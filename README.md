@@ -10,6 +10,8 @@ TODO
 
 TODO
 
+- A comprehensive list of Homomorphic Encryption Research Talk at Microsoft Research([video](https://www.youtube.com/playlist?list=PLD7HFcN7LXRcWGoKPoxyxe4RwxXy84mgx))
+
 ## License
 
 [Apache License 2.0](https://github.com/OpenMined/TenSEAL/blob/master/LICENSE)
