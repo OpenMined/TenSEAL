@@ -7,7 +7,13 @@ TenSEAL is a library for doing homomorphic encryption operations on tensors, bui
 Install CMake. 
 If you are on Linux, head down to [CMake- Snap](https://snapcraft.io/cmake) and install CMake.
 
-Run ```prereqs``` to setup dependecies.
+For people on Linux, Run ```prereqs``` to setup dependecies.
+
+For other platform:
+```
+git submodule init
+git submodule update
+```
 
 To build, type: ```pip3 install .```
 
