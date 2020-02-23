@@ -12,7 +12,7 @@ int adder(int i, int j) {
 
 PYBIND11_MODULE(_tenseal_cpp, m) {
 
-    m.doc() = "HE python extension";
+    m.doc() = "Library for doing homomorphic encryption operations on tensors";
 
     m.def("adder", &adder);
 

@@ -4,18 +4,23 @@ TenSEAL is a library for doing homomorphic encryption operations on tensors, bui
 
 ## Installation
 
-Install CMake. 
-If you are on Linux, head down to [CMake- Snap](https://snapcraft.io/cmake) and install CMake.
-
-For people on Linux, Run ```prereqs``` to setup dependecies.
-
-For other platform:
+```bash
+$ pip install tenseal
 ```
-git submodule init
-git submodule update
+This installs the last packaged version on [pypi](https://pypi.org/). If your platform doesn't have a ready package, please open an [issue](https://github.com/OpenMined/TenSEAL/issues) to let us know.
+
+If you want to install tenseal from the repository, you should first make sure to have [CMake (3.12 or higher) installed](https://cmake.org/install/), then get the third party libraries (if you didn't already) by running the following command from the root directory of the project
+
+```bash
+$ git submodule init
+$ git submodule update
 ```
 
-To build, type: ```pip3 install .```
+You can then trigger the build and the installation
+
+```bash
+$ pip install .
+```
 
 ## Tutorials
 
