@@ -9,4 +9,4 @@ add_subdirectory(third_party/SEAL/native/src)
 add_subdirectory(third_party/pybind11)
 
 pybind11_add_module(_tenseal_cpp tenseal/binding.cpp)
-target_link_libraries(_tenseal_cpp PRIVATE seal pybind11::embed)
+target_link_libraries(_tenseal_cpp PRIVATE seal)

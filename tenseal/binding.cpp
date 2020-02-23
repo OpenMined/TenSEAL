@@ -1,7 +1,5 @@
 #include "pybind11/pybind11.h"
-#include "pybind11/embed.h"
 
-using namespace std;
 namespace py = pybind11;
 
 // sample code just to test
