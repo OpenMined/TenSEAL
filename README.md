@@ -22,6 +22,22 @@ You can then trigger the build and the installation
 $ pip install .
 ```
 
+### Use Docker
+
+![Update Docker Image](https://github.com/OpenMined/TenSEAL/workflows/Update%20Docker%20Image/badge.svg)
+
+You can use our [Docker image](https://hub.docker.com/r/openmined/tenseal) for a ready to use environment with TenSEAL installed
+
+```bash
+$ docker container run --interactive --tty openmined/tenseal
+```
+
+You can also build your custom image, this might be handy for developers working on the project
+
+```bash
+$ docker image build --tag tenseal .
+```
+
 ## Tutorials
 
 TODO
