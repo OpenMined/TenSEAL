@@ -2,7 +2,11 @@
 #include <pybind11/stl.h>
 #include <seal/seal.h>
 
+#include <memory>
+#include <vector>
+
 #include "keygen.h"
+#include "tensors/bfv_naive.h"
 
 using namespace tenseal;
 using namespace seal;
@@ -14,12 +18,21 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     m.def("create_bfv_parameters", &create_bfv_parameters);
 
-    m.def("create_context", &create_context,
-          "Create a context from the provided parameters\
-          Args:\
-            parameters (EncryptionParameters): parameters built for either CKKS or BFV scheme.\
-          Returns:\
-            SEALContext");
+    m.def("create_context", &create_context);
+
+    py::class_<BFVNaive>(m, "BFVNaive")
+        .def(py::init<shared_ptr<SEALContext>&, PublicKey, vector<int>>())
+        .def(py::init<BFVNaive>())
+        .def("decrypt", &BFVNaive::decrypt)
+        .def("add", &BFVNaive::add)
+        .def("add_", &BFVNaive::add_inplace)
+        .def("add_plain", &BFVNaive::add_plain)
+        .def("add_plain_", &BFVNaive::add_plain_inplace)
+        .def("mul", &BFVNaive::mul)
+        .def("mul_", &BFVNaive::mul_inplace)
+        .def("mul_plain", &BFVNaive::mul_plain)
+        .def("mul_plain_", &BFVNaive::mul_plain_inplace)
+        .def("size", &BFVNaive::size);
 
     py::class_<KeyGenerator>(m, "KeyGenerator")
         .def(py::init<std::shared_ptr<seal::SEALContext>&>())
