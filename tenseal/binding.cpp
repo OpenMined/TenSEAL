@@ -22,7 +22,6 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     py::class_<BFVNaive>(m, "BFVNaive")
         .def(py::init<shared_ptr<SEALContext>&, PublicKey, vector<int>>())
-        .def(py::init<BFVNaive>())
         .def("decrypt", &BFVNaive::decrypt)
         .def("add", &BFVNaive::add)
         .def("add_", &BFVNaive::add_inplace)
