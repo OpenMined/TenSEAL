@@ -5,8 +5,8 @@
 #include <memory>
 #include <vector>
 
-#include "utils.h"
 #include "tensors/bfvnaivevector.h"
+#include "utils.h"
 
 using namespace tenseal;
 using namespace seal;
@@ -16,11 +16,24 @@ namespace py = pybind11;
 PYBIND11_MODULE(_tenseal_cpp, m) {
     m.doc() = "Library for doing homomorphic encryption operations on tensors";
 
-    m.def("create_bfv_parameters", &create_bfv_parameters);
+    m.def("bfv_parameters", &create_bfv_parameters,
+          R"(Create a EncryptionParameters object for the BFV scheme.
+    Args:
+        poly_modulus_degree (int): The degree of the polynomial modulus, must be a power of two.
+        plain_modulus (int): The plaintext modulus.
+    Returns:
+        EncryptionParameters object.)",
+          py::arg("poly_modulus_degree"), py::arg("plain_modulus"));
 
-    m.def("create_context", &create_context);
+    m.def("context", &create_context,
+          R"(create a SEALContext object, checking the validity and properties of encryption_parameters.
+    Args:
+        encryption_parameters (EncryptionParameters): parameters to use to create the SEALContext.
+    Returns:
+        SEALContext object.)",
+          py::arg("encryption_parameters"));
 
-    py::class_<BFVNaiveVector>(m, "BFVNaive")
+    py::class_<BFVNaiveVector>(m, "BFVNaiveVector")
         .def(py::init<shared_ptr<SEALContext>&, PublicKey, vector<int>>())
         .def("decrypt", &BFVNaiveVector::decrypt)
         .def("add", &BFVNaiveVector::add)
@@ -52,8 +65,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     py::class_<KeyGenerator>(m, "KeyGenerator")
         .def(py::init<std::shared_ptr<seal::SEALContext>&>())
-        .def("public_key", &KeyGenerator::public_key)
-        .def("secret_key", &KeyGenerator::secret_key);
+        .def("public_key", &KeyGenerator::public_key, "get the public key.")
+        .def("secret_key", &KeyGenerator::secret_key, "get the secret key.");
 
     py::class_<EncryptionParameters>(m, "EncryptionParameters");
     py::class_<SEALContext, std::shared_ptr<SEALContext>>(m, "SEALContext");
