@@ -133,7 +133,7 @@ vector<int> BFVNaive::decrypt(SecretKey sk) {
 Ciphertext BFVNaive::encrypt(PublicKey pk, int pt) {
     IntegerEncoder encoder(this->context);
     Encryptor encryptor(this->context, pk);
-    Ciphertext ciphertext;
+    Ciphertext ciphertext(this->context);
     Plaintext plaintext = encoder.encode(pt);
     encryptor.encrypt(plaintext, ciphertext);
 
