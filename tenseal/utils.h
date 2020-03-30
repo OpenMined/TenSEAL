@@ -1,3 +1,6 @@
+#ifndef TENSEAL_UTILS_H
+#define TESNEAL_UTILS_H
+
 #include <seal/seal.h>
 
 #include <memory>
@@ -13,3 +16,5 @@ EncryptionParameters create_bfv_parameters(size_t poly_modulus_degree,
 shared_ptr<seal::SEALContext> create_context(EncryptionParameters parms);
 
 }  // namespace tenseal
+
+#endif
