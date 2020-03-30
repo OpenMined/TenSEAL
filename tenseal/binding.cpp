@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "utils.h"
-#include "tensors/bfv_naive.h"
+#include "tensors/bfvnaivevector.h"
 
 using namespace tenseal;
 using namespace seal;
@@ -20,27 +20,27 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     m.def("create_context", &create_context);
 
-    py::class_<BFVNaive>(m, "BFVNaive")
+    py::class_<BFVNaiveVector>(m, "BFVNaive")
         .def(py::init<shared_ptr<SEALContext>&, PublicKey, vector<int>>())
-        .def("decrypt", &BFVNaive::decrypt)
-        .def("add", &BFVNaive::add)
-        .def("add_", &BFVNaive::add_inplace)
-        .def("add_plain", &BFVNaive::add_plain)
-        .def("add_plain_", &BFVNaive::add_plain_inplace)
-        .def("mul", &BFVNaive::mul)
-        .def("mul_", &BFVNaive::mul_inplace)
-        .def("mul_plain", &BFVNaive::mul_plain)
-        .def("mul_plain_", &BFVNaive::mul_plain_inplace)
-        .def("size", &BFVNaive::size)
+        .def("decrypt", &BFVNaiveVector::decrypt)
+        .def("add", &BFVNaiveVector::add)
+        .def("add_", &BFVNaiveVector::add_inplace)
+        .def("add_plain", &BFVNaiveVector::add_plain)
+        .def("add_plain_", &BFVNaiveVector::add_plain_inplace)
+        .def("mul", &BFVNaiveVector::mul)
+        .def("mul_", &BFVNaiveVector::mul_inplace)
+        .def("mul_plain", &BFVNaiveVector::mul_plain)
+        .def("mul_plain_", &BFVNaiveVector::mul_plain_inplace)
+        .def("size", &BFVNaiveVector::size)
         // python arithmetic
-        .def("__add__", &BFVNaive::add)
-        .def("__add__", &BFVNaive::add_plain)
-        .def("__iadd__", &BFVNaive::add_inplace)
-        .def("__iadd__", &BFVNaive::add_plain_inplace)
-        .def("__mul__", &BFVNaive::mul)
-        .def("__mul__", &BFVNaive::mul_plain)
-        .def("__imul__", &BFVNaive::mul_inplace)
-        .def("__imul__", &BFVNaive::mul_plain_inplace);
+        .def("__add__", &BFVNaiveVector::add)
+        .def("__add__", &BFVNaiveVector::add_plain)
+        .def("__iadd__", &BFVNaiveVector::add_inplace)
+        .def("__iadd__", &BFVNaiveVector::add_plain_inplace)
+        .def("__mul__", &BFVNaiveVector::mul)
+        .def("__mul__", &BFVNaiveVector::mul_plain)
+        .def("__imul__", &BFVNaiveVector::mul_inplace)
+        .def("__imul__", &BFVNaiveVector::mul_plain_inplace);
 
     py::class_<KeyGenerator>(m, "KeyGenerator")
         .def(py::init<std::shared_ptr<seal::SEALContext>&>())

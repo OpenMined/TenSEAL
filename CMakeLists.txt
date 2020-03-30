@@ -12,7 +12,7 @@ set(TENSEAL_BASEDIR tenseal)
 set(SOURCES
     ${TENSEAL_BASEDIR}/binding.cpp
     ${TENSEAL_BASEDIR}/utils.cpp
-    ${TENSEAL_BASEDIR}/tensors/bfv_naive.cpp
+    ${TENSEAL_BASEDIR}/tensors/bfvnaivevector.cpp
 )
 
 pybind11_add_module(_tenseal_cpp ${SOURCES})
