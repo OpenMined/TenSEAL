@@ -15,7 +15,7 @@ BFVNaiveVector::BFVNaiveVector(shared_ptr<SEALContext> context, PublicKey pk,
     this->ciphertexts.reserve(vec.size());
     this->context = context;
 
-    for (int i; i < vec.size(); i++) {
+    for (int i = 0; i < vec.size(); i++) {
         Ciphertext ct = encrypt(pk, vec[i]);
         this->ciphertexts.push_back(ct);
     }
@@ -180,7 +180,7 @@ vector<int> BFVNaiveVector::decrypt(SecretKey sk) {
 
     vector<int> result;
     result.reserve(this->ciphertexts.size());
-    for (int i; i < this->ciphertexts.size(); i++) {
+    for (int i = 0; i < this->ciphertexts.size(); i++) {
         decryptor.decrypt(this->ciphertexts[i], plaintext);
         result.push_back(encoder.decode_int64(plaintext));
     }
