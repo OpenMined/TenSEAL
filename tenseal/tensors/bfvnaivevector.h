@@ -24,6 +24,12 @@ class BFVNaiveVector {
     
     BFVNaiveVector add_plain(vector<int> to_add);
     BFVNaiveVector& add_plain_inplace(vector<int> to_add);
+
+    BFVNaiveVector sub(BFVNaiveVector to_sub);
+    BFVNaiveVector& sub_inplace(BFVNaiveVector to_sub);
+
+    BFVNaiveVector sub_plain(vector<int> to_sub);
+    BFVNaiveVector& sub_plain_inplace(vector<int> to_sub);
     
     BFVNaiveVector mul(BFVNaiveVector to_mul);
     BFVNaiveVector& mul_inplace(BFVNaiveVector to_mul);

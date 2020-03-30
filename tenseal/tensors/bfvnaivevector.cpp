@@ -77,6 +77,54 @@ BFVNaiveVector& BFVNaiveVector::add_plain_inplace(vector<int> to_add) {
     return *this;
 }
 
+BFVNaiveVector BFVNaiveVector::sub(BFVNaiveVector to_sub) {
+    BFVNaiveVector new_vector(this->context, this->ciphertexts);
+    new_vector.sub_inplace(to_sub);
+
+    return new_vector;
+}
+
+BFVNaiveVector& BFVNaiveVector::sub_inplace(BFVNaiveVector to_sub) {
+    if (this->context != to_sub.context) {
+        throw invalid_argument(
+            "can't sub vectors that have different contexts");
+    }
+
+    if (this->size() != to_sub.size()) {
+        throw invalid_argument("can't sub vectors of different sizes");
+    }
+
+    Evaluator evaluator(this->context);
+    for (int i = 0; i < this->size(); i++) {
+        evaluator.sub_inplace(this->ciphertexts[i], to_sub.ciphertexts[i]);
+    }
+
+    return *this;
+}
+
+BFVNaiveVector BFVNaiveVector::sub_plain(vector<int> to_sub) {
+    BFVNaiveVector new_vector(this->context, this->ciphertexts);
+    new_vector.sub_plain_inplace(to_sub);
+
+    return new_vector;
+}
+
+BFVNaiveVector& BFVNaiveVector::sub_plain_inplace(vector<int> to_sub) {
+    if (this->size() != to_sub.size()) {
+        throw invalid_argument("can't sub vectors of different sizes");
+    }
+
+    Evaluator evaluator(this->context);
+    IntegerEncoder encoder(this->context);
+    Plaintext pt;
+    for (int i = 0; i < this->size(); i++) {
+        pt = encoder.encode(to_sub[i]);
+        evaluator.sub_plain_inplace(this->ciphertexts[i], pt);
+    }
+
+    return *this;
+}
+
 BFVNaiveVector BFVNaiveVector::mul(BFVNaiveVector to_mul) {
     BFVNaiveVector new_vector(this->context, this->ciphertexts);
     new_vector.mul_inplace(to_mul);
