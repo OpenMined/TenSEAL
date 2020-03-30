@@ -38,11 +38,11 @@ BFVNaive BFVNaive::add(BFVNaive to_add) {
 
 void BFVNaive::add_inplace(BFVNaive to_add) {
     if (this->context != to_add.context) {
-        throw "Can't add vectors that have different contexts";
+        throw invalid_argument("can't add vectors that have different contexts");
     }
 
     if (this->size() != to_add.size()) {
-        throw "Can't add vectors of different sizes";
+        throw invalid_argument("can't add vectors of different sizes");
     }
 
     Evaluator evaluator(this->context);
@@ -60,7 +60,7 @@ BFVNaive BFVNaive::add_plain(vector<int> to_add) {
 
 void BFVNaive::add_plain_inplace(vector<int> to_add) {
     if (this->size() != to_add.size()) {
-        throw "Can't add vectors of different sizes";
+        throw invalid_argument("can't add vectors of different sizes");
     }
 
     Evaluator evaluator(this->context);
@@ -81,11 +81,11 @@ BFVNaive BFVNaive::mul(BFVNaive to_mul) {
 
 void BFVNaive::mul_inplace(BFVNaive to_mul) {
     if (this->context != to_mul.context) {
-        throw "Can't mul vectors that have different contexts";
+        throw invalid_argument("can't mul vectors that have different contexts");
     }
 
     if (this->size() != to_mul.size()) {
-        throw "Can't mul vectors of different sizes";
+        throw invalid_argument("can't mul vectors of different sizes");
     }
 
     Evaluator evaluator(this->context);
@@ -103,7 +103,7 @@ BFVNaive BFVNaive::mul_plain(vector<int> to_mul) {
 
 void BFVNaive::mul_plain_inplace(vector<int> to_mul) {
     if (this->size() != to_mul.size()) {
-        throw "Can't multiply vectors of different sizes";
+        throw invalid_argument("can't multiply vectors of different sizes");
     }
 
     Evaluator evaluator(this->context);
