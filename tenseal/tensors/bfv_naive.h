@@ -20,16 +20,16 @@ class BFVNaive {
     size_t size();
 
     BFVNaive add(BFVNaive to_add);
-    void add_inplace(BFVNaive to_add);
+    BFVNaive& add_inplace(BFVNaive to_add);
     
     BFVNaive add_plain(vector<int> to_add);
-    void add_plain_inplace(vector<int> to_add);
+    BFVNaive& add_plain_inplace(vector<int> to_add);
     
     BFVNaive mul(BFVNaive to_mul);
-    void mul_inplace(BFVNaive to_mul);
+    BFVNaive& mul_inplace(BFVNaive to_mul);
     
     BFVNaive mul_plain(vector<int> to_mul);
-    void mul_plain_inplace(vector<int> to_mul);
+    BFVNaive& mul_plain_inplace(vector<int> to_mul);
 
    private:
     shared_ptr<SEALContext> context;

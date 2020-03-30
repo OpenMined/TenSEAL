@@ -19,7 +19,7 @@ def test_add():
 
     first_vec = ts.bfv_naive_vector(context, pk, [1, 2, 3, 4])
     second_vec = ts.bfv_naive_vector(context, pk, [4, 3, 2, 1])
-    result = first_vec.add(second_vec)
+    result = first_vec + second_vec
 
     # Decryption
     decrypted_result = result.decrypt(sk)
@@ -37,7 +37,7 @@ def test_add_inplace():
 
     first_vec = ts.bfv_naive_vector(context, pk, [1, 2, 3, 4])
     second_vec = ts.bfv_naive_vector(context, pk, [4, 3, 2, 1])
-    first_vec.add_(second_vec)
+    first_vec += second_vec
 
     # Decryption
     decrypted_result = first_vec.decrypt(sk)

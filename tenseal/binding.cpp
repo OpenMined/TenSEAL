@@ -31,7 +31,16 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("mul_", &BFVNaive::mul_inplace)
         .def("mul_plain", &BFVNaive::mul_plain)
         .def("mul_plain_", &BFVNaive::mul_plain_inplace)
-        .def("size", &BFVNaive::size);
+        .def("size", &BFVNaive::size)
+        // python arithmetic
+        .def("__add__", &BFVNaive::add)
+        .def("__add__", &BFVNaive::add_plain)
+        .def("__iadd__", &BFVNaive::add_inplace)
+        .def("__iadd__", &BFVNaive::add_plain_inplace)
+        .def("__mul__", &BFVNaive::mul)
+        .def("__mul__", &BFVNaive::mul_plain)
+        .def("__imul__", &BFVNaive::mul_inplace)
+        .def("__imul__", &BFVNaive::mul_plain_inplace);
 
     py::class_<KeyGenerator>(m, "KeyGenerator")
         .def(py::init<std::shared_ptr<seal::SEALContext>&>())

@@ -32,13 +32,14 @@ size_t BFVNaive::size() { return this->ciphertexts.size(); }
 BFVNaive BFVNaive::add(BFVNaive to_add) {
     BFVNaive new_vector(this->context, this->ciphertexts);
     new_vector.add_inplace(to_add);
-    
+
     return new_vector;
 }
 
-void BFVNaive::add_inplace(BFVNaive to_add) {
+BFVNaive& BFVNaive::add_inplace(BFVNaive to_add) {
     if (this->context != to_add.context) {
-        throw invalid_argument("can't add vectors that have different contexts");
+        throw invalid_argument(
+            "can't add vectors that have different contexts");
     }
 
     if (this->size() != to_add.size()) {
@@ -49,16 +50,18 @@ void BFVNaive::add_inplace(BFVNaive to_add) {
     for (int i = 0; i < this->size(); i++) {
         evaluator.add_inplace(this->ciphertexts[i], to_add.ciphertexts[i]);
     }
+
+    return *this;
 }
 
 BFVNaive BFVNaive::add_plain(vector<int> to_add) {
     BFVNaive new_vector(this->context, this->ciphertexts);
     new_vector.add_plain_inplace(to_add);
-    
+
     return new_vector;
 }
 
-void BFVNaive::add_plain_inplace(vector<int> to_add) {
+BFVNaive& BFVNaive::add_plain_inplace(vector<int> to_add) {
     if (this->size() != to_add.size()) {
         throw invalid_argument("can't add vectors of different sizes");
     }
@@ -70,18 +73,21 @@ void BFVNaive::add_plain_inplace(vector<int> to_add) {
         pt = encoder.encode(to_add[i]);
         evaluator.add_plain_inplace(this->ciphertexts[i], pt);
     }
+
+    return *this;
 }
 
 BFVNaive BFVNaive::mul(BFVNaive to_mul) {
     BFVNaive new_vector(this->context, this->ciphertexts);
     new_vector.mul_inplace(to_mul);
-    
+
     return new_vector;
 }
 
-void BFVNaive::mul_inplace(BFVNaive to_mul) {
+BFVNaive& BFVNaive::mul_inplace(BFVNaive to_mul) {
     if (this->context != to_mul.context) {
-        throw invalid_argument("can't mul vectors that have different contexts");
+        throw invalid_argument(
+            "can't mul vectors that have different contexts");
     }
 
     if (this->size() != to_mul.size()) {
@@ -92,16 +98,18 @@ void BFVNaive::mul_inplace(BFVNaive to_mul) {
     for (int i = 0; i < this->size(); i++) {
         evaluator.multiply_inplace(this->ciphertexts[i], to_mul.ciphertexts[i]);
     }
+
+    return *this;
 }
 
 BFVNaive BFVNaive::mul_plain(vector<int> to_mul) {
     BFVNaive new_vector(this->context, this->ciphertexts);
     new_vector.mul_plain_inplace(to_mul);
-    
+
     return new_vector;
 }
 
-void BFVNaive::mul_plain_inplace(vector<int> to_mul) {
+BFVNaive& BFVNaive::mul_plain_inplace(vector<int> to_mul) {
     if (this->size() != to_mul.size()) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
@@ -113,6 +121,8 @@ void BFVNaive::mul_plain_inplace(vector<int> to_mul) {
         pt = encoder.encode(to_mul[i]);
         evaluator.multiply_plain_inplace(this->ciphertexts[i], pt);
     }
+
+    return *this;
 }
 
 vector<int> BFVNaive::decrypt(SecretKey sk) {
