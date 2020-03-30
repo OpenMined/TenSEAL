@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "keygen.h"
+#include "utils.h"
 #include "tensors/bfv_naive.h"
 
 using namespace tenseal;
