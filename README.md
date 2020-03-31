@@ -1,6 +1,7 @@
 # TenSEAL
 
 ![Tests](https://github.com/OpenMined/TenSEAL/workflows/Tests/badge.svg)
+![Update Docker Image](https://github.com/OpenMined/TenSEAL/workflows/Update%20Docker%20Image/badge.svg)
 
 TenSEAL is a library for doing homomorphic encryption operations on tensors, built on top of [Microsoft SEAL](https://github.com/Microsoft/SEAL). It provides ease of use through a Python API, while preserving efficiency by implementing most of its operations using C++.
 
@@ -25,8 +26,6 @@ $ pip install .
 ```
 
 ### Use Docker
-
-![Update Docker Image](https://github.com/OpenMined/TenSEAL/workflows/Update%20Docker%20Image/badge.svg)
 
 You can use our [Docker image](https://hub.docker.com/r/openmined/tenseal) for a ready to use environment with TenSEAL installed
 
