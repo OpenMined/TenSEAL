@@ -19,6 +19,7 @@ class BFVNaiveVector {
    public:
     BFVNaiveVector(shared_ptr<SEALContext> context, PublicKey pk,
                    vector<int> vec);
+
     BFVNaiveVector(shared_ptr<SEALContext> context,
                    vector<Ciphertext> ciphertexts);
 

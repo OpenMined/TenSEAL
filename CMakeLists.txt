@@ -13,6 +13,7 @@ set(SOURCES
     ${TENSEAL_BASEDIR}/binding.cpp
     ${TENSEAL_BASEDIR}/utils.cpp
     ${TENSEAL_BASEDIR}/tensors/bfvnaivevector.cpp
+    ${TENSEAL_BASEDIR}/tensors/ckksvector.cpp
 )
 
 pybind11_add_module(_tenseal_cpp ${SOURCES})

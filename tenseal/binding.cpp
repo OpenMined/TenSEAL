@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "tensors/bfvnaivevector.h"
+#include "tensors/ckksvector.h"
 #include "utils.h"
 
 using namespace tenseal;
@@ -17,13 +18,22 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
     m.doc() = "Library for doing homomorphic encryption operations on tensors";
 
     m.def("bfv_parameters", &create_bfv_parameters,
-          R"(Create a EncryptionParameters object for the BFV scheme.
+          R"(Create an EncryptionParameters object for the BFV scheme.
     Args:
         poly_modulus_degree (int): The degree of the polynomial modulus, must be a power of two.
         plain_modulus (int): The plaintext modulus.
     Returns:
         EncryptionParameters object.)",
           py::arg("poly_modulus_degree"), py::arg("plain_modulus"));
+
+    m.def("ckks_parameters", &create_ckks_parameters,
+          R"(Create an EncryptionParameters object for the CKKS scheme.
+    Args:
+        poly_modulus_degree (int): The degree of the polynomial modulus, must be a power of two.
+        coeff_mod_bit_sizes (list of int): List of bit size for each coeffecient modulus.
+    Returns:
+        EncryptionParameters object.)",
+          py::arg("poly_modulus_degree"), py::arg("coeff_mod_bit_sizes"));
 
     m.def(
         "context", &create_context,
@@ -36,6 +46,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     py::class_<BFVNaiveVector>(m, "BFVNaiveVector")
         .def(py::init<shared_ptr<SEALContext>&, PublicKey, vector<int>>())
+        .def("size", &BFVNaiveVector::size)
         .def("decrypt", &BFVNaiveVector::decrypt)
         .def("add", &BFVNaiveVector::add)
         .def("add_", &BFVNaiveVector::add_inplace)
@@ -49,7 +60,6 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("mul_", &BFVNaiveVector::mul_inplace)
         .def("mul_plain", &BFVNaiveVector::mul_plain)
         .def("mul_plain_", &BFVNaiveVector::mul_plain_inplace)
-        .def("size", &BFVNaiveVector::size)
         // python arithmetic
         .def("__add__", &BFVNaiveVector::add)
         .def("__add__", &BFVNaiveVector::add_plain)
@@ -64,13 +74,22 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__imul__", &BFVNaiveVector::mul_inplace)
         .def("__imul__", &BFVNaiveVector::mul_plain_inplace);
 
+    py::class_<CKKSVector>(m, "CKKSVector")
+        .def(py::init<shared_ptr<SEALContext>&, PublicKey, double,
+                      vector<double>>())
+        .def("size", &CKKSVector::size)
+        .def("decrypt", &CKKSVector::decrypt);
+
     py::class_<KeyGenerator>(m, "KeyGenerator")
         .def(py::init<std::shared_ptr<seal::SEALContext>&>())
         .def("public_key", &KeyGenerator::public_key, "get the public key.")
-        .def("secret_key", &KeyGenerator::secret_key, "get the secret key.");
+        .def("secret_key", &KeyGenerator::secret_key, "get the secret key.")
+        .def("relin_keys", py::overload_cast<>(&KeyGenerator::relin_keys),
+             "get the relinearization keys.");
 
     py::class_<EncryptionParameters>(m, "EncryptionParameters");
     py::class_<SEALContext, std::shared_ptr<SEALContext>>(m, "SEALContext");
     py::class_<PublicKey>(m, "PublicKey");
     py::class_<SecretKey>(m, "SecretKey");
+    py::class_<RelinKeys>(m, "RelinKeys");
 }
