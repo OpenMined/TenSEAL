@@ -25,13 +25,14 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         EncryptionParameters object.)",
           py::arg("poly_modulus_degree"), py::arg("plain_modulus"));
 
-    m.def("context", &create_context,
-          R"(create a SEALContext object, checking the validity and properties of encryption_parameters.
+    m.def(
+        "context", &create_context,
+        R"(create a SEALContext object, checking the validity and properties of encryption_parameters.
     Args:
         encryption_parameters (EncryptionParameters): parameters to use to create the SEALContext.
     Returns:
         SEALContext object.)",
-          py::arg("encryption_parameters"));
+        py::arg("encryption_parameters"));
 
     py::class_<BFVNaiveVector>(m, "BFVNaiveVector")
         .def(py::init<shared_ptr<SEALContext>&, PublicKey, vector<int>>())

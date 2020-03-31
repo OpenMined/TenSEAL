@@ -11,10 +11,11 @@ using namespace std;
 namespace tenseal {
 
 BFVNaiveVector::BFVNaiveVector(shared_ptr<SEALContext> context, PublicKey pk,
-                   vector<int> vec) {
+                               vector<int> vec) {
     this->ciphertexts.reserve(vec.size());
     this->context = context;
 
+    // Encrypts each integer separately as a Ciphertext
     for (int i = 0; i < vec.size(); i++) {
         Ciphertext ct = encrypt(pk, vec[i]);
         this->ciphertexts.push_back(ct);
@@ -22,7 +23,7 @@ BFVNaiveVector::BFVNaiveVector(shared_ptr<SEALContext> context, PublicKey pk,
 }
 
 BFVNaiveVector::BFVNaiveVector(shared_ptr<SEALContext> context,
-                   vector<Ciphertext> ciphertexts) {
+                               vector<Ciphertext> ciphertexts) {
     this->ciphertexts = ciphertexts;
     this->context = context;
 }
@@ -38,6 +39,7 @@ BFVNaiveVector BFVNaiveVector::add(BFVNaiveVector to_add) {
 
 BFVNaiveVector& BFVNaiveVector::add_inplace(BFVNaiveVector to_add) {
     if (this->context != to_add.context) {
+        // Different contexts means different parameters
         throw invalid_argument(
             "can't add vectors that have different contexts");
     }
@@ -86,6 +88,7 @@ BFVNaiveVector BFVNaiveVector::sub(BFVNaiveVector to_sub) {
 
 BFVNaiveVector& BFVNaiveVector::sub_inplace(BFVNaiveVector to_sub) {
     if (this->context != to_sub.context) {
+        // Different contexts means different parameters
         throw invalid_argument(
             "can't sub vectors that have different contexts");
     }
@@ -134,6 +137,7 @@ BFVNaiveVector BFVNaiveVector::mul(BFVNaiveVector to_mul) {
 
 BFVNaiveVector& BFVNaiveVector::mul_inplace(BFVNaiveVector to_mul) {
     if (this->context != to_mul.context) {
+        // Different contexts means different parameters
         throw invalid_argument(
             "can't mul vectors that have different contexts");
     }
