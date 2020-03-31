@@ -18,6 +18,16 @@ EncryptionParameters create_bfv_parameters(size_t poly_modulus_degree,
     return parameters;
 }
 
+EncryptionParameters create_ckks_parameters(size_t poly_modulus_degree,
+                                            vector<int> coeff_mod_bit_sizes) {
+    EncryptionParameters parameters(scheme_type::CKKS);
+    parameters.set_poly_modulus_degree(poly_modulus_degree);
+    parameters.set_coeff_modulus(
+        CoeffModulus::Create(poly_modulus_degree, coeff_mod_bit_sizes));
+
+    return parameters;
+}
+
 shared_ptr<seal::SEALContext> create_context(EncryptionParameters parms) {
     auto context = SEALContext::Create(parms);
     return context;
