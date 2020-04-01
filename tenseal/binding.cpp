@@ -78,7 +78,32 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def(py::init<shared_ptr<SEALContext>&, PublicKey, double,
                       vector<double>>())
         .def("size", &CKKSVector::size)
-        .def("decrypt", &CKKSVector::decrypt);
+        .def("decrypt", &CKKSVector::decrypt)
+        .def("add", &CKKSVector::add)
+        .def("add_", &CKKSVector::add_inplace)
+        .def("add_plain", &CKKSVector::add_plain)
+        .def("add_plain_", &CKKSVector::add_plain_inplace)
+        .def("sub", &CKKSVector::sub)
+        .def("sub_", &CKKSVector::sub_inplace)
+        .def("sub_plain", &CKKSVector::sub_plain)
+        .def("sub_plain_", &CKKSVector::sub_plain_inplace)
+        .def("mul", &CKKSVector::mul)
+        .def("mul_", &CKKSVector::mul_inplace)
+        .def("mul_plain", &CKKSVector::mul_plain)
+        .def("mul_plain_", &CKKSVector::mul_plain_inplace)
+        // python arithmetic
+        .def("__add__", &CKKSVector::add)
+        .def("__add__", &CKKSVector::add_plain)
+        .def("__iadd__", &CKKSVector::add_inplace)
+        .def("__iadd__", &CKKSVector::add_plain_inplace)
+        .def("__sub__", &CKKSVector::sub)
+        .def("__sub__", &CKKSVector::sub_plain)
+        .def("__isub__", &CKKSVector::sub_inplace)
+        .def("__isub__", &CKKSVector::sub_plain_inplace)
+        .def("__mul__", &CKKSVector::mul)
+        .def("__mul__", &CKKSVector::mul_plain)
+        .def("__imul__", &CKKSVector::mul_inplace)
+        .def("__imul__", &CKKSVector::mul_plain_inplace);
 
     py::class_<KeyGenerator>(m, "KeyGenerator")
         .def(py::init<std::shared_ptr<seal::SEALContext>&>())

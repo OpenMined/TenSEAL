@@ -20,7 +20,7 @@ class CKKSVector {
     CKKSVector(shared_ptr<SEALContext> context, PublicKey pk, double scale,
                vector<double> vec);
 
-    CKKSVector(shared_ptr<SEALContext> context, Ciphertext ciphertext);
+    CKKSVector(const CKKSVector& vec);
 
     /*
     Decrypts and returns the plaintext representation of the encrypted vector of
