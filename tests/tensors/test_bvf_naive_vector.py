@@ -88,7 +88,7 @@ def test_sub():
     # Decryption
     decrypted_result = result.decrypt(sk)
     assert decrypted_result == [
-        -3, -1, 1, 3], "Addition of vectors is incorrect."
+        -3, -1, 1, 3], "Substraction of vectors is incorrect."
     assert first_vec.decrypt(
         sk) == [1, 2, 3, 4], "Something went wrong in memory."
     assert second_vec.decrypt(
@@ -106,7 +106,7 @@ def test_sub_inplace():
     # Decryption
     decrypted_result = first_vec.decrypt(sk)
     assert decrypted_result == [
-        -3, -1, 1, 3], "Addition of vectors is incorrect."
+        -3, -1, 1, 3], "Substraction of vectors is incorrect."
     assert second_vec.decrypt(
         sk) == [4, 3, 2, 1], "Something went wrong in memory."
 
@@ -122,7 +122,7 @@ def test_sub_plain():
     # Decryption
     decrypted_result = result.decrypt(sk)
     assert decrypted_result == [
-        -3, -1, 1, 3], "Addition of vectors is incorrect."
+        -3, -1, 1, 3], "Substraction of vectors is incorrect."
     assert first_vec.decrypt(
         sk) == [1, 2, 3, 4], "Something went wrong in memory."
 
@@ -138,7 +138,7 @@ def test_sub_plain_inplace():
     # Decryption
     decrypted_result = first_vec.decrypt(sk)
     assert decrypted_result == [
-        -3, -1, 1, 3], "Addition of vectors is incorrect."
+        -3, -1, 1, 3], "Substraction of vectors is incorrect."
 
 
 def test_mul():
@@ -152,7 +152,7 @@ def test_mul():
     # Decryption
     decrypted_result = result.decrypt(sk)
     assert decrypted_result == [
-        132, 219, 324, 450], "Addition of vectors is incorrect."
+        132, 219, 324, 450], "Multiplication of vectors is incorrect."
     assert first_vec.decrypt(
         sk) == [66, 73, 81, 90], "Something went wrong in memory."
     assert second_vec.decrypt(
@@ -170,7 +170,7 @@ def test_mul_inplace():
     # Decryption
     decrypted_result = first_vec.decrypt(sk)
     assert decrypted_result == [
-        132, 219, 324, 450], "Addition of vectors is incorrect."
+        132, 219, 324, 450], "Multiplication of vectors is incorrect."
     assert second_vec.decrypt(
         sk) == [2, 3, 4, 5], "Something went wrong in memory."
 
@@ -186,7 +186,7 @@ def test_mul_plain():
     # Decryption
     decrypted_result = result.decrypt(sk)
     assert decrypted_result == [
-        132, 219, 324, 450], "Addition of vectors is incorrect."
+        132, 219, 324, 450], "Multiplication of vectors is incorrect."
     assert first_vec.decrypt(
         sk) == [66, 73, 81, 90], "Something went wrong in memory."
 
@@ -202,7 +202,7 @@ def test_mul_plain_inplace():
     # Decryption
     decrypted_result = first_vec.decrypt(sk)
     assert decrypted_result == [
-        132, 219, 324, 450], "Addition of vectors is incorrect."
+        132, 219, 324, 450], "Multiplication of vectors is incorrect."
 
 
 def test_size():
