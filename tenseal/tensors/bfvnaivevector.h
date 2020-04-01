@@ -20,8 +20,7 @@ class BFVNaiveVector {
     BFVNaiveVector(shared_ptr<SEALContext> context, PublicKey pk,
                    vector<int> vec);
 
-    BFVNaiveVector(shared_ptr<SEALContext> context,
-                   vector<Ciphertext> ciphertexts);
+    BFVNaiveVector(const BFVNaiveVector& vec);
 
     /*
     Decrypts and returns the plaintext representation of the encrypted vector of
