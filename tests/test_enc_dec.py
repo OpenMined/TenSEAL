@@ -29,7 +29,7 @@ def test_ckks_encryption_decryption():
     parms = ts.ckks_parameters(8192, [60, 40, 40, 60])
     context = ts.context(parms)
     keygen = ts.key_generator(context)
-    pk, sk = keygen.public_key(), keygen.secret_key()
+    pk, sk, relin_keys = keygen.public_key(), keygen.secret_key(), keygen.relin_keys()
     scale = pow(2, 40)
 
     plain_vec = [73, 81, 90]
