@@ -22,16 +22,23 @@ BFVNaiveVector::BFVNaiveVector(shared_ptr<SEALContext> context, PublicKey pk,
     }
 }
 
-BFVNaiveVector::BFVNaiveVector(shared_ptr<SEALContext> context,
-                               vector<Ciphertext> ciphertexts) {
-    this->ciphertexts = ciphertexts;
-    this->context = context;
+BFVNaiveVector::BFVNaiveVector(const BFVNaiveVector& vec) {
+    this->ciphertexts = vec.ciphertexts;
+    this->context = vec.context;
 }
 
 size_t BFVNaiveVector::size() { return this->ciphertexts.size(); }
 
+streamoff BFVNaiveVector::save_size() {
+    streamoff sum_save_size = 0;
+    for (int i = 0; i < this->ciphertexts.size(); i++)
+        sum_save_size += this->ciphertexts[i].save_size(compr_mode_type::none);
+
+    return sum_save_size;
+}
+
 BFVNaiveVector BFVNaiveVector::add(BFVNaiveVector to_add) {
-    BFVNaiveVector new_vector(this->context, this->ciphertexts);
+    BFVNaiveVector new_vector = *this;
     new_vector.add_inplace(to_add);
 
     return new_vector;
@@ -57,7 +64,7 @@ BFVNaiveVector& BFVNaiveVector::add_inplace(BFVNaiveVector to_add) {
 }
 
 BFVNaiveVector BFVNaiveVector::add_plain(vector<int> to_add) {
-    BFVNaiveVector new_vector(this->context, this->ciphertexts);
+    BFVNaiveVector new_vector = *this;
     new_vector.add_plain_inplace(to_add);
 
     return new_vector;
@@ -80,7 +87,7 @@ BFVNaiveVector& BFVNaiveVector::add_plain_inplace(vector<int> to_add) {
 }
 
 BFVNaiveVector BFVNaiveVector::sub(BFVNaiveVector to_sub) {
-    BFVNaiveVector new_vector(this->context, this->ciphertexts);
+    BFVNaiveVector new_vector = *this;
     new_vector.sub_inplace(to_sub);
 
     return new_vector;
@@ -106,7 +113,7 @@ BFVNaiveVector& BFVNaiveVector::sub_inplace(BFVNaiveVector to_sub) {
 }
 
 BFVNaiveVector BFVNaiveVector::sub_plain(vector<int> to_sub) {
-    BFVNaiveVector new_vector(this->context, this->ciphertexts);
+    BFVNaiveVector new_vector = *this;
     new_vector.sub_plain_inplace(to_sub);
 
     return new_vector;
@@ -129,7 +136,7 @@ BFVNaiveVector& BFVNaiveVector::sub_plain_inplace(vector<int> to_sub) {
 }
 
 BFVNaiveVector BFVNaiveVector::mul(BFVNaiveVector to_mul) {
-    BFVNaiveVector new_vector(this->context, this->ciphertexts);
+    BFVNaiveVector new_vector = *this;
     new_vector.mul_inplace(to_mul);
 
     return new_vector;
@@ -155,7 +162,7 @@ BFVNaiveVector& BFVNaiveVector::mul_inplace(BFVNaiveVector to_mul) {
 }
 
 BFVNaiveVector BFVNaiveVector::mul_plain(vector<int> to_mul) {
-    BFVNaiveVector new_vector(this->context, this->ciphertexts);
+    BFVNaiveVector new_vector = *this;
     new_vector.mul_plain_inplace(to_mul);
 
     return new_vector;

@@ -12,11 +12,19 @@ namespace tenseal {
 
 /*
 Returns a setuped EncryptionParameters that holds the parameters required for
-the BFV scheme, namely, the polynomial modulus, the coeffecient modulus and
-plaintext modulus.
+the BFV scheme, namely, the polynomial modulus, the coeffecient modulus bit
+sizes and plaintext modulus.
 */
 EncryptionParameters create_bfv_parameters(size_t poly_modulus_degree,
                                            uint64_t plain_modulus);
+
+/*
+Returns a setuped EncryptionParameters that holds the parameters required for
+the CKKS scheme, namely, the polynomial modulus, the coeffecient modulus bit
+sizes.
+*/
+EncryptionParameters create_ckks_parameters(size_t poly_modulus_degree,
+                                            vector<int> coeff_mod_bit_sizes);
 
 /*
 Returns a smart pointer to a SEALContext created with the provided encryption

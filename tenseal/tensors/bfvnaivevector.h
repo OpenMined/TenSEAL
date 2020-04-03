@@ -19,8 +19,8 @@ class BFVNaiveVector {
    public:
     BFVNaiveVector(shared_ptr<SEALContext> context, PublicKey pk,
                    vector<int> vec);
-    BFVNaiveVector(shared_ptr<SEALContext> context,
-                   vector<Ciphertext> ciphertexts);
+
+    BFVNaiveVector(const BFVNaiveVector& vec);
 
     /*
     Decrypts and returns the plaintext representation of the encrypted vector of
@@ -32,6 +32,12 @@ class BFVNaiveVector {
     Returns the size of the encrypted vector.
     */
     size_t size();
+
+    /*
+    Returns an upper bound on the size of the CKKSVector, as if it was written
+    to an output stream.
+    */
+    streamoff save_size();
 
     /*
     Encrypted evaluation function operates on two encrypted vectors and returns
