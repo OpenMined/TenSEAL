@@ -13,26 +13,20 @@ def _almost_equal(vec1, vec2, m_pow_ten):
 
 
 def test_bfv_naive_encryption_decryption():
-    parms = ts.bfv_parameters(4096, 1024)
-    context = ts.context(parms)
-    keygen = ts.key_generator(context)
-    pk, sk = keygen.public_key(), keygen.secret_key()
+    context = ts.bfv_context(4096, 1024)
 
     plain_vec = [73, 81, 90]
-    bfv_vec = ts.bfv_naive_vector(context, pk, plain_vec)
-    decrypted_vec = bfv_vec.decrypt(sk)
+    bfv_vec = ts.bfv_naive_vector(context, plain_vec)
+    decrypted_vec = bfv_vec.decrypt()
 
     assert decrypted_vec == plain_vec, "Decryption of vector is incorrect."
 
 
 def test_ckks_encryption_decryption():
-    parms = ts.ckks_parameters(8192, [60, 40, 40, 60])
-    context = ts.context(parms)
-    keygen = ts.key_generator(context)
-    pk, sk, relin_keys = keygen.public_key(), keygen.secret_key(), keygen.relin_keys()
+    context = ts.ckks_context(8192, [60, 40, 40, 60])
     scale = pow(2, 40)
 
     plain_vec = [73, 81, 90]
-    ckks_vec = ts.ckks_vector(context, pk, scale, plain_vec)
-    decrypted_vec = ckks_vec.decrypt(sk)
+    ckks_vec = ts.ckks_vector(context, scale, plain_vec)
+    decrypted_vec = ckks_vec.decrypt()
     assert _almost_equal(decrypted_vec, plain_vec, 1), "Decryption of vector is incorrect"
