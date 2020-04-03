@@ -185,7 +185,8 @@ CKKSVector& CKKSVector::mul_plain_inplace(vector<double> to_mul) {
     CKKSEncoder encoder(this->context->seal_context());
     Plaintext plaintext;
     encoder.encode(to_mul, this->init_scale, plaintext);
-    this->context->evaluator->multiply_plain_inplace(this->ciphertext, plaintext);
+    this->context->evaluator->multiply_plain_inplace(this->ciphertext,
+                                                     plaintext);
 
     return *this;
 }

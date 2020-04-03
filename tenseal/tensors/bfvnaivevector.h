@@ -72,8 +72,7 @@ class BFVNaiveVector {
 
     vector<Ciphertext> ciphertexts;
 
-    static Ciphertext encrypt(shared_ptr<BFVContext> context,
-                                              int pt) {
+    static Ciphertext encrypt(shared_ptr<BFVContext> context, int pt) {
         IntegerEncoder encoder(context->seal_context());
         Ciphertext ciphertext(context->seal_context());
         Plaintext plaintext = encoder.encode(pt);
