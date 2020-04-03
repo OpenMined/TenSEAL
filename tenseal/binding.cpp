@@ -21,10 +21,12 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
           R"(Create an EncryptionParameters object for the BFV scheme.
     Args:
         poly_modulus_degree (int): The degree of the polynomial modulus, must be a power of two.
+        coeff_mod_bit_sizes (list of int): List of bit size for each coeffecient modulus.
         plain_modulus (int): The plaintext modulus.
     Returns:
         EncryptionParameters object.)",
-          py::arg("poly_modulus_degree"), py::arg("plain_modulus"));
+          py::arg("poly_modulus_degree"), py::arg("plain_modulus"),
+          py::arg("coeff_mod_bit_sizes") = vector<int>());
 
     m.def("ckks_parameters", &create_ckks_parameters,
           R"(Create an EncryptionParameters object for the CKKS scheme.
