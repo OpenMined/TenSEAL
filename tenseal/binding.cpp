@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 
+#include "context.h"
 #include "tensors/bfvnaivevector.h"
 #include "tensors/ckksvector.h"
 #include "utils.h"
@@ -116,9 +117,34 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("relin_keys", py::overload_cast<>(&KeyGenerator::relin_keys),
              "get the relinearization keys.");
 
+    py::class_<CKKSContext, std::shared_ptr<CKKSContext>>(m, "CKKSContext")
+        .def("new",
+             py::overload_cast<size_t, vector<int>>(&CKKSContext::Create))
+        .def("load", py::overload_cast<const char*>(&CKKSContext::Create))
+        .def("public_key", &CKKSContext::public_key)
+        .def("secret_key", &CKKSContext::secret_key)
+        .def("relin_keys", &CKKSContext::relin_keys)
+        .def("galois_keys", &CKKSContext::galois_keys)
+        .def("is_public", &CKKSContext::is_public)
+        .def("is_private", &CKKSContext::is_private)
+        .def("key_generator", &CKKSContext::key_gen);
+
+    py::class_<BFVContext, std::shared_ptr<BFVContext>>(m, "BFVContext")
+        .def("new",
+             py::overload_cast<size_t, uint64_t, vector<int>>(&BFVContext::Create))
+        .def("load", py::overload_cast<const char*>(&BFVContext::Create))
+        .def("public_key", &BFVContext::public_key)
+        .def("secret_key", &BFVContext::secret_key)
+        .def("relin_keys", &BFVContext::relin_keys)
+        .def("galois_keys", &BFVContext::galois_keys)
+        .def("is_public", &BFVContext::is_public)
+        .def("is_private", &BFVContext::is_private)
+        .def("key_generator", &BFVContext::key_gen);
+
     py::class_<EncryptionParameters>(m, "EncryptionParameters");
     py::class_<SEALContext, std::shared_ptr<SEALContext>>(m, "SEALContext");
     py::class_<PublicKey>(m, "PublicKey");
     py::class_<SecretKey>(m, "SecretKey");
     py::class_<RelinKeys>(m, "RelinKeys");
+    py::class_<GaloisKeys>(m, "GaloisKeys");
 }
