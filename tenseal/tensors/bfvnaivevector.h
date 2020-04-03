@@ -34,6 +34,12 @@ class BFVNaiveVector {
     size_t size();
 
     /*
+    Returns an upper bound on the size of the CKKSVector, as if it was written
+    to an output stream.
+    */
+    streamoff save_size();
+
+    /*
     Encrypted evaluation function operates on two encrypted vectors and returns
     a new BFVNaiveVector which is the result of either addition, substraction or
     multiplication in an element-wise fashion. in_place functions return a

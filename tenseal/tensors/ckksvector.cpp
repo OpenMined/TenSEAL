@@ -62,6 +62,10 @@ Ciphertext CKKSVector::encrypt(PublicKey pk, vector<double> pt) {
     return ciphertext;
 }
 
+streamoff CKKSVector::save_size() {
+    return this->ciphertext.save_size(compr_mode_type::none);
+}
+
 CKKSVector CKKSVector::add(CKKSVector to_add) {
     CKKSVector new_vector = *this;
     new_vector.add_inplace(to_add);

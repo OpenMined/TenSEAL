@@ -29,6 +29,14 @@ BFVNaiveVector::BFVNaiveVector(const BFVNaiveVector& vec) {
 
 size_t BFVNaiveVector::size() { return this->ciphertexts.size(); }
 
+streamoff BFVNaiveVector::save_size() {
+    streamoff sum_save_size = 0;
+    for (int i = 0; i < this->ciphertexts.size(); i++)
+        sum_save_size += this->ciphertexts[i].save_size(compr_mode_type::none);
+
+    return sum_save_size;
+}
+
 BFVNaiveVector BFVNaiveVector::add(BFVNaiveVector to_add) {
     BFVNaiveVector new_vector = *this;
     new_vector.add_inplace(to_add);
