@@ -20,15 +20,19 @@ class TenSEALContext {
     bool is_public() { return this->_is_public; }
     bool is_private() { return !this->_is_public; }
 
-   protected:
-    EncryptionParameters _parms;
-    shared_ptr<SEALContext> _context;
-    shared_ptr<KeyGenerator> _keygen;
+    shared_ptr<SEALContext> seal_context() { return _context; }
+
     shared_ptr<Encryptor> encryptor;
     shared_ptr<Decryptor> decryptor;
     shared_ptr<Evaluator> evaluator;
     // TODO: can we put a parent class here?
     // Encoder* encoder
+
+   protected:
+    EncryptionParameters _parms;
+    shared_ptr<SEALContext> _context;
+    shared_ptr<KeyGenerator> _keygen;
+
     bool _is_public;
 
     virtual void load(const char* filename) = 0;
@@ -71,9 +75,9 @@ class CKKSContext : public TenSEALContext {
         return shared_ptr<CKKSContext>(new CKKSContext(filename));
     }
 
-   private:
     shared_ptr<CKKSEncoder> encoder;
 
+   private:
     CKKSContext(size_t poly_modulus_degree, vector<int> coeff_mod_bit_sizes);
     CKKSContext(const char* filename);
 

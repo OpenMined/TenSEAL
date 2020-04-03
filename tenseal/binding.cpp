@@ -48,10 +48,11 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         py::arg("encryption_parameters"));
 
     py::class_<BFVNaiveVector>(m, "BFVNaiveVector")
-        .def(py::init<shared_ptr<SEALContext>&, PublicKey, vector<int>>())
+        .def(py::init<shared_ptr<BFVContext>&, vector<int>>())
         .def("size", &BFVNaiveVector::size)
         .def("save_size", &BFVNaiveVector::save_size)
-        .def("decrypt", &BFVNaiveVector::decrypt)
+        .def("decrypt", py::overload_cast<>(&BFVNaiveVector::decrypt))
+        .def("decrypt", py::overload_cast<SecretKey>(&BFVNaiveVector::decrypt))
         .def("add", &BFVNaiveVector::add)
         .def("add_", &BFVNaiveVector::add_inplace)
         .def("add_plain", &BFVNaiveVector::add_plain)
@@ -79,10 +80,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__imul__", &BFVNaiveVector::mul_plain_inplace);
 
     py::class_<CKKSVector>(m, "CKKSVector")
-        .def(py::init<shared_ptr<SEALContext>&, PublicKey, double,
-                      vector<double>>())
+        .def(py::init<shared_ptr<CKKSContext>&, double, vector<double>>())
         .def("size", &CKKSVector::size)
-        .def("decrypt", &CKKSVector::decrypt)
+        .def("decrypt", py::overload_cast<>(&CKKSVector::decrypt))
+        .def("decrypt", py::overload_cast<SecretKey>(&CKKSVector::decrypt))
         .def("save_size", &CKKSVector::save_size)
         .def("add", &CKKSVector::add)
         .def("add_", &CKKSVector::add_inplace)
@@ -130,8 +131,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("key_generator", &CKKSContext::key_gen);
 
     py::class_<BFVContext, std::shared_ptr<BFVContext>>(m, "BFVContext")
-        .def("new",
-             py::overload_cast<size_t, uint64_t, vector<int>>(&BFVContext::Create))
+        .def("new", py::overload_cast<size_t, uint64_t, vector<int>>(
+                        &BFVContext::Create))
         .def("load", py::overload_cast<const char*>(&BFVContext::Create))
         .def("public_key", &BFVContext::public_key)
         .def("secret_key", &BFVContext::secret_key)
