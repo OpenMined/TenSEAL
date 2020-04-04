@@ -31,5 +31,4 @@ void TenSEALContext::save_public(const char* filename) {}
 
 void TenSEALContext::save_private(const char* filename) {}
 
-
 }  // namespace tenseal

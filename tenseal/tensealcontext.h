@@ -18,10 +18,10 @@ class TenSEALContext {
     shared_ptr<Decryptor> decryptor;
     shared_ptr<Evaluator> evaluator;
 
-    static shared_ptr<TenSEALContext> Create(
-        scheme_type scheme, size_t poly_modulus_degree,
-        uint64_t plain_modulus,
-        vector<int> coeff_mod_bit_sizes) {
+    static shared_ptr<TenSEALContext> Create(scheme_type scheme,
+                                             size_t poly_modulus_degree,
+                                             uint64_t plain_modulus,
+                                             vector<int> coeff_mod_bit_sizes) {
         EncryptionParameters parms;
         switch (scheme) {
             case scheme_type::BFV:
