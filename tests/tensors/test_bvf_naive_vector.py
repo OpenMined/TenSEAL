@@ -2,9 +2,9 @@ import tenseal as ts
 import pytest
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def context():
-    return ts.bfv_context(4096, 1024)
+    return ts.context(ts.SCHEME_TYPE.BFV, 4096, 1024)
 
 
 def test_add(context):

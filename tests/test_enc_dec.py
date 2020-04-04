@@ -13,7 +13,7 @@ def _almost_equal(vec1, vec2, m_pow_ten):
 
 
 def test_bfv_naive_encryption_decryption():
-    context = ts.bfv_context(4096, 1024)
+    context = ts.context(ts.SCHEME_TYPE.BFV, 4096, 1024)
 
     plain_vec = [73, 81, 90]
     bfv_vec = ts.bfv_naive_vector(context, plain_vec)
@@ -23,7 +23,7 @@ def test_bfv_naive_encryption_decryption():
 
 
 def test_ckks_encryption_decryption():
-    context = ts.ckks_context(8192, [60, 40, 40, 60])
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
     scale = pow(2, 40)
 
     plain_vec = [73, 81, 90]

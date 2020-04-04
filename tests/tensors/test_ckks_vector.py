@@ -13,12 +13,12 @@ def _almost_equal(vec1, vec2, m_pow_ten):
     return True
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def context():
-    return ts.ckks_context(8192, [60, 40, 40, 60])
+    return ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def scale():
     return pow(2, 40)
 

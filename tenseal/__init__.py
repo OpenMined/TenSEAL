@@ -5,57 +5,48 @@ import _tenseal_cpp as _ts_cpp
 from tenseal.tensors import bfv_naive_vector, ckks_vector
 from tenseal.version import __version__
 
-# TODO: delete this from the API
-key_generator = _ts_cpp.KeyGenerator
-bfv_parameters = _ts_cpp.bfv_parameters
-ckks_parameters = _ts_cpp.ckks_parameters
-seal_context = _ts_cpp.context
+
+SCHEME_TYPE = _ts_cpp.SCHEME_TYPE
 
 
-def context(poly_modulus_degree, coeff_mod_bit_sizes=None, plain_modulus=None, scheme=None):
-    # TODO: implement a generic context constructor or
-    # reduce CKKSContext & BFVContext to a single TenSEALContext class
-    pass
-
-
-def ckks_context(poly_modulus_degree, coeff_mod_bit_sizes):
-    """Construct a context that holds keys and parameters needed for
-    operating encrypted tensors using the CKKS scheme.
+def context(scheme, poly_modulus_degree, plain_modulus=None,
+            coeff_mod_bit_sizes=None):
+    """Construct a context that holds keys and parameters needed for operating
+    encrypted tensors using either BFV or CKKS scheme.
 
     Args:
+        scheme : define the scheme to be used, either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS.
         poly_modulus_degree (int): The degree of the polynomial modulus, must be a power of two.
+        plain_modulus (int): The plaintext modulus. Should not be passed when the scheme is CKKS.
         coeff_mod_bit_sizes (list of int): List of bit size for each coeffecient modulus.
+            Can be an empty list for BFV, a default value will be given.
 
     Returns:
-        A CKKSContext object.
+        A TenSEALContext object.
     """
-    return _ts_cpp.CKKSContext.new(poly_modulus_degree, coeff_mod_bit_sizes)
+    if scheme == SCHEME_TYPE.BFV:
+        if plain_modulus is None:
+            raise ValueError("plain_modulus must be provided")
+        if coeff_mod_bit_sizes is None:
+            coeff_mod_bit_sizes = []
 
+    elif scheme == SCHEME_TYPE.CKKS:
+        # must be int, but the value doesn't matter for ckks
+        plain_modulus = 0
+        if coeff_mod_bit_sizes is None:
+            raise ValueError("coeff_mod_bit_sizes must be provided")
 
-def bfv_context(poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes=[]):
-    """Construct a context that holds keys and parameters needed for
-    operating encrypted tensors using the BFV scheme.
+    else:
+        raise ValueError(
+            "Invalid scheme type, use either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS")
 
-    Args:
-        poly_modulus_degree (int): The degree of the polynomial modulus, must be a power of two.
-        plain_modulus (int): The plaintext modulus.
-        coeff_mod_bit_sizes (list of int): List of bit size for each coeffecient modulus.
-
-    Returns:
-        A BFVContext object.
-    """
-    return _ts_cpp.BFVContext.new(
-        poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes)
+    # We can't pass None here, everything should be set prior to this call
+    return _ts_cpp.TenSEALContext.new(scheme, poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes)
 
 
 __all__ = [
-    "key_generator",
-    "bfv_context",
-    "bfv_parameters",
     "bfv_naive_vector",
-    "ckks_context",
-    "ckks_parameters"
     "ckks_vector",
-    "seal_context",
+    "context"
     "__version__",
 ]
