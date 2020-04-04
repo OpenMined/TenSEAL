@@ -9,15 +9,32 @@
 
 using namespace seal;
 using namespace std;
-// TODO: add docs
+
 namespace tenseal {
 
+/*
+A store for keeping all the keys and parameters required to run an encrypted
+computation, it wraps around SEALContext and keeps additional parameters and
+objects that are needed during encryption, evaluation and decryption of tensors.
+This should be the main object a user is required to create to use encrypted
+tenors.
+*/
 class TenSEALContext {
    public:
+    /*
+    These are the objects needed for encryption, decryption and evaluation of
+    tensors respectively. Keeping them in a single objects reduces memory and
+    time for doing operations on encrypted tensors since we only need to
+    instantiate them once.
+    */
     shared_ptr<Encryptor> encryptor;
     shared_ptr<Decryptor> decryptor;
     shared_ptr<Evaluator> evaluator;
 
+    /*
+    The way to instantiate TenSEALContext is through the Create function, it
+    makes sure to create an object and only share a pointer to it.
+    */
     static shared_ptr<TenSEALContext> Create(scheme_type scheme,
                                              size_t poly_modulus_degree,
                                              uint64_t plain_modulus,
@@ -54,9 +71,16 @@ class TenSEALContext {
     bool is_public() { return this->_is_public; }
     bool is_private() { return !this->_is_public; }
 
+    /*
+    Save the attributes needed to restore the context later, public is for not
+    saving the secret_key.
+    */
     void save_public(const char* filename);
     void save_private(const char* filename);
 
+    /*
+    Returns the wrapped SEALContext object.
+    */
     shared_ptr<SEALContext> seal_context() { return _context; }
 
    private:
@@ -64,11 +88,17 @@ class TenSEALContext {
     shared_ptr<SEALContext> _context;
     shared_ptr<KeyGenerator> _keygen;
 
+    /*
+    Public is when we don't hold the secret_key and can't decrypt ciphertexts.
+    */
     bool _is_public;
 
     TenSEALContext(EncryptionParameters parms);
     TenSEALContext(const char* filename);
 
+    /*
+    Load the context's attribute to restore a pre-saved TenSEALContext.
+    */
     void load(const char* filename);
 };
 
