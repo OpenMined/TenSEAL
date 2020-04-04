@@ -5,14 +5,14 @@
 #include <memory>
 #include <vector>
 
-#include "../context.h"
+#include "../tensealcontext.h"
 
 using namespace seal;
 using namespace std;
 
 namespace tenseal {
 
-BFVNaiveVector::BFVNaiveVector(shared_ptr<BFVContext> context,
+BFVNaiveVector::BFVNaiveVector(shared_ptr<TenSEALContext> context,
                                vector<int> vec) {
     this->ciphertexts.reserve(vec.size());
     this->context = context;

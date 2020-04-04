@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-#include "../context.h"
+#include "../tensealcontext.h"
 
 using namespace seal;
 using namespace std;
@@ -19,7 +19,7 @@ encryption scheme.
 */
 class BFVNaiveVector {
    public:
-    BFVNaiveVector(shared_ptr<BFVContext> context, vector<int> vec);
+    BFVNaiveVector(shared_ptr<TenSEALContext> context, vector<int> vec);
 
     BFVNaiveVector(const BFVNaiveVector& vec);
 
@@ -68,11 +68,11 @@ class BFVNaiveVector {
     BFVNaiveVector& mul_plain_inplace(vector<int> to_mul);
 
    private:
-    shared_ptr<BFVContext> context;
+    shared_ptr<TenSEALContext> context;
 
     vector<Ciphertext> ciphertexts;
 
-    static Ciphertext encrypt(shared_ptr<BFVContext> context, int pt) {
+    static Ciphertext encrypt(shared_ptr<TenSEALContext> context, int pt) {
         IntegerEncoder encoder(context->seal_context());
         Ciphertext ciphertext(context->seal_context());
         Plaintext plaintext = encoder.encode(pt);

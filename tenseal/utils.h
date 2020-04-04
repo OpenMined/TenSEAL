@@ -17,7 +17,7 @@ sizes and plaintext modulus.
 */
 EncryptionParameters create_bfv_parameters(
     size_t poly_modulus_degree, uint64_t plain_modulus,
-    vector<int> coeff_mod_bit_sizes = vector<int>());
+    vector<int> coeff_mod_bit_sizes);
 
 /*
 Returns a setuped EncryptionParameters that holds the parameters required for

@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-#include "../context.h"
+#include "../tensealcontext.h"
 
 using namespace seal;
 using namespace std;
@@ -19,7 +19,7 @@ encryption scheme.
 */
 class CKKSVector {
    public:
-    CKKSVector(shared_ptr<CKKSContext> context, double scale,
+    CKKSVector(shared_ptr<TenSEALContext> context, double scale,
                vector<double> vec);
 
     CKKSVector(const CKKSVector& vec);
@@ -73,11 +73,11 @@ class CKKSVector {
 
     double init_scale;
 
-    shared_ptr<CKKSContext> context;
+    shared_ptr<TenSEALContext> context;
 
     Ciphertext ciphertext;
 
-    static Ciphertext encrypt(shared_ptr<CKKSContext> context, double scale,
+    static Ciphertext encrypt(shared_ptr<TenSEALContext> context, double scale,
                               vector<double> pt) {
         CKKSEncoder encoder(context->seal_context());
 

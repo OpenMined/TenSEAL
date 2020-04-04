@@ -5,14 +5,14 @@
 #include <memory>
 #include <vector>
 
-#include "../context.h"
+#include "../tensealcontext.h"
 
 using namespace seal;
 using namespace std;
 
 namespace tenseal {
 
-CKKSVector::CKKSVector(shared_ptr<CKKSContext> context, double scale,
+CKKSVector::CKKSVector(shared_ptr<TenSEALContext> context, double scale,
                        vector<double> vec) {
     this->context = context;
     this->init_scale = scale;
