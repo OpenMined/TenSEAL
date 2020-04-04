@@ -6,6 +6,8 @@
 #include <memory>
 #include <vector>
 
+#include "../tensealcontext.h"
+
 using namespace seal;
 using namespace std;
 
@@ -17,7 +19,7 @@ encryption scheme.
 */
 class CKKSVector {
    public:
-    CKKSVector(shared_ptr<SEALContext> context, PublicKey pk, double scale,
+    CKKSVector(shared_ptr<TenSEALContext> context, double scale,
                vector<double> vec);
 
     CKKSVector(const CKKSVector& vec);
@@ -26,6 +28,7 @@ class CKKSVector {
     Decrypts and returns the plaintext representation of the encrypted vector of
     real numbers using the secret-key.
     */
+    vector<double> decrypt();
     vector<double> decrypt(SecretKey sk);
 
     /*
@@ -70,11 +73,27 @@ class CKKSVector {
 
     double init_scale;
 
-    shared_ptr<SEALContext> context;
+    shared_ptr<TenSEALContext> context;
 
     Ciphertext ciphertext;
 
-    Ciphertext encrypt(PublicKey pk, vector<double> pt);
+    static Ciphertext encrypt(shared_ptr<TenSEALContext> context, double scale,
+                              vector<double> pt) {
+        CKKSEncoder encoder(context->seal_context());
+
+        if (pt.size() > encoder.slot_count())
+            // number of slots available is poly_modulus_degree / 2
+            throw invalid_argument(
+                "can't encrypt vectors of this size, please use a larger "
+                "polynomial modulus degree.");
+
+        Ciphertext ciphertext(context->seal_context());
+        Plaintext plaintext;
+        encoder.encode(pt, scale, plaintext);
+        context->encryptor->encrypt(plaintext, ciphertext);
+
+        return ciphertext;
+    }
 };
 
 }  // namespace tenseal

@@ -5,17 +5,19 @@
 #include <memory>
 #include <vector>
 
+#include "../tensealcontext.h"
+
 using namespace seal;
 using namespace std;
 
 namespace tenseal {
 
-CKKSVector::CKKSVector(shared_ptr<SEALContext> context, PublicKey pk,
-                       double scale, vector<double> vec) {
+CKKSVector::CKKSVector(shared_ptr<TenSEALContext> context, double scale,
+                       vector<double> vec) {
     this->context = context;
     this->init_scale = scale;
     // Encrypts the whole vector into a single ciphertext using CKKS batching
-    this->ciphertext = encrypt(pk, vec);
+    this->ciphertext = CKKSVector::encrypt(context, scale, vec);
     this->_size = vec.size();
 }
 
@@ -28,38 +30,30 @@ CKKSVector::CKKSVector(const CKKSVector& vec) {
 
 size_t CKKSVector::size() { return this->_size; }
 
+vector<double> CKKSVector::decrypt() {
+    if (this->context->decryptor == NULL) {
+        // this->context was loaded with public keys only
+        throw invalid_argument(
+            "the current context of the vector doesn't hold a secret_key, "
+            "please provide one as argument");
+    }
+
+    return this->decrypt(this->context->secret_key());
+}
+
 vector<double> CKKSVector::decrypt(SecretKey sk) {
-    Decryptor decryptor(this->context, sk);
     Plaintext plaintext;
-    CKKSEncoder encoder(this->context);
+    CKKSEncoder encoder(this->context->seal_context());
 
     vector<double> result;
     result.reserve(this->size());
-    decryptor.decrypt(this->ciphertext, plaintext);
+    this->context->decryptor->decrypt(this->ciphertext, plaintext);
     encoder.decode(plaintext, result);
 
     // result contains all slots of ciphertext (n/2), but we may be using less
     // we use the size to delimit the resulting plaintext vector
     vector<double> sub(result.cbegin(), result.cbegin() + this->size());
     return sub;
-}
-
-Ciphertext CKKSVector::encrypt(PublicKey pk, vector<double> pt) {
-    CKKSEncoder encoder(this->context);
-
-    if (pt.size() > encoder.slot_count())
-        // number of slots available is poly_modulus_degree / 2
-        throw invalid_argument(
-            "can't encrypt vectors of this size, please use a larger "
-            "polynomial modulus degree.");
-
-    Encryptor encryptor(this->context, pk);
-    Ciphertext ciphertext(this->context);
-    Plaintext plaintext;
-    encoder.encode(pt, this->init_scale, plaintext);
-    encryptor.encrypt(plaintext, ciphertext);
-
-    return ciphertext;
 }
 
 streamoff CKKSVector::save_size() {
@@ -84,8 +78,7 @@ CKKSVector& CKKSVector::add_inplace(CKKSVector to_add) {
         throw invalid_argument("can't add vectors of different sizes");
     }
 
-    Evaluator evaluator(this->context);
-    evaluator.add_inplace(this->ciphertext, to_add.ciphertext);
+    this->context->evaluator->add_inplace(this->ciphertext, to_add.ciphertext);
 
     return *this;
 }
@@ -102,11 +95,10 @@ CKKSVector& CKKSVector::add_plain_inplace(vector<double> to_add) {
         throw invalid_argument("can't add vectors of different sizes");
     }
 
-    Evaluator evaluator(this->context);
-    CKKSEncoder encoder(this->context);
+    CKKSEncoder encoder(this->context->seal_context());
     Plaintext plaintext;
     encoder.encode(to_add, this->init_scale, plaintext);
-    evaluator.add_plain_inplace(this->ciphertext, plaintext);
+    this->context->evaluator->add_plain_inplace(this->ciphertext, plaintext);
 
     return *this;
 }
@@ -129,8 +121,7 @@ CKKSVector& CKKSVector::sub_inplace(CKKSVector to_sub) {
         throw invalid_argument("can't sub vectors of different sizes");
     }
 
-    Evaluator evaluator(this->context);
-    evaluator.sub_inplace(this->ciphertext, to_sub.ciphertext);
+    this->context->evaluator->sub_inplace(this->ciphertext, to_sub.ciphertext);
 
     return *this;
 }
@@ -147,11 +138,10 @@ CKKSVector& CKKSVector::sub_plain_inplace(vector<double> to_sub) {
         throw invalid_argument("can't sub vectors of different sizes");
     }
 
-    Evaluator evaluator(this->context);
-    CKKSEncoder encoder(this->context);
+    CKKSEncoder encoder(this->context->seal_context());
     Plaintext plaintext;
     encoder.encode(to_sub, this->init_scale, plaintext);
-    evaluator.sub_plain_inplace(this->ciphertext, plaintext);
+    this->context->evaluator->sub_plain_inplace(this->ciphertext, plaintext);
 
     return *this;
 }
@@ -174,8 +164,8 @@ CKKSVector& CKKSVector::mul_inplace(CKKSVector to_mul) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
 
-    Evaluator evaluator(this->context);
-    evaluator.multiply_inplace(this->ciphertext, to_mul.ciphertext);
+    this->context->evaluator->multiply_inplace(this->ciphertext,
+                                               to_mul.ciphertext);
 
     return *this;
 }
@@ -192,11 +182,11 @@ CKKSVector& CKKSVector::mul_plain_inplace(vector<double> to_mul) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
 
-    Evaluator evaluator(this->context);
-    CKKSEncoder encoder(this->context);
+    CKKSEncoder encoder(this->context->seal_context());
     Plaintext plaintext;
     encoder.encode(to_mul, this->init_scale, plaintext);
-    evaluator.multiply_plain_inplace(this->ciphertext, plaintext);
+    this->context->evaluator->multiply_plain_inplace(this->ciphertext,
+                                                     plaintext);
 
     return *this;
 }

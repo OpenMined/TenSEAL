@@ -11,6 +11,7 @@ add_subdirectory(third_party/pybind11)
 set(TENSEAL_BASEDIR tenseal)
 set(SOURCES
     ${TENSEAL_BASEDIR}/binding.cpp
+    ${TENSEAL_BASEDIR}/tensealcontext.cpp
     ${TENSEAL_BASEDIR}/utils.cpp
     ${TENSEAL_BASEDIR}/tensors/bfvnaivevector.cpp
     ${TENSEAL_BASEDIR}/tensors/ckksvector.cpp

@@ -6,31 +6,29 @@ one for their specific use case.
 import _tenseal_cpp as _ts_cpp
 
 
-def bfv_naive_vector(context, public_key, plaintext_vector):
+def bfv_naive_vector(context, plaintext_vector):
     """Constructor method for the BFVNaiveVector object, which can store
     a list of integers in encrypted form, using the BFV homomorphic encryption
     scheme.
 
     Args:
-        context: a SEALContext object, holding the encryption parameters.
-        public_key: a PublicKey object to be used for encrypting the vector.
+        context: a TenSEALContext object, holding the encryption parameters and keys.
         plaintext_vector: a list of integers to be encrypted.
 
     Returns:
         BFVNaiveVector object.
     """
 
-    return _ts_cpp.BFVNaiveVector(context, public_key, plaintext_vector)
+    return _ts_cpp.BFVNaiveVector(context, plaintext_vector)
 
 
-def ckks_vector(context, public_key, scale, plaintext_vector):
+def ckks_vector(context, scale, plaintext_vector):
     """Constructor method for the CKKSVector object, which can store a list
-    of integers in encrypted form, using the CKKS homomorphic encryption
+    of float numbers in encrypted form, using the CKKS homomorphic encryption
     scheme.
 
     Args:
-        context: a SEALContext object, holding the encryption parameters.
-        public_key: a PublicKey object to be used for encrypting the vector.
+        context: a TenSEALContext object, holding the encryption parameters and keys.
         scale: the scale to be used to encode vector values.
         plaintext_vector: a list of float to be encrypted.
 
@@ -38,7 +36,7 @@ def ckks_vector(context, public_key, scale, plaintext_vector):
         CKKSVector object.
     """
 
-    return _ts_cpp.CKKSVector(context, public_key, scale, plaintext_vector)
+    return _ts_cpp.CKKSVector(context, scale, plaintext_vector)
 
 
 __all__ = ["bfv_naive_vector", "ckks_vector"]
