@@ -12,7 +12,7 @@ def bfv_naive_vector(context, plaintext_vector):
     scheme.
 
     Args:
-        context: a BFVContext object, holding the encryption parameters and keys.
+        context: a TenSEALContext object, holding the encryption parameters and keys.
         plaintext_vector: a list of integers to be encrypted.
 
     Returns:
@@ -28,7 +28,7 @@ def ckks_vector(context, scale, plaintext_vector):
     scheme.
 
     Args:
-        context: a CKKSContext object, holding the encryption parameters and keys.
+        context: a TenSEALContext object, holding the encryption parameters and keys.
         scale: the scale to be used to encode vector values.
         plaintext_vector: a list of float to be encrypted.
 
