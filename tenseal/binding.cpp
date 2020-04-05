@@ -7,6 +7,7 @@
 
 #include "tensealcontext.h"
 #include "tensors/bfvnaivevector.h"
+#include "tensors/bfvvector.h"
 #include "tensors/ckksvector.h"
 #include "utils.h"
 
@@ -72,6 +73,38 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__mul__", &BFVNaiveVector::mul_plain)
         .def("__imul__", &BFVNaiveVector::mul_inplace)
         .def("__imul__", &BFVNaiveVector::mul_plain_inplace);
+
+    py::class_<BFVVector>(m, "BFVVector")
+        .def(py::init<shared_ptr<TenSEALContext>&, vector<int64_t>>())
+        .def("size", &BFVVector::size)
+        .def("save_size", &BFVVector::save_size)
+        .def("decrypt", py::overload_cast<>(&BFVVector::decrypt))
+        .def("decrypt", py::overload_cast<SecretKey>(&BFVVector::decrypt))
+        .def("add", &BFVVector::add)
+        .def("add_", &BFVVector::add_inplace)
+        .def("add_plain", &BFVVector::add_plain)
+        .def("add_plain_", &BFVVector::add_plain_inplace)
+        .def("sub", &BFVVector::sub)
+        .def("sub_", &BFVVector::sub_inplace)
+        .def("sub_plain", &BFVVector::sub_plain)
+        .def("sub_plain_", &BFVVector::sub_plain_inplace)
+        .def("mul", &BFVVector::mul)
+        .def("mul_", &BFVVector::mul_inplace)
+        .def("mul_plain", &BFVVector::mul_plain)
+        .def("mul_plain_", &BFVVector::mul_plain_inplace)
+        // python arithmetic
+        .def("__add__", &BFVVector::add)
+        .def("__add__", &BFVVector::add_plain)
+        .def("__iadd__", &BFVVector::add_inplace)
+        .def("__iadd__", &BFVVector::add_plain_inplace)
+        .def("__sub__", &BFVVector::sub)
+        .def("__sub__", &BFVVector::sub_plain)
+        .def("__isub__", &BFVVector::sub_inplace)
+        .def("__isub__", &BFVVector::sub_plain_inplace)
+        .def("__mul__", &BFVVector::mul)
+        .def("__mul__", &BFVVector::mul_plain)
+        .def("__imul__", &BFVVector::mul_inplace)
+        .def("__imul__", &BFVVector::mul_plain_inplace);
 
     py::class_<CKKSVector>(m, "CKKSVector")
         .def(py::init<shared_ptr<TenSEALContext>&, double, vector<double>>())

@@ -14,6 +14,7 @@ set(SOURCES
     ${TENSEAL_BASEDIR}/tensealcontext.cpp
     ${TENSEAL_BASEDIR}/utils.cpp
     ${TENSEAL_BASEDIR}/tensors/bfvnaivevector.cpp
+    ${TENSEAL_BASEDIR}/tensors/bfvvector.cpp
     ${TENSEAL_BASEDIR}/tensors/ckksvector.cpp
 )
 
