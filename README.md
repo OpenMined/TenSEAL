@@ -41,7 +41,7 @@ $ docker image build --tag tenseal .
 
 ## Tutorials
 
-TODO
+- [Getting Started](./blob/master/tutorials/Tutorial 0 - Getting Started.ipynb)
 
 ## License
 
