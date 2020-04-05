@@ -2,7 +2,7 @@
 """
 
 import _tenseal_cpp as _ts_cpp
-from tenseal.tensors import bfv_naive_vector, ckks_vector
+from tenseal.tensors import bfv_naive_vector, bfv_vector, ckks_vector
 from tenseal.version import __version__
 
 
@@ -46,6 +46,7 @@ def context(scheme, poly_modulus_degree, plain_modulus=None,
 
 __all__ = [
     "bfv_naive_vector",
+    "bfv_vector",
     "ckks_vector",
     "context"
     "__version__",
