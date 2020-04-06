@@ -22,6 +22,16 @@ def test_bfv_naive_encryption_decryption():
     assert decrypted_vec == plain_vec, "Decryption of vector is incorrect."
 
 
+def test_bfv_encryption_decryption():
+    context = ts.context(ts.SCHEME_TYPE.BFV, 8192, 1032193)
+
+    plain_vec = [73, 81, 90]
+    bfv_vec = ts.bfv_vector(context, plain_vec)
+    decrypted_vec = bfv_vec.decrypt()
+
+    assert decrypted_vec == plain_vec, "Decryption of vector is incorrect."
+
+
 def test_ckks_encryption_decryption():
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
     scale = pow(2, 40)
