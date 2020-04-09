@@ -53,11 +53,13 @@ vector<int> BFVNaiveVector::decrypt() {
 vector<int> BFVNaiveVector::decrypt(SecretKey sk) {
     Plaintext plaintext;
     IntegerEncoder encoder(this->context->seal_context());
+    Decryptor decryptor = Decryptor(this->context->seal_context(), sk);
 
     vector<int> result;
     result.reserve(this->ciphertexts.size());
+
     for (int i = 0; i < this->ciphertexts.size(); i++) {
-        this->context->decryptor->decrypt(this->ciphertexts[i], plaintext);
+        decryptor.decrypt(this->ciphertexts[i], plaintext);
         result.push_back(encoder.decode_int64(plaintext));
     }
 

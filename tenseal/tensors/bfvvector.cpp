@@ -46,10 +46,11 @@ vector<int64_t> BFVVector::decrypt() {
 vector<int64_t> BFVVector::decrypt(SecretKey sk) {
     Plaintext plaintext;
     BatchEncoder batch_encoder(this->context->seal_context());
+    Decryptor decryptor = Decryptor(this->context->seal_context(), sk);
 
     vector<int64_t> result;
 
-    this->context->decryptor->decrypt(this->ciphertext, plaintext);
+    decryptor.decrypt(this->ciphertext, plaintext);
     batch_encoder.decode(plaintext, result);
 
     // result contains all slots of ciphertext (poly_modulus_degree)
