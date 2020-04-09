@@ -7,6 +7,10 @@ from tenseal.version import __version__
 
 
 SCHEME_TYPE = _ts_cpp.SCHEME_TYPE
+PublicKey = _ts_cpp.PublicKey
+SecretKey = _ts_cpp.SecretKey
+RelinKeys = _ts_cpp.RelinKeys
+GaloisKeys = _ts_cpp.GaloisKeys
 
 
 def context(scheme, poly_modulus_degree, plain_modulus=None,
