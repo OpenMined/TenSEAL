@@ -44,10 +44,12 @@ vector<double> CKKSVector::decrypt() {
 vector<double> CKKSVector::decrypt(SecretKey sk) {
     Plaintext plaintext;
     CKKSEncoder encoder(this->context->seal_context());
+    Decryptor decryptor = Decryptor(this->context->seal_context(), sk);
 
     vector<double> result;
     result.reserve(this->size());
-    this->context->decryptor->decrypt(this->ciphertext, plaintext);
+
+    decryptor.decrypt(this->ciphertext, plaintext);
     encoder.decode(plaintext, result);
 
     // result contains all slots of ciphertext (n/2), but we may be using less
