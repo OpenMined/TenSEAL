@@ -114,8 +114,9 @@ class TenSEALContext {
             }
         }
 
-        // destory and set _secret_key to null
+        // destory and set _secret_key and decryptor to null
         this->_secret_key = nullptr;
+        this->decryptor = nullptr;
         this->_is_public = true;
     }
 
