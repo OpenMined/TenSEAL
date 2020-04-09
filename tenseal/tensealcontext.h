@@ -117,11 +117,10 @@ class TenSEALContext {
         // destory and set _secret_key and decryptor to null
         this->_secret_key = nullptr;
         this->decryptor = nullptr;
-        this->_is_public = true;
     }
 
-    bool is_public() { return this->_is_public; }
-    bool is_private() { return !this->_is_public; }
+    bool is_public() { return this->_secret_key == nullptr; }
+    bool is_private() { return this->_secret_key != nullptr; }
 
     /*
     Save the attributes needed to restore the context later, public is for not
@@ -142,11 +141,6 @@ class TenSEALContext {
     shared_ptr<SecretKey> _secret_key;
     shared_ptr<RelinKeys> _relin_keys;
     shared_ptr<GaloisKeys> _galois_keys;
-
-    /*
-    Public is when we don't hold the secret_key and can't decrypt ciphertexts.
-    */
-    bool _is_public;
 
     TenSEALContext(EncryptionParameters parms);
     TenSEALContext(const char* filename);

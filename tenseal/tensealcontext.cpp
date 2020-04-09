@@ -26,7 +26,6 @@ TenSEALContext::TenSEALContext(EncryptionParameters parms) {
     this->decryptor = shared_ptr<Decryptor>(
         new Decryptor(this->_context, *(this->_secret_key)));
     this->evaluator = shared_ptr<Evaluator>(new Evaluator(this->_context));
-    this->_is_public = false;
 }
 
 TenSEALContext::TenSEALContext(const char* filename) { this->load(filename); }
