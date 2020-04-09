@@ -91,6 +91,27 @@ class TenSEALContext {
     }
 
     /*
+    Generate Galois keys using the secret key
+    */
+    void generate_galois_keys(SecretKey secret_key) {
+        KeyGenerator keygen =
+            KeyGenerator(this->_context, secret_key, *this->_public_key);
+
+        this->_galois_keys =
+            shared_ptr<GaloisKeys>(new GaloisKeys(keygen.galois_keys()));
+    }
+
+    /*
+    Generate Relinearization keys using the secret key
+    */
+    void generate_relin_keys(SecretKey secret_key) {
+        KeyGenerator keygen =
+            KeyGenerator(this->_context, secret_key, *this->_public_key);
+        this->_relin_keys =
+            shared_ptr<RelinKeys>(new RelinKeys(keygen.relin_keys()));
+    }
+
+    /*
     Generate Galois and Relinearization keys if needed, then destroy the
     _secret_key and set it to nullptr
     */

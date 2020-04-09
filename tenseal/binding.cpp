@@ -167,7 +167,11 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              "Generate Galois and Relinearization keys if needed, then make "
              "then context public",
              py::arg("generate_galois_keys") = false,
-             py::arg("generate_relin_keys") = false);
+             py::arg("generate_relin_keys") = false)
+        .def("generate_galois_keys", &TenSEALContext::generate_galois_keys,
+             "Generate Galois keys using the secret key")
+        .def("generate_relin_keys", &TenSEALContext::generate_relin_keys,
+             "Generate Relinearization keys using the secret key");
 
     // SEAL objects
 
