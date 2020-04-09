@@ -22,9 +22,9 @@ TenSEALContext::TenSEALContext(EncryptionParameters parms) {
     this->_secret_key =
         shared_ptr<SecretKey>(new SecretKey(keygen.secret_key()));
     this->encryptor = shared_ptr<Encryptor>(
-        new Encryptor(this->_context, *(this->_public_key)));
+        new Encryptor(this->_context, *this->_public_key));
     this->decryptor = shared_ptr<Decryptor>(
-        new Decryptor(this->_context, *(this->_secret_key)));
+        new Decryptor(this->_context, *this->_secret_key));
     this->evaluator = shared_ptr<Evaluator>(new Evaluator(this->_context));
 }
 
