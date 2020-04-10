@@ -72,7 +72,7 @@ class CMakeBuild(build_ext):
 
 
 
-setuptools.setup(
+setup(
     name="tenseal",
     version=find_version(),
     author="Ayoub Benaissa",
