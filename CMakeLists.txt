@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.12)
 
+if(SKBUILD)
+  message(STATUS "The project is being built using scikit-build")
+else()
+  message(STATUS "The project is NOT being built using scikit-build")
+endif()
+
 project(tenseal)
 
 set(CMAKE_CXX_STANDARD 17)

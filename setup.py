@@ -5,7 +5,9 @@ import subprocess
 import re
 import setuptools
 
-from setuptools import setup, Extension
+from skbuild import setup
+
+from setuptools import Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
@@ -91,4 +93,9 @@ setuptools.setup(
     ext_modules=[CMakeExtension('_tenseal_cpp')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
+    extras_require={
+        'dev': [
+            'scikit-build'
+        ]
+    }
 )
