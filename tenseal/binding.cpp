@@ -10,13 +10,15 @@
 #include "tensors/bfvvector.h"
 #include "tensors/ckksvector.h"
 #include "utils.h"
+#include "sealapi.h"
 
 using namespace tenseal;
 using namespace seal;
 using namespace std;
 namespace py = pybind11;
 
-PYBIND11_MODULE(_tenseal_cpp, m) {
+PYBIND11_MODULE(_tenseal_cpp, m)
+{
     m.doc() = "Library for doing homomorphic encryption operations on tensors";
 
     m.def("bfv_parameters", &create_bfv_parameters,
@@ -43,7 +45,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         py::arg("encryption_parameters"));
 
     py::class_<BFVNaiveVector>(m, "BFVNaiveVector")
-        .def(py::init<shared_ptr<TenSEALContext>&, vector<int>>())
+        .def(py::init<shared_ptr<TenSEALContext> &, vector<int>>())
         .def("size", &BFVNaiveVector::size)
         .def("save_size", &BFVNaiveVector::save_size)
         .def("decrypt", py::overload_cast<>(&BFVNaiveVector::decrypt))
@@ -75,7 +77,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__imul__", &BFVNaiveVector::mul_plain_inplace);
 
     py::class_<BFVVector>(m, "BFVVector")
-        .def(py::init<shared_ptr<TenSEALContext>&, vector<int64_t>>())
+        .def(py::init<shared_ptr<TenSEALContext> &, vector<int64_t>>())
         .def("size", &BFVVector::size)
         .def("save_size", &BFVVector::save_size)
         .def("decrypt", py::overload_cast<>(&BFVVector::decrypt))
@@ -107,7 +109,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__imul__", &BFVVector::mul_plain_inplace);
 
     py::class_<CKKSVector>(m, "CKKSVector")
-        .def(py::init<shared_ptr<TenSEALContext>&, double, vector<double>>())
+        .def(py::init<shared_ptr<TenSEALContext> &, double, vector<double>>())
         .def("size", &CKKSVector::size)
         .def("decrypt", py::overload_cast<>(&CKKSVector::decrypt))
         .def("decrypt", py::overload_cast<SecretKey>(&CKKSVector::decrypt))
@@ -138,11 +140,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__imul__", &CKKSVector::mul_inplace)
         .def("__imul__", &CKKSVector::mul_plain_inplace);
 
-    py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
-        m, "TenSEALContext")
+    py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(m, "TenSEALContext")
         .def("new",
-             py::overload_cast<scheme_type, size_t, uint64_t, vector<int>>(
-                 &TenSEALContext::Create),
+             py::overload_cast<scheme_type, size_t, uint64_t, vector<int>>(&TenSEALContext::Create),
              R"(Create a new TenSEALContext object to hold keys and parameters.
     Args:
         scheme : define the scheme to be used, either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS.
@@ -153,10 +153,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         )",
              py::arg("poly_modulus_degree"), py::arg("plain_modulus"),
              py::arg("coeff_mod_bit_sizes") = vector<int>())
-        .def("load", py::overload_cast<const char*>(&TenSEALContext::Create))
+        .def("load", py::overload_cast<const char *>(&TenSEALContext::Create))
         .def("save_public", &TenSEALContext::save_public, "save public keys.")
-        .def("save_private", &TenSEALContext::save_private,
-             "save private keys.")
+        .def("save_private", &TenSEALContext::save_private, "save private keys.")
         .def("public_key", &TenSEALContext::public_key)
         .def("secret_key", &TenSEALContext::secret_key)
         .def("relin_keys", &TenSEALContext::relin_keys)
@@ -166,8 +165,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("make_context_public", &TenSEALContext::make_context_public,
              "Generate Galois and Relinearization keys if needed, then make "
              "then context public",
-             py::arg("generate_galois_keys") = false,
-             py::arg("generate_relin_keys") = false)
+             py::arg("generate_galois_keys") = false, py::arg("generate_relin_keys") = false)
         .def("generate_galois_keys", &TenSEALContext::generate_galois_keys,
              "Generate Galois keys using the secret key")
         .def("generate_relin_keys", &TenSEALContext::generate_relin_keys,
@@ -176,7 +174,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
     // SEAL objects
 
     py::class_<KeyGenerator>(m, "KeyGenerator")
-        .def(py::init<std::shared_ptr<seal::SEALContext>&>())
+        .def(py::init<std::shared_ptr<seal::SEALContext> &>())
         .def("public_key", &KeyGenerator::public_key, "get the public key.")
         .def("secret_key", &KeyGenerator::secret_key, "get the secret key.")
         .def("relin_keys", py::overload_cast<>(&KeyGenerator::relin_keys),
@@ -194,4 +192,6 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .value("NONE", scheme_type::none)
         .value("BFV", scheme_type::BFV)
         .value("CKKS", scheme_type::CKKS);
+
+    loadSealAPI(m);
 }

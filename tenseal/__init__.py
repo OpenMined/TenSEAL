@@ -11,6 +11,7 @@ PublicKey = _ts_cpp.PublicKey
 SecretKey = _ts_cpp.SecretKey
 RelinKeys = _ts_cpp.RelinKeys
 GaloisKeys = _ts_cpp.GaloisKeys
+BigUInt = _ts_cpp.BigUInt
 
 
 def context(scheme, poly_modulus_degree, plain_modulus=None,
