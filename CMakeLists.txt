@@ -18,5 +18,7 @@ set(SOURCES
     ${TENSEAL_BASEDIR}/tensors/ckksvector.cpp
 )
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wnarrowing -Wextra -Wno-varargs -Werror -Wno-strict-overflow -Wfatal-errors -fno-strict-overflow -Wno-psabi -Wno-noexcept-type -Wno-maybe-uninitialized -fstack-protector")
+
 pybind11_add_module(_tenseal_cpp ${SOURCES})
 target_link_libraries(_tenseal_cpp PRIVATE seal)

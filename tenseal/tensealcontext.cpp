@@ -30,10 +30,10 @@ TenSEALContext::TenSEALContext(EncryptionParameters parms) {
 
 TenSEALContext::TenSEALContext(const char* filename) { this->load(filename); }
 
-void TenSEALContext::load(const char* filename) {}
+void TenSEALContext::load(const char* /*filename*/) {}
 
-void TenSEALContext::save_public(const char* filename) {}
+void TenSEALContext::save_public(const char* /*filename*/) {}
 
-void TenSEALContext::save_private(const char* filename) {}
+void TenSEALContext::save_private(const char* /*filename*/) {}
 
 }  // namespace tenseal
