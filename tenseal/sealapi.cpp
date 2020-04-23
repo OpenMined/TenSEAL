@@ -74,7 +74,7 @@ void loadSEALAPI(py::module &m) {
         .def(py::self |= py::self)
         .def(py::self |= std::uint64_t())
         .def(py::self <<= int())
-        .def(py::self >>= int())
+        .def(py::self >>= int());
 
     // "seal/ciphertext.h"
     // "seal/ckks.h"
