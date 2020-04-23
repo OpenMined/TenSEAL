@@ -127,6 +127,82 @@ void loadSEALAPI(py::module &m) {
         .def_static("ComprSizeEstimate", &Serialization::ComprSizeEstimate)
         .def_static("IsValidHeader", &Serialization::IsValidHeader);
 
+    // "seal/plaintext.h"
+    py::class_<Plaintext>(m, "Plaintext")
+        .def(py::init<>())
+        .def(py::init<std::size_t>())
+        .def(py::init<std::size_t, std::size_t>())
+        .def(py::init<std::string>())
+        .def(py::init<Plaintext &>())
+
+        .def("reserve", &Plaintext::reserve)
+        .def("shrink_to_fit", &Plaintext::shrink_to_fit)
+        .def("release", &Plaintext::release)
+        .def("resize", &Plaintext::resize)
+        .def("set_zero",
+             py::overload_cast<std::size_t, std::size_t>(&Plaintext::set_zero))
+        .def("set_zero", py::overload_cast<std::size_t>(&Plaintext::set_zero))
+        .def("set_zero", py::overload_cast<>(&Plaintext::set_zero))
+        //.def("data", py::overload_cast<>(&Plaintext::data))
+        //.def("data", py::overload_cast<std::size_t>(&Plaintext::data))
+        .def("is_zero", &Plaintext::is_zero)
+        .def("capacity", &Plaintext::capacity)
+        .def("coeff_count", &Plaintext::coeff_count)
+        .def("significant_coeff_count", &Plaintext::significant_coeff_count)
+        .def("nonzero_coeff_count", &Plaintext::nonzero_coeff_count)
+        .def("to_string", &Plaintext::to_string)
+        .def("is_ntt_form", &Plaintext::is_ntt_form)
+        .def("pool", &Plaintext::pool)
+
+        .def(py::self == py::self)
+        .def(py::self != py::self);
+
+    // "seal/intencoder.h"
+    py::class_<IntegerEncoder>(m, "IntegerEncoder")
+        .def(py::init<std::shared_ptr<SEALContext>>())
+
+        .def("encode",
+             py::overload_cast<std::uint64_t>(&IntegerEncoder::encode))
+        .def("encode", py::overload_cast<std::uint64_t, Plaintext &>(
+                           &IntegerEncoder::encode))
+        .def("encode",
+             py::overload_cast<std::uint32_t>(&IntegerEncoder::encode))
+        .def("encode", py::overload_cast<std::uint32_t, Plaintext &>(
+                           &IntegerEncoder::encode))
+        .def("decode_uint32", &IntegerEncoder::decode_uint32)
+        .def("decode_uint64", &IntegerEncoder::decode_uint64)
+        .def("encode", py::overload_cast<std::int64_t>(&IntegerEncoder::encode))
+        .def("encode", py::overload_cast<std::int64_t, Plaintext &>(
+                           &IntegerEncoder::encode))
+        .def("encode", py::overload_cast<std::int32_t>(&IntegerEncoder::encode))
+        .def("encode", py::overload_cast<std::int32_t, Plaintext &>(
+                           &IntegerEncoder::encode))
+        .def("encode",
+             py::overload_cast<const BigUInt &>(&IntegerEncoder::encode))
+        .def("encode", py::overload_cast<const BigUInt &, Plaintext &>(
+                           &IntegerEncoder::encode))
+        .def("decode_int32", &IntegerEncoder::decode_int32)
+        .def("decode_int64", &IntegerEncoder::decode_int64)
+        .def("decode_biguint", &IntegerEncoder::decode_biguint)
+        .def("plain_modulus", &IntegerEncoder::plain_modulus);
+
+    // "seal/ciphertext.h"
+    // "seal/ckks.h"
+    // "seal/context.h"
+    // "seal/decryptor.h"
+    // "seal/encryptionparams.h"
+    // "seal/encryptor.h"
+    // "seal/evaluator.h"
+    // "seal/intarray.h"
+    // "seal/keygenerator.h"
+    // "seal/batchencoder.h"
+    // "seal/publickey.h"
+    // "seal/randomgen.h"
+    // "seal/randomtostd.h"
+    // "seal/relinkeys.h"
+    // "seal/secretkey.h"
+    // "seal/valcheck.h"
+
     // "seal/modulus.h"
     py::enum_<sec_level_type>(m, "sec_level_type")
         .value("none", sec_level_type::none)
@@ -145,25 +221,6 @@ void loadSEALAPI(py::module &m) {
        py::overload_cast<std::size_t,
        std::vector<int>>(&PlainModulus::Batching));
    */
-
-    // "seal/ciphertext.h"
-    // "seal/ckks.h"
-    // "seal/context.h"
-    // "seal/decryptor.h"
-    // "seal/intencoder.h"
-    // "seal/encryptionparams.h"
-    // "seal/encryptor.h"
-    // "seal/evaluator.h"
-    // "seal/intarray.h"
-    // "seal/keygenerator.h"
-    // "seal/plaintext.h"
-    // "seal/batchencoder.h"
-    // "seal/publickey.h"
-    // "seal/randomgen.h"
-    // "seal/randomtostd.h"
-    // "seal/relinkeys.h"
-    // "seal/secretkey.h"
-    // "seal/valcheck.h"
 
     // "seal/memorymanager.h"
     py::class_<MemoryPoolHandle>(m, "MemoryPoolHandle")

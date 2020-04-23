@@ -176,3 +176,54 @@ def test_serialization():
 
     header.magic = 0
     assert ts.Serialization.IsValidHeader(header) == False
+
+
+def test_plaintext():
+    testcase = ts.Plaintext()
+    assert testcase.coeff_count() == 0
+
+    testcase = ts.Plaintext(15)
+    assert testcase.coeff_count() == 15
+
+    testcase = ts.Plaintext(100, 15)
+    assert testcase.coeff_count() == 15
+    assert testcase.capacity() == 100
+
+    testcase = ts.Plaintext("7FFx^3 + 1x^1 + 3")
+    assert testcase.coeff_count() == 4
+    assert testcase.significant_coeff_count() == 4
+    assert testcase.capacity() == 4
+
+    testcase2 = testcase
+    assert testcase.coeff_count() == 4
+    assert testcase.capacity() == 4
+
+    testcase = ts.Plaintext(100, 15)
+    testcase.reserve(200)
+    assert testcase.capacity() == 200
+
+    testcase = ts.Plaintext("7FFx^3 + 1x^1 + 3")
+    assert testcase.capacity() == 4
+    testcase.reserve(200)
+    assert testcase.capacity() == 200
+    testcase.shrink_to_fit()
+    assert testcase.capacity() == 4
+
+    testcase.release()
+    assert testcase.coeff_count() == 0
+
+    testcase = ts.Plaintext("7FFx^3 + 1x^1 + 3")
+    assert testcase.coeff_count() == 4
+    assert testcase.nonzero_coeff_count() == 3
+    testcase.resize(10)
+    assert testcase.coeff_count() == 10
+
+    testcase.set_zero()
+    assert testcase.is_zero()
+    assert testcase.nonzero_coeff_count() == 0
+
+    testcase = ts.Plaintext("7FFx^3 + 2x^1 + 3")
+    assert testcase.to_string() == "7FFx^3 + 2x^1 + 3"
+
+def test_intencoder():
+    pass
