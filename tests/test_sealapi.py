@@ -152,3 +152,27 @@ def test_smallmodulus():
     assert left >= right
     assert left >= start
     assert left >= start - 1
+
+
+def test_serialization():
+    assert int(ts.COMPR_MODE_TYPE.NONE) == 0
+    header = ts.Serialization.SEALHeader()
+    assert header.magic == 0xA15E
+    assert header.zero_byte == 0
+    assert header.compr_mode == ts.COMPR_MODE_TYPE.NONE
+    assert header.size == 0
+    assert header.reserved == 0
+
+    assert ts.Serialization.IsSupportedComprMode(
+        ts.COMPR_MODE_TYPE.NONE) == True
+    assert ts.Serialization.IsSupportedComprMode(15) == False
+    assert ts.Serialization.IsSupportedComprMode(0) == True
+
+    assert ts.Serialization.ComprSizeEstimate(256,
+                                              ts.COMPR_MODE_TYPE.NONE) == 256
+
+    header = ts.Serialization.SEALHeader()
+    assert ts.Serialization.IsValidHeader(header) == True
+
+    header.magic = 0
+    assert ts.Serialization.IsValidHeader(header) == False

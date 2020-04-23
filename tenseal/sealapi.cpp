@@ -101,7 +101,51 @@ void loadSEALAPI(py::module &m) {
         .def(py::self >= py::self)
         .def(py::self >= std::uint64_t());
 
+    // "seal/serialization.h"
+    py::enum_<compr_mode_type>(m, "COMPR_MODE_TYPE")
+#ifdef SEAL_USE_ZLIB
+        .value("DEFLATE", compr_mode_type::deflate)
+#endif
+        .value("NONE", compr_mode_type::none);
+
+    py::class_<Serialization> serialization(m, "Serialization");
+    py::class_<Serialization::SEALHeader>(serialization, "SEALHeader")
+        .def(py::init<>())
+        .def_readwrite("magic", &Serialization::SEALHeader::magic)
+        .def_readwrite("zero_byte", &Serialization::SEALHeader::zero_byte)
+        .def_readwrite("compr_mode", &Serialization::SEALHeader::compr_mode)
+        .def_readwrite("size", &Serialization::SEALHeader::size)
+        .def_readwrite("reserved", &Serialization::SEALHeader::reserved);
+
+    serialization
+        .def_static("IsSupportedComprMode",
+                    py::overload_cast<compr_mode_type>(
+                        &Serialization::IsSupportedComprMode))
+        .def_static("IsSupportedComprMode",
+                    py::overload_cast<std::uint8_t>(
+                        &Serialization::IsSupportedComprMode))
+        .def_static("ComprSizeEstimate", &Serialization::ComprSizeEstimate)
+        .def_static("IsValidHeader", &Serialization::IsValidHeader);
+
     // "seal/modulus.h"
+    py::enum_<sec_level_type>(m, "sec_level_type")
+        .value("none", sec_level_type::none)
+        .value("tc128", sec_level_type::tc128)
+        .value("tc192", sec_level_type::tc192)
+        .value("tc256", sec_level_type::tc256);
+
+    /*   py::class_<CoeffModulus>(m, "CoeffModulus")
+           .def_static("MaxBitCount", &CoeffModulus::MaxBitCount)
+           .def_static("BFVDefault", &CoeffModulus::BFVDefault)
+           .def_static("Create", &CoeffModulus::Create);
+
+       py::class_<PlainModulus>(m, "PlainModulus")
+           .def_static("Batching", py::overload_cast<std::size_t,
+       int>(&PlainModulus::Batching)) .def_static("Batching",
+       py::overload_cast<std::size_t,
+       std::vector<int>>(&PlainModulus::Batching));
+   */
+
     // "seal/ciphertext.h"
     // "seal/ckks.h"
     // "seal/context.h"
@@ -119,7 +163,6 @@ void loadSEALAPI(py::module &m) {
     // "seal/randomtostd.h"
     // "seal/relinkeys.h"
     // "seal/secretkey.h"
-    // "seal/serialization.h"
     // "seal/valcheck.h"
 
     // "seal/memorymanager.h"
@@ -158,7 +201,7 @@ void loadSEALAPI(py::module &m) {
                                          &MemoryManager::SwitchProfile));
     //.def_static("SwitchProfile", py::overload_cast<std::unique_ptr<MMProf>
     //&&>(&MemoryManager::SwitchProfile)); .def_static("GetPool",
-    //py::overload_cast<>(&MemoryManager::GetPool));
+    // py::overload_cast<>(&MemoryManager::GetPool));
 
     py::class_<MMProfGuard>(m, "MMProfGuard")
         //.def(py::init<std::unique_ptr<MMProf> &&, bool>())

@@ -5,16 +5,21 @@ import _tenseal_cpp as _ts_cpp
 from tenseal.tensors import bfv_naive_vector, bfv_vector, ckks_vector
 from tenseal.version import __version__
 
-
 SCHEME_TYPE = _ts_cpp.SCHEME_TYPE
 PublicKey = _ts_cpp.PublicKey
 SecretKey = _ts_cpp.SecretKey
 RelinKeys = _ts_cpp.RelinKeys
 GaloisKeys = _ts_cpp.GaloisKeys
+
 BigUInt = _ts_cpp.BigUInt
+SmallModulus = _ts_cpp.SmallModulus
+Serialization = _ts_cpp.Serialization
+COMPR_MODE_TYPE = _ts_cpp.COMPR_MODE_TYPE
 
 
-def context(scheme, poly_modulus_degree, plain_modulus=None,
+def context(scheme,
+            poly_modulus_degree,
+            plain_modulus=None,
             coeff_mod_bit_sizes=None):
     """Construct a context that holds keys and parameters needed for operating
     encrypted tensors using either BFV or CKKS scheme.
@@ -43,10 +48,12 @@ def context(scheme, poly_modulus_degree, plain_modulus=None,
 
     else:
         raise ValueError(
-            "Invalid scheme type, use either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS")
+            "Invalid scheme type, use either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS"
+        )
 
     # We can't pass None here, everything should be set prior to this call
-    return _ts_cpp.TenSEALContext.new(scheme, poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes)
+    return _ts_cpp.TenSEALContext.new(scheme, poly_modulus_degree,
+                                      plain_modulus, coeff_mod_bit_sizes)
 
 
 __all__ = [
