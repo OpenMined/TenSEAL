@@ -1,18 +1,14 @@
-#include <pybind11/pybind11.h>
-#include <pybind11/operators.h>
-
-#include <seal/seal.h>
-
 #include "sealapi.h"
+
+#include <pybind11/operators.h>
+#include <pybind11/pybind11.h>
+#include <seal/seal.h>
 
 using namespace seal;
 using namespace std;
 namespace py = pybind11;
 
-void loadSealAPI(py::module &m)
-{
-    // SEAL objects
-
+void loadSEALAPI(py::module &m) {
     // "seal/biguint.h"
     py::class_<BigUInt>(m, "BigUInt")
         .def(py::init<>())
@@ -79,8 +75,6 @@ void loadSealAPI(py::module &m)
         .def(py::self |= std::uint64_t())
         .def(py::self <<= int())
         .def(py::self >>= int())
-
-        .def("__repr__", &BigUInt::to_dec_string);
 
     // "seal/ciphertext.h"
     // "seal/ckks.h"

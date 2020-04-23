@@ -3,5 +3,5 @@
 
 namespace py = pybind11;
 
-void loadSealAPI(py::module &m);
+void loadSEALAPI(py::module &m);
 #endif

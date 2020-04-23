@@ -5,20 +5,19 @@
 #include <memory>
 #include <vector>
 
+#include "sealapi.h"
 #include "tensealcontext.h"
 #include "tensors/bfvnaivevector.h"
 #include "tensors/bfvvector.h"
 #include "tensors/ckksvector.h"
 #include "utils.h"
-#include "sealapi.h"
 
 using namespace tenseal;
 using namespace seal;
 using namespace std;
 namespace py = pybind11;
 
-PYBIND11_MODULE(_tenseal_cpp, m)
-{
+PYBIND11_MODULE(_tenseal_cpp, m) {
     m.doc() = "Library for doing homomorphic encryption operations on tensors";
 
     m.def("bfv_parameters", &create_bfv_parameters,
@@ -140,9 +139,11 @@ PYBIND11_MODULE(_tenseal_cpp, m)
         .def("__imul__", &CKKSVector::mul_inplace)
         .def("__imul__", &CKKSVector::mul_plain_inplace);
 
-    py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(m, "TenSEALContext")
+    py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
+        m, "TenSEALContext")
         .def("new",
-             py::overload_cast<scheme_type, size_t, uint64_t, vector<int>>(&TenSEALContext::Create),
+             py::overload_cast<scheme_type, size_t, uint64_t, vector<int>>(
+                 &TenSEALContext::Create),
              R"(Create a new TenSEALContext object to hold keys and parameters.
     Args:
         scheme : define the scheme to be used, either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS.
@@ -155,7 +156,8 @@ PYBIND11_MODULE(_tenseal_cpp, m)
              py::arg("coeff_mod_bit_sizes") = vector<int>())
         .def("load", py::overload_cast<const char *>(&TenSEALContext::Create))
         .def("save_public", &TenSEALContext::save_public, "save public keys.")
-        .def("save_private", &TenSEALContext::save_private, "save private keys.")
+        .def("save_private", &TenSEALContext::save_private,
+             "save private keys.")
         .def("public_key", &TenSEALContext::public_key)
         .def("secret_key", &TenSEALContext::secret_key)
         .def("relin_keys", &TenSEALContext::relin_keys)
@@ -165,7 +167,8 @@ PYBIND11_MODULE(_tenseal_cpp, m)
         .def("make_context_public", &TenSEALContext::make_context_public,
              "Generate Galois and Relinearization keys if needed, then make "
              "then context public",
-             py::arg("generate_galois_keys") = false, py::arg("generate_relin_keys") = false)
+             py::arg("generate_galois_keys") = false,
+             py::arg("generate_relin_keys") = false)
         .def("generate_galois_keys", &TenSEALContext::generate_galois_keys,
              "Generate Galois keys using the secret key")
         .def("generate_relin_keys", &TenSEALContext::generate_relin_keys,
@@ -193,5 +196,5 @@ PYBIND11_MODULE(_tenseal_cpp, m)
         .value("BFV", scheme_type::BFV)
         .value("CKKS", scheme_type::CKKS);
 
-    loadSealAPI(m);
+    loadSEALAPI(m);
 }
