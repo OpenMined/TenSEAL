@@ -113,3 +113,42 @@ def test_biguint():
     left = ts.BigUInt(32, 27)
     left /= 13
     assert left == 2
+
+
+def test_smallmodulus():
+    testcase = ts.SmallModulus(1023)
+    assert testcase.bit_count() == 10
+    assert testcase.uint64_count() == 1
+    assert testcase.value() == 1023
+    assert testcase.data() == 1023
+    assert not testcase.is_zero()
+    assert not testcase.is_prime()
+
+    testcase = ts.SmallModulus(15451)
+    assert testcase.is_prime()
+
+    testcase = ts.SmallModulus(0)
+    assert testcase.is_zero()
+
+    #operators
+    start = 15451
+    left = ts.SmallModulus(start)
+    right = ts.SmallModulus(start)
+    assert left == right
+    assert left == start
+
+    right = ts.SmallModulus(start + 1)
+    assert left != right
+    assert right != start
+    assert left < right
+    assert left < start + 1
+    assert left <= right
+    assert left <= start
+    assert left <= start + 1
+
+    right = ts.SmallModulus(start - 1)
+    assert left > right
+    assert left > start - 1
+    assert left >= right
+    assert left >= start
+    assert left >= start - 1
