@@ -168,8 +168,13 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("generate", py::overload_cast<>(&BlakePRNG::generate))
         .def("refresh", &BlakePRNG::refresh);
 
-    py::class_<BlakePRNGFactory, std::shared_ptr<BlakePRNGFactory>>(
-        m, "BlakePRNGFactory", py::module_local())
+    py::class_<UniformRandomGeneratorFactory,
+               std::shared_ptr<UniformRandomGeneratorFactory>>(
+        m, "UniformRandomGeneratorFactory", py::module_local());
+
+    py::class_<BlakePRNGFactory, UniformRandomGeneratorFactory,
+               std::shared_ptr<BlakePRNGFactory>>(m, "BlakePRNGFactory",
+                                                  py::module_local())
         .def(py::init<>())
         .def(py::init<random_seed_type>())
         .def("create", py::overload_cast<>(&BlakePRNGFactory::create),
@@ -179,7 +184,6 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
              py::return_value_policy::reference)
         .def_static("DefaultFactory", &BlakePRNGFactory::DefaultFactory);
 
-    // "seal/randomtostd.h"
     // "seal/encryptionparams.h"
     py::enum_<scheme_type>(m, "SCHEME_TYPE", py::module_local())
         .value("NONE", scheme_type::none)
@@ -208,6 +212,25 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def(py::self == py::self)
         .def(py::self != py::self);
 
+    // "seal/modulus.h"
+    py::enum_<sec_level_type>(m, "SEC_LEVEL_TYPE", py::module_local())
+        .value("NONE", sec_level_type::none)
+        .value("TC128", sec_level_type::tc128)
+        .value("TC192", sec_level_type::tc192)
+        .value("TC256", sec_level_type::tc256);
+
+    py::class_<CoeffModulus>(m, "CoeffModulus")
+        .def_static("MaxBitCount", &CoeffModulus::MaxBitCount)
+        .def_static("BFVDefault", &CoeffModulus::BFVDefault)
+        .def_static("Create", &CoeffModulus::Create);
+
+    py::class_<PlainModulus>(m, "PlainModulus")
+        .def_static("Batching", py::overload_cast<std::size_t, int>(
+                                    &PlainModulus::Batching))
+        .def_static("Batching",
+                    py::overload_cast<std::size_t, std::vector<int>>(
+                        &PlainModulus::Batching));
+
     // "seal/context.h"
     py::class_<EncryptionParameterQualifiers>(
         m, "EncryptionParameterQualifiers", py::module_local())
@@ -224,8 +247,38 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
             &EncryptionParameterQualifiers::using_descending_modulus_chain)
         .def_readwrite("sec_level", &EncryptionParameterQualifiers::sec_level);
 
-    py::class_<SEALContext> sealContext(m, "SEALContext", py::module_local());
+    py::class_<SEALContext, std::shared_ptr<SEALContext>> sealContext(
+        m, "SEALContext", py::module_local());
+    py::class_<SEALContext::ContextData>(sealContext, "ContextData",
+                                         py::module_local())
+        .def("parms", &SEALContext::ContextData::parms)
+        .def("parms_id", &SEALContext::ContextData::parms_id)
+        .def("qualifiers", &SEALContext::ContextData::qualifiers)
+        .def("total_coeff_modulus",
+             &SEALContext::ContextData::total_coeff_modulus)
+        .def("total_coeff_modulus_bit_count",
+             &SEALContext::ContextData::total_coeff_modulus_bit_count)
+        .def("base_converter", &SEALContext::ContextData::base_converter)
+        .def("small_ntt_tables", &SEALContext::ContextData::small_ntt_tables)
+        .def("plain_ntt_tables", &SEALContext::ContextData::plain_ntt_tables)
+        .def("coeff_div_plain_modulus",
+             &SEALContext::ContextData::coeff_div_plain_modulus)
+        .def("plain_upper_half_threshold",
+             &SEALContext::ContextData::plain_upper_half_threshold)
+        .def("upper_half_threshold",
+             &SEALContext::ContextData::upper_half_threshold)
+        .def("upper_half_increment",
+             &SEALContext::ContextData::upper_half_increment)
+        .def("coeff_mod_plain_modulus",
+             &SEALContext::ContextData::coeff_mod_plain_modulus)
+        .def("prev_context_data", &SEALContext::ContextData::prev_context_data)
+        .def("next_context_data", &SEALContext::ContextData::next_context_data)
+        .def("chain_index", &SEALContext::ContextData::chain_index);
+
     sealContext.def_static("Create", &SEALContext::Create)
+        .def("get_context_data", &SEALContext::get_context_data)
+        .def("key_context_data", &SEALContext::key_context_data)
+        .def("first_context_data", &SEALContext::first_context_data)
         .def("last_context_data", &SEALContext::last_context_data)
         .def("parameters_set", &SEALContext::parameters_set)
         .def("key_parms_id", &SEALContext::key_parms_id)
@@ -274,25 +327,6 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
     // "seal/relinkeys.h"
     // "seal/secretkey.h"
     // "seal/valcheck.h"
-
-    // "seal/modulus.h"
-    py::enum_<sec_level_type>(m, "SEC_LEVEL_TYPE", py::module_local())
-        .value("NONE", sec_level_type::none)
-        .value("TC128", sec_level_type::tc128)
-        .value("TC192", sec_level_type::tc192)
-        .value("TC256", sec_level_type::tc256);
-
-    /*   py::class_<CoeffModulus>(m, "CoeffModulus")
-           .def_static("MaxBitCount", &CoeffModulus::MaxBitCount)
-           .def_static("BFVDefault", &CoeffModulus::BFVDefault)
-           .def_static("Create", &CoeffModulus::Create);
-
-       py::class_<PlainModulus>(m, "PlainModulus")
-           .def_static("Batching", py::overload_cast<std::size_t,
-       int>(&PlainModulus::Batching)) .def_static("Batching",
-       py::overload_cast<std::size_t,
-       std::vector<int>>(&PlainModulus::Batching));
-   */
 
     // "seal/memorymanager.h"
     py::class_<MemoryPoolHandle>(m, "MemoryPoolHandle", py::module_local())

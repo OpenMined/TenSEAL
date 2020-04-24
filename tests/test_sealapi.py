@@ -280,8 +280,8 @@ def test_encryptionparams():
 
     for scheme in [sealapi.SCHEME_TYPE.BFV, sealapi.SCHEME_TYPE.CKKS]:
         testcase = sealapi.EncryptionParameters(scheme)
-        testcase.set_poly_modulus_degree(10)
-        assert testcase.poly_modulus_degree() == 10
+        testcase.set_poly_modulus_degree(32768)
+        assert testcase.poly_modulus_degree() == 32768
 
         testcase = sealapi.EncryptionParameters(scheme)
         testcase.set_coeff_modulus(
@@ -292,13 +292,13 @@ def test_encryptionparams():
         assert testcase.coeff_modulus()[1].value() == 234
 
         left = sealapi.EncryptionParameters(scheme)
-        left.set_poly_modulus_degree(10)
+        left.set_poly_modulus_degree(32768)
         left.set_coeff_modulus(
             [sealapi.SmallModulus(1023),
              sealapi.SmallModulus(234)])
 
         right = sealapi.EncryptionParameters(scheme)
-        right.set_poly_modulus_degree(10)
+        right.set_poly_modulus_degree(32768)
         assert left != right
 
         right.set_coeff_modulus(
@@ -309,7 +309,84 @@ def test_encryptionparams():
     testcase = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.BFV)
     testcase.set_plain_modulus(sealapi.SmallModulus(1023))
     assert testcase.plain_modulus().value() == 1023
-    #testcase.set_random_generator()
+
+    testcase.set_random_generator(sealapi.BlakePRNGFactory())
+    generator = testcase.random_generator().create()
+    assert generator.generate() != generator.generate()
+
+
+def test_modulus():
+    sec_levels = {
+        0: sealapi.SEC_LEVEL_TYPE.NONE,
+        128: sealapi.SEC_LEVEL_TYPE.TC128,
+        192: sealapi.SEC_LEVEL_TYPE.TC192,
+        256: sealapi.SEC_LEVEL_TYPE.TC256
+    }
+
+    for val in sec_levels:
+        assert val == int(sec_levels[val])
+
+    expected_max_bit_count = {
+        sealapi.SEC_LEVEL_TYPE.NONE: 2147483647,
+        sealapi.SEC_LEVEL_TYPE.TC128: 881,
+        sealapi.SEC_LEVEL_TYPE.TC192: 611,
+        sealapi.SEC_LEVEL_TYPE.TC256: 476,
+    }
+
+    for level in expected_max_bit_count:
+        assert sealapi.CoeffModulus.MaxBitCount(
+            32768, level) == expected_max_bit_count[level]
+    assert sealapi.CoeffModulus.MaxBitCount(1,
+                                            sealapi.SEC_LEVEL_TYPE.TC256) == 0
+
+    expected_bfv_def_len = {
+        sealapi.SEC_LEVEL_TYPE.TC128: 16,
+        sealapi.SEC_LEVEL_TYPE.TC192: 11,
+        sealapi.SEC_LEVEL_TYPE.TC256: 9,
+    }
+    for level in expected_bfv_def_len:
+        assert len(sealapi.CoeffModulus.BFVDefault(
+            32768, level)) == expected_bfv_def_len[level]
+
+    custom_mod = sealapi.CoeffModulus.Create(1024, [32, 32])
+    assert len(custom_mod) == 2
+    for small_mod in custom_mod:
+        assert small_mod.is_prime() == True
+
+    small_mod = sealapi.PlainModulus.Batching(1024, 40)
+    assert small_mod.is_prime() == True
+    assert small_mod.bit_count() == 40
+
+    sizes = [16, 32, 40]
+    small_mods = sealapi.PlainModulus.Batching(1024, sizes)
+    for idx, small_mod in enumerate(small_mods):
+        assert small_mod.bit_count() == sizes[idx]
+
+
+def test_context():
+    schemes = [
+        sealapi.SCHEME_TYPE.NONE, sealapi.SCHEME_TYPE.BFV,
+        sealapi.SCHEME_TYPE.CKKS
+    ]
+    sec_levels = [
+        sealapi.SEC_LEVEL_TYPE.NONE, sealapi.SEC_LEVEL_TYPE.TC128,
+        sealapi.SEC_LEVEL_TYPE.TC192, sealapi.SEC_LEVEL_TYPE.TC256
+    ]
+
+    for scheme in schemes:
+        for sec_level in sec_levels:
+            parms = sealapi.EncryptionParameters(scheme)
+            sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
+            assert sealctx.parameters_set() == False
+
+    parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.BFV)
+    parms.set_poly_modulus_degree(8192)
+    parms.set_plain_modulus(1032193)
+    parms.set_coeff_modulus([sealapi.SmallModulus(666013)])
+
+    #for sec_level in sec_levels:
+    #    sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
+    #    assert sealctx.parameters_set() == True
 
 
 def test_intencoder():
@@ -321,10 +398,6 @@ def test_ciphertext():
 
 
 def test_ckks():
-    pass
-
-
-def test_context():
     pass
 
 
@@ -356,10 +429,6 @@ def test_publickey():
     pass
 
 
-def test_randomtostd():
-    pass
-
-
 def test_relinkeys():
     pass
 
@@ -369,10 +438,6 @@ def test_secretkey():
 
 
 def test_valcheck():
-    pass
-
-
-def test_modulus():
     pass
 
 
