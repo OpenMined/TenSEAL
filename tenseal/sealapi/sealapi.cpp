@@ -159,6 +159,27 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def(py::self == py::self)
         .def(py::self != py::self);
 
+    // "seal/randomgen.h"
+    m.def("random_uint64", &random_uint64);
+
+    py::class_<BlakePRNG, std::shared_ptr<BlakePRNG>>(m, "BlakePRNG",
+                                                      py::module_local())
+        .def(py::init<random_seed_type>())
+        .def("generate", py::overload_cast<>(&BlakePRNG::generate))
+        .def("refresh", &BlakePRNG::refresh);
+
+    py::class_<BlakePRNGFactory, std::shared_ptr<BlakePRNGFactory>>(
+        m, "BlakePRNGFactory", py::module_local())
+        .def(py::init<>())
+        .def(py::init<random_seed_type>())
+        .def("create", py::overload_cast<>(&BlakePRNGFactory::create),
+             py::return_value_policy::reference)
+        .def("create",
+             py::overload_cast<random_seed_type>(&BlakePRNGFactory::create),
+             py::return_value_policy::reference)
+        .def_static("DefaultFactory", &BlakePRNGFactory::DefaultFactory);
+
+    // "seal/randomtostd.h"
     // "seal/encryptionparams.h"
     py::enum_<scheme_type>(m, "SCHEME_TYPE", py::module_local())
         .value("NONE", scheme_type::none)
@@ -250,8 +271,6 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
     // "seal/keygenerator.h"
     // "seal/batchencoder.h"
     // "seal/publickey.h"
-    // "seal/randomgen.h"
-    // "seal/randomtostd.h"
     // "seal/relinkeys.h"
     // "seal/secretkey.h"
     // "seal/valcheck.h"

@@ -1,5 +1,6 @@
 import math
 import sys
+from pydbg import dbg
 import tenseal.sealapi as sealapi
 
 
@@ -229,6 +230,28 @@ def test_plaintext():
     assert testcase.to_string() == "7FFx^3 + 2x^1 + 3"
 
 
+def test_randomgen():
+    assert sealapi.random_uint64() != sealapi.random_uint64()
+
+    seed = [sealapi.random_uint64() for i in range(8)]
+
+    for factory in [
+            sealapi.BlakePRNGFactory.DefaultFactory(),
+            sealapi.BlakePRNGFactory(),
+            sealapi.BlakePRNGFactory(seed)
+    ]:
+        for generator in [
+                factory.create(),
+                factory.create([sealapi.random_uint64() for i in range(8)])
+        ]:
+
+            assert generator.generate() != generator.generate()
+
+            for i in range(1024):
+                generator.refresh()
+                generator.generate()
+
+
 def test_encryptionparams():
     schemes = [
         sealapi.SCHEME_TYPE.NONE, sealapi.SCHEME_TYPE.BFV,
@@ -330,10 +353,6 @@ def test_batchencoder():
 
 
 def test_publickey():
-    pass
-
-
-def test_randomgen():
     pass
 
 

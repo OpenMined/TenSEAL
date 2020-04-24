@@ -7,13 +7,22 @@ import _sealapi_cpp
 COMPR_MODE_TYPE = _sealapi_cpp.COMPR_MODE_TYPE
 SCHEME_TYPE = _sealapi_cpp.SCHEME_TYPE
 
+#functions
+random_uint64 = _sealapi_cpp.random_uint64
+
+
 #classes
 BigUInt = _sealapi_cpp.BigUInt
 SmallModulus = _sealapi_cpp.SmallModulus
 Serialization = _sealapi_cpp.Serialization
-SEALContext = _sealapi_cpp.SEALContext
 Plaintext = _sealapi_cpp.Plaintext
-IntegerEncoder = _sealapi_cpp.IntegerEncoder
 EncryptionParameters = _sealapi_cpp.EncryptionParameters
+
+BlakePRNGFactory = _sealapi_cpp.BlakePRNGFactory
+BlakePRNG = _sealapi_cpp.BlakePRNG
+
+
+SEALContext = _sealapi_cpp.SEALContext
+IntegerEncoder = _sealapi_cpp.IntegerEncoder
 EncryptionParameterQualifiers = _sealapi_cpp.EncryptionParameterQualifiers
 IntegerEncoder = _sealapi_cpp.IntegerEncoder
