@@ -1,5 +1,3 @@
-#include "sealapi.h"
-
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <seal/seal.h>
@@ -8,9 +6,11 @@ using namespace seal;
 using namespace std;
 namespace py = pybind11;
 
-void loadSEALAPI(py::module &m) {
+PYBIND11_MODULE(_sealapi_cpp, m) {
+    m.doc() = "Library for doing homomorphic encryption operations";
+
     // "seal/biguint.h"
-    py::class_<BigUInt>(m, "BigUInt")
+    py::class_<BigUInt>(m, "BigUInt", py::module_local())
         .def(py::init<>())
         .def(py::init<int>())
         .def(py::init<const std::string &>())
@@ -77,7 +77,7 @@ void loadSEALAPI(py::module &m) {
         .def(py::self >>= int());
 
     // "seal/smallmodulus.h"
-    py::class_<SmallModulus>(m, "SmallModulus")
+    py::class_<SmallModulus>(m, "SmallModulus", py::module_local())
         .def(py::init<std::uint64_t>())
         .def(py::init<const SmallModulus &>())
 
@@ -102,14 +102,16 @@ void loadSEALAPI(py::module &m) {
         .def(py::self >= std::uint64_t());
 
     // "seal/serialization.h"
-    py::enum_<compr_mode_type>(m, "COMPR_MODE_TYPE")
+    py::enum_<compr_mode_type>(m, "COMPR_MODE_TYPE", py::module_local())
 #ifdef SEAL_USE_ZLIB
         .value("DEFLATE", compr_mode_type::deflate)
 #endif
         .value("NONE", compr_mode_type::none);
 
-    py::class_<Serialization> serialization(m, "Serialization");
-    py::class_<Serialization::SEALHeader>(serialization, "SEALHeader")
+    py::class_<Serialization> serialization(m, "Serialization",
+                                            py::module_local());
+    py::class_<Serialization::SEALHeader>(serialization, "SEALHeader",
+                                          py::module_local())
         .def(py::init<>())
         .def_readwrite("magic", &Serialization::SEALHeader::magic)
         .def_readwrite("zero_byte", &Serialization::SEALHeader::zero_byte)
@@ -128,7 +130,7 @@ void loadSEALAPI(py::module &m) {
         .def_static("IsValidHeader", &Serialization::IsValidHeader);
 
     // "seal/plaintext.h"
-    py::class_<Plaintext>(m, "Plaintext")
+    py::class_<Plaintext>(m, "Plaintext", py::module_local())
         .def(py::init<>())
         .def(py::init<std::size_t>())
         .def(py::init<std::size_t, std::size_t>())
@@ -143,8 +145,6 @@ void loadSEALAPI(py::module &m) {
              py::overload_cast<std::size_t, std::size_t>(&Plaintext::set_zero))
         .def("set_zero", py::overload_cast<std::size_t>(&Plaintext::set_zero))
         .def("set_zero", py::overload_cast<>(&Plaintext::set_zero))
-        //.def("data", py::overload_cast<>(&Plaintext::data))
-        //.def("data", py::overload_cast<std::size_t>(&Plaintext::data))
         .def("is_zero", &Plaintext::is_zero)
         .def("capacity", &Plaintext::capacity)
         .def("coeff_count", &Plaintext::coeff_count)
@@ -157,8 +157,61 @@ void loadSEALAPI(py::module &m) {
         .def(py::self == py::self)
         .def(py::self != py::self);
 
+    // "seal/encryptionparams.h"
+    py::enum_<scheme_type>(m, "SCHEME_TYPE", py::module_local())
+        .value("none", scheme_type::none)
+        .value("BFV", scheme_type::BFV)
+        .value("CKKS", scheme_type::CKKS);
+
+    py::class_<EncryptionParameters>(m, "EncryptionParameters",
+                                     py::module_local())
+        .def(py::init<scheme_type>())
+        .def(py::init<std::uint8_t>())
+        .def(py::init<EncryptionParameters &>())
+        .def("set_poly_modulus_degree",
+             &EncryptionParameters::set_poly_modulus_degree)
+        .def("set_coeff_modulus", &EncryptionParameters::set_coeff_modulus)
+        .def("set_plain_modulus", py::overload_cast<const SmallModulus &>(
+                                      &EncryptionParameters::set_plain_modulus))
+        .def("set_plain_modulus", py::overload_cast<std::uint64_t>(
+                                      &EncryptionParameters::set_plain_modulus))
+        .def("set_random_generator",
+             &EncryptionParameters::set_random_generator)
+        .def("scheme", &EncryptionParameters::scheme)
+        .def("poly_modulus_degree", &EncryptionParameters::poly_modulus_degree)
+        .def("coeff_modulus", &EncryptionParameters::coeff_modulus)
+        .def("plain_modulus", &EncryptionParameters::plain_modulus)
+        .def("random_generator", &EncryptionParameters::random_generator)
+        .def(py::self == py::self)
+        .def(py::self != py::self);
+
+    // "seal/context.h"
+    py::class_<EncryptionParameterQualifiers>(
+        m, "EncryptionParameterQualifiers", py::module_local())
+        .def_readwrite("parameters_set",
+                       &EncryptionParameterQualifiers::parameters_set)
+        .def_readwrite("using_fft", &EncryptionParameterQualifiers::using_fft)
+        .def_readwrite("using_ntt", &EncryptionParameterQualifiers::using_ntt)
+        .def_readwrite("using_batching",
+                       &EncryptionParameterQualifiers::using_batching)
+        .def_readwrite("using_fast_plain_lift",
+                       &EncryptionParameterQualifiers::using_fast_plain_lift)
+        .def_readwrite(
+            "using_descending_modulus_chain",
+            &EncryptionParameterQualifiers::using_descending_modulus_chain)
+        .def_readwrite("sec_level", &EncryptionParameterQualifiers::sec_level);
+
+    py::class_<SEALContext> sealContext(m, "SEALContext", py::module_local());
+    sealContext.def_static("Create", &SEALContext::Create)
+        .def("last_context_data", &SEALContext::last_context_data)
+        .def("parameters_set", &SEALContext::parameters_set)
+        .def("key_parms_id", &SEALContext::key_parms_id)
+        .def("first_parms_id", &SEALContext::first_parms_id)
+        .def("last_parms_id", &SEALContext::last_parms_id)
+        .def("using_keyswitching", &SEALContext::using_keyswitching);
+
     // "seal/intencoder.h"
-    py::class_<IntegerEncoder>(m, "IntegerEncoder")
+    py::class_<IntegerEncoder>(m, "IntegerEncoder", py::module_local())
         .def(py::init<std::shared_ptr<SEALContext>>())
 
         .def("encode",
@@ -188,9 +241,7 @@ void loadSEALAPI(py::module &m) {
 
     // "seal/ciphertext.h"
     // "seal/ckks.h"
-    // "seal/context.h"
     // "seal/decryptor.h"
-    // "seal/encryptionparams.h"
     // "seal/encryptor.h"
     // "seal/evaluator.h"
     // "seal/intarray.h"
@@ -204,11 +255,11 @@ void loadSEALAPI(py::module &m) {
     // "seal/valcheck.h"
 
     // "seal/modulus.h"
-    py::enum_<sec_level_type>(m, "sec_level_type")
-        .value("none", sec_level_type::none)
-        .value("tc128", sec_level_type::tc128)
-        .value("tc192", sec_level_type::tc192)
-        .value("tc256", sec_level_type::tc256);
+    py::enum_<sec_level_type>(m, "SEC_LEVEL_TYPE", py::module_local())
+        .value("NONE", sec_level_type::none)
+        .value("TC128", sec_level_type::tc128)
+        .value("TC192", sec_level_type::tc192)
+        .value("TC256", sec_level_type::tc256);
 
     /*   py::class_<CoeffModulus>(m, "CoeffModulus")
            .def_static("MaxBitCount", &CoeffModulus::MaxBitCount)
@@ -223,7 +274,7 @@ void loadSEALAPI(py::module &m) {
    */
 
     // "seal/memorymanager.h"
-    py::class_<MemoryPoolHandle>(m, "MemoryPoolHandle")
+    py::class_<MemoryPoolHandle>(m, "MemoryPoolHandle", py::module_local())
         .def(py::init<>())
         .def(py::init<std::shared_ptr<util::MemoryPool>>())
         .def(py::init<const MemoryPoolHandle &>())
@@ -235,32 +286,32 @@ void loadSEALAPI(py::module &m) {
         .def(py::self == py::self)
         .def(py::self != py::self);
 
-    py::enum_<mm_prof_opt>(m, "mm_prof_opt")
+    py::enum_<mm_prof_opt>(m, "mm_prof_opt", py::module_local())
         .value("DEFAULT", mm_prof_opt::DEFAULT)
         .value("FORCE_GLOBAL", mm_prof_opt::FORCE_GLOBAL)
         .value("FORCE_NEW", mm_prof_opt::FORCE_NEW)
         .value("FORCE_THREAD_LOCAL", mm_prof_opt::FORCE_THREAD_LOCAL);
 
-    py::class_<MMProfGlobal>(m, "MMProfGlobal")
+    py::class_<MMProfGlobal>(m, "MMProfGlobal", py::module_local())
         .def(py::init<>())
         .def("get_pool", &MMProfGlobal::get_pool);
 
-    py::class_<MMProfNew>(m, "MMProfNew")
+    py::class_<MMProfNew>(m, "MMProfNew", py::module_local())
         .def(py::init<>())
         .def("get_pool", &MMProfNew::get_pool);
 
-    py::class_<MMProfFixed>(m, "MMProfFixed")
+    py::class_<MMProfFixed>(m, "MMProfFixed", py::module_local())
         .def(py::init<MemoryPoolHandle>())
         .def("get_pool", &MMProfFixed::get_pool);
 
-    py::class_<MemoryManager>(m, "MemoryManager")
+    py::class_<MemoryManager>(m, "MemoryManager", py::module_local())
         .def_static("SwitchProfile", py::overload_cast<MMProf *&&>(
                                          &MemoryManager::SwitchProfile));
     //.def_static("SwitchProfile", py::overload_cast<std::unique_ptr<MMProf>
     //&&>(&MemoryManager::SwitchProfile)); .def_static("GetPool",
     // py::overload_cast<>(&MemoryManager::GetPool));
 
-    py::class_<MMProfGuard>(m, "MMProfGuard")
+    py::class_<MMProfGuard>(m, "MMProfGuard", py::module_local())
         //.def(py::init<std::unique_ptr<MMProf> &&, bool>())
         .def(py::init<MMProf *, bool>())
         .def("try_lock", py::overload_cast<>(&MMProfGuard::try_lock))

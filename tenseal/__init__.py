@@ -11,11 +11,6 @@ SecretKey = _ts_cpp.SecretKey
 RelinKeys = _ts_cpp.RelinKeys
 GaloisKeys = _ts_cpp.GaloisKeys
 
-BigUInt = _ts_cpp.BigUInt
-SmallModulus = _ts_cpp.SmallModulus
-Serialization = _ts_cpp.Serialization
-COMPR_MODE_TYPE = _ts_cpp.COMPR_MODE_TYPE
-
 
 def context(scheme,
             poly_modulus_degree,

@@ -5,7 +5,6 @@
 #include <memory>
 #include <vector>
 
-#include "sealapi.h"
 #include "tensealcontext.h"
 #include "tensors/bfvnaivevector.h"
 #include "tensors/bfvvector.h"
@@ -195,6 +194,4 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .value("NONE", scheme_type::none)
         .value("BFV", scheme_type::BFV)
         .value("CKKS", scheme_type::CKKS);
-
-    loadSEALAPI(m);
 }

@@ -11,7 +11,6 @@ add_subdirectory(third_party/pybind11)
 set(TENSEAL_BASEDIR tenseal)
 set(SOURCES
     ${TENSEAL_BASEDIR}/binding.cpp
-    ${TENSEAL_BASEDIR}/sealapi.cpp
     ${TENSEAL_BASEDIR}/tensealcontext.cpp
     ${TENSEAL_BASEDIR}/utils.cpp
     ${TENSEAL_BASEDIR}/tensors/bfvnaivevector.cpp
@@ -19,7 +18,13 @@ set(SOURCES
     ${TENSEAL_BASEDIR}/tensors/ckksvector.cpp
 )
 
+set(SEALAPI_SOURCES
+    ${TENSEAL_BASEDIR}/sealapi/sealapi.cpp
+)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wnarrowing -Wextra -Wno-varargs -Werror -Wno-strict-overflow -Wfatal-errors -fno-strict-overflow -Wno-psabi -Wno-noexcept-type -Wno-maybe-uninitialized -fstack-protector")
 
 pybind11_add_module(_tenseal_cpp ${SOURCES})
+pybind11_add_module(_sealapi_cpp ${SEALAPI_SOURCES})
 target_link_libraries(_tenseal_cpp PRIVATE seal)
+target_link_libraries(_sealapi_cpp PRIVATE seal)
