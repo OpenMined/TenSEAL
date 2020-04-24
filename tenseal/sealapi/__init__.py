@@ -15,3 +15,5 @@ SEALContext = _sealapi_cpp.SEALContext
 Plaintext = _sealapi_cpp.Plaintext
 IntegerEncoder = _sealapi_cpp.IntegerEncoder
 EncryptionParameters = _sealapi_cpp.EncryptionParameters
+EncryptionParameterQualifiers = _sealapi_cpp.EncryptionParameterQualifiers
+IntegerEncoder = _sealapi_cpp.IntegerEncoder

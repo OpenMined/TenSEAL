@@ -1,5 +1,6 @@
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <seal/seal.h>
 
 using namespace seal;
@@ -85,6 +86,7 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("uint64_count", &SmallModulus::uint64_count)
         .def("data", &SmallModulus::data)
         .def("value", &SmallModulus::value)
+        .def("const_ratio", &SmallModulus::const_ratio)
         .def("is_zero", &SmallModulus::is_zero)
         .def("is_prime", &SmallModulus::is_prime)
 
@@ -159,7 +161,7 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
 
     // "seal/encryptionparams.h"
     py::enum_<scheme_type>(m, "SCHEME_TYPE", py::module_local())
-        .value("none", scheme_type::none)
+        .value("NONE", scheme_type::none)
         .value("BFV", scheme_type::BFV)
         .value("CKKS", scheme_type::CKKS);
 

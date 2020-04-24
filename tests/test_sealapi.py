@@ -1,3 +1,5 @@
+import math
+import sys
 import tenseal.sealapi as sealapi
 
 
@@ -121,6 +123,7 @@ def test_smallmodulus():
     assert testcase.uint64_count() == 1
     assert testcase.value() == 1023
     assert testcase.data() == 1023
+    assert testcase.const_ratio()[2] == (2**128) % 1023
     assert not testcase.is_zero()
     assert not testcase.is_prime()
 
@@ -227,7 +230,63 @@ def test_plaintext():
 
 
 def test_encryptionparams():
-    pass
+    schemes = [
+        sealapi.SCHEME_TYPE.NONE, sealapi.SCHEME_TYPE.BFV,
+        sealapi.SCHEME_TYPE.CKKS
+    ]
+
+    for scheme_id, scheme in enumerate(schemes):
+        assert int(scheme) == scheme_id
+
+        testcase = sealapi.EncryptionParameters(scheme)
+        assert testcase.scheme() == scheme
+
+        testcase = sealapi.EncryptionParameters(scheme_id)
+        assert testcase.scheme() == scheme
+
+    testcase = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.NONE)
+    poly_modulus_degree_failed = False
+    try:
+        testcase.set_poly_modulus_degree(10)
+    except:
+        poly_modulus_degree_failed = True
+    assert poly_modulus_degree_failed
+    testcase.set_poly_modulus_degree(0)
+    assert testcase.poly_modulus_degree() == 0
+    testcase.set_coeff_modulus([])
+
+    for scheme in [sealapi.SCHEME_TYPE.BFV, sealapi.SCHEME_TYPE.CKKS]:
+        testcase = sealapi.EncryptionParameters(scheme)
+        testcase.set_poly_modulus_degree(10)
+        assert testcase.poly_modulus_degree() == 10
+
+        testcase = sealapi.EncryptionParameters(scheme)
+        testcase.set_coeff_modulus(
+            [sealapi.SmallModulus(1023),
+             sealapi.SmallModulus(234)])
+        assert len(testcase.coeff_modulus()) == 2
+        assert testcase.coeff_modulus()[0].value() == 1023
+        assert testcase.coeff_modulus()[1].value() == 234
+
+        left = sealapi.EncryptionParameters(scheme)
+        left.set_poly_modulus_degree(10)
+        left.set_coeff_modulus(
+            [sealapi.SmallModulus(1023),
+             sealapi.SmallModulus(234)])
+
+        right = sealapi.EncryptionParameters(scheme)
+        right.set_poly_modulus_degree(10)
+        assert left != right
+
+        right.set_coeff_modulus(
+            [sealapi.SmallModulus(1023),
+             sealapi.SmallModulus(234)])
+        assert left == right
+
+    testcase = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.BFV)
+    testcase.set_plain_modulus(sealapi.SmallModulus(1023))
+    assert testcase.plain_modulus().value() == 1023
+    #testcase.set_random_generator()
 
 
 def test_intencoder():
