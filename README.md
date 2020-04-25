@@ -17,19 +17,19 @@ This installs the last packaged version on [pypi](https://pypi.org/project/tense
 
 #### Build from Source
 
-If you want to install tenseal from the repository, you should first make sure to have [CMake (3.12 or higher) installed](https://cmake.org/install/), then get the third party libraries (if you didn't already) by running the following command from the root directory of the project
+Supported platforms and their requirements are listed below: (this are only required for building TenSEAL from source)
+- **Linux:** A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0).
+- **macOS:** Xcode toolchain (>= 9.3)
+- **Windows:** Not supported yet, please use our [Docker image](#use-docker).
+
+If you want to install tenseal from the repository, you should first make sure to have the requirements for your platform (listed above) and [CMake (3.12 or higher)](https://cmake.org/install/) installed, then get the third party libraries (if you didn't already) by running the following command from the root directory of the project
 
 ```bash
 $ git submodule init
 $ git submodule update
 ```
 
-Supported platforms and their additional requirements are listed below:
-- **Linux:** A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0).
-- **macOS:** Xcode toolchain (>= 9.3)
-- **Windows:** Not supported yet, please use our [Docker image](#use-docker).
-
-After installing all the requirements for your platform, you can then trigger the build and the installation
+You can then trigger the build and the installation
 
 ```bash
 $ pip install .
