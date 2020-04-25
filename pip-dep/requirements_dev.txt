@@ -1,0 +1,4 @@
+black>=10.3b0
+flake8
+pytest>=5.4.1
+setuptools>=41.0.0
