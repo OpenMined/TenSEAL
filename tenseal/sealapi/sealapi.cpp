@@ -249,8 +249,9 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
 
     py::class_<SEALContext, std::shared_ptr<SEALContext>> sealContext(
         m, "SEALContext", py::module_local());
-    py::class_<SEALContext::ContextData, std::shared_ptr<SEALContext::ContextData>>(sealContext, "ContextData",
-                                         py::module_local())
+    py::class_<SEALContext::ContextData,
+               std::shared_ptr<SEALContext::ContextData>>(
+        sealContext, "ContextData", py::module_local())
         .def("parms", &SEALContext::ContextData::parms)
         .def("parms_id", &SEALContext::ContextData::parms_id)
         .def("qualifiers", &SEALContext::ContextData::qualifiers)
@@ -285,6 +286,108 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("last_parms_id", &SEALContext::last_parms_id)
         .def("using_keyswitching", &SEALContext::using_keyswitching);
 
+    // "seal/publickey.h"
+    py::class_<PublicKey>(m, "PublicKey", py::module_local())
+        .def(py::init<>())
+        .def("data", py::overload_cast<>(&PublicKey::data))
+        .def("parms_id", py::overload_cast<>(&PublicKey::parms_id));
+
+    // "seal/secretkey.h"
+    py::class_<SecretKey>(m, "SecretKey", py::module_local())
+        .def(py::init<>())
+        .def("data", py::overload_cast<>(&SecretKey::data))
+        .def("parms_id", py::overload_cast<>(&SecretKey::parms_id));
+
+    // "seal//kswitchkeys.h"
+    py::class_<KSwitchKeys>(m, "KSwitchKeys", py::module_local());
+
+    // "seal/relinkeys.h"
+    py::class_<RelinKeys, KSwitchKeys>(m, "RelinKeys", py::module_local())
+        .def(py::init<>())
+        .def("size", &RelinKeys::size)
+        .def("data", py::overload_cast<>(&RelinKeys::data))
+        .def("data", py::overload_cast<std::size_t>(&RelinKeys::data))
+        .def("parms_id", py::overload_cast<>(&RelinKeys::parms_id))
+        .def_static("get_index", &RelinKeys::get_index)
+        .def("has_key", &RelinKeys::has_key)
+        .def("key", &RelinKeys::key);
+
+    // "seal/galoiskeys.h"
+    py::class_<GaloisKeys, KSwitchKeys>(m, "GaloisKeys", py::module_local())
+        .def(py::init<>())
+        .def("size", &GaloisKeys::size)
+        .def("data", py::overload_cast<>(&GaloisKeys::data))
+        .def("data", py::overload_cast<std::size_t>(&GaloisKeys::data))
+        .def("parms_id", py::overload_cast<>(&GaloisKeys::parms_id))
+        .def_static("get_index", &GaloisKeys::get_index)
+        .def("has_key", &GaloisKeys::has_key)
+        .def("key", &GaloisKeys::key);
+
+    // "seal/keygenerator.h"
+    py::class_<KeyGenerator>(m, "KeyGenerator", py::module_local())
+        .def(py::init<std::shared_ptr<SEALContext>>())
+        .def(py::init<std::shared_ptr<SEALContext>, const SecretKey &>())
+        .def(py::init<std::shared_ptr<SEALContext>, const SecretKey &,
+                      const PublicKey &>())
+        .def("secret_key", &KeyGenerator::secret_key)
+        .def("public_key", &KeyGenerator::public_key)
+        .def("relin_keys", py::overload_cast<>(&KeyGenerator::relin_keys))
+        .def("galois_keys",
+             py::overload_cast<const std::vector<std::uint64_t> &>(
+                 &KeyGenerator::galois_keys))
+        .def("galois_keys", py::overload_cast<const std::vector<int> &>(
+                                &KeyGenerator::galois_keys))
+        .def("galois_keys", py::overload_cast<>(&KeyGenerator::galois_keys));
+
+    // "seal/ciphertext.h"
+    py::class_<Ciphertext>(m, "Ciphertext", py::module_local())
+        .def(py::init<>())
+        .def(py::init<MemoryPoolHandle>())
+        .def(py::init<std::shared_ptr<SEALContext>>())
+        .def(py::init<std::shared_ptr<SEALContext>, MemoryPoolHandle>())
+        .def(py::init<std::shared_ptr<SEALContext>, parms_id_type>())
+        .def(py::init<std::shared_ptr<SEALContext>, parms_id_type,
+                      MemoryPoolHandle>())
+        .def(py::init<std::shared_ptr<SEALContext>, parms_id_type,
+                      std::size_t>())
+        .def(py::init<std::shared_ptr<SEALContext>, parms_id_type, std::size_t,
+                      MemoryPoolHandle>())
+        .def("reserve",
+             py::overload_cast<std::shared_ptr<SEALContext>, parms_id_type,
+                               std::size_t>(&Ciphertext::reserve))
+        .def("reserve",
+             py::overload_cast<std::shared_ptr<SEALContext>, std::size_t>(
+                 &Ciphertext::reserve))
+        .def("reserve", py::overload_cast<std::size_t>(&Ciphertext::reserve))
+        .def("resize",
+             py::overload_cast<std::shared_ptr<SEALContext>, parms_id_type,
+                               std::size_t>(&Ciphertext::resize))
+        .def("resize",
+             py::overload_cast<std::shared_ptr<SEALContext>, std::size_t>(
+                 &Ciphertext::resize))
+        .def("resize", py::overload_cast<std::size_t>(&Ciphertext::resize))
+        .def("release", &Ciphertext::release)
+        .def("int_array", &Ciphertext::int_array)
+        .def("data", py::overload_cast<>(&Ciphertext::data))
+        .def("data", py::overload_cast<std::size_t>(&Ciphertext::data))
+        .def("coeff_mod_count", &Ciphertext::coeff_mod_count)
+        .def("poly_modulus_degree", &Ciphertext::poly_modulus_degree)
+        .def("size", &Ciphertext::size)
+        .def("size_capacity", &Ciphertext::size_capacity)
+        .def("is_transparent", &Ciphertext::is_transparent)
+        .def("is_ntt_form", py::overload_cast<>(&Ciphertext::is_ntt_form))
+        .def("parms_id", py::overload_cast<>(&Ciphertext::parms_id))
+        .def("scale", py::overload_cast<>(&Ciphertext::scale))
+        .def("pool", &Ciphertext::pool);
+
+    // "seal/ckks.h"
+    // "seal/decryptor.h"
+    // "seal/encryptor.h"
+    // "seal/evaluator.h"
+    // "seal/intarray.h"
+    // "seal/batchencoder.h"
+    // "seal/valcheck.h"
+
     // "seal/intencoder.h"
     py::class_<IntegerEncoder>(m, "IntegerEncoder", py::module_local())
         .def(py::init<std::shared_ptr<SEALContext>>())
@@ -313,19 +416,6 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("decode_int64", &IntegerEncoder::decode_int64)
         .def("decode_biguint", &IntegerEncoder::decode_biguint)
         .def("plain_modulus", &IntegerEncoder::plain_modulus);
-
-    // "seal/ciphertext.h"
-    // "seal/ckks.h"
-    // "seal/decryptor.h"
-    // "seal/encryptor.h"
-    // "seal/evaluator.h"
-    // "seal/intarray.h"
-    // "seal/keygenerator.h"
-    // "seal/batchencoder.h"
-    // "seal/publickey.h"
-    // "seal/relinkeys.h"
-    // "seal/secretkey.h"
-    // "seal/valcheck.h"
 
     // "seal/memorymanager.h"
     py::class_<MemoryPoolHandle>(m, "MemoryPoolHandle", py::module_local())
