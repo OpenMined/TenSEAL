@@ -25,11 +25,9 @@ jobs:
         sudo apt update
         sudo apt install cmake clang
         python -m pip install --upgrade pip
-        # we don't have python requirements yet
-        # pip install -r requirements.txt
+        pip install -r pip-dep/requirements_dev.txt
     - name: Lint with flake8
       run: |
-        pip install flake8
         # stop the build if there are Python syntax errors or undefined names
         flake8 --config=.flake8 .
         black --check .
@@ -51,5 +49,4 @@ jobs:
         pip install .
     - name: Test with pytest
       run: |
-        pip install pytest
         pytest -v ./tests
