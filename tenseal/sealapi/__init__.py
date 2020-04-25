@@ -3,15 +3,15 @@
 
 import _sealapi_cpp
 
-#enums
+# enums
 COMPR_MODE_TYPE = _sealapi_cpp.COMPR_MODE_TYPE
 SCHEME_TYPE = _sealapi_cpp.SCHEME_TYPE
 SEC_LEVEL_TYPE = _sealapi_cpp.SEC_LEVEL_TYPE
 
-#functions
+# functions
 random_uint64 = _sealapi_cpp.random_uint64
 
-#classes
+# classes
 BigUInt = _sealapi_cpp.BigUInt
 SmallModulus = _sealapi_cpp.SmallModulus
 Serialization = _sealapi_cpp.Serialization

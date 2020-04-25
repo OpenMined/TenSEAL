@@ -32,7 +32,7 @@ def test_biguint():
     assert testcase.uint64_count() == 2
     assert testcase.significant_bit_count() == 6
     assert testcase.to_double() == 34
-    assert testcase.to_string() == "22"  #hex string
+    assert testcase.to_string() == "22"  # hex string
     assert testcase.to_dec_string() == "34"
     assert not testcase.is_zero()
     testcase.set_zero()
@@ -121,7 +121,7 @@ def test_smallmodulus():
     assert testcase.uint64_count() == 1
     assert testcase.value() == 1023
     assert testcase.data() == 1023
-    assert testcase.const_ratio()[2] == (2**128) % 1023
+    assert testcase.const_ratio()[2] == (2 ** 128) % 1023
     assert not testcase.is_zero()
     assert not testcase.is_prime()
 
@@ -131,7 +131,7 @@ def test_smallmodulus():
     testcase = sealapi.SmallModulus(0)
     assert testcase.is_zero()
 
-    #operators
+    # operators
     start = 15451
     left = sealapi.SmallModulus(start)
     right = sealapi.SmallModulus(start)
@@ -164,13 +164,11 @@ def test_serialization():
     assert header.size == 0
     assert header.reserved == 0
 
-    assert sealapi.Serialization.IsSupportedComprMode(
-        sealapi.COMPR_MODE_TYPE.NONE) == True
+    assert sealapi.Serialization.IsSupportedComprMode(sealapi.COMPR_MODE_TYPE.NONE) == True
     assert sealapi.Serialization.IsSupportedComprMode(15) == False
     assert sealapi.Serialization.IsSupportedComprMode(0) == True
 
-    assert sealapi.Serialization.ComprSizeEstimate(
-        256, sealapi.COMPR_MODE_TYPE.NONE) == 256
+    assert sealapi.Serialization.ComprSizeEstimate(256, sealapi.COMPR_MODE_TYPE.NONE) == 256
 
     header = sealapi.Serialization.SEALHeader()
     assert sealapi.Serialization.IsValidHeader(header) == True
@@ -233,13 +231,13 @@ def test_randomgen():
     seed = [sealapi.random_uint64() for i in range(8)]
 
     for factory in [
-            sealapi.BlakePRNGFactory.DefaultFactory(),
-            sealapi.BlakePRNGFactory(),
-            sealapi.BlakePRNGFactory(seed)
+        sealapi.BlakePRNGFactory.DefaultFactory(),
+        sealapi.BlakePRNGFactory(),
+        sealapi.BlakePRNGFactory(seed),
     ]:
         for generator in [
-                factory.create(),
-                factory.create([sealapi.random_uint64() for i in range(8)])
+            factory.create(),
+            factory.create([sealapi.random_uint64() for i in range(8)]),
         ]:
 
             assert generator.generate() != generator.generate()
@@ -250,10 +248,7 @@ def test_randomgen():
 
 
 def test_encryptionparams():
-    schemes = [
-        sealapi.SCHEME_TYPE.NONE, sealapi.SCHEME_TYPE.BFV,
-        sealapi.SCHEME_TYPE.CKKS
-    ]
+    schemes = [sealapi.SCHEME_TYPE.NONE, sealapi.SCHEME_TYPE.BFV, sealapi.SCHEME_TYPE.CKKS]
 
     for scheme_id, scheme in enumerate(schemes):
         assert int(scheme) == scheme_id
@@ -281,26 +276,20 @@ def test_encryptionparams():
         assert testcase.poly_modulus_degree() == 32768
 
         testcase = sealapi.EncryptionParameters(scheme)
-        testcase.set_coeff_modulus(
-            [sealapi.SmallModulus(1023),
-             sealapi.SmallModulus(234)])
+        testcase.set_coeff_modulus([sealapi.SmallModulus(1023), sealapi.SmallModulus(234)])
         assert len(testcase.coeff_modulus()) == 2
         assert testcase.coeff_modulus()[0].value() == 1023
         assert testcase.coeff_modulus()[1].value() == 234
 
         left = sealapi.EncryptionParameters(scheme)
         left.set_poly_modulus_degree(32768)
-        left.set_coeff_modulus(
-            [sealapi.SmallModulus(1023),
-             sealapi.SmallModulus(234)])
+        left.set_coeff_modulus([sealapi.SmallModulus(1023), sealapi.SmallModulus(234)])
 
         right = sealapi.EncryptionParameters(scheme)
         right.set_poly_modulus_degree(32768)
         assert left != right
 
-        right.set_coeff_modulus(
-            [sealapi.SmallModulus(1023),
-             sealapi.SmallModulus(234)])
+        right.set_coeff_modulus([sealapi.SmallModulus(1023), sealapi.SmallModulus(234)])
         assert left == right
 
     testcase = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.BFV)
@@ -317,7 +306,7 @@ def test_modulus():
         0: sealapi.SEC_LEVEL_TYPE.NONE,
         128: sealapi.SEC_LEVEL_TYPE.TC128,
         192: sealapi.SEC_LEVEL_TYPE.TC192,
-        256: sealapi.SEC_LEVEL_TYPE.TC256
+        256: sealapi.SEC_LEVEL_TYPE.TC256,
     }
 
     for val in sec_levels:
@@ -331,10 +320,8 @@ def test_modulus():
     }
 
     for level in expected_max_bit_count:
-        assert sealapi.CoeffModulus.MaxBitCount(
-            32768, level) == expected_max_bit_count[level]
-    assert sealapi.CoeffModulus.MaxBitCount(1,
-                                            sealapi.SEC_LEVEL_TYPE.TC256) == 0
+        assert sealapi.CoeffModulus.MaxBitCount(32768, level) == expected_max_bit_count[level]
+    assert sealapi.CoeffModulus.MaxBitCount(1, sealapi.SEC_LEVEL_TYPE.TC256) == 0
 
     expected_bfv_def_len = {
         sealapi.SEC_LEVEL_TYPE.TC128: 16,
@@ -342,8 +329,7 @@ def test_modulus():
         sealapi.SEC_LEVEL_TYPE.TC256: 9,
     }
     for level in expected_bfv_def_len:
-        assert len(sealapi.CoeffModulus.BFVDefault(
-            32768, level)) == expected_bfv_def_len[level]
+        assert len(sealapi.CoeffModulus.BFVDefault(32768, level)) == expected_bfv_def_len[level]
 
     custom_mod = sealapi.CoeffModulus.Create(1024, [32, 32])
     assert len(custom_mod) == 2
@@ -361,13 +347,12 @@ def test_modulus():
 
 
 def test_context():
-    schemes = [
-        sealapi.SCHEME_TYPE.NONE, sealapi.SCHEME_TYPE.BFV,
-        sealapi.SCHEME_TYPE.CKKS
-    ]
+    schemes = [sealapi.SCHEME_TYPE.NONE, sealapi.SCHEME_TYPE.BFV, sealapi.SCHEME_TYPE.CKKS]
     sec_levels = [
-        sealapi.SEC_LEVEL_TYPE.NONE, sealapi.SEC_LEVEL_TYPE.TC128,
-        sealapi.SEC_LEVEL_TYPE.TC192, sealapi.SEC_LEVEL_TYPE.TC256
+        sealapi.SEC_LEVEL_TYPE.NONE,
+        sealapi.SEC_LEVEL_TYPE.TC128,
+        sealapi.SEC_LEVEL_TYPE.TC192,
+        sealapi.SEC_LEVEL_TYPE.TC256,
     ]
 
     for scheme in schemes:
@@ -381,7 +366,7 @@ def test_context():
     parms.set_plain_modulus(1032193)
     parms.set_coeff_modulus([sealapi.SmallModulus(666013)])
 
-    #for sec_level in sec_levels:
+    # for sec_level in sec_levels:
     #    sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
     #    assert sealctx.parameters_set() == True
 
