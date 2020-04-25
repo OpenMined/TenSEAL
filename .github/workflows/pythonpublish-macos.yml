@@ -1,13 +1,8 @@
-# This workflows will upload a Python Package using Twine when a release is created
-# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
-
 name: MacOS Package
 
 on:
   release:
     types: [created]
-  pull_request:
-    types: [ opened, synchronize, reopened ]
 
 jobs:
   deploy:
