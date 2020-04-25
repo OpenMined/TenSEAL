@@ -16,7 +16,7 @@ def read(fname):
 
 def find_version():
     version_file = read("tenseal/version.py")
-    version_re = r"__version__ = '(?P<version>.+)'"
+    version_re = r"__version__ = \"(?P<version>.+)\""
     version = re.match(version_re, version_file).group("version")
     return version
 

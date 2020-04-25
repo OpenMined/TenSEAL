@@ -8,6 +8,7 @@ repos:
     -   id: check-added-large-files
     -   id: check-yaml
     -   id: debug-statements
+    -   id: name-tests-test
     -   id: requirements-txt-fixer
     -   id: flake8
 -   repo: https://github.com/psf/black
