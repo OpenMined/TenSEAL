@@ -1,5 +1,5 @@
 [tool.black]
-target-version = ['py36']
+target-version = ['py36', 'py37']
 line-length = 100
 exclude = '''
 (
@@ -10,7 +10,9 @@ exclude = '''
     | \.eggs\/
     | build
     | dist
+    | tutorials
     | venv\/
     | test_serde_full\.py
+    | third_party
 )
 '''

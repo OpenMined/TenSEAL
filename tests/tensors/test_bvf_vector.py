@@ -2,7 +2,7 @@ import tenseal as ts
 import pytest
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def context():
     return ts.context(ts.SCHEME_TYPE.BFV, 8192, 1032193)
 
@@ -14,12 +14,9 @@ def test_add(context):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert decrypted_result == [
-        5, 5, 5, 5], "Addition of vectors is incorrect."
-    assert first_vec.decrypt() == [
-        1, 2, 3, 4], "Something went wrong in memory."
-    assert second_vec.decrypt() == [
-        4, 3, 2, 1], "Something went wrong in memory."
+    assert decrypted_result == [5, 5, 5, 5], "Addition of vectors is incorrect."
+    assert first_vec.decrypt() == [1, 2, 3, 4], "Something went wrong in memory."
+    assert second_vec.decrypt() == [4, 3, 2, 1], "Something went wrong in memory."
 
 
 def test_add_inplace(context):
@@ -29,10 +26,8 @@ def test_add_inplace(context):
 
     # Decryption
     decrypted_result = first_vec.decrypt()
-    assert decrypted_result == [
-        5, 5, 5, 5], "Addition of vectors is incorrect."
-    assert second_vec.decrypt() == [
-        4, 3, 2, 1], "Something went wrong in memory."
+    assert decrypted_result == [5, 5, 5, 5], "Addition of vectors is incorrect."
+    assert second_vec.decrypt() == [4, 3, 2, 1], "Something went wrong in memory."
 
 
 def test_add_plain(context):
@@ -42,10 +37,8 @@ def test_add_plain(context):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert decrypted_result == [
-        5, 5, 5, 5], "Addition of vectors is incorrect."
-    assert first_vec.decrypt() == [
-        1, 2, 3, 4], "Something went wrong in memory."
+    assert decrypted_result == [5, 5, 5, 5], "Addition of vectors is incorrect."
+    assert first_vec.decrypt() == [1, 2, 3, 4], "Something went wrong in memory."
 
 
 def test_add__plain_inplace(context):
@@ -55,8 +48,7 @@ def test_add__plain_inplace(context):
 
     # Decryption
     decrypted_result = first_vec.decrypt()
-    assert decrypted_result == [
-        5, 5, 5, 5], "Addition of vectors is incorrect."
+    assert decrypted_result == [5, 5, 5, 5], "Addition of vectors is incorrect."
 
 
 def test_sub(context):
@@ -66,12 +58,9 @@ def test_sub(context):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert decrypted_result == [
-        -3, -1, 1, 3], "Substraction of vectors is incorrect."
-    assert first_vec.decrypt() == [
-        1, 2, 3, 4], "Something went wrong in memory."
-    assert second_vec.decrypt() == [
-        4, 3, 2, 1], "Something went wrong in memory."
+    assert decrypted_result == [-3, -1, 1, 3], "Substraction of vectors is incorrect."
+    assert first_vec.decrypt() == [1, 2, 3, 4], "Something went wrong in memory."
+    assert second_vec.decrypt() == [4, 3, 2, 1], "Something went wrong in memory."
 
 
 def test_sub_inplace(context):
@@ -81,10 +70,8 @@ def test_sub_inplace(context):
 
     # Decryption
     decrypted_result = first_vec.decrypt()
-    assert decrypted_result == [
-        -3, -1, 1, 3], "Substraction of vectors is incorrect."
-    assert second_vec.decrypt() == [
-        4, 3, 2, 1], "Something went wrong in memory."
+    assert decrypted_result == [-3, -1, 1, 3], "Substraction of vectors is incorrect."
+    assert second_vec.decrypt() == [4, 3, 2, 1], "Something went wrong in memory."
 
 
 def test_sub_plain(context):
@@ -94,10 +81,8 @@ def test_sub_plain(context):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert decrypted_result == [
-        -3, -1, 1, 3], "Substraction of vectors is incorrect."
-    assert first_vec.decrypt() == [
-        1, 2, 3, 4], "Something went wrong in memory."
+    assert decrypted_result == [-3, -1, 1, 3], "Substraction of vectors is incorrect."
+    assert first_vec.decrypt() == [1, 2, 3, 4], "Something went wrong in memory."
 
 
 def test_sub_plain_inplace(context):
@@ -107,8 +92,7 @@ def test_sub_plain_inplace(context):
 
     # Decryption
     decrypted_result = first_vec.decrypt()
-    assert decrypted_result == [
-        -3, -1, 1, 3], "Substraction of vectors is incorrect."
+    assert decrypted_result == [-3, -1, 1, 3], "Substraction of vectors is incorrect."
 
 
 def test_mul(context):
@@ -118,12 +102,9 @@ def test_mul(context):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert decrypted_result == [
-        132, 219, 324, 450], "Multiplication of vectors is incorrect."
-    assert first_vec.decrypt() == [66, 73, 81,
-                                   90], "Something went wrong in memory."
-    assert second_vec.decrypt() == [
-        2, 3, 4, 5], "Something went wrong in memory."
+    assert decrypted_result == [132, 219, 324, 450], "Multiplication of vectors is incorrect."
+    assert first_vec.decrypt() == [66, 73, 81, 90], "Something went wrong in memory."
+    assert second_vec.decrypt() == [2, 3, 4, 5], "Something went wrong in memory."
 
 
 def test_mul_inplace(context):
@@ -133,10 +114,8 @@ def test_mul_inplace(context):
 
     # Decryption
     decrypted_result = first_vec.decrypt()
-    assert decrypted_result == [
-        132, 219, 324, 450], "Multiplication of vectors is incorrect."
-    assert second_vec.decrypt() == [
-        2, 3, 4, 5], "Something went wrong in memory."
+    assert decrypted_result == [132, 219, 324, 450], "Multiplication of vectors is incorrect."
+    assert second_vec.decrypt() == [2, 3, 4, 5], "Something went wrong in memory."
 
 
 def test_mul_plain(context):
@@ -146,10 +125,8 @@ def test_mul_plain(context):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert decrypted_result == [
-        132, 219, 324, 450], "Multiplication of vectors is incorrect."
-    assert first_vec.decrypt() == [66, 73, 81,
-                                   90], "Something went wrong in memory."
+    assert decrypted_result == [132, 219, 324, 450], "Multiplication of vectors is incorrect."
+    assert first_vec.decrypt() == [66, 73, 81, 90], "Something went wrong in memory."
 
 
 def test_mul_plain_inplace(context):
@@ -159,8 +136,7 @@ def test_mul_plain_inplace(context):
 
     # Decryption
     decrypted_result = first_vec.decrypt()
-    assert decrypted_result == [
-        132, 219, 324, 450], "Multiplication of vectors is incorrect."
+    assert decrypted_result == [132, 219, 324, 450], "Multiplication of vectors is incorrect."
 
 
 def test_size(context):
