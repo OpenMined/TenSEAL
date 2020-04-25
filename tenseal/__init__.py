@@ -13,8 +13,7 @@ RelinKeys = _ts_cpp.RelinKeys
 GaloisKeys = _ts_cpp.GaloisKeys
 
 
-def context(scheme, poly_modulus_degree, plain_modulus=None,
-            coeff_mod_bit_sizes=None):
+def context(scheme, poly_modulus_degree, plain_modulus=None, coeff_mod_bit_sizes=None):
     """Construct a context that holds keys and parameters needed for operating
     encrypted tensors using either BFV or CKKS scheme.
 
@@ -41,17 +40,12 @@ def context(scheme, poly_modulus_degree, plain_modulus=None,
             raise ValueError("coeff_mod_bit_sizes must be provided")
 
     else:
-        raise ValueError(
-            "Invalid scheme type, use either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS")
+        raise ValueError("Invalid scheme type, use either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS")
 
     # We can't pass None here, everything should be set prior to this call
-    return _ts_cpp.TenSEALContext.new(scheme, poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes)
+    return _ts_cpp.TenSEALContext.new(
+        scheme, poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes
+    )
 
 
-__all__ = [
-    "bfv_naive_vector",
-    "bfv_vector",
-    "ckks_vector",
-    "context"
-    "__version__",
-]
+__all__ = ["bfv_naive_vector", "bfv_vector", "ckks_vector", "context" "__version__"]
