@@ -1,7 +1,9 @@
-FROM ubuntu:19.04
+FROM ubuntu:20.04
+
+ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt update
-RUN apt install -y python3.7 python3-pip git cmake
+RUN apt install -y python3.8 python3-pip git cmake
 COPY ./ ./TenSEAL
 WORKDIR /TenSEAL
 # Get third party libraries if not present

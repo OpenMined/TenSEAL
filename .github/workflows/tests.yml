@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7]
+        python-version: [3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -25,15 +25,14 @@ jobs:
         sudo apt update
         sudo apt install cmake clang
         python -m pip install --upgrade pip
-        # we don't have python requirements yet
-        # pip install -r requirements.txt
+        pip install -r requirements_dev.txt
     - name: Lint with flake8
       run: |
-        pip install flake8
         # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        flake8 --config=.flake8 .
+        black --check .
+        # exit-zero treats all errors as warnings.
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
     - name: Lint with clang-format
       run: |
         # lint files (all .cpp and .h files) inplace
@@ -50,5 +49,4 @@ jobs:
         pip install .
     - name: Test with pytest
       run: |
-        pip install pytest
         pytest -v ./tests
