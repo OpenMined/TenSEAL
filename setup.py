@@ -52,7 +52,7 @@ class CMakeBuild(build_ext):
             "-DPYTHON_EXECUTABLE=" + sys.executable,
         ]
 
-        cfg = "Debug"  # if self.debug else 'Release'
+        cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]
 
         if platform.system() == "Windows":
@@ -74,9 +74,6 @@ class CMakeBuild(build_ext):
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
 
 
-REQ_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pip-dep")
-dev_extras = read(os.path.join(REQ_DIR, "requirements_dev.txt")).split("\n")
-
 setuptools.setup(
     name="tenseal",
     version=find_version(),
@@ -89,7 +86,6 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/OpenMined/TenSEAL",
     packages=setuptools.find_packages(include=["tenseal", "tenseal.*"]),
-    extras_require={"dev": dev_extras},
     classifiers=[
         "Programming Language :: C++",
         "Programming Language :: Python :: 3",
