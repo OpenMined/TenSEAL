@@ -249,7 +249,7 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
 
     py::class_<SEALContext, std::shared_ptr<SEALContext>> sealContext(
         m, "SEALContext", py::module_local());
-    py::class_<SEALContext::ContextData>(sealContext, "ContextData",
+    py::class_<SEALContext::ContextData, std::shared_ptr<SEALContext::ContextData>>(sealContext, "ContextData",
                                          py::module_local())
         .def("parms", &SEALContext::ContextData::parms)
         .def("parms_id", &SEALContext::ContextData::parms_id)
@@ -258,7 +258,6 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
              &SEALContext::ContextData::total_coeff_modulus)
         .def("total_coeff_modulus_bit_count",
              &SEALContext::ContextData::total_coeff_modulus_bit_count)
-        .def("base_converter", &SEALContext::ContextData::base_converter)
         .def("small_ntt_tables", &SEALContext::ContextData::small_ntt_tables)
         .def("plain_ntt_tables", &SEALContext::ContextData::plain_ntt_tables)
         .def("coeff_div_plain_modulus",

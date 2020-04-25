@@ -1,3 +1,4 @@
+import pytest
 import tenseal.sealapi as sealapi
 
 
@@ -225,72 +226,50 @@ def test_plaintext():
     assert testcase.to_string() == "7FFx^3 + 2x^1 + 3"
 
 
-def test_randomgen():
-    assert sealapi.random_uint64() != sealapi.random_uint64()
-
-    seed = [sealapi.random_uint64() for i in range(8)]
-
-    for factory in [
+@pytest.mark.parametrize(
+    "factory",
+    [
         sealapi.BlakePRNGFactory.DefaultFactory(),
         sealapi.BlakePRNGFactory(),
-        sealapi.BlakePRNGFactory(seed),
+        sealapi.BlakePRNGFactory([sealapi.random_uint64() for i in range(8)]),
+    ],
+)
+def test_randomgen(factory):
+    assert sealapi.random_uint64() != sealapi.random_uint64()
+
+    for generator in [
+        factory.create(),
+        factory.create([sealapi.random_uint64() for i in range(8)]),
     ]:
-        for generator in [
-            factory.create(),
-            factory.create([sealapi.random_uint64() for i in range(8)]),
-        ]:
+        assert generator.generate() != generator.generate()
 
-            assert generator.generate() != generator.generate()
-
-            for i in range(1024):
-                generator.refresh()
-                generator.generate()
+        for i in range(1024):
+            generator.refresh()
+            generator.generate()
 
 
-def test_encryptionparams():
-    schemes = [sealapi.SCHEME_TYPE.NONE, sealapi.SCHEME_TYPE.BFV, sealapi.SCHEME_TYPE.CKKS]
+@pytest.mark.parametrize(
+    "scheme_id,scheme",
+    [(0, sealapi.SCHEME_TYPE.NONE), (1, sealapi.SCHEME_TYPE.BFV), (2, sealapi.SCHEME_TYPE.CKKS)],
+)
+def test_encryptionparams_scheme_sanity(scheme_id, scheme):
+    assert int(scheme) == scheme_id
 
-    for scheme_id, scheme in enumerate(schemes):
-        assert int(scheme) == scheme_id
+    testcase = sealapi.EncryptionParameters(scheme)
+    assert testcase.scheme() == scheme
 
-        testcase = sealapi.EncryptionParameters(scheme)
-        assert testcase.scheme() == scheme
+    testcase = sealapi.EncryptionParameters(scheme_id)
+    assert testcase.scheme() == scheme
 
-        testcase = sealapi.EncryptionParameters(scheme_id)
-        assert testcase.scheme() == scheme
 
+def test_encryptionparams_scheme_specific():
     testcase = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.NONE)
-    poly_modulus_degree_failed = False
-    try:
+    with pytest.raises(BaseException):
         testcase.set_poly_modulus_degree(10)
-    except:
-        poly_modulus_degree_failed = True
-    assert poly_modulus_degree_failed
+
     testcase.set_poly_modulus_degree(0)
     assert testcase.poly_modulus_degree() == 0
     testcase.set_coeff_modulus([])
-
-    for scheme in [sealapi.SCHEME_TYPE.BFV, sealapi.SCHEME_TYPE.CKKS]:
-        testcase = sealapi.EncryptionParameters(scheme)
-        testcase.set_poly_modulus_degree(32768)
-        assert testcase.poly_modulus_degree() == 32768
-
-        testcase = sealapi.EncryptionParameters(scheme)
-        testcase.set_coeff_modulus([sealapi.SmallModulus(1023), sealapi.SmallModulus(234)])
-        assert len(testcase.coeff_modulus()) == 2
-        assert testcase.coeff_modulus()[0].value() == 1023
-        assert testcase.coeff_modulus()[1].value() == 234
-
-        left = sealapi.EncryptionParameters(scheme)
-        left.set_poly_modulus_degree(32768)
-        left.set_coeff_modulus([sealapi.SmallModulus(1023), sealapi.SmallModulus(234)])
-
-        right = sealapi.EncryptionParameters(scheme)
-        right.set_poly_modulus_degree(32768)
-        assert left != right
-
-        right.set_coeff_modulus([sealapi.SmallModulus(1023), sealapi.SmallModulus(234)])
-        assert left == right
 
     testcase = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.BFV)
     testcase.set_plain_modulus(sealapi.SmallModulus(1023))
@@ -301,36 +280,47 @@ def test_encryptionparams():
     assert generator.generate() != generator.generate()
 
 
-def test_modulus():
-    sec_levels = {
-        0: sealapi.SEC_LEVEL_TYPE.NONE,
-        128: sealapi.SEC_LEVEL_TYPE.TC128,
-        192: sealapi.SEC_LEVEL_TYPE.TC192,
-        256: sealapi.SEC_LEVEL_TYPE.TC256,
-    }
+@pytest.mark.parametrize("scheme", [sealapi.SCHEME_TYPE.BFV, sealapi.SCHEME_TYPE.CKKS])
+def test_encryptionparams_scheme_settings(scheme):
+    testcase = sealapi.EncryptionParameters(scheme)
+    testcase.set_poly_modulus_degree(32768)
+    assert testcase.poly_modulus_degree() == 32768
 
-    for val in sec_levels:
-        assert val == int(sec_levels[val])
+    testcase = sealapi.EncryptionParameters(scheme)
+    testcase.set_coeff_modulus([sealapi.SmallModulus(1023), sealapi.SmallModulus(234)])
+    assert len(testcase.coeff_modulus()) == 2
+    assert testcase.coeff_modulus()[0].value() == 1023
+    assert testcase.coeff_modulus()[1].value() == 234
 
-    expected_max_bit_count = {
-        sealapi.SEC_LEVEL_TYPE.NONE: 2147483647,
-        sealapi.SEC_LEVEL_TYPE.TC128: 881,
-        sealapi.SEC_LEVEL_TYPE.TC192: 611,
-        sealapi.SEC_LEVEL_TYPE.TC256: 476,
-    }
+    left = sealapi.EncryptionParameters(scheme)
+    left.set_poly_modulus_degree(32768)
+    left.set_coeff_modulus([sealapi.SmallModulus(1023), sealapi.SmallModulus(234)])
 
-    for level in expected_max_bit_count:
-        assert sealapi.CoeffModulus.MaxBitCount(32768, level) == expected_max_bit_count[level]
-    assert sealapi.CoeffModulus.MaxBitCount(1, sealapi.SEC_LEVEL_TYPE.TC256) == 0
+    right = sealapi.EncryptionParameters(scheme)
+    right.set_poly_modulus_degree(32768)
+    assert left != right
 
-    expected_bfv_def_len = {
-        sealapi.SEC_LEVEL_TYPE.TC128: 16,
-        sealapi.SEC_LEVEL_TYPE.TC192: 11,
-        sealapi.SEC_LEVEL_TYPE.TC256: 9,
-    }
-    for level in expected_bfv_def_len:
-        assert len(sealapi.CoeffModulus.BFVDefault(32768, level)) == expected_bfv_def_len[level]
+    right.set_coeff_modulus([sealapi.SmallModulus(1023), sealapi.SmallModulus(234)])
+    assert left == right
 
+
+@pytest.mark.parametrize(
+    "sec_level_int,sec_level",
+    [
+        (0, sealapi.SEC_LEVEL_TYPE.NONE),
+        (128, sealapi.SEC_LEVEL_TYPE.TC128),
+        (192, sealapi.SEC_LEVEL_TYPE.TC192),
+        (256, sealapi.SEC_LEVEL_TYPE.TC256),
+    ],
+)
+def test_modulus_sec_level_sanity(sec_level_int, sec_level):
+    assert sec_level_int == int(sec_level)
+
+    if sec_level != sealapi.SEC_LEVEL_TYPE.NONE:
+        assert sealapi.CoeffModulus.MaxBitCount(1, sec_level) == 0
+
+
+def test_modulus_sanity():
     custom_mod = sealapi.CoeffModulus.Create(1024, [32, 32])
     assert len(custom_mod) == 2
     for small_mod in custom_mod:
@@ -346,29 +336,123 @@ def test_modulus():
         assert small_mod.bit_count() == sizes[idx]
 
 
-def test_context():
-    schemes = [sealapi.SCHEME_TYPE.NONE, sealapi.SCHEME_TYPE.BFV, sealapi.SCHEME_TYPE.CKKS]
-    sec_levels = [
+@pytest.mark.parametrize(
+    "sec_level,expected_max_bit_count",
+    [
+        (sealapi.SEC_LEVEL_TYPE.NONE, 2147483647),
+        (sealapi.SEC_LEVEL_TYPE.TC128, 881),
+        (sealapi.SEC_LEVEL_TYPE.TC192, 611),
+        (sealapi.SEC_LEVEL_TYPE.TC256, 476),
+    ],
+)
+def test_modulus_max_bit_count(sec_level, expected_max_bit_count):
+    assert sealapi.CoeffModulus.MaxBitCount(32768, sec_level) == expected_max_bit_count
+
+
+@pytest.mark.parametrize(
+    "sec_level,expected_bfv_default_len",
+    [
+        (sealapi.SEC_LEVEL_TYPE.TC128, 16),
+        (sealapi.SEC_LEVEL_TYPE.TC192, 11),
+        (sealapi.SEC_LEVEL_TYPE.TC256, 9),
+    ],
+)
+def test_modulus_bfv_default(sec_level, expected_bfv_default_len):
+    coeff_modulus = sealapi.CoeffModulus.BFVDefault(32768, sec_level)
+    assert len(coeff_modulus) == expected_bfv_default_len
+    for coeff in coeff_modulus:
+        assert coeff.is_prime()
+
+
+@pytest.mark.parametrize(
+    "scheme", [sealapi.SCHEME_TYPE.NONE, sealapi.SCHEME_TYPE.BFV, sealapi.SCHEME_TYPE.CKKS],
+)
+@pytest.mark.parametrize(
+    "sec_level",
+    [
         sealapi.SEC_LEVEL_TYPE.NONE,
         sealapi.SEC_LEVEL_TYPE.TC128,
         sealapi.SEC_LEVEL_TYPE.TC192,
         sealapi.SEC_LEVEL_TYPE.TC256,
-    ]
+    ],
+)
+def test_context_failure(scheme, sec_level):
+    parms = sealapi.EncryptionParameters(scheme)
 
-    for scheme in schemes:
-        for sec_level in sec_levels:
-            parms = sealapi.EncryptionParameters(scheme)
-            sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
-            assert sealctx.parameters_set() == False
+    sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
+    assert sealctx.parameters_set() == False
+
+
+def test_context_sanity():
+    poly_modulus_degree = 8192
+    parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.BFV)
+    parms.set_poly_modulus_degree(poly_modulus_degree)
+    parms.set_plain_modulus(1032193)
+
+    coeff = sealapi.CoeffModulus.BFVDefault(poly_modulus_degree, sealapi.SEC_LEVEL_TYPE.TC128)
+    parms.set_coeff_modulus(coeff)
+    sealapi.SEALContext.Create(parms, True, sealapi.SEC_LEVEL_TYPE.TC128)
+
+
+@pytest.mark.parametrize(
+    "sec_level",
+    [sealapi.SEC_LEVEL_TYPE.TC128, sealapi.SEC_LEVEL_TYPE.TC192, sealapi.SEC_LEVEL_TYPE.TC256,],
+)
+def test_context_scheme_bfv_sanity(sec_level):
+    poly_modulus_degree = 8192
+    plaintext_modulus = 1032193
 
     parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.BFV)
-    parms.set_poly_modulus_degree(8192)
-    parms.set_plain_modulus(1032193)
-    parms.set_coeff_modulus([sealapi.SmallModulus(666013)])
+    parms.set_poly_modulus_degree(poly_modulus_degree)
+    parms.set_plain_modulus(plaintext_modulus)
 
-    # for sec_level in sec_levels:
-    #    sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
-    #    assert sealctx.parameters_set() == True
+    coeff = sealapi.CoeffModulus.Create(poly_modulus_degree, [32, 32])
+    parms.set_coeff_modulus(coeff)
+    sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
+    assert sealctx.parameters_set() == True
+
+    coeff = sealapi.CoeffModulus.BFVDefault(poly_modulus_degree, sec_level)
+    parms.set_coeff_modulus(coeff)
+    sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
+    assert sealctx.parameters_set() == True
+
+    def context_data_sanity(ctx_data, ctx_alias, index):
+        assert ctx_data.parms().poly_modulus_degree() == poly_modulus_degree
+        assert len(ctx_data.parms_id()) == len(ctx_alias.parms_id())
+        assert ctx_data.chain_index() == ctx_alias.chain_index()
+        assert ctx_data.chain_index() == index
+        assert (
+            ctx_data.total_coeff_modulus() != 0
+            and ctx_data.total_coeff_modulus() == ctx_alias.total_coeff_modulus()
+        )
+        assert ctx_data.total_coeff_modulus_bit_count() == ctx_alias.total_coeff_modulus_bit_count()
+        assert ctx_data.plain_upper_half_threshold() == ctx_alias.plain_upper_half_threshold()
+        assert ctx_data.coeff_div_plain_modulus() == ctx_alias.coeff_div_plain_modulus()
+        assert ctx_data.coeff_mod_plain_modulus() == ctx_alias.coeff_mod_plain_modulus()
+        assert ctx_data.upper_half_increment() == ctx_alias.upper_half_increment()
+
+        # TODO
+        # ctx_data.small_ntt_tables()
+        # ctx_data.plain_ntt_tables()
+        # assert ctx_data.upper_half_threshold() == (plaintext_modulus + 1) / 2 (??)
+
+        qualifiers = ctx_data.qualifiers()
+        assert qualifiers.parameters_set == True
+        assert qualifiers.using_fft == True
+        assert qualifiers.using_ntt == True
+        assert qualifiers.using_batching == True
+        assert qualifiers.using_fast_plain_lift == True
+        assert qualifiers.sec_level == sec_level
+
+    for (parms_id, ctx_data, index) in [
+        (sealctx.first_parms_id(), sealctx.first_context_data(), len(coeff) - 2),
+        (sealctx.last_parms_id(), sealctx.last_context_data(), 0),
+        (sealctx.key_parms_id(), sealctx.key_context_data(), len(coeff) - 1),
+    ]:
+        should_be_same_ctx = sealctx.get_context_data(parms_id)
+        context_data_sanity(ctx_data, should_be_same_ctx, index)
+
+    assert sealctx.using_keyswitching() == True
 
 
 def test_intencoder():
