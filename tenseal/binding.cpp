@@ -43,7 +43,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         py::arg("encryption_parameters"));
 
     py::class_<BFVNaiveVector>(m, "BFVNaiveVector")
-        .def(py::init<shared_ptr<TenSEALContext> &, vector<int>>())
+        .def(py::init<shared_ptr<TenSEALContext>&, vector<int>>())
         .def("size", &BFVNaiveVector::size)
         .def("save_size", &BFVNaiveVector::save_size)
         .def("decrypt", py::overload_cast<>(&BFVNaiveVector::decrypt))
@@ -75,7 +75,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__imul__", &BFVNaiveVector::mul_plain_inplace);
 
     py::class_<BFVVector>(m, "BFVVector")
-        .def(py::init<shared_ptr<TenSEALContext> &, vector<int64_t>>())
+        .def(py::init<shared_ptr<TenSEALContext>&, vector<int64_t>>())
         .def("size", &BFVVector::size)
         .def("save_size", &BFVVector::save_size)
         .def("decrypt", py::overload_cast<>(&BFVVector::decrypt))
@@ -107,7 +107,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__imul__", &BFVVector::mul_plain_inplace);
 
     py::class_<CKKSVector>(m, "CKKSVector")
-        .def(py::init<shared_ptr<TenSEALContext> &, double, vector<double>>())
+        .def(py::init<shared_ptr<TenSEALContext>&, double, vector<double>>())
         .def("size", &CKKSVector::size)
         .def("decrypt", py::overload_cast<>(&CKKSVector::decrypt))
         .def("decrypt", py::overload_cast<SecretKey>(&CKKSVector::decrypt))
@@ -153,7 +153,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         )",
              py::arg("poly_modulus_degree"), py::arg("plain_modulus"),
              py::arg("coeff_mod_bit_sizes") = vector<int>())
-        .def("load", py::overload_cast<const char *>(&TenSEALContext::Create))
+        .def("load", py::overload_cast<const char*>(&TenSEALContext::Create))
         .def("save_public", &TenSEALContext::save_public, "save public keys.")
         .def("save_private", &TenSEALContext::save_private,
              "save private keys.")
@@ -176,7 +176,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
     // SEAL objects
 
     py::class_<KeyGenerator>(m, "KeyGenerator")
-        .def(py::init<std::shared_ptr<seal::SEALContext> &>())
+        .def(py::init<std::shared_ptr<seal::SEALContext>&>())
         .def("public_key", &KeyGenerator::public_key, "get the public key.")
         .def("secret_key", &KeyGenerator::secret_key, "get the secret key.")
         .def("relin_keys", py::overload_cast<>(&KeyGenerator::relin_keys),

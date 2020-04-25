@@ -28,12 +28,12 @@ TenSEALContext::TenSEALContext(EncryptionParameters parms) {
     this->evaluator = shared_ptr<Evaluator>(new Evaluator(this->_context));
 }
 
-TenSEALContext::TenSEALContext(const char *filename) { this->load(filename); }
+TenSEALContext::TenSEALContext(const char* filename) { this->load(filename); }
 
-void TenSEALContext::load(const char * /*filename*/) {}
+void TenSEALContext::load(const char* filename) {}
 
-void TenSEALContext::save_public(const char * /*filename*/) {}
+void TenSEALContext::save_public(const char* filename) {}
 
-void TenSEALContext::save_private(const char * /*filename*/) {}
+void TenSEALContext::save_private(const char* filename) {}
 
 }  // namespace tenseal

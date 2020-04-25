@@ -58,7 +58,7 @@ class TenSEALContext {
         return shared_ptr<TenSEALContext>(new TenSEALContext(parms));
     }
 
-    static shared_ptr<TenSEALContext> Create(const char *filename) {
+    static shared_ptr<TenSEALContext> Create(const char* filename) {
         return shared_ptr<TenSEALContext>(new TenSEALContext(filename));
     }
 
@@ -147,8 +147,8 @@ class TenSEALContext {
     Save the attributes needed to restore the context later, public is for not
     saving the secret_key.
     */
-    void save_public(const char *filename);
-    void save_private(const char *filename);
+    void save_public(const char* filename);
+    void save_private(const char* filename);
 
     /*
     Returns the wrapped SEALContext object.
@@ -164,12 +164,12 @@ class TenSEALContext {
     shared_ptr<GaloisKeys> _galois_keys;
 
     TenSEALContext(EncryptionParameters parms);
-    TenSEALContext(const char *filename);
+    TenSEALContext(const char* filename);
 
     /*
     Load the context's attribute to restore a pre-saved TenSEALContext.
     */
-    void load(const char *filename);
+    void load(const char* filename);
 };
 
 }  // namespace tenseal

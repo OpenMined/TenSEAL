@@ -18,7 +18,7 @@ BFVNaiveVector::BFVNaiveVector(shared_ptr<TenSEALContext> context,
     this->context = context;
 
     // Encrypts each integer separately as a Ciphertext
-    for (size_t i = 0; i < vec.size(); i++) {
+    for (int i = 0; i < vec.size(); i++) {
         Ciphertext ct = BFVNaiveVector::encrypt(context, vec[i]);
         this->ciphertexts.push_back(ct);
     }
@@ -33,7 +33,7 @@ size_t BFVNaiveVector::size() { return this->ciphertexts.size(); }
 
 streamoff BFVNaiveVector::save_size() {
     streamoff sum_save_size = 0;
-    for (size_t i = 0; i < this->ciphertexts.size(); i++)
+    for (int i = 0; i < this->ciphertexts.size(); i++)
         sum_save_size += this->ciphertexts[i].save_size(compr_mode_type::none);
 
     return sum_save_size;
@@ -58,7 +58,7 @@ vector<int> BFVNaiveVector::decrypt(SecretKey sk) {
     vector<int> result;
     result.reserve(this->ciphertexts.size());
 
-    for (size_t i = 0; i < this->ciphertexts.size(); i++) {
+    for (int i = 0; i < this->ciphertexts.size(); i++) {
         decryptor.decrypt(this->ciphertexts[i], plaintext);
         result.push_back(encoder.decode_int64(plaintext));
     }
@@ -84,7 +84,7 @@ BFVNaiveVector& BFVNaiveVector::add_inplace(BFVNaiveVector to_add) {
         throw invalid_argument("can't add vectors of different sizes");
     }
 
-    for (size_t i = 0; i < this->size(); i++) {
+    for (int i = 0; i < this->size(); i++) {
         this->context->evaluator->add_inplace(this->ciphertexts[i],
                                               to_add.ciphertexts[i]);
     }
@@ -106,7 +106,7 @@ BFVNaiveVector& BFVNaiveVector::add_plain_inplace(vector<int> to_add) {
 
     IntegerEncoder encoder(this->context->seal_context());
     Plaintext pt;
-    for (size_t i = 0; i < this->size(); i++) {
+    for (int i = 0; i < this->size(); i++) {
         pt = encoder.encode(to_add[i]);
         this->context->evaluator->add_plain_inplace(this->ciphertexts[i], pt);
     }
@@ -132,7 +132,7 @@ BFVNaiveVector& BFVNaiveVector::sub_inplace(BFVNaiveVector to_sub) {
         throw invalid_argument("can't sub vectors of different sizes");
     }
 
-    for (size_t i = 0; i < this->size(); i++) {
+    for (int i = 0; i < this->size(); i++) {
         this->context->evaluator->sub_inplace(this->ciphertexts[i],
                                               to_sub.ciphertexts[i]);
     }
@@ -154,7 +154,7 @@ BFVNaiveVector& BFVNaiveVector::sub_plain_inplace(vector<int> to_sub) {
 
     IntegerEncoder encoder(this->context->seal_context());
     Plaintext pt;
-    for (size_t i = 0; i < this->size(); i++) {
+    for (int i = 0; i < this->size(); i++) {
         pt = encoder.encode(to_sub[i]);
         this->context->evaluator->sub_plain_inplace(this->ciphertexts[i], pt);
     }
@@ -180,7 +180,7 @@ BFVNaiveVector& BFVNaiveVector::mul_inplace(BFVNaiveVector to_mul) {
         throw invalid_argument("can't mul vectors of different sizes");
     }
 
-    for (size_t i = 0; i < this->size(); i++) {
+    for (int i = 0; i < this->size(); i++) {
         this->context->evaluator->multiply_inplace(this->ciphertexts[i],
                                                    to_mul.ciphertexts[i]);
     }
@@ -202,7 +202,7 @@ BFVNaiveVector& BFVNaiveVector::mul_plain_inplace(vector<int> to_mul) {
 
     IntegerEncoder encoder(this->context->seal_context());
     Plaintext pt;
-    for (size_t i = 0; i < this->size(); i++) {
+    for (int i = 0; i < this->size(); i++) {
         pt = encoder.encode(to_mul[i]);
         this->context->evaluator->multiply_plain_inplace(this->ciphertexts[i],
                                                          pt);
