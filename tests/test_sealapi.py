@@ -1,8 +1,9 @@
 import pytest
 import tenseal.sealapi as sealapi
+import tenseal.sealapi.util as sealapi_util
 
 
-def test_biguint():
+def test_biguint_sanity():
     testcase = sealapi.BigUInt()
     assert testcase.is_zero()
 
@@ -35,9 +36,43 @@ def test_biguint():
     assert testcase.to_double() == 34
     assert testcase.to_string() == "22"  # hex string
     assert testcase.to_dec_string() == "34"
+    assert testcase.data() == 34
     assert not testcase.is_zero()
     testcase.set_zero()
     assert testcase.is_zero()
+
+    testcase = sealapi.BigUInt(128)
+    assert testcase.bit_count() == 128
+    testcase.resize(16)
+    assert testcase.bit_count() == 16
+
+
+def test_biguint_ops():
+    numerator = 555555555555555555
+    denominator = 77777777777
+    num = sealapi.BigUInt(128, numerator)
+    den = sealapi.BigUInt(128, denominator)
+    rem = sealapi.BigUInt(128)
+
+    assert sealapi.BigUInt.of(7).bit_count() == 3
+    assert num.divrem(den, rem) == int(numerator / denominator)
+    assert rem == numerator % denominator
+
+    def expected_modinv(a, m):
+        a = a % m
+        for x in range(1, m):
+            if (a * x) % m == 1:
+                return x
+        return 1
+
+    value = 66
+    modulus = 101
+    testcase = sealapi.BigUInt(128, value)
+    assert testcase.modinv(sealapi.BigUInt(128, modulus)) == expected_modinv(value, modulus)
+    assert testcase.trymodinv(sealapi.BigUInt(128, modulus), sealapi.BigUInt(128)) == True
+    assert testcase.trymodinv(sealapi.BigUInt(128, 99), sealapi.BigUInt(128)) == False
+
+    testcase = sealapi.BigUInt(128, 34)
 
     testcase = sealapi.BigUInt(128, 555)
     testcase2 = sealapi.BigUInt(2, 10)
@@ -51,6 +86,8 @@ def test_biguint():
     assert testcase2.bit_count() == 128
     assert testcase2 == 777
 
+
+def test_biguint_operators():
     left = sealapi.BigUInt(32, 27)
     right = sealapi.BigUInt(32, 13)
     assert left - right == 14
@@ -432,6 +469,7 @@ def test_context_scheme_bfv_sanity(sec_level):
         assert ctx_data.upper_half_increment() == ctx_alias.upper_half_increment()
 
         # TODO
+        # ctx_data.base_converter()
         # ctx_data.small_ntt_tables()
         # ctx_data.plain_ntt_tables()
         # assert ctx_data.upper_half_threshold() == (plaintext_modulus + 1) / 2 (??)

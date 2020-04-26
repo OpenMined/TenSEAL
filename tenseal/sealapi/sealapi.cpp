@@ -1,3 +1,4 @@
+#include <pybind11/iostream.h>
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -8,16 +9,19 @@ using namespace std;
 namespace py = pybind11;
 
 /***
- *Issues:
- *  - rvalue arguments issues in pybind11
- *https://github.com/pybind/pybind11/pull/2046
+ *pybind11 issues:
+ *  - rvalue arguments issues https://github.com/pybind/pybind11/pull/2046
  *  - variadic templates issues https://github.com/pybind/pybind11/issues/1469
+ *  - no support for ostream/istream. BigUInt save/load
+ *  - no support for std::byte. BigUInt::operator []
  ***/
 
 PYBIND11_MODULE(_sealapi_cpp, m) {
-    m.doc() = "Library for doing homomorphic encryption operations";
+    m.doc() = "SEAL library bindings for Python";
 
-    // "seal/biguint.h"
+    /*******************
+     * "seal/biguint.h" {
+     ***/
     py::class_<BigUInt>(m, "BigUInt", py::module_local())
         .def(py::init<>())
         .def(py::init<int>())
@@ -27,6 +31,10 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def(py::init<const BigUInt &>())
 
         .def("bit_count", &BigUInt::bit_count)
+        .def("data", py::overload_cast<>(&BigUInt::data),
+             py::return_value_policy::reference)
+        .def("data", py::overload_cast<>(&BigUInt::data, py::const_),
+             py::return_value_policy::reference)
         .def("byte_count", &BigUInt::byte_count)
         .def("uint64_count", &BigUInt::uint64_count)
         .def("significant_bit_count", &BigUInt::significant_bit_count)
@@ -36,6 +44,20 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("is_zero", &BigUInt::is_zero)
         .def("set_zero", &BigUInt::set_zero)
         .def("resize", &BigUInt::resize)
+
+        .def("divrem", py::overload_cast<const BigUInt &, BigUInt &>(
+                           &BigUInt::divrem, py::const_))
+        .def("divrem", py::overload_cast<std::uint64_t, BigUInt &>(
+                           &BigUInt::divrem, py::const_))
+        .def("modinv",
+             py::overload_cast<const BigUInt &>(&BigUInt::modinv, py::const_))
+        .def("modinv",
+             py::overload_cast<std::uint64_t>(&BigUInt::modinv, py::const_))
+        .def("trymodinv", py::overload_cast<const BigUInt &, BigUInt &>(
+                              &BigUInt::trymodinv, py::const_))
+        .def("trymodinv", py::overload_cast<std::uint64_t, BigUInt &>(
+                              &BigUInt::trymodinv, py::const_))
+        .def_static("of", &BigUInt::of)
         .def("duplicate_to", &BigUInt::duplicate_to)
         .def("duplicate_from", &BigUInt::duplicate_from)
 
@@ -84,7 +106,13 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def(py::self <<= int())
         .def(py::self >>= int());
 
-    // "seal/smallmodulus.h"
+    /***
+     * } "seal/biguint.h"
+     *******************/
+
+    /*******************
+     * "seal/smallmodulus.h" {
+     ***/
     py::class_<SmallModulus>(m, "SmallModulus", py::module_local())
         .def(py::init<std::uint64_t>())
         .def(py::init<const SmallModulus &>())
@@ -109,12 +137,13 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def(py::self > std::uint64_t())
         .def(py::self >= py::self)
         .def(py::self >= std::uint64_t());
+    /***
+     * "seal/smallmodulus.h" {
+     *******************/
 
     // "seal/serialization.h"
     py::enum_<compr_mode_type>(m, "COMPR_MODE_TYPE", py::module_local())
-#ifdef SEAL_USE_ZLIB
         .value("DEFLATE", compr_mode_type::deflate)
-#endif
         .value("NONE", compr_mode_type::none);
 
     py::class_<Serialization> serialization(m, "Serialization",
@@ -763,83 +792,4 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
     // pybind11 rvalue issue for constructor, try_lock and lock overloads
     //
     //
-
-    // UTILS
-    //
-    // "seal/util/baseconverter.h"
-    py::class_<util::BaseConverter>(m, "BaseConverter", py::module_local())
-        .def(py::init<MemoryPoolHandle>())
-        .def(py::init<const std::vector<SmallModulus> &, std::size_t,
-                      const SmallModulus &, MemoryPoolHandle>())
-        .def("generate", &util::BaseConverter::generate)
-        .def("floor_last_coeff_modulus_inplace",
-             &util::BaseConverter::floor_last_coeff_modulus_inplace)
-        .def("floor_last_coeff_modulus_ntt_inplace",
-             &util::BaseConverter::floor_last_coeff_modulus_ntt_inplace)
-        .def("round_last_coeff_modulus_inplace",
-             &util::BaseConverter::round_last_coeff_modulus_inplace)
-        .def("round_last_coeff_modulus_ntt_inplace",
-             &util::BaseConverter::round_last_coeff_modulus_ntt_inplace)
-        .def("fastbconv", &util::BaseConverter::fastbconv)
-        .def("fastbconv_sk", &util::BaseConverter::fastbconv_sk)
-        .def("mont_rq", &util::BaseConverter::mont_rq)
-        .def("fast_floor", &util::BaseConverter::fast_floor)
-        .def("fastbconv_mtilde", &util::BaseConverter::fastbconv_mtilde)
-        .def("fastbconv_plain_gamma",
-             &util::BaseConverter::fastbconv_plain_gamma)
-        .def("reset", &util::BaseConverter::reset)
-        .def("is_generated", &util::BaseConverter::is_generated)
-        .def("coeff_base_mod_count", &util::BaseConverter::coeff_base_mod_count)
-        .def("aux_base_mod_count", &util::BaseConverter::aux_base_mod_count)
-        .def("get_plain_gamma_product",
-             &util::BaseConverter::get_plain_gamma_product)
-        .def("get_neg_inv_coeff", &util::BaseConverter::get_neg_inv_coeff)
-        .def("get_plain_gamma_array",
-             &util::BaseConverter::get_plain_gamma_array)
-        .def("get_coeff_products_array",
-             &util::BaseConverter::get_coeff_products_array)
-        .def("get_inv_gamma", &util::BaseConverter::get_inv_gamma)
-        .def("get_bsk_small_ntt_tables",
-             &util::BaseConverter::get_bsk_small_ntt_tables)
-        .def("bsk_base_mod_count", &util::BaseConverter::bsk_base_mod_count)
-        .def("get_bsk_mod_array", &util::BaseConverter::get_bsk_mod_array)
-        .def("get_msk", &util::BaseConverter::get_msk)
-        .def("get_m_tilde", &util::BaseConverter::get_m_tilde)
-        .def("get_mtilde_inv_coeff_products_mod_coeff",
-             &util::BaseConverter::get_mtilde_inv_coeff_products_mod_coeff)
-        .def("get_inv_coeff_mod_mtilde",
-             &util::BaseConverter::get_inv_coeff_mod_mtilde)
-        .def("get_inv_coeff_mod_coeff_array",
-             &util::BaseConverter::get_inv_coeff_mod_coeff_array)
-        .def("get_inv_last_coeff_mod_array",
-             &util::BaseConverter::get_inv_last_coeff_mod_array)
-        .def("get_coeff_base_products_mod_msk",
-             &util::BaseConverter::get_coeff_base_products_mod_msk);
-
-    // "seal/util/smallntt.h"
-    py::class_<util::SmallNTTTables>(m, "SmallNTTTables", py::module_local())
-        .def(py::init<MemoryPoolHandle>())
-        .def(py::init<int, const SmallModulus &, MemoryPoolHandle>())
-        .def("generate", &util::SmallNTTTables::generate)
-        .def("reset", &util::SmallNTTTables::reset)
-        .def("get_root", &util::SmallNTTTables::get_root)
-        .def("get_from_root_powers",
-             &util::SmallNTTTables::get_from_root_powers)
-        .def("get_from_inv_root_powers",
-             &util::SmallNTTTables::get_from_inv_root_powers)
-        .def("get_from_scaled_inv_root_powers",
-             &util::SmallNTTTables::get_from_scaled_inv_root_powers)
-        .def("get_from_inv_root_powers_div_two",
-             &util::SmallNTTTables::get_from_inv_root_powers_div_two)
-        .def("get_from_scaled_inv_root_powers_div_two",
-             &util::SmallNTTTables::get_from_scaled_inv_root_powers_div_two)
-        .def("get_inv_degree_modulo",
-             &util::SmallNTTTables::get_inv_degree_modulo)
-        .def("modulus", &util::SmallNTTTables::modulus)
-        .def("coeff_count_power", &util::SmallNTTTables::coeff_count_power)
-        .def("coeff_count", &util::SmallNTTTables::coeff_count);
-    m.def("ntt_negacyclic_harvey_lazy", &util::ntt_negacyclic_harvey_lazy);
-    m.def("ntt_negacyclic_harvey", &util::ntt_negacyclic_harvey);
-    m.def("inverse_ntt_negacyclic_harvey_lazy",
-          &util::inverse_ntt_negacyclic_harvey_lazy);
 }
