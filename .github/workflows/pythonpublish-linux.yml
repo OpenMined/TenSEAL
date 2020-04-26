@@ -16,7 +16,7 @@ jobs:
           - cp38-cp38
 
     runs-on: ubuntu-latest
-    container: quay.io/pypa/manylinux1_x86_64
+    container: quay.io/pypa/manylinux2014_x86_64
 
     steps:
       - name: install cmake
