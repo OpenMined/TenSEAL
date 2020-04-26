@@ -24,6 +24,8 @@ jobs:
           yum install -y cmake3
           ln -s /usr/bin/cmake3 /bin/cmake
       - uses: actions/checkout@v1
+        with:
+          submodules: true
       - name: Set target Python version PATH
         run: echo "::add-path::/opt/python/${{ matrix.python-version }}/bin"
       - name: Install dependencies
