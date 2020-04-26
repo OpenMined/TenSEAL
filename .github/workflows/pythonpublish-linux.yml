@@ -19,6 +19,10 @@ jobs:
     container: quay.io/pypa/manylinux1_x86_64
 
     steps:
+      - name: install cmake
+        run: |
+          yum install cmake3
+          ln -s /usr/bin/cmake3 /bin/cmake
       - uses: actions/checkout@v1
       - name: Set target Python version PATH
         run: echo "::add-path::/opt/python/${{ matrix.python-version }}/bin"
