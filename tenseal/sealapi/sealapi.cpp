@@ -7,6 +7,13 @@ using namespace seal;
 using namespace std;
 namespace py = pybind11;
 
+/***
+ *Issues:
+ *  - rvalue arguments issues in pybind11
+ *https://github.com/pybind/pybind11/pull/2046
+ *  - variadic templates issues https://github.com/pybind/pybind11/issues/1469
+ ***/
+
 PYBIND11_MODULE(_sealapi_cpp, m) {
     m.doc() = "Library for doing homomorphic encryption operations";
 
@@ -583,51 +590,256 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
                  &is_valid_for));
 
     // "seal/ckks.h"
+    py::class_<CKKSEncoder> ckksEncoder(m, "CKKSEncoder", py::module_local());
+    ckksEncoder.def(py::init<std::shared_ptr<SEALContext>>())
+        .def("slot_count", &CKKSEncoder::slot_count);
+    // using sig = void(std::complex<double>, double, Plaintext &,
+    // MemoryPoolHandle); ckksEncoder.def("encode",
+    // py::overload_cast<std::complex<double>, double, Plaintext &,
+    // MemoryPoolHandle>((sig*)&CKKSEncoder::encode))
+    ;
+    //.def("encode", py::overload_cast<const double, parms_id_type, double,
+    // Plaintext &, MemoryPoolHandle>(&CKKSEncoder::encode));
+    /*
+        .def("encode", py::overload_cast<double, double, Plaintext &,
+       MemoryPoolHandle>(&CKKSEncoder::encode)) .def("encode",
+       py::overload_cast<std::complex<double>, parms_id_type, double, Plaintext
+       &, MemoryPoolHandle>(&CKKSEncoder::encode)) .def("encode",
+       py::overload_cast<std::int64_t, parms_id_type, Plaintext
+       &>(&CKKSEncoder::encode)) .def("encode", py::overload_cast<std::int64_t,
+       Plaintext &>(&CKKSEncoder::encode))
+*/
+    auto encoder_template = [&]<typename T>() {
+        ckksEncoder
+            .def("encode",
+                 py::overload_cast<const std::vector<T> &, parms_id_type,
+                                   double, Plaintext &, MemoryPoolHandle>(
+                     &CKKSEncoder::encode))
+            .def("encode",
+                 py::overload_cast<const std::vector<T> &, double, Plaintext &,
+                                   MemoryPoolHandle>(&CKKSEncoder::encode))
+            .def("decode",
+                 py::overload_cast<const Plaintext &, std::vector<T> &,
+                                   MemoryPoolHandle>(&CKKSEncoder::decode));
+    };
+
     // "seal/evaluator.h"
+    py::class_<Evaluator>(m, "Evaluator", py::module_local())
+        .def(py::init<std::shared_ptr<SEALContext>>())
+        .def("negate_inplace", &Evaluator::negate_inplace)
+        .def("negate", &Evaluator::negate)
+        .def("add_inplace", &Evaluator::add_inplace)
+        .def("add", &Evaluator::add)
+        .def("add_many", &Evaluator::add_many)
+        .def("sub_inplace", &Evaluator::sub_inplace)
+        .def("sub", &Evaluator::sub)
+        .def("multiply_inplace", &Evaluator::multiply_inplace)
+        .def("multiply", &Evaluator::multiply)
+        .def("square_inplace", &Evaluator::square_inplace)
+        .def("square", &Evaluator::square)
+        .def("relinearize_inplace", &Evaluator::relinearize_inplace)
+        .def("relinearize", &Evaluator::relinearize)
+        .def("mod_switch_to_next",
+             py::overload_cast<const Plaintext &, Plaintext &>(
+                 &Evaluator::mod_switch_to_next))
+        .def(
+            "mod_switch_to_next",
+            py::overload_cast<const Ciphertext &, Ciphertext &,
+                              MemoryPoolHandle>(&Evaluator::mod_switch_to_next))
+        .def("mod_switch_to_next_inplace",
+             py::overload_cast<Ciphertext &, MemoryPoolHandle>(
+                 &Evaluator::mod_switch_to_next_inplace))
+        .def("mod_switch_to_next_inplace",
+             py::overload_cast<Plaintext &>(
+                 &Evaluator::mod_switch_to_next_inplace))
+        .def("mod_switch_to_inplace",
+             py::overload_cast<Ciphertext &, parms_id_type, MemoryPoolHandle>(
+                 &Evaluator::mod_switch_to_inplace))
+        .def("mod_switch_to_inplace",
+             py::overload_cast<Plaintext &, parms_id_type>(
+                 &Evaluator::mod_switch_to_inplace))
+        .def("mod_switch_to",
+             py::overload_cast<const Ciphertext &, parms_id_type, Ciphertext &,
+                               MemoryPoolHandle>(&Evaluator::mod_switch_to))
+        .def("mod_switch_to",
+             py::overload_cast<const Plaintext &, parms_id_type, Plaintext &>(
+                 &Evaluator::mod_switch_to))
+        .def("rescale_to_next", &Evaluator::rescale_to_next)
+        .def("rescale_to_next_inplace", &Evaluator::rescale_to_next_inplace)
+        .def("rescale_to_inplace", &Evaluator::rescale_to_inplace)
+        .def("rescale_to", &Evaluator::rescale_to)
+        .def("multiply_many", &Evaluator::multiply_many)
+        .def("exponentiate_inplace", &Evaluator::exponentiate_inplace)
+        .def("exponentiate", &Evaluator::exponentiate)
+        .def("add_plain_inplace", &Evaluator::add_plain_inplace)
+        .def("add_plain", &Evaluator::add_plain)
+        .def("sub_plain_inplace", &Evaluator::sub_plain_inplace)
+        .def("sub_plain", &Evaluator::sub_plain)
+        .def("multiply_plain_inplace", &Evaluator::multiply_plain_inplace)
+        .def("multiply_plain", &Evaluator::multiply_plain)
+        .def("transform_to_ntt_inplace",
+             py::overload_cast<Plaintext &, parms_id_type, MemoryPoolHandle>(
+                 &Evaluator::transform_to_ntt_inplace))
+        .def("transform_to_ntt_inplace",
+             py::overload_cast<Ciphertext &>(
+                 &Evaluator::transform_to_ntt_inplace))
+        .def("transform_to_ntt",
+             py::overload_cast<const Plaintext &, parms_id_type, Plaintext &,
+                               MemoryPoolHandle>(&Evaluator::transform_to_ntt))
+        .def("transform_to_ntt",
+             py::overload_cast<const Ciphertext &, Ciphertext &>(
+                 &Evaluator::transform_to_ntt))
+        .def("transform_from_ntt_inplace",
+             py::overload_cast<Ciphertext &>(
+                 &Evaluator::transform_from_ntt_inplace))
+        .def("transform_from_ntt",
+             py::overload_cast<const Ciphertext &, Ciphertext &>(
+                 &Evaluator::transform_from_ntt))
+        .def("apply_galois_inplace", &Evaluator::apply_galois_inplace)
+        .def("apply_galois", &Evaluator::apply_galois)
+        .def("rotate_rows", &Evaluator::rotate_rows)
+        .def("rotate_columns_inplace", &Evaluator::rotate_columns_inplace)
+        .def("rotate_columns", &Evaluator::rotate_columns)
+        .def("rotate_vector_inplace", &Evaluator::rotate_vector_inplace)
+        .def("rotate_vector", &Evaluator::rotate_vector)
+        .def("complex_conjugate_inplace", &Evaluator::complex_conjugate_inplace)
+        .def("complex_conjugate", &Evaluator::complex_conjugate);
 
     // "seal/memorymanager.h"
     py::class_<MemoryPoolHandle>(m, "MemoryPoolHandle", py::module_local())
         .def(py::init<>())
-        .def(py::init<std::shared_ptr<util::MemoryPool>>())
         .def(py::init<const MemoryPoolHandle &>())
+
+        .def_static("Global", &MemoryPoolHandle::Global)
+        .def_static("ThreadLocal", &MemoryPoolHandle::ThreadLocal)
+        .def_static("New", &MemoryPoolHandle::New)
 
         .def("pool_count", &MemoryPoolHandle::pool_count)
         .def("alloc_byte_count", &MemoryPoolHandle::alloc_byte_count)
         .def("use_count", &MemoryPoolHandle::use_count)
 
+        .def("__bool__",
+             py::overload_cast<>(&MemoryPoolHandle::operator bool, py::const_))
         .def(py::self == py::self)
         .def(py::self != py::self);
 
-    py::enum_<mm_prof_opt>(m, "mm_prof_opt", py::module_local())
+    py::enum_<mm_prof_opt>(m, "MM_PROF_OPT", py::module_local())
         .value("DEFAULT", mm_prof_opt::DEFAULT)
         .value("FORCE_GLOBAL", mm_prof_opt::FORCE_GLOBAL)
         .value("FORCE_NEW", mm_prof_opt::FORCE_NEW)
         .value("FORCE_THREAD_LOCAL", mm_prof_opt::FORCE_THREAD_LOCAL);
 
-    py::class_<MMProfGlobal>(m, "MMProfGlobal", py::module_local())
+    py::class_<MMProf>(m, "MMProf", py::module_local());
+
+    py::class_<MMProfGlobal, MMProf>(m, "MMProfGlobal", py::module_local())
         .def(py::init<>())
         .def("get_pool", &MMProfGlobal::get_pool);
 
-    py::class_<MMProfNew>(m, "MMProfNew", py::module_local())
+    py::class_<MMProfNew, MMProf>(m, "MMProfNew", py::module_local())
         .def(py::init<>())
         .def("get_pool", &MMProfNew::get_pool);
 
-    py::class_<MMProfFixed>(m, "MMProfFixed", py::module_local())
+    py::class_<MMProfFixed, MMProf>(m, "MMProfFixed", py::module_local())
         .def(py::init<MemoryPoolHandle>())
         .def("get_pool", &MMProfFixed::get_pool);
+
+    py::class_<MMProfThreadLocal, MMProf>(m, "MMProfThreadLocal",
+                                          py::module_local())
+        .def(py::init<>())
+        .def("get_pool", &MMProfThreadLocal::get_pool);
 
     py::class_<MemoryManager>(m, "MemoryManager", py::module_local())
         .def_static("SwitchProfile", py::overload_cast<MMProf *&&>(
                                          &MemoryManager::SwitchProfile));
-    //.def_static("SwitchProfile", py::overload_cast<std::unique_ptr<MMProf>
-    //&&>(&MemoryManager::SwitchProfile)); .def_static("GetPool",
-    // py::overload_cast<>(&MemoryManager::GetPool));
+    // pybind11 rvalue issue for SwitchProfile overload
+    // pybind11 variadic template issue for GetPool method
 
     py::class_<MMProfGuard>(m, "MMProfGuard", py::module_local())
-        //.def(py::init<std::unique_ptr<MMProf> &&, bool>())
-        .def(py::init<MMProf *, bool>())
+        .def(py::init<MMProf *&&, bool>())
         .def("try_lock", py::overload_cast<>(&MMProfGuard::try_lock))
         .def("lock", py::overload_cast<>(&MMProfGuard::lock))
-        .def("unlock", py::overload_cast<>(&MMProfGuard::unlock))
+        .def("unlock", &MMProfGuard::unlock)
         .def("owns_lock", &MMProfGuard::owns_lock);
+    // pybind11 rvalue issue for constructor, try_lock and lock overloads
+    //
+    //
+
+    // UTILS
+    //
+    // "seal/util/baseconverter.h"
+    py::class_<util::BaseConverter>(m, "BaseConverter", py::module_local())
+        .def(py::init<MemoryPoolHandle>())
+        .def(py::init<const std::vector<SmallModulus> &, std::size_t,
+                      const SmallModulus &, MemoryPoolHandle>())
+        .def("generate", &util::BaseConverter::generate)
+        .def("floor_last_coeff_modulus_inplace",
+             &util::BaseConverter::floor_last_coeff_modulus_inplace)
+        .def("floor_last_coeff_modulus_ntt_inplace",
+             &util::BaseConverter::floor_last_coeff_modulus_ntt_inplace)
+        .def("round_last_coeff_modulus_inplace",
+             &util::BaseConverter::round_last_coeff_modulus_inplace)
+        .def("round_last_coeff_modulus_ntt_inplace",
+             &util::BaseConverter::round_last_coeff_modulus_ntt_inplace)
+        .def("fastbconv", &util::BaseConverter::fastbconv)
+        .def("fastbconv_sk", &util::BaseConverter::fastbconv_sk)
+        .def("mont_rq", &util::BaseConverter::mont_rq)
+        .def("fast_floor", &util::BaseConverter::fast_floor)
+        .def("fastbconv_mtilde", &util::BaseConverter::fastbconv_mtilde)
+        .def("fastbconv_plain_gamma",
+             &util::BaseConverter::fastbconv_plain_gamma)
+        .def("reset", &util::BaseConverter::reset)
+        .def("is_generated", &util::BaseConverter::is_generated)
+        .def("coeff_base_mod_count", &util::BaseConverter::coeff_base_mod_count)
+        .def("aux_base_mod_count", &util::BaseConverter::aux_base_mod_count)
+        .def("get_plain_gamma_product",
+             &util::BaseConverter::get_plain_gamma_product)
+        .def("get_neg_inv_coeff", &util::BaseConverter::get_neg_inv_coeff)
+        .def("get_plain_gamma_array",
+             &util::BaseConverter::get_plain_gamma_array)
+        .def("get_coeff_products_array",
+             &util::BaseConverter::get_coeff_products_array)
+        .def("get_inv_gamma", &util::BaseConverter::get_inv_gamma)
+        .def("get_bsk_small_ntt_tables",
+             &util::BaseConverter::get_bsk_small_ntt_tables)
+        .def("bsk_base_mod_count", &util::BaseConverter::bsk_base_mod_count)
+        .def("get_bsk_mod_array", &util::BaseConverter::get_bsk_mod_array)
+        .def("get_msk", &util::BaseConverter::get_msk)
+        .def("get_m_tilde", &util::BaseConverter::get_m_tilde)
+        .def("get_mtilde_inv_coeff_products_mod_coeff",
+             &util::BaseConverter::get_mtilde_inv_coeff_products_mod_coeff)
+        .def("get_inv_coeff_mod_mtilde",
+             &util::BaseConverter::get_inv_coeff_mod_mtilde)
+        .def("get_inv_coeff_mod_coeff_array",
+             &util::BaseConverter::get_inv_coeff_mod_coeff_array)
+        .def("get_inv_last_coeff_mod_array",
+             &util::BaseConverter::get_inv_last_coeff_mod_array)
+        .def("get_coeff_base_products_mod_msk",
+             &util::BaseConverter::get_coeff_base_products_mod_msk);
+
+    // "seal/util/smallntt.h"
+    py::class_<util::SmallNTTTables>(m, "SmallNTTTables", py::module_local())
+        .def(py::init<MemoryPoolHandle>())
+        .def(py::init<int, const SmallModulus &, MemoryPoolHandle>())
+        .def("generate", &util::SmallNTTTables::generate)
+        .def("reset", &util::SmallNTTTables::reset)
+        .def("get_root", &util::SmallNTTTables::get_root)
+        .def("get_from_root_powers",
+             &util::SmallNTTTables::get_from_root_powers)
+        .def("get_from_inv_root_powers",
+             &util::SmallNTTTables::get_from_inv_root_powers)
+        .def("get_from_scaled_inv_root_powers",
+             &util::SmallNTTTables::get_from_scaled_inv_root_powers)
+        .def("get_from_inv_root_powers_div_two",
+             &util::SmallNTTTables::get_from_inv_root_powers_div_two)
+        .def("get_from_scaled_inv_root_powers_div_two",
+             &util::SmallNTTTables::get_from_scaled_inv_root_powers_div_two)
+        .def("get_inv_degree_modulo",
+             &util::SmallNTTTables::get_inv_degree_modulo)
+        .def("modulus", &util::SmallNTTTables::modulus)
+        .def("coeff_count_power", &util::SmallNTTTables::coeff_count_power)
+        .def("coeff_count", &util::SmallNTTTables::coeff_count);
+    m.def("ntt_negacyclic_harvey_lazy", &util::ntt_negacyclic_harvey_lazy);
+    m.def("ntt_negacyclic_harvey", &util::ntt_negacyclic_harvey);
+    m.def("inverse_ntt_negacyclic_harvey_lazy",
+          &util::inverse_ntt_negacyclic_harvey_lazy);
 }
