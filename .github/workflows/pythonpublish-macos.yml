@@ -3,6 +3,8 @@ name: MacOS Package
 on:
   release:
     types: [created]
+  pull_request:
+    types: [ opened ]
 
 jobs:
   deploy:
