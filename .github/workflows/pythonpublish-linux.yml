@@ -4,33 +4,33 @@ on:
   release:
     types: [created]
   pull_request:
-    types: [ opened, synchronize, reopened ]
+    types: [opened, synchronize, reopened]
 
 jobs:
   deploy:
-
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version:
+          - cp36-cp36m
+          - cp37-cp37m
+          - cp38-cp38
+
+    runs-on: ubuntu-latest
+    container: quay.io/pypa/manylinux1_x86_64
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine auditwheel
-    - name: Build and publish
-      env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      run: |
-        # fetch third party libraries
-        git submodule init && git submodule update
-        pip wheel . -w wheel/
-        auditwheel repair wheel/*.whl -w wheel/
-        twine upload wheel/*
+      - uses: actions/checkout@v1
+      - name: Set target Python version PATH
+        run: echo "::add-path::/opt/python/${{ matrix.python-version }}/bin"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel twine auditwheel
+      - name: Build and publish
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          pip wheel . -w dist/ --no-deps
+          auditwheel repair dist/*.whl --plat $AUDITWHEEL_PLAT
+          twine upload --skip-existing wheelhouse/*
