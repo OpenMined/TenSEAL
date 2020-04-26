@@ -105,7 +105,6 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def(py::self |= std::uint64_t())
         .def(py::self <<= int())
         .def(py::self >>= int());
-
     /***
      * } "seal/biguint.h"
      *******************/
@@ -119,7 +118,7 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
 
         .def("bit_count", &SmallModulus::bit_count)
         .def("uint64_count", &SmallModulus::uint64_count)
-        .def("data", &SmallModulus::data)
+        .def("data", &SmallModulus::data, py::return_value_policy::reference)
         .def("value", &SmallModulus::value)
         .def("const_ratio", &SmallModulus::const_ratio)
         .def("is_zero", &SmallModulus::is_zero)
@@ -138,10 +137,12 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def(py::self >= py::self)
         .def(py::self >= std::uint64_t());
     /***
-     * "seal/smallmodulus.h" {
+     * } "seal/smallmodulus.h"
      *******************/
 
-    // "seal/serialization.h"
+    /*******************
+     * "seal/serialization.h" {
+     ***/
     py::enum_<compr_mode_type>(m, "COMPR_MODE_TYPE", py::module_local())
         .value("DEFLATE", compr_mode_type::deflate)
         .value("NONE", compr_mode_type::none);
@@ -166,13 +167,22 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
                         &Serialization::IsSupportedComprMode))
         .def_static("ComprSizeEstimate", &Serialization::ComprSizeEstimate)
         .def_static("IsValidHeader", &Serialization::IsValidHeader);
+    /***
+     * } "seal/serialization.h"
+     *******************/
 
-    // "seal/plaintext.h"
+    /*******************
+     * "seal/plaintext.h" {
+     ***/
     py::class_<Plaintext>(m, "Plaintext", py::module_local())
         .def(py::init<>())
+        .def(py::init<MemoryPoolHandle>())
         .def(py::init<std::size_t>())
+        .def(py::init<std::size_t, MemoryPoolHandle>())
         .def(py::init<std::size_t, std::size_t>())
-        .def(py::init<std::string>())
+        .def(py::init<std::size_t, std::size_t, MemoryPoolHandle>())
+        .def(py::init<const std::string &>())
+        .def(py::init<const std::string &, MemoryPoolHandle>())
         .def(py::init<Plaintext &>())
 
         .def("reserve", &Plaintext::reserve)
@@ -184,16 +194,30 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("set_zero", py::overload_cast<std::size_t>(&Plaintext::set_zero))
         .def("set_zero", py::overload_cast<>(&Plaintext::set_zero))
         .def("is_zero", &Plaintext::is_zero)
+        .def("int_array", &Plaintext::int_array,
+             py::return_value_policy::reference)
+        .def("data", py::overload_cast<>(&Plaintext::data, py::const_),
+             py::return_value_policy::reference)
+        .def("data",
+             py::overload_cast<std::size_t>(&Plaintext::data, py::const_),
+             py::return_value_policy::reference)
         .def("capacity", &Plaintext::capacity)
         .def("coeff_count", &Plaintext::coeff_count)
         .def("significant_coeff_count", &Plaintext::significant_coeff_count)
         .def("nonzero_coeff_count", &Plaintext::nonzero_coeff_count)
         .def("to_string", &Plaintext::to_string)
         .def("is_ntt_form", &Plaintext::is_ntt_form)
+        .def("parms_id", py::overload_cast<>(&Plaintext::parms_id, py::const_))
+        .def("scale", py::overload_cast<>(&Plaintext::scale, py::const_))
         .def("pool", &Plaintext::pool)
 
+        .def("__getitem__",
+             py::overload_cast<std::size_t>(&Plaintext::operator[], py::const_))
         .def(py::self == py::self)
         .def(py::self != py::self);
+    /***
+     * } "seal/plaintext.h"
+     *******************/
 
     // "seal/randomgen.h"
     m.def("random_uint64", &random_uint64);

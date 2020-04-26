@@ -193,8 +193,18 @@ def test_smallmodulus():
     assert left >= start - 1
 
 
-def test_serialization():
+@pytest.mark.parametrize(
+    "compr_type", [sealapi.COMPR_MODE_TYPE.NONE, sealapi.COMPR_MODE_TYPE.DEFLATE]
+)
+def test_serialization_compression(compr_type):
+    assert sealapi.Serialization.IsSupportedComprMode(compr_type) == True
+    assert sealapi.Serialization.ComprSizeEstimate(8, compr_type) > 0
+
+
+def test_serialization_sanity():
     assert int(sealapi.COMPR_MODE_TYPE.NONE) == 0
+    assert int(sealapi.COMPR_MODE_TYPE.DEFLATE) == 1
+
     header = sealapi.Serialization.SEALHeader()
     assert header.magic == 0xA15E
     assert header.zero_byte == 0
@@ -202,11 +212,7 @@ def test_serialization():
     assert header.size == 0
     assert header.reserved == 0
 
-    assert sealapi.Serialization.IsSupportedComprMode(sealapi.COMPR_MODE_TYPE.NONE) == True
     assert sealapi.Serialization.IsSupportedComprMode(15) == False
-    assert sealapi.Serialization.IsSupportedComprMode(0) == True
-
-    assert sealapi.Serialization.ComprSizeEstimate(256, sealapi.COMPR_MODE_TYPE.NONE) == 256
 
     header = sealapi.Serialization.SEALHeader()
     assert sealapi.Serialization.IsValidHeader(header) == True
@@ -245,6 +251,11 @@ def test_plaintext():
     assert testcase.capacity() == 200
     testcase.shrink_to_fit()
     assert testcase.capacity() == 4
+    assert testcase.int_array()[3] == 0x7FF
+    assert testcase.data() == 3
+    assert testcase.parms_id() == [0, 0, 0, 0]
+    assert testcase.scale() == 1.0
+    assert testcase[3] == 0x7FF
 
     testcase.release()
     assert testcase.coeff_count() == 0
