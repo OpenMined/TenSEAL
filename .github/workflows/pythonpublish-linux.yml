@@ -16,13 +16,13 @@ jobs:
           - cp38-cp38
 
     runs-on: ubuntu-latest
-    container: quay.io/pypa/manylinux2014_x86_64
+    container: quay.io/pypa/manylinux2010_x86_64
 
     steps:
       - name: install cmake
         run: |
-          yum install -y cmake3
-          ln -s /usr/bin/cmake3 /bin/cmake
+          curl https://github.com/Kitware/CMake/releases/download/v3.17.1/cmake-3.17.1-Linux-x86_64.tar.gz -L | tar xz -C /opt/
+          echo "::add-path::/opt/cmake-3.17.1-Linux-x86_64/bin"
       - uses: actions/checkout@v1
         with:
           submodules: true
