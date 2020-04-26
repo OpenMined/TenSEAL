@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: install cmake
         run: |
-          yum install cmake3
+          yum install -y cmake3
           ln -s /usr/bin/cmake3 /bin/cmake
       - uses: actions/checkout@v1
       - name: Set target Python version PATH
