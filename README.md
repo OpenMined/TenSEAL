@@ -1,5 +1,6 @@
 # TenSEAL
 
+![Linux Package](https://github.com/OpenMined/TenSEAL/workflows/Linux%20Package/badge.svg)
 ![MacOS Package](https://github.com/OpenMined/TenSEAL/workflows/MacOS%20Package/badge.svg)
 ![Tests](https://github.com/OpenMined/TenSEAL/workflows/Tests/badge.svg)
 ![Update Docker Image](https://github.com/OpenMined/TenSEAL/workflows/Update%20Docker%20Image/badge.svg)
