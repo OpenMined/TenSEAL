@@ -380,18 +380,66 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("scale", py::overload_cast<>(&Ciphertext::scale))
         .def("pool", &Ciphertext::pool);
 
-    // "seal/ckks.h"
     // "seal/decryptor.h"
+    py::class_<Decryptor>(m, "Decryptor", py::module_local())
+        .def(py::init<std::shared_ptr<SEALContext>, const SecretKey &>())
+        .def("decrypt", &Decryptor::decrypt)
+        .def("invariant_noise_budget", &Decryptor::invariant_noise_budget);
+
     // "seal/encryptor.h"
-    // "seal/evaluator.h"
+    py::class_<Encryptor>(m, "Encryptor", py::module_local())
+        .def(py::init<std::shared_ptr<SEALContext>, const PublicKey &>())
+        .def(py::init<std::shared_ptr<SEALContext>, const SecretKey &>())
+        .def(py::init<std::shared_ptr<SEALContext>, const PublicKey &,
+                      const SecretKey &>())
+        .def("set_public_key", &Encryptor::set_public_key)
+        .def("set_secret_key", &Encryptor::set_secret_key)
+        .def("encrypt", &Encryptor::encrypt)
+        .def("encrypt_zero", py::overload_cast<Ciphertext &, MemoryPoolHandle>(
+                                 &Encryptor::encrypt_zero, py::const_))
+        .def("encrypt_zero",
+             py::overload_cast<parms_id_type, Ciphertext &, MemoryPoolHandle>(
+                 &Encryptor::encrypt_zero, py::const_))
+        .def("encrypt_symmetric", &Encryptor::encrypt_symmetric)
+        .def("encrypt_zero_symmetric",
+             py::overload_cast<Ciphertext &, MemoryPoolHandle>(
+                 &Encryptor::encrypt_zero_symmetric, py::const_))
+        .def("encrypt_zero_symmetric",
+             py::overload_cast<parms_id_type, Ciphertext &, MemoryPoolHandle>(
+                 &Encryptor::encrypt_zero_symmetric, py::const_));
+
     // "seal/intarray.h"
-    // "seal/batchencoder.h"
-    // "seal/valcheck.h"
+    //
+    // headers use template for ct_coeff_type and pt_coeff_type
+
+    using IntArray64 = IntArray<std::uint64_t>;
+    py::class_<IntArray64>(m, "IntArray", py::module_local())
+        .def(py::init<MemoryPoolHandle>())
+        .def(py::init<>())
+        .def(py::init<std::size_t, MemoryPoolHandle>())
+        .def(py::init<std::size_t, std::size_t, MemoryPoolHandle>())
+        .def("begin", &IntArray64::begin)
+        .def("cbegin", &IntArray64::cbegin)
+        .def("end", &IntArray64::end)
+        .def("cend", &IntArray64::cend)
+        .def("at", py::overload_cast<std::size_t>(&IntArray64::at, py::const_))
+        .def("at", py::overload_cast<std::size_t>(&IntArray64::at))
+        .def("__getitem__", py::overload_cast<std::size_t>(
+                                &IntArray64::operator[], py::const_))
+        .def("empty", &IntArray64::empty)
+        .def("max_size", &IntArray64::max_size)
+        .def("size", &IntArray64::size)
+        .def("capacity", &IntArray64::capacity)
+        .def("pool", &IntArray64::pool)
+        .def("release", &IntArray64::release)
+        .def("clear", &IntArray64::clear)
+        .def("reserve", &IntArray64::reserve)
+        .def("shrink_to_fit", &IntArray64::shrink_to_fit)
+        .def("resize", &IntArray64::resize);
 
     // "seal/intencoder.h"
     py::class_<IntegerEncoder>(m, "IntegerEncoder", py::module_local())
         .def(py::init<std::shared_ptr<SEALContext>>())
-
         .def("encode",
              py::overload_cast<std::uint64_t>(&IntegerEncoder::encode))
         .def("encode", py::overload_cast<std::uint64_t, Plaintext &>(
@@ -416,6 +464,126 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("decode_int64", &IntegerEncoder::decode_int64)
         .def("decode_biguint", &IntegerEncoder::decode_biguint)
         .def("plain_modulus", &IntegerEncoder::plain_modulus);
+
+    // "seal/batchencoder.h"
+    py::class_<BatchEncoder>(m, "BatchEncoder", py::module_local())
+        .def(py::init<std::shared_ptr<SEALContext>>())
+        .def("encode",
+             py::overload_cast<const std::vector<std::uint64_t> &, Plaintext &>(
+                 &BatchEncoder::encode))
+        .def("encode",
+             py::overload_cast<const std::vector<std::int64_t> &, Plaintext &>(
+                 &BatchEncoder::encode))
+        .def("encode", py::overload_cast<Plaintext &, MemoryPoolHandle>(
+                           &BatchEncoder::encode))
+        .def("decode",
+             py::overload_cast<const Plaintext &, std::vector<std::uint64_t> &,
+                               MemoryPoolHandle>(&BatchEncoder::decode))
+        .def("decode",
+             py::overload_cast<const Plaintext &, std::vector<std::int64_t> &,
+                               MemoryPoolHandle>(&BatchEncoder::decode))
+        .def("decode", py::overload_cast<Plaintext &, MemoryPoolHandle>(
+                           &BatchEncoder::decode))
+        .def("slot_count", &BatchEncoder::slot_count);
+
+    // "seal/valcheck.h"
+    m.def("is_metadata_valid_for",
+          py::overload_cast<const Plaintext &,
+                            std::shared_ptr<const SEALContext>, bool>(
+              &is_metadata_valid_for))
+        .def("is_metadata_valid_for",
+             py::overload_cast<const Ciphertext &,
+                               std::shared_ptr<const SEALContext>, bool>(
+                 &is_metadata_valid_for))
+        .def("is_metadata_valid_for",
+             py::overload_cast<const SecretKey &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_metadata_valid_for))
+        .def("is_metadata_valid_for",
+             py::overload_cast<const PublicKey &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_metadata_valid_for))
+        .def("is_metadata_valid_for",
+             py::overload_cast<const KSwitchKeys &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_metadata_valid_for))
+        .def("is_metadata_valid_for",
+             py::overload_cast<const RelinKeys &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_metadata_valid_for))
+        .def("is_metadata_valid_for",
+             py::overload_cast<const GaloisKeys &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_metadata_valid_for))
+        .def("is_buffer_valid",
+             py::overload_cast<const Plaintext &>(&is_buffer_valid))
+        .def("is_buffer_valid",
+             py::overload_cast<const Ciphertext &>(&is_buffer_valid))
+        .def("is_buffer_valid",
+             py::overload_cast<const SecretKey &>(&is_buffer_valid))
+        .def("is_buffer_valid",
+             py::overload_cast<const PublicKey &>(&is_buffer_valid))
+        .def("is_buffer_valid",
+             py::overload_cast<const KSwitchKeys &>(&is_buffer_valid))
+        .def("is_buffer_valid",
+             py::overload_cast<const RelinKeys &>(&is_buffer_valid))
+        .def("is_buffer_valid",
+             py::overload_cast<const GaloisKeys &>(&is_buffer_valid))
+        .def("is_data_valid_for",
+             py::overload_cast<const Plaintext &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_data_valid_for))
+        .def("is_data_valid_for",
+             py::overload_cast<const Ciphertext &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_data_valid_for))
+        .def("is_data_valid_for",
+             py::overload_cast<const SecretKey &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_data_valid_for))
+        .def("is_data_valid_for",
+             py::overload_cast<const PublicKey &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_data_valid_for))
+        .def("is_data_valid_for",
+             py::overload_cast<const KSwitchKeys &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_data_valid_for))
+        .def("is_data_valid_for",
+             py::overload_cast<const RelinKeys &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_data_valid_for))
+        .def("is_data_valid_for",
+             py::overload_cast<const GaloisKeys &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_data_valid_for))
+        .def("is_valid_for",
+             py::overload_cast<const Ciphertext &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_valid_for))
+        .def("is_valid_for",
+             py::overload_cast<const SecretKey &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_valid_for))
+        .def("is_valid_for",
+             py::overload_cast<const PublicKey &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_valid_for))
+        .def("is_valid_for",
+             py::overload_cast<const KSwitchKeys &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_valid_for))
+        .def("is_valid_for",
+             py::overload_cast<const RelinKeys &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_valid_for))
+        .def("is_valid_for",
+             py::overload_cast<const GaloisKeys &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_valid_for));
+
+    // "seal/ckks.h"
+    // "seal/evaluator.h"
 
     // "seal/memorymanager.h"
     py::class_<MemoryPoolHandle>(m, "MemoryPoolHandle", py::module_local())
