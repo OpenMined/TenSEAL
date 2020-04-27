@@ -3,26 +3,55 @@
 
 import _sealapi_cpp
 
-# enums
-COMPR_MODE_TYPE = _sealapi_cpp.COMPR_MODE_TYPE
-SCHEME_TYPE = _sealapi_cpp.SCHEME_TYPE
-SEC_LEVEL_TYPE = _sealapi_cpp.SEC_LEVEL_TYPE
-
-# functions
-random_uint64 = _sealapi_cpp.random_uint64
-
-# classes
+## seal/biguint.h ##
 BigUInt = _sealapi_cpp.BigUInt
-IntArray = _sealapi_cpp.IntArray
+
+## seal/smallmodulus.h ##
 SmallModulus = _sealapi_cpp.SmallModulus
+
+## seal/serialization.h ##
+COMPR_MODE_TYPE = _sealapi_cpp.COMPR_MODE_TYPE
 Serialization = _sealapi_cpp.Serialization
+
+## seal/plaintext.h  ##
 Plaintext = _sealapi_cpp.Plaintext
-EncryptionParameters = _sealapi_cpp.EncryptionParameters
-CoeffModulus = _sealapi_cpp.CoeffModulus
-PlainModulus = _sealapi_cpp.PlainModulus
+
+## seal/randomgen.h ##
+random_uint64 = _sealapi_cpp.random_uint64
 BlakePRNGFactory = _sealapi_cpp.BlakePRNGFactory
 BlakePRNG = _sealapi_cpp.BlakePRNG
-SEALContext = _sealapi_cpp.SEALContext
-IntegerEncoder = _sealapi_cpp.IntegerEncoder
+
+## seal/encryptionparams.h ##
+SCHEME_TYPE = _sealapi_cpp.SCHEME_TYPE
+EncryptionParameters = _sealapi_cpp.EncryptionParameters
+
+## seal/modulus.h ##
+SEC_LEVEL_TYPE = _sealapi_cpp.SEC_LEVEL_TYPE
+CoeffModulus = _sealapi_cpp.CoeffModulus
+PlainModulus = _sealapi_cpp.PlainModulus
+
+## seal/context.h ##
 EncryptionParameterQualifiers = _sealapi_cpp.EncryptionParameterQualifiers
+SEALContext = _sealapi_cpp.SEALContext
+
+## seal/publickey.h ##
+PublicKey = _sealapi_cpp.PublicKey
+
+## seal/secretkey.h ##
+SecretKey = _sealapi_cpp.SecretKey
+
+## seal/relinkeys.h ##
+RelinKeys = _sealapi_cpp.RelinKeys
+
+## seal/galoiskeys.h ##
+GaloisKeys = _sealapi_cpp.GaloisKeys
+
+## seal/keygenerator.h ##
+KeyGenerator = _sealapi_cpp.KeyGenerator
+
+## seal/ciphertext.h ##
+Ciphertext = _sealapi_cpp.Ciphertext
+
+
+IntArray = _sealapi_cpp.IntArray
 IntegerEncoder = _sealapi_cpp.IntegerEncoder

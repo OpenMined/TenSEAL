@@ -1,6 +1,5 @@
 import pytest
 import tenseal.sealapi as sealapi
-import tenseal.sealapi.util as sealapi_util
 
 
 def test_biguint_sanity():
@@ -252,10 +251,11 @@ def test_plaintext():
     testcase.shrink_to_fit()
     assert testcase.capacity() == 4
     assert testcase.int_array()[3] == 0x7FF
-    assert testcase.data() == 3
+    assert testcase.data(3) == 0x7FF
     assert testcase.parms_id() == [0, 0, 0, 0]
     assert testcase.scale() == 1.0
     assert testcase[3] == 0x7FF
+    assert testcase.to_string() == "7FFx^3 + 1x^1 + 3"
 
     testcase.release()
     assert testcase.coeff_count() == 0
@@ -271,7 +271,7 @@ def test_plaintext():
     assert testcase.nonzero_coeff_count() == 0
 
     testcase = sealapi.Plaintext("7FFx^3 + 2x^1 + 3")
-    assert testcase.to_string() == "7FFx^3 + 2x^1 + 3"
+    assert testcase.is_ntt_form() == False
 
 
 @pytest.mark.parametrize(
@@ -431,15 +431,19 @@ def test_context_failure(scheme, sec_level):
     assert sealctx.parameters_set() == False
 
 
-def test_context_sanity():
+def context_sample():
     poly_modulus_degree = 8192
     parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.BFV)
     parms.set_poly_modulus_degree(poly_modulus_degree)
     parms.set_plain_modulus(1032193)
-
     coeff = sealapi.CoeffModulus.BFVDefault(poly_modulus_degree, sealapi.SEC_LEVEL_TYPE.TC128)
     parms.set_coeff_modulus(coeff)
-    sealapi.SEALContext.Create(parms, True, sealapi.SEC_LEVEL_TYPE.TC128)
+
+    return sealapi.SEALContext.Create(parms, True, sealapi.SEC_LEVEL_TYPE.TC128)
+
+
+def test_context_sanity():
+    assert context_sample().parameters_set() == True
 
 
 @pytest.mark.parametrize(
@@ -478,12 +482,7 @@ def test_context_scheme_bfv_sanity(sec_level):
         assert ctx_data.coeff_div_plain_modulus() == ctx_alias.coeff_div_plain_modulus()
         assert ctx_data.coeff_mod_plain_modulus() == ctx_alias.coeff_mod_plain_modulus()
         assert ctx_data.upper_half_increment() == ctx_alias.upper_half_increment()
-
-        # TODO
-        # ctx_data.base_converter()
-        # ctx_data.small_ntt_tables()
-        # ctx_data.plain_ntt_tables()
-        # assert ctx_data.upper_half_threshold() == (plaintext_modulus + 1) / 2 (??)
+        assert ctx_data.upper_half_threshold() == ctx_alias.upper_half_threshold()
 
         qualifiers = ctx_data.qualifiers()
         assert qualifiers.parameters_set == True
@@ -501,7 +500,28 @@ def test_context_scheme_bfv_sanity(sec_level):
         should_be_same_ctx = sealctx.get_context_data(parms_id)
         context_data_sanity(ctx_data, should_be_same_ctx, index)
 
+    assert sealctx.last_context_data().next_context_data() == None
+    assert (
+        sealctx.first_context_data().prev_context_data().chain_index()
+        == sealctx.key_context_data().chain_index()
+    )
+
     assert sealctx.using_keyswitching() == True
+
+
+def test_publickey():
+    ctx = context_sample()
+    keygen = sealapi.KeyGenerator(ctx)
+    public_key = keygen.public_key()
+    print(public_key.data(), public_key.parms_id())
+
+
+def test_relinkeys():
+    pass
+
+
+def test_secretkey():
+    pass
 
 
 def test_intencoder():
@@ -537,18 +557,6 @@ def test_keygenerator():
 
 
 def test_batchencoder():
-    pass
-
-
-def test_publickey():
-    pass
-
-
-def test_relinkeys():
-    pass
-
-
-def test_secretkey():
     pass
 
 

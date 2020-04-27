@@ -196,8 +196,6 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("is_zero", &Plaintext::is_zero)
         .def("int_array", &Plaintext::int_array,
              py::return_value_policy::reference)
-        .def("data", py::overload_cast<>(&Plaintext::data, py::const_),
-             py::return_value_policy::reference)
         .def("data",
              py::overload_cast<std::size_t>(&Plaintext::data, py::const_),
              py::return_value_policy::reference)
@@ -219,12 +217,17 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
      * } "seal/plaintext.h"
      *******************/
 
-    // "seal/randomgen.h"
+    /*******************
+     * "seal/randomgen.h" {
+     ***/
     m.def("random_uint64", &random_uint64);
 
-    py::class_<BlakePRNG, std::shared_ptr<BlakePRNG>>(m, "BlakePRNG",
-                                                      py::module_local())
+    py::class_<UniformRandomGenerator, std::shared_ptr<UniformRandomGenerator>>(
+        m, "UniformRandomGenerator", py::module_local());
+    py::class_<BlakePRNG, UniformRandomGenerator, std::shared_ptr<BlakePRNG>>(
+        m, "BlakePRNG", py::module_local())
         .def(py::init<random_seed_type>())
+        .def("seed", &BlakePRNG::seed)
         .def("generate", py::overload_cast<>(&BlakePRNG::generate))
         .def("refresh", &BlakePRNG::refresh);
 
@@ -243,8 +246,13 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
              py::overload_cast<random_seed_type>(&BlakePRNGFactory::create),
              py::return_value_policy::reference)
         .def_static("DefaultFactory", &BlakePRNGFactory::DefaultFactory);
+    /***
+     * } "seal/randomgen.h"
+     *******************/
 
-    // "seal/encryptionparams.h"
+    /*******************
+     * "seal/encryptionparams.h" {
+     ***/
     py::enum_<scheme_type>(m, "SCHEME_TYPE", py::module_local())
         .value("NONE", scheme_type::none)
         .value("BFV", scheme_type::BFV)
@@ -271,8 +279,13 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("random_generator", &EncryptionParameters::random_generator)
         .def(py::self == py::self)
         .def(py::self != py::self);
+    /***
+     * } "seal/encryptionparams.h"
+     *******************/
 
-    // "seal/modulus.h"
+    /*******************
+     * "seal/modulus.h" {
+     ***/
     py::enum_<sec_level_type>(m, "SEC_LEVEL_TYPE", py::module_local())
         .value("NONE", sec_level_type::none)
         .value("TC128", sec_level_type::tc128)
@@ -290,8 +303,13 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def_static("Batching",
                     py::overload_cast<std::size_t, std::vector<int>>(
                         &PlainModulus::Batching));
+    /***
+     * } "seal/modulus.h"
+     *******************/
 
-    // "seal/context.h"
+    /*******************
+     * "seal/context.h" {
+     ***/
     py::class_<EncryptionParameterQualifiers>(
         m, "EncryptionParameterQualifiers", py::module_local())
         .def_readwrite("parameters_set",
@@ -319,8 +337,6 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
              &SEALContext::ContextData::total_coeff_modulus)
         .def("total_coeff_modulus_bit_count",
              &SEALContext::ContextData::total_coeff_modulus_bit_count)
-        .def("small_ntt_tables", &SEALContext::ContextData::small_ntt_tables)
-        .def("plain_ntt_tables", &SEALContext::ContextData::plain_ntt_tables)
         .def("coeff_div_plain_modulus",
              &SEALContext::ContextData::coeff_div_plain_modulus)
         .def("plain_upper_half_threshold",
@@ -345,23 +361,47 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("first_parms_id", &SEALContext::first_parms_id)
         .def("last_parms_id", &SEALContext::last_parms_id)
         .def("using_keyswitching", &SEALContext::using_keyswitching);
+    /***
+     * } "seal/context.h"
+     *******************/
 
-    // "seal/publickey.h"
-    py::class_<PublicKey>(m, "PublicKey", py::module_local())
+    /*******************
+     * "seal/publickey.h" {
+     ***/
+    py::class_<PublicKey, std::shared_ptr<PublicKey>>(m, "PublicKey",
+                                                      py::module_local())
         .def(py::init<>())
-        .def("data", py::overload_cast<>(&PublicKey::data))
-        .def("parms_id", py::overload_cast<>(&PublicKey::parms_id));
+        .def("data", py::overload_cast<>(&PublicKey::data, py::const_),
+             py::return_value_policy::reference)
+        .def("parms_id", py::overload_cast<>(&PublicKey::parms_id, py::const_));
+    /***
+     * } "seal/publickey.h"
+     *******************/
 
-    // "seal/secretkey.h"
-    py::class_<SecretKey>(m, "SecretKey", py::module_local())
+    /*******************
+     * "seal/secretkey.h" {
+     ***/
+    py::class_<SecretKey, std::shared_ptr<SecretKey>>(m, "SecretKey",
+                                                      py::module_local())
         .def(py::init<>())
-        .def("data", py::overload_cast<>(&SecretKey::data))
-        .def("parms_id", py::overload_cast<>(&SecretKey::parms_id));
+        .def("data", py::overload_cast<>(&SecretKey::data, py::const_),
+             py::return_value_policy::reference)
+        .def("parms_id", py::overload_cast<>(&SecretKey::parms_id, py::const_));
+    /***
+     * } "seal/secretkey.h"
+     *******************/
 
-    // "seal//kswitchkeys.h"
+    /*******************
+     * "seal//kswitchkeys.h" {
+     ***/
     py::class_<KSwitchKeys>(m, "KSwitchKeys", py::module_local());
+    /***
+     * } "seal//kswitchkeys.h"
+     *******************/
 
-    // "seal/relinkeys.h"
+    /*******************
+     * "seal/relinkeys.h" {
+     ***/
     py::class_<RelinKeys, KSwitchKeys>(m, "RelinKeys", py::module_local())
         .def(py::init<>())
         .def("size", &RelinKeys::size)
@@ -371,8 +411,13 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def_static("get_index", &RelinKeys::get_index)
         .def("has_key", &RelinKeys::has_key)
         .def("key", &RelinKeys::key);
+    /***
+     * } "seal/relinkeys.h"
+     *******************/
 
-    // "seal/galoiskeys.h"
+    /*******************
+     * "seal/galoiskeys.h" {
+     ***/
     py::class_<GaloisKeys, KSwitchKeys>(m, "GaloisKeys", py::module_local())
         .def(py::init<>())
         .def("size", &GaloisKeys::size)
@@ -382,8 +427,13 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def_static("get_index", &GaloisKeys::get_index)
         .def("has_key", &GaloisKeys::has_key)
         .def("key", &GaloisKeys::key);
+    /***
+     * } "seal/galoiskeys.h"
+     *******************/
 
-    // "seal/keygenerator.h"
+    /*******************
+     * "seal/keygenerator.h" {
+     ***/
     py::class_<KeyGenerator>(m, "KeyGenerator", py::module_local())
         .def(py::init<std::shared_ptr<SEALContext>>())
         .def(py::init<std::shared_ptr<SEALContext>, const SecretKey &>())
@@ -398,8 +448,13 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("galois_keys", py::overload_cast<const std::vector<int> &>(
                                 &KeyGenerator::galois_keys))
         .def("galois_keys", py::overload_cast<>(&KeyGenerator::galois_keys));
+    /***
+     * } "seal/keygenerator.h"
+     *******************/
 
-    // "seal/ciphertext.h"
+    /*******************
+     * "seal/ciphertext.h" {
+     ***/
     py::class_<Ciphertext>(m, "Ciphertext", py::module_local())
         .def(py::init<>())
         .def(py::init<MemoryPoolHandle>())
@@ -439,6 +494,9 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("parms_id", py::overload_cast<>(&Ciphertext::parms_id))
         .def("scale", py::overload_cast<>(&Ciphertext::scale))
         .def("pool", &Ciphertext::pool);
+    /***
+     * } "seal/ciphertext.h"
+     *******************/
 
     // "seal/decryptor.h"
     py::class_<Decryptor>(m, "Decryptor", py::module_local())
