@@ -603,11 +603,75 @@ def test_keygenerator_galoiskeys_with_steps():
 
 
 def test_intencoder():
-    pass
+    ctx = context_sample()
+    encoder = sealapi.IntegerEncoder(ctx)
+
+    enc = encoder.encode(5)
+    assert enc.to_string() == "1x^2 + 1"
+    assert enc.int_array()[2] == 1
+    assert encoder.decode_uint32(enc) == 5
+    assert encoder.decode_int32(enc) == 5
+    assert encoder.decode_uint64(enc) == 5
+    assert encoder.decode_int32(enc) == 5
+
+    enc = sealapi.Plaintext()
+    encoder.encode(7, enc)
+    assert enc.to_string() == "1x^2 + 1x^1 + 1"
+
+    big = sealapi.BigUInt("5555555555")
+    enc = encoder.encode(big)
+    assert enc.int_array()[0] == 1
+    assert encoder.decode_biguint(enc) == 0x5555555555
+
+    enc = sealapi.Plaintext()
+    encoder.encode(big + 1, enc)
+    assert encoder.decode_biguint(enc) == 0x5555555556
+
+
+def test_intarray():
+    testcase = sealapi.Plaintext("3x^3 + 1x^1 + 3")
+    int_arr = testcase.int_array()
+
+    assert int_arr[0] == 3
+    assert int_arr.at(3) == 3
+    assert int_arr.empty() == False
+    assert int_arr.max_size() == 2 ** 64 - 1
+    assert int_arr.size() == 4
+    assert int_arr.capacity() == 4
+
+    int_arr.resize(10, True)
+    assert int_arr.capacity() == 10
+    assert int_arr.size() == 10
+
+    int_arr.reserve(30)
+    assert int_arr.capacity() == 30
+    assert int_arr.capacity() == 30
+
+    int_arr.shrink_to_fit()
+    assert int_arr.capacity() == 10
+    assert int_arr.size() == 10
+
+    int_arr.clear()
+    assert int_arr.size() == 0
+    assert int_arr.capacity() == 10
+    assert int_arr.empty() == True
+
+    int_arr.release()
+    assert int_arr.capacity() == 0
 
 
 def test_ciphertext():
-    pass
+    ctx = context_sample()
+    keygen = sealapi.KeyGenerator(ctx)
+    public_key = keygen.public_key()
+
+    intenc = sealapi.IntegerEncoder(ctx)
+    ciphertext = sealapi.Ciphertext(ctx)
+    plaintext = sealapi.Plaintext(intenc.encode(42))
+
+    encryptor = sealapi.Encryptor(ctx, public_key)
+
+    encryptor.encrypt(plaintext, ciphertext)
 
 
 def test_ckks():
@@ -626,17 +690,9 @@ def test_evaluator():
     pass
 
 
-def test_intarray():
-    pass
-
-
 def test_batchencoder():
     pass
 
 
 def test_valcheck():
-    pass
-
-
-def test_memorymanager():
     pass

@@ -52,6 +52,14 @@ KeyGenerator = _sealapi_cpp.KeyGenerator
 ## seal/ciphertext.h ##
 Ciphertext = _sealapi_cpp.Ciphertext
 
+## seal/decryptor.h ##
+Decryptor = _sealapi_cpp.Decryptor
 
-IntArray = _sealapi_cpp.IntArray
+## seal/encryptor.h ##
+Encryptor = _sealapi_cpp.Encryptor
+
+## seal/intencoder.h ##
 IntegerEncoder = _sealapi_cpp.IntegerEncoder
+
+## seal/intarray.h ##
+IntArray = _sealapi_cpp.IntArray

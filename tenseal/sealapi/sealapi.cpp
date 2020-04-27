@@ -172,52 +172,6 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
      *******************/
 
     /*******************
-     * "seal/plaintext.h" {
-     ***/
-    py::class_<Plaintext>(m, "Plaintext", py::module_local())
-        .def(py::init<>())
-        .def(py::init<MemoryPoolHandle>())
-        .def(py::init<std::size_t>())
-        .def(py::init<std::size_t, MemoryPoolHandle>())
-        .def(py::init<std::size_t, std::size_t>())
-        .def(py::init<std::size_t, std::size_t, MemoryPoolHandle>())
-        .def(py::init<const std::string &>())
-        .def(py::init<const std::string &, MemoryPoolHandle>())
-        .def(py::init<Plaintext &>())
-
-        .def("reserve", &Plaintext::reserve)
-        .def("shrink_to_fit", &Plaintext::shrink_to_fit)
-        .def("release", &Plaintext::release)
-        .def("resize", &Plaintext::resize)
-        .def("set_zero",
-             py::overload_cast<std::size_t, std::size_t>(&Plaintext::set_zero))
-        .def("set_zero", py::overload_cast<std::size_t>(&Plaintext::set_zero))
-        .def("set_zero", py::overload_cast<>(&Plaintext::set_zero))
-        .def("is_zero", &Plaintext::is_zero)
-        .def("int_array", &Plaintext::int_array,
-             py::return_value_policy::reference)
-        .def("data",
-             py::overload_cast<std::size_t>(&Plaintext::data, py::const_),
-             py::return_value_policy::reference)
-        .def("capacity", &Plaintext::capacity)
-        .def("coeff_count", &Plaintext::coeff_count)
-        .def("significant_coeff_count", &Plaintext::significant_coeff_count)
-        .def("nonzero_coeff_count", &Plaintext::nonzero_coeff_count)
-        .def("to_string", &Plaintext::to_string)
-        .def("is_ntt_form", &Plaintext::is_ntt_form)
-        .def("parms_id", py::overload_cast<>(&Plaintext::parms_id, py::const_))
-        .def("scale", py::overload_cast<>(&Plaintext::scale, py::const_))
-        .def("pool", &Plaintext::pool)
-
-        .def("__getitem__",
-             py::overload_cast<std::size_t>(&Plaintext::operator[], py::const_))
-        .def(py::self == py::self)
-        .def(py::self != py::self);
-    /***
-     * } "seal/plaintext.h"
-     *******************/
-
-    /*******************
      * "seal/randomgen.h" {
      ***/
     m.def("random_uint64", &random_uint64);
@@ -465,20 +419,55 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
      *******************/
 
     /*******************
+     * "seal/plaintext.h" {
+     ***/
+    py::class_<Plaintext>(m, "Plaintext", py::module_local())
+        .def(py::init<>())
+        .def(py::init<std::size_t>())
+        .def(py::init<std::size_t, std::size_t>())
+        .def(py::init<const std::string &>())
+        .def(py::init<Plaintext &>())
+
+        .def("reserve", &Plaintext::reserve)
+        .def("shrink_to_fit", &Plaintext::shrink_to_fit)
+        .def("release", &Plaintext::release)
+        .def("resize", &Plaintext::resize)
+        .def("set_zero",
+             py::overload_cast<std::size_t, std::size_t>(&Plaintext::set_zero))
+        .def("set_zero", py::overload_cast<std::size_t>(&Plaintext::set_zero))
+        .def("set_zero", py::overload_cast<>(&Plaintext::set_zero))
+        .def("is_zero", &Plaintext::is_zero)
+        .def("int_array", &Plaintext::int_array,
+             py::return_value_policy::reference)
+        .def("data",
+             py::overload_cast<std::size_t>(&Plaintext::data, py::const_),
+             py::return_value_policy::reference)
+        .def("capacity", &Plaintext::capacity)
+        .def("coeff_count", &Plaintext::coeff_count)
+        .def("significant_coeff_count", &Plaintext::significant_coeff_count)
+        .def("nonzero_coeff_count", &Plaintext::nonzero_coeff_count)
+        .def("to_string", &Plaintext::to_string)
+        .def("is_ntt_form", &Plaintext::is_ntt_form)
+        .def("parms_id", py::overload_cast<>(&Plaintext::parms_id, py::const_))
+        .def("scale", py::overload_cast<>(&Plaintext::scale, py::const_))
+
+        .def("__getitem__",
+             py::overload_cast<std::size_t>(&Plaintext::operator[], py::const_))
+        .def(py::self == py::self)
+        .def(py::self != py::self);
+    /***
+     * } "seal/plaintext.h"
+     *******************/
+
+    /*******************
      * "seal/ciphertext.h" {
      ***/
     py::class_<Ciphertext>(m, "Ciphertext", py::module_local())
         .def(py::init<>())
-        .def(py::init<MemoryPoolHandle>())
         .def(py::init<std::shared_ptr<SEALContext>>())
-        .def(py::init<std::shared_ptr<SEALContext>, MemoryPoolHandle>())
         .def(py::init<std::shared_ptr<SEALContext>, parms_id_type>())
         .def(py::init<std::shared_ptr<SEALContext>, parms_id_type,
-                      MemoryPoolHandle>())
-        .def(py::init<std::shared_ptr<SEALContext>, parms_id_type,
                       std::size_t>())
-        .def(py::init<std::shared_ptr<SEALContext>, parms_id_type, std::size_t,
-                      MemoryPoolHandle>())
         .def("reserve",
              py::overload_cast<std::shared_ptr<SEALContext>, parms_id_type,
                                std::size_t>(&Ciphertext::reserve))
@@ -494,9 +483,13 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
                  &Ciphertext::resize))
         .def("resize", py::overload_cast<std::size_t>(&Ciphertext::resize))
         .def("release", &Ciphertext::release)
-        .def("int_array", &Ciphertext::int_array)
-        .def("data", py::overload_cast<>(&Ciphertext::data))
-        .def("data", py::overload_cast<std::size_t>(&Ciphertext::data))
+        .def("int_array", &Ciphertext::int_array,
+             py::return_value_policy::reference)
+        .def("data", py::overload_cast<>(&Ciphertext::data, py::const_),
+             py::return_value_policy::reference)
+        .def("data",
+             py::overload_cast<std::size_t>(&Ciphertext::data, py::const_),
+             py::return_value_policy::reference)
         .def("coeff_mod_count", &Ciphertext::coeff_mod_count)
         .def("poly_modulus_degree", &Ciphertext::poly_modulus_degree)
         .def("size", &Ciphertext::size)
@@ -505,18 +498,26 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("is_ntt_form", py::overload_cast<>(&Ciphertext::is_ntt_form))
         .def("parms_id", py::overload_cast<>(&Ciphertext::parms_id))
         .def("scale", py::overload_cast<>(&Ciphertext::scale))
-        .def("pool", &Ciphertext::pool);
+        .def("__getitem__", py::overload_cast<std::size_t>(
+                                &Ciphertext::operator[], py::const_));
     /***
      * } "seal/ciphertext.h"
      *******************/
 
-    // "seal/decryptor.h"
+    /*******************
+     * "seal/decryptor.h" {
+     ***/
     py::class_<Decryptor>(m, "Decryptor", py::module_local())
         .def(py::init<std::shared_ptr<SEALContext>, const SecretKey &>())
         .def("decrypt", &Decryptor::decrypt)
         .def("invariant_noise_budget", &Decryptor::invariant_noise_budget);
+    /***
+     * } "seal/decryptor.h"
+     *******************/
 
-    // "seal/encryptor.h"
+    /*******************
+     * "seal/encryptor.h" {
+     ***/
     py::class_<Encryptor>(m, "Encryptor", py::module_local())
         .def(py::init<std::shared_ptr<SEALContext>, const PublicKey &>())
         .def(py::init<std::shared_ptr<SEALContext>, const SecretKey &>())
@@ -524,7 +525,10 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
                       const SecretKey &>())
         .def("set_public_key", &Encryptor::set_public_key)
         .def("set_secret_key", &Encryptor::set_secret_key)
-        .def("encrypt", &Encryptor::encrypt)
+        .def("encrypt",
+             [](Encryptor &e, const Plaintext &plain, Ciphertext &destination) {
+                 return e.encrypt(plain, destination);
+             })
         .def("encrypt_zero", py::overload_cast<Ciphertext &, MemoryPoolHandle>(
                                  &Encryptor::encrypt_zero, py::const_))
         .def("encrypt_zero",
@@ -537,37 +541,13 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("encrypt_zero_symmetric",
              py::overload_cast<parms_id_type, Ciphertext &, MemoryPoolHandle>(
                  &Encryptor::encrypt_zero_symmetric, py::const_));
+    /***
+     * } "seal/encryptor.h"
+     *******************/
 
-    // "seal/intarray.h"
-    //
-    // headers use template for ct_coeff_type and pt_coeff_type
-
-    using IntArray64 = IntArray<std::uint64_t>;
-    py::class_<IntArray64>(m, "IntArray", py::module_local())
-        .def(py::init<MemoryPoolHandle>())
-        .def(py::init<>())
-        .def(py::init<std::size_t, MemoryPoolHandle>())
-        .def(py::init<std::size_t, std::size_t, MemoryPoolHandle>())
-        .def("begin", &IntArray64::begin)
-        .def("cbegin", &IntArray64::cbegin)
-        .def("end", &IntArray64::end)
-        .def("cend", &IntArray64::cend)
-        .def("at", py::overload_cast<std::size_t>(&IntArray64::at, py::const_))
-        .def("at", py::overload_cast<std::size_t>(&IntArray64::at))
-        .def("__getitem__", py::overload_cast<std::size_t>(
-                                &IntArray64::operator[], py::const_))
-        .def("empty", &IntArray64::empty)
-        .def("max_size", &IntArray64::max_size)
-        .def("size", &IntArray64::size)
-        .def("capacity", &IntArray64::capacity)
-        .def("pool", &IntArray64::pool)
-        .def("release", &IntArray64::release)
-        .def("clear", &IntArray64::clear)
-        .def("reserve", &IntArray64::reserve)
-        .def("shrink_to_fit", &IntArray64::shrink_to_fit)
-        .def("resize", &IntArray64::resize);
-
-    // "seal/intencoder.h"
+    /*******************
+     * "seal/intencoder.h" {
+     ***/
     py::class_<IntegerEncoder>(m, "IntegerEncoder", py::module_local())
         .def(py::init<std::shared_ptr<SEALContext>>())
         .def("encode",
@@ -594,6 +574,35 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("decode_int64", &IntegerEncoder::decode_int64)
         .def("decode_biguint", &IntegerEncoder::decode_biguint)
         .def("plain_modulus", &IntegerEncoder::plain_modulus);
+    /***
+     * } "seal/intencoder.h"
+     *******************/
+
+    /*******************
+     * "seal/intarray.h" {
+     ***/
+    using IntArray64 = IntArray<std::uint64_t>;
+    py::class_<IntArray64>(m, "IntArray", py::module_local())
+        .def(py::init<>())
+        .def(py::init<std::size_t>())
+        .def(py::init<std::size_t, std::size_t>())
+        .def("at", py::overload_cast<std::size_t>(&IntArray64::at, py::const_),
+             py::return_value_policy::reference)
+        .def("at", py::overload_cast<std::size_t>(&IntArray64::at))
+        .def("__getitem__", py::overload_cast<std::size_t>(
+                                &IntArray64::operator[], py::const_))
+        .def("empty", &IntArray64::empty)
+        .def("max_size", &IntArray64::max_size)
+        .def("size", &IntArray64::size)
+        .def("capacity", &IntArray64::capacity)
+        .def("release", &IntArray64::release)
+        .def("clear", &IntArray64::clear)
+        .def("reserve", &IntArray64::reserve)
+        .def("shrink_to_fit", &IntArray64::shrink_to_fit)
+        .def("resize", &IntArray64::resize);
+    /***
+     * } "seal/intarray.h"
+     *******************/
 
     // "seal/batchencoder.h"
     py::class_<BatchEncoder>(m, "BatchEncoder", py::module_local())
@@ -827,63 +836,4 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("rotate_vector", &Evaluator::rotate_vector)
         .def("complex_conjugate_inplace", &Evaluator::complex_conjugate_inplace)
         .def("complex_conjugate", &Evaluator::complex_conjugate);
-
-    // "seal/memorymanager.h"
-    py::class_<MemoryPoolHandle>(m, "MemoryPoolHandle", py::module_local())
-        .def(py::init<>())
-        .def(py::init<const MemoryPoolHandle &>())
-
-        .def_static("Global", &MemoryPoolHandle::Global)
-        .def_static("ThreadLocal", &MemoryPoolHandle::ThreadLocal)
-        .def_static("New", &MemoryPoolHandle::New)
-
-        .def("pool_count", &MemoryPoolHandle::pool_count)
-        .def("alloc_byte_count", &MemoryPoolHandle::alloc_byte_count)
-        .def("use_count", &MemoryPoolHandle::use_count)
-
-        .def("__bool__",
-             py::overload_cast<>(&MemoryPoolHandle::operator bool, py::const_))
-        .def(py::self == py::self)
-        .def(py::self != py::self);
-
-    py::enum_<mm_prof_opt>(m, "MM_PROF_OPT", py::module_local())
-        .value("DEFAULT", mm_prof_opt::DEFAULT)
-        .value("FORCE_GLOBAL", mm_prof_opt::FORCE_GLOBAL)
-        .value("FORCE_NEW", mm_prof_opt::FORCE_NEW)
-        .value("FORCE_THREAD_LOCAL", mm_prof_opt::FORCE_THREAD_LOCAL);
-
-    py::class_<MMProf>(m, "MMProf", py::module_local());
-
-    py::class_<MMProfGlobal, MMProf>(m, "MMProfGlobal", py::module_local())
-        .def(py::init<>())
-        .def("get_pool", &MMProfGlobal::get_pool);
-
-    py::class_<MMProfNew, MMProf>(m, "MMProfNew", py::module_local())
-        .def(py::init<>())
-        .def("get_pool", &MMProfNew::get_pool);
-
-    py::class_<MMProfFixed, MMProf>(m, "MMProfFixed", py::module_local())
-        .def(py::init<MemoryPoolHandle>())
-        .def("get_pool", &MMProfFixed::get_pool);
-
-    py::class_<MMProfThreadLocal, MMProf>(m, "MMProfThreadLocal",
-                                          py::module_local())
-        .def(py::init<>())
-        .def("get_pool", &MMProfThreadLocal::get_pool);
-
-    py::class_<MemoryManager>(m, "MemoryManager", py::module_local())
-        .def_static("SwitchProfile", py::overload_cast<MMProf *&&>(
-                                         &MemoryManager::SwitchProfile));
-    // pybind11 rvalue issue for SwitchProfile overload
-    // pybind11 variadic template issue for GetPool method
-
-    py::class_<MMProfGuard>(m, "MMProfGuard", py::module_local())
-        .def(py::init<MMProf *&&, bool>())
-        .def("try_lock", py::overload_cast<>(&MMProfGuard::try_lock))
-        .def("lock", py::overload_cast<>(&MMProfGuard::lock))
-        .def("unlock", &MMProfGuard::unlock)
-        .def("owns_lock", &MMProfGuard::owns_lock);
-    // pybind11 rvalue issue for constructor, try_lock and lock overloads
-    //
-    //
 }
