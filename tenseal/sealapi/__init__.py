@@ -66,3 +66,12 @@ IntArray = _sealapi_cpp.IntArray
 
 ## seal/batchencoder.h ##
 BatchEncoder = _sealapi_cpp.BatchEncoder
+
+## seal/evaluator.h ##
+Evaluator = _sealapi_cpp.Evaluator
+
+## seal/valcheck.h ##
+is_valid_for = _sealapi_cpp.is_valid_for
+is_buffer_valid = _sealapi_cpp.is_buffer_valid
+is_data_valid_for = _sealapi_cpp.is_data_valid_for
+is_metadata_valid_for = _sealapi_cpp.is_metadata_valid_for

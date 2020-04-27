@@ -2,6 +2,31 @@ import pytest
 import tenseal.sealapi as sealapi
 
 
+def context_bfv_sample(poly_modulus_degree=4096, plain_modulus=1032193):
+    parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.BFV)
+    parms.set_poly_modulus_degree(poly_modulus_degree)
+    parms.set_plain_modulus(plain_modulus)
+    coeff = sealapi.CoeffModulus.BFVDefault(poly_modulus_degree, sealapi.SEC_LEVEL_TYPE.TC128)
+    parms.set_coeff_modulus(coeff)
+
+    return sealapi.SEALContext.Create(parms, True, sealapi.SEC_LEVEL_TYPE.TC128)
+
+
+def context_ckks_sample(poly_modulus_degree=8192, plain_modulus=0):
+    parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.CKKS)
+    parms.set_poly_modulus_degree(poly_modulus_degree)
+    coeff = sealapi.CoeffModulus.Create(poly_modulus_degree, [60, 40, 40, 60])
+    parms.set_coeff_modulus(coeff)
+
+    return sealapi.SEALContext.Create(parms, True, sealapi.SEC_LEVEL_TYPE.TC128)
+
+
+def get_poly_modulus_degree(ctx):
+    ctx_data = ctx.key_context_data()
+    parms = ctx_data.parms()
+    return parms.poly_modulus_degree()
+
+
 def test_biguint_sanity():
     testcase = sealapi.BigUInt()
     assert testcase.is_zero()
@@ -431,41 +456,20 @@ def test_context_failure(scheme, sec_level):
     assert sealctx.parameters_set() == False
 
 
-def context_sample(poly_modulus_degree=8192):
-    parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.BFV)
-    parms.set_poly_modulus_degree(poly_modulus_degree)
-    parms.set_plain_modulus(1032193)
-    coeff = sealapi.CoeffModulus.BFVDefault(poly_modulus_degree, sealapi.SEC_LEVEL_TYPE.TC128)
-    parms.set_coeff_modulus(coeff)
-
-    return sealapi.SEALContext.Create(parms, True, sealapi.SEC_LEVEL_TYPE.TC128)
-
-
-def test_context_sanity():
-    assert context_sample().parameters_set() == True
-
-
 @pytest.mark.parametrize(
-    "sec_level",
-    [sealapi.SEC_LEVEL_TYPE.TC128, sealapi.SEC_LEVEL_TYPE.TC192, sealapi.SEC_LEVEL_TYPE.TC256,],
+    "sealctx", [context_bfv_sample(), context_ckks_sample()],
 )
-def test_context_scheme_bfv_sanity(sec_level):
-    poly_modulus_degree = 8192
-    plaintext_modulus = 1032193
-
-    parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.BFV)
-    parms.set_poly_modulus_degree(poly_modulus_degree)
-    parms.set_plain_modulus(plaintext_modulus)
-
-    coeff = sealapi.CoeffModulus.Create(poly_modulus_degree, [32, 32])
-    parms.set_coeff_modulus(coeff)
-    sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
+def test_context_sanity(sealctx):
     assert sealctx.parameters_set() == True
 
-    coeff = sealapi.CoeffModulus.BFVDefault(poly_modulus_degree, sec_level)
-    parms.set_coeff_modulus(coeff)
-    sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
+
+def context_asserts(sealctx, sec_level):
     assert sealctx.parameters_set() == True
+
+    orig_ctx_data = sealctx.key_context_data()
+    parms = orig_ctx_data.parms()
+    poly_modulus_degree = parms.poly_modulus_degree()
+    coeff_mod_count = len(parms.coeff_modulus())
 
     def context_data_sanity(ctx_data, ctx_alias, index):
         assert ctx_data.parms().poly_modulus_degree() == poly_modulus_degree
@@ -492,9 +496,9 @@ def test_context_scheme_bfv_sanity(sec_level):
         assert qualifiers.sec_level == sec_level
 
     for (parms_id, ctx_data, index) in [
-        (sealctx.first_parms_id(), sealctx.first_context_data(), len(coeff) - 2),
+        (sealctx.first_parms_id(), sealctx.first_context_data(), coeff_mod_count - 2),
         (sealctx.last_parms_id(), sealctx.last_context_data(), 0),
-        (sealctx.key_parms_id(), sealctx.key_context_data(), len(coeff) - 1),
+        (sealctx.key_parms_id(), sealctx.key_context_data(), coeff_mod_count - 1),
     ]:
         should_be_same_ctx = sealctx.get_context_data(parms_id)
         context_data_sanity(ctx_data, should_be_same_ctx, index)
@@ -508,18 +512,61 @@ def test_context_scheme_bfv_sanity(sec_level):
     assert sealctx.using_keyswitching() == True
 
 
-def test_keygenerator_publickey():
+@pytest.mark.parametrize(
+    "sec_level",
+    [sealapi.SEC_LEVEL_TYPE.TC128, sealapi.SEC_LEVEL_TYPE.TC192, sealapi.SEC_LEVEL_TYPE.TC256,],
+)
+def test_context_scheme_bfv_sanity(sec_level):
     poly_modulus_degree = 8192
-    ctx = context_sample(poly_modulus_degree)
+    plaintext_modulus = 1032193
+
+    parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.BFV)
+    parms.set_poly_modulus_degree(poly_modulus_degree)
+    parms.set_plain_modulus(plaintext_modulus)
+
+    coeff = sealapi.CoeffModulus.Create(poly_modulus_degree, [32, 32])
+    parms.set_coeff_modulus(coeff)
+    sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
+    assert sealctx.parameters_set() == True
+
+    coeff = sealapi.CoeffModulus.BFVDefault(poly_modulus_degree, sec_level)
+    parms.set_coeff_modulus(coeff)
+    sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
+    context_asserts(sealctx, sec_level)
+
+
+@pytest.mark.parametrize(
+    "sec_level", [sealapi.SEC_LEVEL_TYPE.TC128, sealapi.SEC_LEVEL_TYPE.TC192],
+)
+def test_context_scheme_ckks_sanity(sec_level):
+    poly_modulus_degree = 8192
+    plaintext_modulus = 1032193
+
+    parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.CKKS)
+    parms.set_poly_modulus_degree(poly_modulus_degree)
+
+    coeff = sealapi.CoeffModulus.Create(poly_modulus_degree, [60, 40, 40, 60])
+    parms.set_coeff_modulus(coeff)
+    sealctx = sealapi.SEALContext.Create(parms, True, sealapi.SEC_LEVEL_TYPE.TC128)
+    assert sealctx.parameters_set() == True
+
+    # context_asserts(sealctx, sec_level)
+
+
+@pytest.mark.parametrize(
+    "ctx", [context_bfv_sample(8192), context_ckks_sample(8192)],
+)
+def test_keygenerator_publickey(ctx):
     keygen = sealapi.KeyGenerator(ctx)
     public_key = keygen.public_key()
     assert public_key.data().parms_id() == public_key.parms_id()
-    assert public_key.data().poly_modulus_degree() == poly_modulus_degree
+    assert public_key.data().poly_modulus_degree() == get_poly_modulus_degree(ctx)
 
 
-def test_keygenerator_secretkey():
-    poly_modulus_degree = 8192
-    ctx = context_sample(poly_modulus_degree)
+@pytest.mark.parametrize(
+    "ctx", [context_bfv_sample(8192), context_ckks_sample(8192)],
+)
+def test_keygenerator_secretkey(ctx):
     keygen = sealapi.KeyGenerator(ctx)
     secret_key = keygen.secret_key()
     assert secret_key.data().parms_id() == secret_key.parms_id()
@@ -527,18 +574,21 @@ def test_keygenerator_secretkey():
 
     ctx_data = ctx.key_context_data()
     parms = ctx_data.parms()
-    coeff_count = parms.poly_modulus_degree()
+    poly_modulus_degree = parms.poly_modulus_degree()
     coeff_mod_count = len(parms.coeff_modulus())
 
-    assert secret_key.data().coeff_count() == coeff_mod_count * coeff_count
+    assert secret_key.data().coeff_count() == coeff_mod_count * poly_modulus_degree
 
 
-def test_keygenerator_relinkeys():
+@pytest.mark.parametrize(
+    "ctx", [context_bfv_sample(8192), context_ckks_sample(8192)],
+)
+def test_keygenerator_relinkeys(ctx):
+    poly_modulus_degree = get_poly_modulus_degree(ctx)
+
     index = 4
     assert sealapi.RelinKeys.get_index(index) == index - 2
 
-    poly_modulus_degree = 8192
-    ctx = context_sample(poly_modulus_degree)
     keygen = sealapi.KeyGenerator(ctx)
     relin_keys = keygen.relin_keys()
 
@@ -549,16 +599,19 @@ def test_keygenerator_relinkeys():
 
     assert relin_keys.size() > 0
     assert len(relin_keys.data()) == relin_keys.size()
-    assert relin_keys.data(0)[0].data().poly_modulus_degree() == poly_modulus_degree
+    assert relin_keys.data(0)[0].data().poly_modulus_degree() == get_poly_modulus_degree(ctx)
     assert len(relin_keys.parms_id()) == 4
 
 
-def test_keygenerator_galoiskeys():
+@pytest.mark.parametrize(
+    "ctx", [context_bfv_sample(8192), context_ckks_sample(8192)],
+)
+def test_keygenerator_galoiskeys(ctx):
+    poly_modulus_degree = get_poly_modulus_degree(ctx)
+
     idx = 3
     assert sealapi.GaloisKeys.get_index(idx) == (idx - 1) >> 1
 
-    poly_modulus_degree = 8192
-    ctx = context_sample(poly_modulus_degree)
     keygen = sealapi.KeyGenerator(ctx)
     galois_keys = keygen.galois_keys()
 
@@ -569,7 +622,7 @@ def test_keygenerator_galoiskeys():
 
     assert galois_keys.size() > 0
     assert len(galois_keys.data()) == poly_modulus_degree
-    assert len(galois_keys.data(sealapi.GaloisKeys.get_index(idx))) == 4
+    assert len(galois_keys.data(sealapi.GaloisKeys.get_index(idx))) > 0
 
     assert (
         galois_keys.data(sealapi.GaloisKeys.get_index(idx))[0].data().poly_modulus_degree()
@@ -578,11 +631,16 @@ def test_keygenerator_galoiskeys():
     assert len(galois_keys.parms_id()) == 4
 
 
-def test_keygenerator_galoiskeys_with_steps():
-    idx = sealapi.GaloisKeys.get_index(7)
-    poly_modulus_degree = 8192
+@pytest.mark.parametrize(
+    "ctx", [context_bfv_sample(8192), context_ckks_sample(8192)],
+)
+def test_keygenerator_galoiskeys_with_steps(ctx):
+    ctx_data = ctx.key_context_data()
+    parms = ctx_data.parms()
+    poly_modulus_degree = parms.poly_modulus_degree()
 
-    ctx = context_sample(poly_modulus_degree)
+    idx = sealapi.GaloisKeys.get_index(7)
+
     keygen = sealapi.KeyGenerator(ctx)
     galois_keys = keygen.galois_keys([idx])
 
@@ -593,7 +651,7 @@ def test_keygenerator_galoiskeys_with_steps():
 
     assert galois_keys.size() > 0
     assert len(galois_keys.data()) == poly_modulus_degree
-    assert len(galois_keys.data(sealapi.GaloisKeys.get_index(idx))) == 4
+    assert len(galois_keys.data(sealapi.GaloisKeys.get_index(idx))) > 0
 
     assert (
         galois_keys.data(sealapi.GaloisKeys.get_index(idx))[0].data().poly_modulus_degree()
@@ -602,8 +660,10 @@ def test_keygenerator_galoiskeys_with_steps():
     assert len(galois_keys.parms_id()) == 4
 
 
-def test_intencoder():
-    ctx = context_sample()
+@pytest.mark.parametrize(
+    "ctx", [context_bfv_sample(8192)],
+)
+def test_intencoder(ctx):
     encoder = sealapi.IntegerEncoder(ctx)
 
     enc = encoder.encode(5)
@@ -660,9 +720,11 @@ def test_intarray():
     assert int_arr.capacity() == 0
 
 
-def test_batchencoder():
-    poly_modulus_degree = 1024
-    ctx = context_sample(poly_modulus_degree)
+@pytest.mark.parametrize(
+    "ctx", [context_bfv_sample(1024)],
+)
+def test_batchencoder(ctx):
+    poly_modulus_degree = get_poly_modulus_degree(ctx)
     enc_out = sealapi.Plaintext()
 
     testcase = [1, 2, 3, 4, 5]
@@ -680,9 +742,11 @@ def test_batchencoder():
     assert testcase.to_string() == test_str
 
 
-def test_ciphertext():
-    poly_modulus_degree = 1024
-    ctx = context_sample(poly_modulus_degree)
+@pytest.mark.parametrize(
+    "ctx", [context_bfv_sample(1024)],
+)
+def test_ciphertext(ctx):
+    poly_modulus_degree = get_poly_modulus_degree(ctx)
 
     ctx_data = ctx.key_context_data()
     parms = ctx_data.parms()
@@ -692,9 +756,8 @@ def test_ciphertext():
     keygen = sealapi.KeyGenerator(ctx)
     public_key = keygen.public_key()
 
-    intenc = sealapi.IntegerEncoder(ctx)
     ciphertext = sealapi.Ciphertext(ctx)
-    plaintext = sealapi.Plaintext(intenc.encode(42))
+    plaintext = sealapi.Plaintext("42")
 
     encryptor = sealapi.Encryptor(ctx, public_key)
 
@@ -719,15 +782,100 @@ def test_ciphertext():
     assert ciphertext.size_capacity() == 15
 
 
-def test_ckks():
-    pass
+def test_encryptor():
+    poly_modulus_degree = 4096
+    plain_modulus = 1024
+    ctx = context_bfv_sample(poly_modulus_degree, plain_modulus)
+
+    keygen = sealapi.KeyGenerator(ctx)
+    intenc = sealapi.IntegerEncoder(ctx)
+    public_key = keygen.public_key()
+    secret_key = keygen.secret_key()
+
+    decryptor = sealapi.Decryptor(ctx, secret_key)
+
+    expected_value = 1234
+    plaintext = intenc.encode(expected_value)
+
+    def _test_encryptor_symmetric_setup(encryptor):
+        ciphertext = sealapi.Ciphertext(ctx)
+        encryptor.encrypt_symmetric(plaintext, ciphertext)
+        plaintext_out = sealapi.Plaintext()
+        decryptor.decrypt(ciphertext, plaintext_out)
+        assert intenc.decode_int64(plaintext_out) == expected_value
+        plaintext_out.set_zero()
+
+        ciphertext = sealapi.Ciphertext(ctx)
+        encryptor.encrypt_zero_symmetric(ciphertext)
+        plaintext_out = sealapi.Plaintext()
+        decryptor.decrypt(ciphertext, plaintext_out)
+        assert intenc.decode_int64(plaintext_out) == 0
+        plaintext_out.set_zero()
+
+    def _test_encryptor_pk_setup(encryptor):
+        ciphertext = sealapi.Ciphertext(ctx)
+        encryptor.encrypt(plaintext, ciphertext)
+        plaintext_out = sealapi.Plaintext()
+
+        decryptor.decrypt(ciphertext, plaintext_out)
+        assert intenc.decode_int64(plaintext_out) == expected_value
+        plaintext_out.set_zero()
+
+        ciphertext = sealapi.Ciphertext(ctx)
+        encryptor.encrypt_zero(ciphertext)
+        plaintext_out = sealapi.Plaintext()
+        decryptor.decrypt(ciphertext, plaintext_out)
+        assert intenc.decode_int64(plaintext_out) == 0
+        plaintext_out.set_zero()
+
+    encryptor = sealapi.Encryptor(ctx, public_key)
+    _test_encryptor_pk_setup(encryptor)
+
+    encryptor = sealapi.Encryptor(ctx, public_key, secret_key)
+    _test_encryptor_symmetric_setup(encryptor)
+    _test_encryptor_pk_setup(encryptor)
+
+    encryptor = sealapi.Encryptor(ctx, secret_key)
+    _test_encryptor_symmetric_setup(encryptor)
+
+    encryptor = sealapi.Encryptor(ctx, public_key)
+    encryptor.set_secret_key(secret_key)
+    _test_encryptor_pk_setup(encryptor)
+    _test_encryptor_symmetric_setup(encryptor)
+
+    encryptor = sealapi.Encryptor(ctx, secret_key)
+    encryptor.set_public_key(public_key)
+    _test_encryptor_pk_setup(encryptor)
+    _test_encryptor_symmetric_setup(encryptor)
 
 
 def test_decryptor():
-    pass
+    poly_modulus_degree = 4096
+    plain_modulus = 1024
+    ctx = context_bfv_sample(poly_modulus_degree, plain_modulus)
+
+    keygen = sealapi.KeyGenerator(ctx)
+    intenc = sealapi.IntegerEncoder(ctx)
+    public_key = keygen.public_key()
+    secret_key = keygen.secret_key()
+
+    decryptor = sealapi.Decryptor(ctx, secret_key)
+    encryptor = sealapi.Encryptor(ctx, public_key, secret_key)
+
+    expected_value = 1234
+    plaintext = intenc.encode(expected_value)
+
+    ciphertext = sealapi.Ciphertext(ctx)
+    encryptor.encrypt(plaintext, ciphertext)
+    plaintext_out = sealapi.Plaintext()
+
+    assert decryptor.invariant_noise_budget(ciphertext) > 0
+
+    decryptor.decrypt(ciphertext, plaintext_out)
+    assert intenc.decode_int64(plaintext_out) == expected_value
 
 
-def test_encryptor():
+def test_ckks():
     pass
 
 

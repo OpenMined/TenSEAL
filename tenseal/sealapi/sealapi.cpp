@@ -399,7 +399,8 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
     /*******************
      * "seal/keygenerator.h" {
      ***/
-    py::class_<KeyGenerator>(m, "KeyGenerator", py::module_local())
+    py::class_<KeyGenerator, std::shared_ptr<KeyGenerator>>(m, "KeyGenerator",
+                                                            py::module_local())
         .def(py::init<std::shared_ptr<SEALContext>>())
         .def(py::init<std::shared_ptr<SEALContext>, const SecretKey &>())
         .def(py::init<std::shared_ptr<SEALContext>, const SecretKey &,
@@ -506,7 +507,8 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
     /*******************
      * "seal/decryptor.h" {
      ***/
-    py::class_<Decryptor>(m, "Decryptor", py::module_local())
+    py::class_<Decryptor, std::shared_ptr<Decryptor>>(m, "Decryptor",
+                                                      py::module_local())
         .def(py::init<std::shared_ptr<SEALContext>, const SecretKey &>())
         .def("decrypt", &Decryptor::decrypt)
         .def("invariant_noise_budget", &Decryptor::invariant_noise_budget);
@@ -517,7 +519,8 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
     /*******************
      * "seal/encryptor.h" {
      ***/
-    py::class_<Encryptor>(m, "Encryptor", py::module_local())
+    py::class_<Encryptor, std::shared_ptr<Encryptor>>(m, "Encryptor",
+                                                      py::module_local())
         .def(py::init<std::shared_ptr<SEALContext>, const PublicKey &>())
         .def(py::init<std::shared_ptr<SEALContext>, const SecretKey &>())
         .def(py::init<std::shared_ptr<SEALContext>, const PublicKey &,
@@ -528,18 +531,24 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
              [](Encryptor &e, const Plaintext &plain, Ciphertext &destination) {
                  return e.encrypt(plain, destination);
              })
-        .def("encrypt_zero", py::overload_cast<Ciphertext &, MemoryPoolHandle>(
-                                 &Encryptor::encrypt_zero, py::const_))
         .def("encrypt_zero",
-             py::overload_cast<parms_id_type, Ciphertext &, MemoryPoolHandle>(
-                 &Encryptor::encrypt_zero, py::const_))
-        .def("encrypt_symmetric", &Encryptor::encrypt_symmetric)
+             [](Encryptor &e, Ciphertext &dst) { return e.encrypt_zero(dst); })
+        .def("encrypt_zero",
+             [](Encryptor &e, parms_id_type parms_id, Ciphertext &dst) {
+                 return e.encrypt_zero(parms_id, dst);
+             })
+        .def("encrypt_symmetric",
+             [](Encryptor &e, const Plaintext &plain, Ciphertext &dst) {
+                 return e.encrypt_symmetric(plain, dst);
+             })
         .def("encrypt_zero_symmetric",
-             py::overload_cast<Ciphertext &, MemoryPoolHandle>(
-                 &Encryptor::encrypt_zero_symmetric, py::const_))
+             [](Encryptor &e, Ciphertext &dst) {
+                 return e.encrypt_zero_symmetric(dst);
+             })
         .def("encrypt_zero_symmetric",
-             py::overload_cast<parms_id_type, Ciphertext &, MemoryPoolHandle>(
-                 &Encryptor::encrypt_zero_symmetric, py::const_));
+             [](Encryptor &e, parms_id_type parms_id, Ciphertext &dst) {
+                 return e.encrypt_zero_symmetric(parms_id, dst);
+             });
     /***
      * } "seal/encryptor.h"
      *******************/
@@ -606,7 +615,6 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
     /*******************
      * "seal/batchencoder.h" {
      ***/
-
     py::class_<BatchEncoder>(m, "BatchEncoder", py::module_local())
         .def(py::init<std::shared_ptr<SEALContext>>())
         .def("encode",
@@ -636,7 +644,9 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
      * } "seal/batchencoder.h"
      *******************/
 
-    // "seal/valcheck.h"
+    /*******************
+     * "seal/valcheck.h" {
+     ***/
     m.def("is_metadata_valid_for",
           py::overload_cast<const Plaintext &,
                             std::shared_ptr<const SEALContext>, bool>(
@@ -731,8 +741,13 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
              py::overload_cast<const GaloisKeys &,
                                std::shared_ptr<const SEALContext>>(
                  &is_valid_for));
+    /***
+     * } "seal/valcheck.h"
+     *******************/
 
-    // "seal/ckks.h"
+    /*******************
+     * "seal/ckks.h" {
+     ***/
     py::class_<CKKSEncoder> ckksEncoder(m, "CKKSEncoder", py::module_local());
     ckksEncoder.def(py::init<std::shared_ptr<SEALContext>>())
         .def("slot_count", &CKKSEncoder::slot_count);
@@ -765,8 +780,13 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
                  py::overload_cast<const Plaintext &, std::vector<T> &,
                                    MemoryPoolHandle>(&CKKSEncoder::decode));
     };
+    /***
+     * } "seal/ckks.h"
+     *******************/
 
-    // "seal/evaluator.h"
+    /*******************
+     * "seal/evaluator.h" {
+     ***/
     py::class_<Evaluator>(m, "Evaluator", py::module_local())
         .def(py::init<std::shared_ptr<SEALContext>>())
         .def("negate_inplace", &Evaluator::negate_inplace)
@@ -847,4 +867,7 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("rotate_vector", &Evaluator::rotate_vector)
         .def("complex_conjugate_inplace", &Evaluator::complex_conjugate_inplace)
         .def("complex_conjugate", &Evaluator::complex_conjugate);
+    /***
+     * } "seal/evaluator.h"
+     *******************/
 }
