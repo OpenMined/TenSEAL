@@ -787,7 +787,7 @@ def test_ciphertext(ctx):
     assert ciphertext.size_capacity() == 15
 
 
-def test_encryptor():
+def test_encryptor_bfv():
     poly_modulus_degree = 4096
     plain_modulus = 1024
     ctx = helper_context_bfv(poly_modulus_degree, plain_modulus)
@@ -821,7 +821,6 @@ def test_encryptor():
         ciphertext = sealapi.Ciphertext(ctx)
         encryptor.encrypt(plaintext, ciphertext)
         plaintext_out = sealapi.Plaintext()
-
         decryptor.decrypt(ciphertext, plaintext_out)
         assert intenc.decode_int64(plaintext_out) == expected_value
         plaintext_out.set_zero()
@@ -852,6 +851,37 @@ def test_encryptor():
     encryptor.set_public_key(public_key)
     _test_encryptor_pk_setup(encryptor)
     _test_encryptor_symmetric_setup(encryptor)
+
+
+def test_encryptor_bfv_batch():
+    batch = [1, 2, 3, 4, 5]
+    poly_modulus_degree = 8192
+    plain_modulus = 1032193
+
+    ctx = helper_context_bfv(poly_modulus_degree, plain_modulus)
+
+    keygen = sealapi.KeyGenerator(ctx)
+    batchenc = sealapi.BatchEncoder(ctx)
+    public_key = keygen.public_key()
+    secret_key = keygen.secret_key()
+
+    decryptor = sealapi.Decryptor(ctx, secret_key)
+
+    def _test_encryptor_pk_setup(encryptor):
+        ciphertext = sealapi.Ciphertext(ctx)
+        plaintext = sealapi.Plaintext()
+        batchenc.encode(batch, plaintext)
+        encryptor.encrypt(plaintext, ciphertext)
+        plaintext_out = sealapi.Plaintext()
+        decryptor.decrypt(ciphertext, plaintext_out)
+        assert batchenc.decode_int64(plaintext_out)[: len(batch)] == batch
+        plaintext_out.set_zero()
+
+    encryptor = sealapi.Encryptor(ctx, public_key)
+    _test_encryptor_pk_setup(encryptor)
+
+    encryptor = sealapi.Encryptor(ctx, public_key, secret_key)
+    _test_encryptor_pk_setup(encryptor)
 
 
 def test_decryptor():
@@ -916,12 +946,13 @@ def test_valcheck(check):
         assert sealapi.is_buffer_valid(key) == True
 
 
+def close_enough(out, expected):
+    for idx in range(len(expected)):
+        assert abs(expected[idx] - out[idx]) < 0.1
+
+
 @pytest.mark.parametrize("testcase", [[10, 20, 30], [1 / div for div in range(2, 10)]])
 def test_ckks_encoder(testcase):
-    def is_valid(out, expected):
-        for idx in range(len(expected)):
-            assert abs(expected[idx] - out[idx]) < 0.1
-
     ctx = helper_context_ckks()
     encoder = sealapi.CKKSEncoder(ctx)
 
@@ -929,7 +960,7 @@ def test_ckks_encoder(testcase):
     encoder.encode(testcase, 2 ** 40, plaintext)
     out = encoder.decode(plaintext)
 
-    is_valid(out, testcase)
+    close_enough(out, testcase)
 
     keygen = sealapi.KeyGenerator(ctx)
     public_key = keygen.public_key()
@@ -948,8 +979,126 @@ def test_ckks_encoder(testcase):
 
     decryptor.decrypt(ciphertext, plaintext_out)
     decrypted = encoder.decode(plaintext)
-    is_valid(decrypted, testcase)
+    close_enough(decrypted, testcase)
 
 
-def test_evaluator():
-    pass
+@pytest.mark.parametrize(
+    "scheme, ctx",
+    [
+        (sealapi.SCHEME_TYPE.BFV, helper_context_bfv(8192)),
+        (sealapi.SCHEME_TYPE.CKKS, helper_context_ckks(8192)),
+    ],
+)
+def test_evaluator(scheme, ctx):
+    def encode(test):
+        plaintext = sealapi.Plaintext()
+        if scheme == sealapi.SCHEME_TYPE.CKKS:
+            encoder = sealapi.CKKSEncoder(ctx)
+            encoder.encode(test, 2 ** 40, plaintext)
+        else:
+            encoder = sealapi.BatchEncoder(ctx)
+            encoder.encode(test, plaintext)
+        return plaintext
+
+    def decode(test):
+        if scheme == sealapi.SCHEME_TYPE.CKKS:
+            encoder = sealapi.CKKSEncoder(ctx)
+            return encoder.decode(test)
+        else:
+            encoder = sealapi.BatchEncoder(ctx)
+            return encoder.decode_int64(test)
+
+    left = [10, 100, 500, 600]
+    right = [5, 50, 100, 500]
+
+    evaluator = sealapi.Evaluator(ctx)
+
+    keygen = sealapi.KeyGenerator(ctx)
+    public_key = keygen.public_key()
+    secret_key = keygen.secret_key()
+
+    decryptor = sealapi.Decryptor(ctx, secret_key)
+    encryptor = sealapi.Encryptor(ctx, public_key, secret_key)
+
+    # unary in place
+    for (op, expected) in [
+        (evaluator.negate_inplace, [-10, -100, -500, -600]),
+        (evaluator.square_inplace, [100, 10000, 250000, 360000]),
+    ]:
+        cleft = sealapi.Ciphertext(ctx)
+        pleft = encode(left)
+        encryptor.encrypt(pleft, cleft)
+
+        op(cleft)
+
+        out = sealapi.Plaintext()
+        decryptor.decrypt(cleft, out)
+        out = decode(out)
+
+        close_enough(out[: len(left)], expected)
+
+    # unary
+    for (op, expected) in [
+        (evaluator.negate, [-10, -100, -500, -600]),
+        (evaluator.square, [100, 10000, 250000, 360000]),
+    ]:
+        cleft = sealapi.Ciphertext(ctx)
+        cright = sealapi.Ciphertext(ctx)
+
+        pleft = encode(left)
+        encryptor.encrypt(pleft, cleft)
+
+        op(cleft, cright)
+
+        out = sealapi.Plaintext()
+        decryptor.decrypt(cright, out)
+        out = decode(out)
+
+        close_enough(out[: len(left)], expected)
+
+    # binary in place
+    for (op, expected) in [
+        (evaluator.add_inplace, [15, 150, 600, 1100]),
+        (evaluator.sub_inplace, [5, 50, 400, 100]),
+        (evaluator.multiply_inplace, [50, 5000, 50000, 300000]),
+    ]:
+        cleft = sealapi.Ciphertext(ctx)
+        cright = sealapi.Ciphertext(ctx)
+
+        pleft = encode(left)
+        pright = encode(right)
+
+        encryptor.encrypt(pleft, cleft)
+        encryptor.encrypt(pright, cright)
+
+        op(cleft, cright)
+
+        out = sealapi.Plaintext()
+        decryptor.decrypt(cleft, out)
+        out = decode(out)
+
+        close_enough(out[: len(left)], expected)
+
+    # binary in place
+    for (op, expected) in [
+        (evaluator.add, [15, 150, 600, 1100]),
+        (evaluator.sub, [5, 50, 400, 100]),
+        (evaluator.multiply, [50, 5000, 50000, 300000]),
+    ]:
+        cleft = sealapi.Ciphertext(ctx)
+        cright = sealapi.Ciphertext(ctx)
+        cout = sealapi.Ciphertext(ctx)
+
+        pleft = encode(left)
+        pright = encode(right)
+
+        encryptor.encrypt(pleft, cleft)
+        encryptor.encrypt(pright, cright)
+
+        op(cleft, cright, cout)
+
+        out = sealapi.Plaintext()
+        decryptor.decrypt(cout, out)
+        out = decode(out)
+
+        close_enough(out[: len(left)], expected)

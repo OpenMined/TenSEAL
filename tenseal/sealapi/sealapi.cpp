@@ -827,43 +827,56 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
     /*******************
      * "seal/evaluator.h" {
      ***/
-    py::class_<Evaluator>(m, "Evaluator", py::module_local())
+    py::class_<Evaluator, std::shared_ptr<Evaluator>>(m, "Evaluator",
+                                                      py::module_local())
         .def(py::init<std::shared_ptr<SEALContext>>())
-        .def("negate_inplace", &Evaluator::negate_inplace)
-        .def("negate", &Evaluator::negate)
         .def("add_inplace", &Evaluator::add_inplace)
-        .def("add", &Evaluator::add)
-        .def("add_many", &Evaluator::add_many)
         .def("sub_inplace", &Evaluator::sub_inplace)
+        .def("multiply_inplace",
+             [](Evaluator &e, Ciphertext &l, const Ciphertext &r) {
+                 return e.multiply_inplace(l, r);
+             })
+        .def("negate_inplace", &Evaluator::negate_inplace)
+        .def("square_inplace",
+             [](Evaluator &e, Ciphertext &l) { return e.square_inplace(l); })
+        .def("negate", &Evaluator::negate)
+        .def("square", [](Evaluator &e, const Ciphertext &src,
+                          Ciphertext &dst) { e.square(src, dst); })
+        .def("add", &Evaluator::add)
         .def("sub", &Evaluator::sub)
-        .def("multiply_inplace", &Evaluator::multiply_inplace)
-        .def("multiply", &Evaluator::multiply)
-        .def("square_inplace", &Evaluator::square_inplace)
-        .def("square", &Evaluator::square)
+        .def("multiply",
+             [](Evaluator &e, const Ciphertext &e1, const Ciphertext &e2,
+                Ciphertext &dst) { return e.multiply(e1, e2, dst); })
+
+        // TODO tests
+        .def("add_many", &Evaluator::add_many)
         .def("relinearize_inplace", &Evaluator::relinearize_inplace)
         .def("relinearize", &Evaluator::relinearize)
         .def("mod_switch_to_next",
              py::overload_cast<const Plaintext &, Plaintext &>(
                  &Evaluator::mod_switch_to_next))
-        .def(
-            "mod_switch_to_next",
-            py::overload_cast<const Ciphertext &, Ciphertext &,
-                              MemoryPoolHandle>(&Evaluator::mod_switch_to_next))
+        .def("mod_switch_to_next",
+             [](Evaluator &e, const Ciphertext &enc, Ciphertext &dst) {
+                 return e.mod_switch_to_next(enc, dst);
+             })
         .def("mod_switch_to_next_inplace",
-             py::overload_cast<Ciphertext &, MemoryPoolHandle>(
-                 &Evaluator::mod_switch_to_next_inplace))
+             [](Evaluator &e, Ciphertext &dst) {
+                 return e.mod_switch_to_next_inplace(dst);
+             })
         .def("mod_switch_to_next_inplace",
              py::overload_cast<Plaintext &>(
                  &Evaluator::mod_switch_to_next_inplace))
         .def("mod_switch_to_inplace",
-             py::overload_cast<Ciphertext &, parms_id_type, MemoryPoolHandle>(
-                 &Evaluator::mod_switch_to_inplace))
+             [](Evaluator &e, Ciphertext &dst, parms_id_type parms_id) {
+                 return e.mod_switch_to_inplace(dst, parms_id);
+             })
         .def("mod_switch_to_inplace",
              py::overload_cast<Plaintext &, parms_id_type>(
                  &Evaluator::mod_switch_to_inplace))
-        .def("mod_switch_to",
-             py::overload_cast<const Ciphertext &, parms_id_type, Ciphertext &,
-                               MemoryPoolHandle>(&Evaluator::mod_switch_to))
+        .def(
+            "mod_switch_to",
+            [](Evaluator &e, const Ciphertext &enc, parms_id_type parms_id,
+               Ciphertext &dst) { return e.mod_switch_to(enc, parms_id, dst); })
         .def("mod_switch_to",
              py::overload_cast<const Plaintext &, parms_id_type, Plaintext &>(
                  &Evaluator::mod_switch_to))
@@ -881,14 +894,15 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("multiply_plain_inplace", &Evaluator::multiply_plain_inplace)
         .def("multiply_plain", &Evaluator::multiply_plain)
         .def("transform_to_ntt_inplace",
-             py::overload_cast<Plaintext &, parms_id_type, MemoryPoolHandle>(
-                 &Evaluator::transform_to_ntt_inplace))
+             [](Evaluator &e, Plaintext &in, parms_id_type parms_id) {
+                 e.transform_to_ntt_inplace(in, parms_id);
+             })
         .def("transform_to_ntt_inplace",
              py::overload_cast<Ciphertext &>(
                  &Evaluator::transform_to_ntt_inplace))
         .def("transform_to_ntt",
-             py::overload_cast<const Plaintext &, parms_id_type, Plaintext &,
-                               MemoryPoolHandle>(&Evaluator::transform_to_ntt))
+             [](Evaluator &e, const Plaintext &in, parms_id_type parms_id,
+                Plaintext &dst) { e.transform_to_ntt(in, parms_id, dst); })
         .def("transform_to_ntt",
              py::overload_cast<const Ciphertext &, Ciphertext &>(
                  &Evaluator::transform_to_ntt))
