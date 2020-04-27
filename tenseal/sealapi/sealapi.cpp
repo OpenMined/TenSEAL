@@ -404,13 +404,19 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
      ***/
     py::class_<RelinKeys, KSwitchKeys>(m, "RelinKeys", py::module_local())
         .def(py::init<>())
+        // KSwitchKeys
         .def("size", &RelinKeys::size)
-        .def("data", py::overload_cast<>(&RelinKeys::data))
-        .def("data", py::overload_cast<std::size_t>(&RelinKeys::data))
-        .def("parms_id", py::overload_cast<>(&RelinKeys::parms_id))
+        .def("data", py::overload_cast<>(&RelinKeys::data, py::const_),
+             py::return_value_policy::reference)
+        .def("data",
+             py::overload_cast<std::size_t>(&RelinKeys::data, py::const_),
+             py::return_value_policy::reference)
+        .def("parms_id", py::overload_cast<>(&RelinKeys::parms_id),
+             py::return_value_policy::reference)
+        // RelinKeys
         .def_static("get_index", &RelinKeys::get_index)
         .def("has_key", &RelinKeys::has_key)
-        .def("key", &RelinKeys::key);
+        .def("key", &RelinKeys::key, py::return_value_policy::reference);
     /***
      * } "seal/relinkeys.h"
      *******************/
@@ -420,10 +426,16 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
      ***/
     py::class_<GaloisKeys, KSwitchKeys>(m, "GaloisKeys", py::module_local())
         .def(py::init<>())
+        // KSwitchKeys
         .def("size", &GaloisKeys::size)
-        .def("data", py::overload_cast<>(&GaloisKeys::data))
-        .def("data", py::overload_cast<std::size_t>(&GaloisKeys::data))
-        .def("parms_id", py::overload_cast<>(&GaloisKeys::parms_id))
+        .def("data", py::overload_cast<>(&GaloisKeys::data, py::const_),
+             py::return_value_policy::reference)
+        .def("data",
+             py::overload_cast<std::size_t>(&GaloisKeys::data, py::const_),
+             py::return_value_policy::reference)
+        .def("parms_id", py::overload_cast<>(&GaloisKeys::parms_id),
+             py::return_value_policy::reference)
+        // GaloisKeys
         .def_static("get_index", &GaloisKeys::get_index)
         .def("has_key", &GaloisKeys::has_key)
         .def("key", &GaloisKeys::key);

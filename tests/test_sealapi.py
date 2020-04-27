@@ -431,8 +431,7 @@ def test_context_failure(scheme, sec_level):
     assert sealctx.parameters_set() == False
 
 
-def context_sample():
-    poly_modulus_degree = 8192
+def context_sample(poly_modulus_degree=8192):
     parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.BFV)
     parms.set_poly_modulus_degree(poly_modulus_degree)
     parms.set_plain_modulus(1032193)
@@ -509,19 +508,98 @@ def test_context_scheme_bfv_sanity(sec_level):
     assert sealctx.using_keyswitching() == True
 
 
-def test_publickey():
-    ctx = context_sample()
+def test_keygenerator_publickey():
+    poly_modulus_degree = 8192
+    ctx = context_sample(poly_modulus_degree)
     keygen = sealapi.KeyGenerator(ctx)
     public_key = keygen.public_key()
-    print(public_key.data(), public_key.parms_id())
+    assert public_key.data().parms_id() == public_key.parms_id()
+    assert public_key.data().poly_modulus_degree() == poly_modulus_degree
 
 
-def test_relinkeys():
-    pass
+def test_keygenerator_secretkey():
+    poly_modulus_degree = 8192
+    ctx = context_sample(poly_modulus_degree)
+    keygen = sealapi.KeyGenerator(ctx)
+    secret_key = keygen.secret_key()
+    assert secret_key.data().parms_id() == secret_key.parms_id()
+    assert secret_key.data().is_ntt_form() == True
+
+    ctx_data = ctx.key_context_data()
+    parms = ctx_data.parms()
+    coeff_count = parms.poly_modulus_degree()
+    coeff_mod_count = len(parms.coeff_modulus())
+
+    assert secret_key.data().coeff_count() == coeff_mod_count * coeff_count
 
 
-def test_secretkey():
-    pass
+def test_keygenerator_relinkeys():
+    index = 4
+    assert sealapi.RelinKeys.get_index(index) == index - 2
+
+    poly_modulus_degree = 8192
+    ctx = context_sample(poly_modulus_degree)
+    keygen = sealapi.KeyGenerator(ctx)
+    relin_keys = keygen.relin_keys()
+
+    assert relin_keys.has_key(2) == True
+
+    pubkey = relin_keys.key(2)[0]
+    assert pubkey.data().poly_modulus_degree() == poly_modulus_degree
+
+    assert relin_keys.size() > 0
+    assert len(relin_keys.data()) == relin_keys.size()
+    assert relin_keys.data(0)[0].data().poly_modulus_degree() == poly_modulus_degree
+    assert len(relin_keys.parms_id()) == 4
+
+
+def test_keygenerator_galoiskeys():
+    idx = 3
+    assert sealapi.GaloisKeys.get_index(idx) == (idx - 1) >> 1
+
+    poly_modulus_degree = 8192
+    ctx = context_sample(poly_modulus_degree)
+    keygen = sealapi.KeyGenerator(ctx)
+    galois_keys = keygen.galois_keys()
+
+    assert galois_keys.has_key(idx) == True
+
+    pubkey = galois_keys.key(idx)[0]
+    assert pubkey.data().poly_modulus_degree() == poly_modulus_degree
+
+    assert galois_keys.size() > 0
+    assert len(galois_keys.data()) == poly_modulus_degree
+    assert len(galois_keys.data(sealapi.GaloisKeys.get_index(idx))) == 4
+
+    assert (
+        galois_keys.data(sealapi.GaloisKeys.get_index(idx))[0].data().poly_modulus_degree()
+        == poly_modulus_degree
+    )
+    assert len(galois_keys.parms_id()) == 4
+
+
+def test_keygenerator_galoiskeys_with_steps():
+    idx = sealapi.GaloisKeys.get_index(7)
+    poly_modulus_degree = 8192
+
+    ctx = context_sample(poly_modulus_degree)
+    keygen = sealapi.KeyGenerator(ctx)
+    galois_keys = keygen.galois_keys([idx])
+
+    assert galois_keys.has_key(idx) == True
+
+    pubkey = galois_keys.key(idx)[0]
+    assert pubkey.data().poly_modulus_degree() == poly_modulus_degree
+
+    assert galois_keys.size() > 0
+    assert len(galois_keys.data()) == poly_modulus_degree
+    assert len(galois_keys.data(sealapi.GaloisKeys.get_index(idx))) == 4
+
+    assert (
+        galois_keys.data(sealapi.GaloisKeys.get_index(idx))[0].data().poly_modulus_degree()
+        == poly_modulus_degree
+    )
+    assert len(galois_keys.parms_id()) == 4
 
 
 def test_intencoder():
@@ -549,10 +627,6 @@ def test_evaluator():
 
 
 def test_intarray():
-    pass
-
-
-def test_keygenerator():
     pass
 
 
