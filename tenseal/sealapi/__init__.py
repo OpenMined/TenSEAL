@@ -63,3 +63,6 @@ IntegerEncoder = _sealapi_cpp.IntegerEncoder
 
 ## seal/intarray.h ##
 IntArray = _sealapi_cpp.IntArray
+
+## seal/batchencoder.h ##
+BatchEncoder = _sealapi_cpp.BatchEncoder

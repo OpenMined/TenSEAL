@@ -15,7 +15,6 @@ namespace py = pybind11;
  *  - no support for ostream/istream. BigUInt save/load
  *  - no support for std::byte. BigUInt::operator []
  ***/
-
 PYBIND11_MODULE(_sealapi_cpp, m) {
     m.doc() = "SEAL library bindings for Python";
 
@@ -604,7 +603,10 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
      * } "seal/intarray.h"
      *******************/
 
-    // "seal/batchencoder.h"
+    /*******************
+     * "seal/batchencoder.h" {
+     ***/
+
     py::class_<BatchEncoder>(m, "BatchEncoder", py::module_local())
         .def(py::init<std::shared_ptr<SEALContext>>())
         .def("encode",
@@ -613,17 +615,26 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("encode",
              py::overload_cast<const std::vector<std::int64_t> &, Plaintext &>(
                  &BatchEncoder::encode))
-        .def("encode", py::overload_cast<Plaintext &, MemoryPoolHandle>(
-                           &BatchEncoder::encode))
+        .def("encode",
+             [](BatchEncoder &b, Plaintext &plain) { return b.encode(plain); })
+        .def("decode_uint64",
+             [](BatchEncoder &b, const Plaintext &plain) {
+                 std::vector<std::uint64_t> destination;
+                 b.decode(plain, destination);
+                 return destination;
+             })
+        .def("decode_int64",
+             [](BatchEncoder &b, const Plaintext &plain) {
+                 std::vector<std::int64_t> destination;
+                 b.decode(plain, destination);
+                 return destination;
+             })
         .def("decode",
-             py::overload_cast<const Plaintext &, std::vector<std::uint64_t> &,
-                               MemoryPoolHandle>(&BatchEncoder::decode))
-        .def("decode",
-             py::overload_cast<const Plaintext &, std::vector<std::int64_t> &,
-                               MemoryPoolHandle>(&BatchEncoder::decode))
-        .def("decode", py::overload_cast<Plaintext &, MemoryPoolHandle>(
-                           &BatchEncoder::decode))
+             [](BatchEncoder &b, Plaintext &plain) { return b.decode(plain); })
         .def("slot_count", &BatchEncoder::slot_count);
+    /***
+     * } "seal/batchencoder.h"
+     *******************/
 
     // "seal/valcheck.h"
     m.def("is_metadata_valid_for",

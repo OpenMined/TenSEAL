@@ -660,8 +660,35 @@ def test_intarray():
     assert int_arr.capacity() == 0
 
 
+def test_batchencoder():
+    poly_modulus_degree = 1024
+    ctx = context_sample(poly_modulus_degree)
+    enc_out = sealapi.Plaintext()
+
+    testcase = [1, 2, 3, 4, 5]
+    encoder = sealapi.BatchEncoder(ctx)
+    encoder.encode(testcase, enc_out)
+    assert enc_out.int_array().size() == poly_modulus_degree
+    assert encoder.decode_uint64(enc_out)[: len(testcase)] == testcase
+    assert encoder.decode_int64(enc_out)[: len(testcase)] == testcase
+
+    test_str = "7FFx^3 + 1x^1 + 3"
+    testcase = sealapi.Plaintext(test_str)
+    encoder.encode(testcase)
+    assert testcase.to_string() != test_str
+    encoder.decode(testcase)
+    assert testcase.to_string() == test_str
+
+
 def test_ciphertext():
-    ctx = context_sample()
+    poly_modulus_degree = 1024
+    ctx = context_sample(poly_modulus_degree)
+
+    ctx_data = ctx.key_context_data()
+    parms = ctx_data.parms()
+    coeff_count = parms.poly_modulus_degree()
+    coeff_mod_count = len(parms.coeff_modulus())
+
     keygen = sealapi.KeyGenerator(ctx)
     public_key = keygen.public_key()
 
@@ -672,6 +699,24 @@ def test_ciphertext():
     encryptor = sealapi.Encryptor(ctx, public_key)
 
     encryptor.encrypt(plaintext, ciphertext)
+
+    assert ciphertext.poly_modulus_degree() == poly_modulus_degree
+    assert ciphertext.coeff_mod_count() == coeff_mod_count
+    assert ciphertext.int_array().size() > 0
+    assert ciphertext.size() == 2
+    assert ciphertext.size_capacity() == 2
+    assert ciphertext.is_transparent() == False
+    assert ciphertext.is_ntt_form() == False
+    assert ciphertext.parms_id() == ctx_data.parms_id()
+    assert ciphertext.scale() == 1
+
+    ciphertext.resize(ctx, 10)
+    assert ciphertext.size() == 10
+    assert ciphertext.size_capacity() == 10
+
+    ciphertext.reserve(15)
+    assert ciphertext.size() == 10
+    assert ciphertext.size_capacity() == 15
 
 
 def test_ckks():
@@ -687,10 +732,6 @@ def test_encryptor():
 
 
 def test_evaluator():
-    pass
-
-
-def test_batchencoder():
     pass
 
 
