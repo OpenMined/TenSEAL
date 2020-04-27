@@ -916,8 +916,39 @@ def test_valcheck(check):
         assert sealapi.is_buffer_valid(key) == True
 
 
-def test_ckks():
-    pass
+@pytest.mark.parametrize("testcase", [[10, 20, 30], [1 / div for div in range(2, 10)]])
+def test_ckks_encoder(testcase):
+    def is_valid(out, expected):
+        for idx in range(len(expected)):
+            assert abs(expected[idx] - out[idx]) < 0.1
+
+    ctx = helper_context_ckks()
+    encoder = sealapi.CKKSEncoder(ctx)
+
+    plaintext = sealapi.Plaintext()
+    encoder.encode(testcase, 2 ** 40, plaintext)
+    out = encoder.decode(plaintext)
+
+    is_valid(out, testcase)
+
+    keygen = sealapi.KeyGenerator(ctx)
+    public_key = keygen.public_key()
+    secret_key = keygen.secret_key()
+
+    decryptor = sealapi.Decryptor(ctx, secret_key)
+    encryptor = sealapi.Encryptor(ctx, public_key, secret_key)
+
+    plaintext = sealapi.Plaintext()
+    ciphertext = sealapi.Ciphertext(ctx)
+
+    encoder.encode(testcase, 2 ** 40, plaintext)
+    encryptor.encrypt(plaintext, ciphertext)
+
+    plaintext_out = sealapi.Plaintext()
+
+    decryptor.decrypt(ciphertext, plaintext_out)
+    decrypted = encoder.decode(plaintext)
+    is_valid(decrypted, testcase)
 
 
 def test_evaluator():

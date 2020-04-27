@@ -1,3 +1,4 @@
+#include <pybind11/complex.h>
 #include <pybind11/iostream.h>
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
@@ -752,38 +753,73 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
     /*******************
      * "seal/ckks.h" {
      ***/
-    py::class_<CKKSEncoder> ckksEncoder(m, "CKKSEncoder", py::module_local());
-    ckksEncoder.def(py::init<std::shared_ptr<SEALContext>>())
-        .def("slot_count", &CKKSEncoder::slot_count);
-    // using sig = void(std::complex<double>, double, Plaintext &,
-    // MemoryPoolHandle); ckksEncoder.def("encode",
-    // py::overload_cast<std::complex<double>, double, Plaintext &,
-    // MemoryPoolHandle>((sig*)&CKKSEncoder::encode))
-    ;
-    //.def("encode", py::overload_cast<const double, parms_id_type, double,
-    // Plaintext &, MemoryPoolHandle>(&CKKSEncoder::encode));
-    /*
-        .def("encode", py::overload_cast<double, double, Plaintext &,
-       MemoryPoolHandle>(&CKKSEncoder::encode)) .def("encode",
-       py::overload_cast<std::complex<double>, parms_id_type, double, Plaintext
-       &, MemoryPoolHandle>(&CKKSEncoder::encode)) .def("encode",
-       py::overload_cast<std::int64_t, parms_id_type, Plaintext
-       &>(&CKKSEncoder::encode)) .def("encode", py::overload_cast<std::int64_t,
-       Plaintext &>(&CKKSEncoder::encode))
-*/
-    auto encoder_template = [&]<typename T>() {
-        ckksEncoder
-            .def("encode",
-                 py::overload_cast<const std::vector<T> &, parms_id_type,
-                                   double, Plaintext &, MemoryPoolHandle>(
-                     &CKKSEncoder::encode))
-            .def("encode",
-                 py::overload_cast<const std::vector<T> &, double, Plaintext &,
-                                   MemoryPoolHandle>(&CKKSEncoder::encode))
-            .def("decode",
-                 py::overload_cast<const Plaintext &, std::vector<T> &,
-                                   MemoryPoolHandle>(&CKKSEncoder::decode));
-    };
+    py::class_<CKKSEncoder>(m, "CKKSEncoder", py::module_local())
+        .def(py::init<std::shared_ptr<SEALContext>>())
+        .def("slot_count", &CKKSEncoder::slot_count)
+        .def("encode",
+             [](CKKSEncoder &e, const std::vector<double> &values,
+                parms_id_type parms_id, double scale, Plaintext &destination) {
+                 return e.encode(values, parms_id, scale, destination);
+             })
+        .def("encode",
+             [](CKKSEncoder &e, const std::vector<std::complex<double>> &values,
+                parms_id_type parms_id, double scale, Plaintext &destination) {
+                 return e.encode(values, parms_id, scale, destination);
+             })
+        .def("encode",
+             [](CKKSEncoder &e, const std::vector<double> &values, double scale,
+                Plaintext &destination) {
+                 return e.encode(values, scale, destination);
+             })
+        .def("encode",
+             [](CKKSEncoder &e, const std::vector<std::complex<double>> &values,
+                double scale, Plaintext &destination) {
+                 return e.encode(values, scale, destination);
+             })
+        .def("encode",
+             [](CKKSEncoder &e, double value, parms_id_type parms_id,
+                double scale, Plaintext &destination) {
+                 return e.encode(value, parms_id, scale, destination);
+             })
+        .def("encode",
+             [](CKKSEncoder &e, double value, double scale,
+                Plaintext &destination) {
+                 return e.encode(value, scale, destination);
+             })
+        .def("encode",
+             [](CKKSEncoder &e, std::complex<double> value,
+                parms_id_type parms_id, double scale, Plaintext &destination) {
+                 return e.encode(value, parms_id, scale, destination);
+             })
+        .def("encode",
+             [](CKKSEncoder &e, std::complex<double> value, double scale,
+                Plaintext &destination) {
+                 return e.encode(value, scale, destination);
+             })
+        .def("encode",
+             [](CKKSEncoder &e, std::int64_t value, parms_id_type parms_id,
+                double scale, Plaintext &destination) {
+                 return e.encode(value, parms_id, scale, destination);
+             })
+        .def("encode",
+             [](CKKSEncoder &e, std::int64_t value, double scale,
+                Plaintext &destination) {
+                 return e.encode(value, scale, destination);
+             })
+        .def("decode",
+             [](CKKSEncoder &e, const Plaintext &plain) {
+                 std::vector<double> destination;
+                 e.decode(plain, destination);
+                 return destination;
+             })
+        .def("decode",
+             [](CKKSEncoder &e, const Plaintext &plain) {
+                 std::vector<double> destination;
+                 e.decode(plain, destination);
+                 return destination;
+             })
+
+        ;
     /***
      * } "seal/ckks.h"
      *******************/
