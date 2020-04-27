@@ -648,33 +648,33 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
      * "seal/valcheck.h" {
      ***/
     m.def("is_metadata_valid_for",
-          py::overload_cast<const Plaintext &,
-                            std::shared_ptr<const SEALContext>, bool>(
-              &is_metadata_valid_for))
+          [](const Plaintext &in, std::shared_ptr<const SEALContext> ctx) {
+              return is_metadata_valid_for(in, ctx);
+          })
         .def("is_metadata_valid_for",
-             py::overload_cast<const Ciphertext &,
-                               std::shared_ptr<const SEALContext>, bool>(
-                 &is_metadata_valid_for))
+             [](const Ciphertext &in, std::shared_ptr<const SEALContext> ctx) {
+                 return is_metadata_valid_for(in, ctx);
+             })
         .def("is_metadata_valid_for",
-             py::overload_cast<const SecretKey &,
-                               std::shared_ptr<const SEALContext>>(
-                 &is_metadata_valid_for))
+             [](const SecretKey &in, std::shared_ptr<const SEALContext> ctx) {
+                 return is_metadata_valid_for(in, ctx);
+             })
         .def("is_metadata_valid_for",
-             py::overload_cast<const PublicKey &,
-                               std::shared_ptr<const SEALContext>>(
-                 &is_metadata_valid_for))
+             [](const PublicKey &in, std::shared_ptr<const SEALContext> ctx) {
+                 return is_metadata_valid_for(in, ctx);
+             })
         .def("is_metadata_valid_for",
-             py::overload_cast<const KSwitchKeys &,
-                               std::shared_ptr<const SEALContext>>(
-                 &is_metadata_valid_for))
+             [](const KSwitchKeys &in, std::shared_ptr<const SEALContext> ctx) {
+                 return is_metadata_valid_for(in, ctx);
+             })
         .def("is_metadata_valid_for",
-             py::overload_cast<const RelinKeys &,
-                               std::shared_ptr<const SEALContext>>(
-                 &is_metadata_valid_for))
+             [](const RelinKeys &in, std::shared_ptr<const SEALContext> ctx) {
+                 return is_metadata_valid_for(in, ctx);
+             })
         .def("is_metadata_valid_for",
-             py::overload_cast<const GaloisKeys &,
-                               std::shared_ptr<const SEALContext>>(
-                 &is_metadata_valid_for))
+             [](const GaloisKeys &in, std::shared_ptr<const SEALContext> ctx) {
+                 return is_metadata_valid_for(in, ctx);
+             })
         .def("is_buffer_valid",
              py::overload_cast<const Plaintext &>(&is_buffer_valid))
         .def("is_buffer_valid",
@@ -717,6 +717,10 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
              py::overload_cast<const GaloisKeys &,
                                std::shared_ptr<const SEALContext>>(
                  &is_data_valid_for))
+        .def("is_valid_for",
+             py::overload_cast<const Plaintext &,
+                               std::shared_ptr<const SEALContext>>(
+                 &is_valid_for))
         .def("is_valid_for",
              py::overload_cast<const Ciphertext &,
                                std::shared_ptr<const SEALContext>>(
