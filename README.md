@@ -1,5 +1,7 @@
 # TenSEAL
 
+![Linux Package](https://github.com/OpenMined/TenSEAL/workflows/Linux%20Package/badge.svg)
+![MacOS Package](https://github.com/OpenMined/TenSEAL/workflows/MacOS%20Package/badge.svg)
 ![Tests](https://github.com/OpenMined/TenSEAL/workflows/Tests/badge.svg)
 ![Update Docker Image](https://github.com/OpenMined/TenSEAL/workflows/Update%20Docker%20Image/badge.svg)
 
@@ -7,12 +9,21 @@ TenSEAL is a library for doing homomorphic encryption operations on tensors, bui
 
 ## Installation
 
+#### Using pip
+
 ```bash
 $ pip install tenseal
 ```
-This installs the last packaged version on [pypi](https://pypi.org/). If your platform doesn't have a ready package, please open an [issue](https://github.com/OpenMined/TenSEAL/issues) to let us know.
+This installs the last packaged version on [pypi](https://pypi.org/project/tenseal/). If your platform doesn't have a ready package, please open an [issue](https://github.com/OpenMined/TenSEAL/issues) to let us know.
 
-If you want to install tenseal from the repository, you should first make sure to have [CMake (3.12 or higher) installed](https://cmake.org/install/), then get the third party libraries (if you didn't already) by running the following command from the root directory of the project
+#### Build from Source
+
+Supported platforms and their requirements are listed below: (this are only required for building TenSEAL from source)
+- **Linux:** A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0).
+- **macOS:** Xcode toolchain (>= 9.3)
+- **Windows:** Not supported yet, please use our [Docker image](#use-docker).
+
+If you want to install tenseal from the repository, you should first make sure to have the requirements for your platform (listed above) and [CMake (3.12 or higher)](https://cmake.org/install/) installed, then get the third party libraries (if you didn't already) by running the following command from the root directory of the project
 
 ```bash
 $ git submodule init
