@@ -5,7 +5,7 @@ project(tenseal)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_subdirectory(third_party/SEAL/native/src)
+add_subdirectory(third_party/SEAL)
 add_subdirectory(third_party/pybind11)
 
 set(TENSEAL_BASEDIR tenseal)
