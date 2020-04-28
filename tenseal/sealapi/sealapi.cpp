@@ -807,15 +807,15 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
                 Plaintext &destination) {
                  return e.encode(value, scale, destination);
              })
-        .def("decode",
+        .def("decode_double",
              [](CKKSEncoder &e, const Plaintext &plain) {
                  std::vector<double> destination;
                  e.decode(plain, destination);
                  return destination;
              })
-        .def("decode",
+        .def("decode_complex",
              [](CKKSEncoder &e, const Plaintext &plain) {
-                 std::vector<double> destination;
+                 std::vector<std::complex<double>> destination;
                  e.decode(plain, destination);
                  return destination;
              })
@@ -963,15 +963,45 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
                                        destination);
              })
 
-        // TODO tests
-        .def("rotate_rows", &Evaluator::rotate_rows)
-        .def("rotate_columns_inplace", &Evaluator::rotate_columns_inplace)
-        .def("rotate_columns", &Evaluator::rotate_columns)
-        .def("rotate_vector_inplace", &Evaluator::rotate_vector_inplace)
-        .def("rotate_vector", &Evaluator::rotate_vector)
+        .def("rotate_rows_inplace",
+             [](Evaluator &e, Ciphertext &enc, int steps,
+                const GaloisKeys &galois_keys) {
+                 return e.rotate_rows_inplace(enc, steps, galois_keys);
+             })
+        .def("rotate_rows",
+             [](Evaluator &e, const Ciphertext &enc, int steps,
+                const GaloisKeys &galois_keys, Ciphertext &dst) {
+                 return e.rotate_rows(enc, steps, galois_keys, dst);
+             })
+        .def("rotate_columns",
+             [](Evaluator &e, const Ciphertext &enc,
+                const GaloisKeys &galois_keys, Ciphertext &dst) {
+                 return e.rotate_columns(enc, galois_keys, dst);
+             })
+        .def("rotate_columns_inplace",
+             [](Evaluator &e, Ciphertext &enc, const GaloisKeys &galois_key) {
+                 return e.rotate_columns_inplace(enc, galois_key);
+             })
+        .def("rotate_vector_inplace",
+             [](Evaluator &e, Ciphertext &enc, int steps,
+                const GaloisKeys &galois_keys) {
+                 return e.rotate_vector_inplace(enc, steps, galois_keys);
+             })
+        .def("rotate_vector",
+             [](Evaluator &e, const Ciphertext &enc, int steps,
+                const GaloisKeys &galois_keys, Ciphertext &dst) {
+                 return e.rotate_vector(enc, steps, galois_keys, dst);
+             })
 
-        .def("complex_conjugate_inplace", &Evaluator::complex_conjugate_inplace)
-        .def("complex_conjugate", &Evaluator::complex_conjugate);
+        .def("complex_conjugate_inplace",
+             [](Evaluator &e, Ciphertext &enc, const GaloisKeys &galois_keys) {
+                 return e.complex_conjugate_inplace(enc, galois_keys);
+             })
+        .def("complex_conjugate",
+             [](Evaluator &e, const Ciphertext &enc,
+                const GaloisKeys &galois_keys, Ciphertext &dst) {
+                 return e.complex_conjugate(enc, galois_keys, dst);
+             });
     /***
      * } "seal/evaluator.h"
      *******************/

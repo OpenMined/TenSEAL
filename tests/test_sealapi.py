@@ -12,7 +12,7 @@ def helper_context_bfv(poly_modulus_degree=4096, plain_modulus=1032193):
     return sealapi.SEALContext.Create(parms, True, sealapi.SEC_LEVEL_TYPE.TC128)
 
 
-def helper_context_ckks(poly_modulus_degree=8192, plain_modulus=0):
+def helper_context_ckks(poly_modulus_degree=8192):
     parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.CKKS)
     parms.set_poly_modulus_degree(poly_modulus_degree)
     coeff = sealapi.CoeffModulus.Create(poly_modulus_degree, [60, 40, 40, 60])
@@ -46,10 +46,10 @@ def helper_encode(scheme, ctx, test):
 def helper_decode(scheme, ctx, test):
     if scheme == sealapi.SCHEME_TYPE.CKKS:
         encoder = sealapi.CKKSEncoder(ctx)
-        return encoder.decode(test)
-    else:
-        encoder = sealapi.BatchEncoder(ctx)
-        return encoder.decode_int64(test)
+        return encoder.decode_double(test)
+
+    encoder = sealapi.BatchEncoder(ctx)
+    return encoder.decode_int64(test)
 
 
 def helper_generate_evaluator(ctx):
@@ -132,8 +132,8 @@ def test_biguint_ops():
     modulus = 101
     testcase = sealapi.BigUInt(128, value)
     assert testcase.modinv(sealapi.BigUInt(128, modulus)) == expected_modinv(value, modulus)
-    assert testcase.trymodinv(sealapi.BigUInt(128, modulus), sealapi.BigUInt(128)) == True
-    assert testcase.trymodinv(sealapi.BigUInt(128, 99), sealapi.BigUInt(128)) == False
+    assert testcase.trymodinv(sealapi.BigUInt(128, modulus), sealapi.BigUInt(128)) is True
+    assert testcase.trymodinv(sealapi.BigUInt(128, 99), sealapi.BigUInt(128)) is False
 
     testcase = sealapi.BigUInt(128, 34)
 
@@ -260,7 +260,7 @@ def test_smallmodulus():
     "compr_type", [sealapi.COMPR_MODE_TYPE.NONE, sealapi.COMPR_MODE_TYPE.DEFLATE]
 )
 def test_serialization_compression(compr_type):
-    assert sealapi.Serialization.IsSupportedComprMode(compr_type) == True
+    assert sealapi.Serialization.IsSupportedComprMode(compr_type) is True
     assert sealapi.Serialization.ComprSizeEstimate(8, compr_type) > 0
 
 
@@ -275,13 +275,13 @@ def test_serialization_sanity():
     assert header.size == 0
     assert header.reserved == 0
 
-    assert sealapi.Serialization.IsSupportedComprMode(15) == False
+    assert sealapi.Serialization.IsSupportedComprMode(15) is False
 
     header = sealapi.Serialization.SEALHeader()
-    assert sealapi.Serialization.IsValidHeader(header) == True
+    assert sealapi.Serialization.IsValidHeader(header) is True
 
     header.magic = 0
-    assert sealapi.Serialization.IsValidHeader(header) == False
+    assert sealapi.Serialization.IsValidHeader(header) is False
 
 
 def test_plaintext():
@@ -301,8 +301,8 @@ def test_plaintext():
     assert testcase.capacity() == 4
 
     testcase2 = testcase
-    assert testcase.coeff_count() == 4
-    assert testcase.capacity() == 4
+    assert testcase2.coeff_count() == 4
+    assert testcase2.capacity() == 4
 
     testcase = sealapi.Plaintext(100, 15)
     testcase.reserve(200)
@@ -335,7 +335,7 @@ def test_plaintext():
     assert testcase.nonzero_coeff_count() == 0
 
     testcase = sealapi.Plaintext("7FFx^3 + 2x^1 + 3")
-    assert testcase.is_ntt_form() == False
+    assert testcase.is_ntt_form() is False
 
 
 @pytest.mark.parametrize(
@@ -436,10 +436,10 @@ def test_modulus_sanity():
     custom_mod = sealapi.CoeffModulus.Create(1024, [32, 32])
     assert len(custom_mod) == 2
     for small_mod in custom_mod:
-        assert small_mod.is_prime() == True
+        assert small_mod.is_prime() is True
 
     small_mod = sealapi.PlainModulus.Batching(1024, 40)
-    assert small_mod.is_prime() == True
+    assert small_mod.is_prime() is True
     assert small_mod.bit_count() == 40
 
     sizes = [16, 32, 40]
@@ -492,18 +492,18 @@ def test_context_failure(scheme, sec_level):
     parms = sealapi.EncryptionParameters(scheme)
 
     sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
-    assert sealctx.parameters_set() == False
+    assert sealctx.parameters_set() is False
 
 
 @pytest.mark.parametrize(
     "sealctx", [helper_context_bfv(), helper_context_ckks()],
 )
 def test_context_sanity(sealctx):
-    assert sealctx.parameters_set() == True
+    assert sealctx.parameters_set() is True
 
 
 def context_asserts(sealctx, sec_level, scheme):
-    assert sealctx.parameters_set() == True
+    assert sealctx.parameters_set() is True
 
     orig_ctx_data = sealctx.key_context_data()
     parms = orig_ctx_data.parms()
@@ -527,10 +527,10 @@ def context_asserts(sealctx, sec_level, scheme):
         assert ctx_data.upper_half_threshold() == ctx_alias.upper_half_threshold()
 
         qualifiers = ctx_data.qualifiers()
-        assert qualifiers.parameters_set == True
-        assert qualifiers.using_fft == True
-        assert qualifiers.using_ntt == True
-        assert qualifiers.using_batching == True
+        assert qualifiers.parameters_set is True
+        assert qualifiers.using_fft is True
+        assert qualifiers.using_ntt is True
+        assert qualifiers.using_batching is True
         assert qualifiers.using_fast_plain_lift == (scheme == sealapi.SCHEME_TYPE.BFV)
         assert qualifiers.sec_level == sec_level
 
@@ -542,13 +542,13 @@ def context_asserts(sealctx, sec_level, scheme):
         should_be_same_ctx = sealctx.get_context_data(parms_id)
         context_data_sanity(ctx_data, should_be_same_ctx, index)
 
-    assert sealctx.last_context_data().next_context_data() == None
+    assert sealctx.last_context_data().next_context_data() is None
     assert (
         sealctx.first_context_data().prev_context_data().chain_index()
         == sealctx.key_context_data().chain_index()
     )
 
-    assert sealctx.using_keyswitching() == True
+    assert sealctx.using_keyswitching() is True
 
 
 @pytest.mark.parametrize(
@@ -566,7 +566,7 @@ def test_context_scheme_bfv_sanity(sec_level):
     coeff = sealapi.CoeffModulus.Create(poly_modulus_degree, [32, 32])
     parms.set_coeff_modulus(coeff)
     sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
-    assert sealctx.parameters_set() == True
+    assert sealctx.parameters_set() is True
 
     coeff = sealapi.CoeffModulus.BFVDefault(poly_modulus_degree, sec_level)
     parms.set_coeff_modulus(coeff)
@@ -587,7 +587,7 @@ def test_context_scheme_ckks_sanity(sec_level):
     coeff = sealapi.CoeffModulus.Create(poly_modulus_degree, [60, 40, 40, 60])
     parms.set_coeff_modulus(coeff)
     sealctx = sealapi.SEALContext.Create(parms, True, sealapi.SEC_LEVEL_TYPE.TC128)
-    assert sealctx.parameters_set() == True
+    assert sealctx.parameters_set() is True
 
     context_asserts(sealctx, sec_level, sealapi.SCHEME_TYPE.CKKS)
 
@@ -609,7 +609,7 @@ def test_keygenerator_secretkey(ctx):
     keygen = sealapi.KeyGenerator(ctx)
     secret_key = keygen.secret_key()
     assert secret_key.data().parms_id() == secret_key.parms_id()
-    assert secret_key.data().is_ntt_form() == True
+    assert secret_key.data().is_ntt_form() is True
 
     ctx_data = ctx.key_context_data()
     parms = ctx_data.parms()
@@ -631,7 +631,7 @@ def test_keygenerator_relinkeys(ctx):
     keygen = sealapi.KeyGenerator(ctx)
     relin_keys = keygen.relin_keys()
 
-    assert relin_keys.has_key(2) == True
+    assert relin_keys.has_key(2) is True
 
     pubkey = relin_keys.key(2)[0]
     assert pubkey.data().poly_modulus_degree() == poly_modulus_degree
@@ -654,7 +654,7 @@ def test_keygenerator_galoiskeys(ctx):
     keygen = sealapi.KeyGenerator(ctx)
     galois_keys = keygen.galois_keys()
 
-    assert galois_keys.has_key(idx) == True
+    assert galois_keys.has_key(idx) is True
 
     pubkey = galois_keys.key(idx)[0]
     assert pubkey.data().poly_modulus_degree() == poly_modulus_degree
@@ -683,7 +683,7 @@ def test_keygenerator_galoiskeys_with_steps(ctx):
     keygen = sealapi.KeyGenerator(ctx)
     galois_keys = keygen.galois_keys([idx])
 
-    assert galois_keys.has_key(idx) == True
+    assert galois_keys.has_key(idx) is True
 
     pubkey = galois_keys.key(idx)[0]
     assert pubkey.data().poly_modulus_degree() == poly_modulus_degree
@@ -733,7 +733,7 @@ def test_intarray():
 
     assert int_arr[0] == 3
     assert int_arr.at(3) == 3
-    assert int_arr.empty() == False
+    assert int_arr.empty() is False
     assert int_arr.max_size() == 2 ** 64 - 1
     assert int_arr.size() == 4
     assert int_arr.capacity() == 4
@@ -753,7 +753,7 @@ def test_intarray():
     int_arr.clear()
     assert int_arr.size() == 0
     assert int_arr.capacity() == 10
-    assert int_arr.empty() == True
+    assert int_arr.empty() is True
 
     int_arr.release()
     assert int_arr.capacity() == 0
@@ -789,7 +789,6 @@ def test_ciphertext(ctx):
 
     ctx_data = ctx.key_context_data()
     parms = ctx_data.parms()
-    coeff_count = parms.poly_modulus_degree()
     coeff_mod_count = len(parms.coeff_modulus())
 
     keygen = sealapi.KeyGenerator(ctx)
@@ -807,8 +806,8 @@ def test_ciphertext(ctx):
     assert ciphertext.int_array().size() > 0
     assert ciphertext.size() == 2
     assert ciphertext.size_capacity() == 2
-    assert ciphertext.is_transparent() == False
-    assert ciphertext.is_ntt_form() == False
+    assert ciphertext.is_transparent() is False
+    assert ciphertext.is_ntt_form() is False
     assert ciphertext.parms_id() == ctx_data.parms_id()
     assert ciphertext.scale() == 1
 
@@ -954,17 +953,17 @@ def test_valcheck(check):
 
     ciphertext = sealapi.Ciphertext(ctx)
 
-    assert check(ciphertext, ctx) == True
-    assert check(ciphertext, other_ctx) == False
-    assert check(ciphertext, invalid_ctx) == False
+    assert check(ciphertext, ctx) is True
+    assert check(ciphertext, other_ctx) is False
+    assert check(ciphertext, invalid_ctx) is False
 
-    assert sealapi.is_buffer_valid(ciphertext) == True
+    assert sealapi.is_buffer_valid(ciphertext) is True
 
     plaintext = sealapi.Plaintext()
 
-    assert check(plaintext, ctx) == True
-    assert check(plaintext, other_ctx) == True
-    assert check(plaintext, invalid_ctx) == False
+    assert check(plaintext, ctx) is True
+    assert check(plaintext, other_ctx) is True
+    assert check(plaintext, invalid_ctx) is False
 
     keygen = sealapi.KeyGenerator(ctx)
 
@@ -974,10 +973,10 @@ def test_valcheck(check):
         keygen.galois_keys(),
         keygen.relin_keys(),
     ]:
-        assert check(key, ctx) == True
-        assert check(key, other_ctx) == False
-        assert check(key, invalid_ctx) == False
-        assert sealapi.is_buffer_valid(key) == True
+        assert check(key, ctx) is True
+        assert check(key, other_ctx) is False
+        assert check(key, invalid_ctx) is False
+        assert sealapi.is_buffer_valid(key) is True
 
 
 def is_close_enough(out, expected):
@@ -992,7 +991,7 @@ def test_ckks_encoder(testcase):
 
     plaintext = sealapi.Plaintext()
     encoder.encode(testcase, 2 ** 40, plaintext)
-    out = encoder.decode(plaintext)
+    out = encoder.decode_double(plaintext)
 
     is_close_enough(out, testcase)
 
@@ -1012,42 +1011,8 @@ def test_ckks_encoder(testcase):
     plaintext_out = sealapi.Plaintext()
 
     decryptor.decrypt(ciphertext, plaintext_out)
-    decrypted = encoder.decode(plaintext)
+    decrypted = encoder.decode_double(plaintext)
     is_close_enough(decrypted, testcase)
-
-
-def helper_encode(scheme, ctx, test):
-    plaintext = sealapi.Plaintext()
-    if scheme == sealapi.SCHEME_TYPE.CKKS:
-        encoder = sealapi.CKKSEncoder(ctx)
-        encoder.encode(test, 2 ** 40, plaintext)
-    else:
-        encoder = sealapi.BatchEncoder(ctx)
-        encoder.encode(test, plaintext)
-    return plaintext
-
-
-def helper_decode(scheme, ctx, test):
-    if scheme == sealapi.SCHEME_TYPE.CKKS:
-        encoder = sealapi.CKKSEncoder(ctx)
-        return encoder.decode(test)
-    else:
-        encoder = sealapi.BatchEncoder(ctx)
-        return encoder.decode_int64(test)
-
-
-def helper_generate_evaluator(ctx):
-    evaluator = sealapi.Evaluator(ctx)
-
-    keygen = sealapi.KeyGenerator(ctx)
-    public_key = keygen.public_key()
-    secret_key = keygen.secret_key()
-    relin_keys = keygen.relin_keys()
-
-    decryptor = sealapi.Decryptor(ctx, secret_key)
-    encryptor = sealapi.Encryptor(ctx, public_key, secret_key)
-
-    return evaluator, encryptor, decryptor, relin_keys
 
 
 @pytest.mark.parametrize(
@@ -1061,7 +1026,7 @@ def helper_generate_evaluator(ctx):
     "left", [[10, 100, 500, 600], [i for i in range(200)],],
 )
 def test_evaluator_unary(scheme, ctx, left):
-    evaluator, encryptor, decryptor, relin_keys = helper_generate_evaluator(ctx)
+    evaluator, encryptor, decryptor, _ = helper_generate_evaluator(ctx)
 
     # unary in place
     for (op, expected) in [
@@ -1117,7 +1082,7 @@ def test_evaluator_unary(scheme, ctx, left):
     ],
 )
 def test_evaluator_binary(scheme, ctx, left, right):
-    evaluator, encryptor, decryptor, relin_keys = helper_generate_evaluator(ctx)
+    evaluator, encryptor, decryptor, _ = helper_generate_evaluator(ctx)
 
     # binary in place
     for (op, expected) in [
@@ -1178,7 +1143,7 @@ def test_evaluator_binary(scheme, ctx, left, right):
     "left", [[10, 100, 500, 600], [i for i in range(200)],],
 )
 def test_evaluator_plain(scheme, ctx, left):
-    evaluator, encryptor, decryptor, relin_keys = helper_generate_evaluator(ctx)
+    evaluator, encryptor, decryptor, _ = helper_generate_evaluator(ctx)
 
     # plain op in place
     for (op, plain, expected) in [
@@ -1274,7 +1239,7 @@ def test_evaluator_exp(scheme, ctx, exp, left):
     "many", [[[7, 3], [2, 5]], [[2 * i for i in range(100)], [7 * i for i in range(100)]],],
 )
 def test_evaluator_add_many(scheme, ctx, many):
-    evaluator, encryptor, decryptor, relin_keys = helper_generate_evaluator(ctx)
+    evaluator, encryptor, decryptor, _ = helper_generate_evaluator(ctx)
 
     expected = [0] * len(many[0])
     for idx in range(len(many)):
@@ -1390,141 +1355,134 @@ def test_evaluator_relin(scheme, ctx, left, right):
     is_close_enough(out[: len(left)], expected)
 
 
-@pytest.mark.parametrize("scheme, ctx", [(sealapi.SCHEME_TYPE.BFV, helper_context_bfv(8192)),])
-@pytest.mark.parametrize(
-    "left, right",
-    [
-        ([10, 100, 500, 600], [5, 50, 100, 500]),
-        ([2 * i for i in range(200)], [5 * i for i in range(200)]),
-    ],
-)
-def test_evaluator_mod_switch(scheme, ctx, left, right):
-    evaluator, encryptor, decryptor, relin_keys = helper_generate_evaluator(ctx)
+def test_evaluator_mod_switch():
+    scheme = sealapi.SCHEME_TYPE.BFV
+    parms = sealapi.EncryptionParameters(scheme)
+    parms.set_poly_modulus_degree(128)
+    parms.set_plain_modulus(1 << 6)
+    coeff = sealapi.CoeffModulus.Create(128, [30, 30, 30])
+    parms.set_coeff_modulus(coeff)
+    ctx = sealapi.SEALContext.Create(parms, True, sealapi.SEC_LEVEL_TYPE.NONE)
 
-    expected = [left[idx] * right[idx] for idx in range(len(left))]
+    intenc = sealapi.IntegerEncoder(ctx)
+    keygen = sealapi.KeyGenerator(ctx)
+    public_key = keygen.public_key()
+    secret_key = keygen.secret_key()
+
+    decryptor = sealapi.Decryptor(ctx, secret_key)
+    encryptor = sealapi.Encryptor(ctx, public_key)
+
+    evaluator = sealapi.Evaluator(ctx)
 
     # cphertext mod switch to next
-    cleft = sealapi.Ciphertext(ctx)
-    cright = sealapi.Ciphertext(ctx)
+    expected_value = 1234
+    plain = intenc.encode(expected_value)
+    out = sealapi.Plaintext()
+    enc = sealapi.Ciphertext(ctx)
 
-    pleft = helper_encode(scheme, ctx, left)
-    pright = helper_encode(scheme, ctx, right)
+    encryptor.encrypt(plain, enc)
 
-    encryptor.encrypt(pleft, cleft)
-    encryptor.encrypt(pright, cright)
-
-    evaluator.multiply_inplace(cleft, cright)
-    before = decryptor.invariant_noise_budget(cleft)
-    evaluator.mod_switch_to_next_inplace(cleft)
-    after = decryptor.invariant_noise_budget(cleft)
-
-    assert before > after  # we reduced the modulus
+    before = decryptor.invariant_noise_budget(enc)
+    evaluator.mod_switch_to_next_inplace(enc)
+    after = decryptor.invariant_noise_budget(enc)
+    assert before > after
+    decryptor.decrypt(enc, out)
+    assert intenc.decode_int64(out) == expected_value
 
     # ciphertext mod switch to next
-    cleft = sealapi.Ciphertext(ctx)
-    cright = sealapi.Ciphertext(ctx)
+    plain = intenc.encode(expected_value)
+    out = sealapi.Plaintext()
+    enc = sealapi.Ciphertext(ctx)
     cout = sealapi.Ciphertext(ctx)
 
-    pleft = helper_encode(scheme, ctx, left)
-    pright = helper_encode(scheme, ctx, right)
+    encryptor.encrypt(plain, enc)
 
-    encryptor.encrypt(pleft, cleft)
-    encryptor.encrypt(pright, cright)
-
-    evaluator.multiply_inplace(cleft, cright)
-
-    before = decryptor.invariant_noise_budget(cleft)
-    evaluator.mod_switch_to_next(cleft, cout)
+    before = decryptor.invariant_noise_budget(enc)
+    evaluator.mod_switch_to_next(enc, cout)
     after = decryptor.invariant_noise_budget(cout)
-
-    assert before > after  # we reduced the modulus
+    assert before > after
+    decryptor.decrypt(cout, out)
+    assert intenc.decode_int64(out) == expected_value
 
     # cphertext mod switch to inplace
     parms_id = ctx.last_parms_id()
-    cleft = sealapi.Ciphertext(ctx)
-    cright = sealapi.Ciphertext(ctx)
+    plain = intenc.encode(expected_value)
+    out = sealapi.Plaintext()
+    enc = sealapi.Ciphertext(ctx)
+    cout = sealapi.Ciphertext(ctx)
 
-    pleft = helper_encode(scheme, ctx, left)
-    pright = helper_encode(scheme, ctx, right)
+    encryptor.encrypt(plain, enc)
 
-    encryptor.encrypt(pleft, cleft)
-    encryptor.encrypt(pright, cright)
-
-    evaluator.multiply_inplace(cleft, cright)
-    before = decryptor.invariant_noise_budget(cleft)
-    evaluator.mod_switch_to_inplace(cleft, parms_id)
-    after = decryptor.invariant_noise_budget(cleft)
-
-    assert before > after  # we went to the last modulus?
+    before = decryptor.invariant_noise_budget(enc)
+    evaluator.mod_switch_to_inplace(enc, parms_id)
+    after = decryptor.invariant_noise_budget(enc)
+    assert before > after
+    decryptor.decrypt(enc, out)
+    assert intenc.decode_int64(out) == expected_value
+    assert enc.parms_id() == parms_id
 
     # ciphertext mod switch to
     parms_id = ctx.last_parms_id()
-    cleft = sealapi.Ciphertext(ctx)
-    cright = sealapi.Ciphertext(ctx)
+    plain = intenc.encode(expected_value)
+    out = sealapi.Plaintext()
+    enc = sealapi.Ciphertext(ctx)
     cout = sealapi.Ciphertext(ctx)
 
-    pleft = helper_encode(scheme, ctx, left)
-    pright = helper_encode(scheme, ctx, right)
+    encryptor.encrypt(plain, enc)
 
-    encryptor.encrypt(pleft, cleft)
-    encryptor.encrypt(pright, cright)
-
-    evaluator.multiply_inplace(cleft, cright)
-
-    before = decryptor.invariant_noise_budget(cleft)
-    evaluator.mod_switch_to(cleft, parms_id, cout)
+    before = decryptor.invariant_noise_budget(enc)
+    evaluator.mod_switch_to(enc, parms_id, cout)
     after = decryptor.invariant_noise_budget(cout)
+    assert before > after
+    decryptor.decrypt(cout, out)
+    assert intenc.decode_int64(out) == expected_value
+    assert cout.parms_id() == parms_id
 
-    assert before > after  # we went to the last modulus?
-
+    pol_str = "1x^3 + 1x^1 + 3"
     # plaintext mod switch to next inplace
-    parms_id = ctx.first_parms_id()
-    plain = sealapi.Plaintext("7FFx^3 + 1x^1 + 3")
+    plain = sealapi.Plaintext(pol_str)
     evaluator.transform_to_ntt_inplace(plain, ctx.first_parms_id())
-    assert plain.is_ntt_form() == True
+    assert plain.is_ntt_form() is True
     evaluator.mod_switch_to_next_inplace(plain)
-    ### assert ??
+    assert plain.parms_id() != ctx.first_parms_id()
 
     # plaintext mod switch to next inplace failure
-    parms_id = ctx.first_parms_id()
-    plain = sealapi.Plaintext("7FFx^3 + 1x^1 + 3")
+    plain = sealapi.Plaintext(pol_str)
     evaluator.transform_to_ntt_inplace(plain, ctx.last_parms_id())
-    assert plain.is_ntt_form() == True
+    assert plain.is_ntt_form() is True
     with pytest.raises(BaseException):
         evaluator.mod_switch_to_next_inplace(plain)
 
     # plaintext mod switch to inplace
-    parms_id = ctx.last_parms_id()
-    plain = sealapi.Plaintext("7FFx^3 + 1x^1 + 3")
+    plain = sealapi.Plaintext(pol_str)
     evaluator.transform_to_ntt_inplace(plain, ctx.first_parms_id())
-    assert plain.is_ntt_form() == True
+    assert plain.is_ntt_form() is True
     evaluator.mod_switch_to_inplace(plain, ctx.last_parms_id())
-    ### assert ??
+    assert plain.parms_id() == ctx.last_parms_id()
 
     # plaintext mod switch to next
-    plain = sealapi.Plaintext("7FFx^3 + 1x^1 + 3")
+    plain = sealapi.Plaintext(pol_str)
     plain_out = sealapi.Plaintext()
 
     evaluator.transform_to_ntt(plain, ctx.first_parms_id(), plain_out)
-    assert plain_out.is_ntt_form() == True
+    assert plain_out.is_ntt_form() is True
 
     plain_next = sealapi.Plaintext()
     evaluator.mod_switch_to_next(plain_out, plain_next)
-    ### assert ??
+    assert plain_out.parms_id() == ctx.first_parms_id()
+    assert plain_next.parms_id() != ctx.first_parms_id()
 
     # plaintext mod switch to
-    plain = sealapi.Plaintext("7FFx^3 + 1x^1 + 3")
+    plain = sealapi.Plaintext(pol_str)
     plain_out = sealapi.Plaintext()
 
     evaluator.transform_to_ntt(plain, ctx.first_parms_id(), plain_out)
-    assert plain_out.is_ntt_form() == True
+    assert plain_out.is_ntt_form() is True
 
     plain_next = sealapi.Plaintext()
     evaluator.mod_switch_to(plain_out, ctx.last_parms_id(), plain_next)
-    for idx in range(plain_next.int_array().size()):
-        if plain_out[idx] != plain_next[idx]:
-            print(plain_out[idx], plain_next[idx])
-    ### assert ??
+    assert plain_out.parms_id() == ctx.first_parms_id()
+    assert plain_next.parms_id() == ctx.last_parms_id()
 
 
 @pytest.mark.parametrize(
@@ -1534,7 +1492,7 @@ def test_evaluator_mod_switch(scheme, ctx, left, right):
     "left", [[10, 100, 500, 600], [i for i in range(200)],],
 )
 def test_evaluator_rescale(scheme, ctx, left):
-    evaluator, encryptor, decryptor, relin_keys = helper_generate_evaluator(ctx)
+    evaluator, encryptor, _, relin_keys = helper_generate_evaluator(ctx)
 
     # cipher rescale to next in place
     cleft = sealapi.Ciphertext(ctx)
@@ -1603,14 +1561,14 @@ def test_evaluator_rescale(scheme, ctx, left):
     "scheme, ctx",
     [
         (sealapi.SCHEME_TYPE.BFV, helper_context_bfv(8192)),
-        (sealapi.SCHEME_TYPE.CKKS, helper_context_ckks(8192)),
+        # CKKS already in NTT form
     ],
 )
 @pytest.mark.parametrize(
     "left", [[10, 100, 500, 600], [i for i in range(200)],],
 )
 def test_evaluator_transform_ntt(scheme, ctx, left):
-    evaluator, encryptor, decryptor, relin_keys = helper_generate_evaluator(ctx)
+    evaluator, encryptor, _, _ = helper_generate_evaluator(ctx)
 
     # cipher transform ntt inplace
     cleft = sealapi.Ciphertext(ctx)
@@ -1618,11 +1576,11 @@ def test_evaluator_transform_ntt(scheme, ctx, left):
     pleft = helper_encode(scheme, ctx, left)
     encryptor.encrypt(pleft, cleft)
 
-    assert cleft.is_ntt_form() == False
+    assert cleft.is_ntt_form() is False
     evaluator.transform_to_ntt_inplace(cleft)
-    assert cleft.is_ntt_form() == True
+    assert cleft.is_ntt_form() is True
     evaluator.transform_from_ntt_inplace(cleft)
-    assert cleft.is_ntt_form() == False
+    assert cleft.is_ntt_form() is False
 
     # cipher transform ntt
     cleft = sealapi.Ciphertext(ctx)
@@ -1632,11 +1590,11 @@ def test_evaluator_transform_ntt(scheme, ctx, left):
     pleft = helper_encode(scheme, ctx, left)
     encryptor.encrypt(pleft, cleft)
 
-    assert cleft.is_ntt_form() == False
+    assert cleft.is_ntt_form() is False
     evaluator.transform_to_ntt(cleft, cout)
-    assert cout.is_ntt_form() == True
+    assert cout.is_ntt_form() is True
     evaluator.transform_from_ntt(cout, cfinal)
-    assert cfinal.is_ntt_form() == False
+    assert cfinal.is_ntt_form() is False
 
 
 def test_evaluator_galois():
@@ -1668,3 +1626,172 @@ def test_evaluator_galois():
     evaluator.apply_galois(encrypted, 3, galois_keys, out)
     decryptor.decrypt(out, plain)
     assert plain.to_string() == "1x^6"
+
+
+def test_evaluator_rotate_bfv():
+    parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.BFV)
+    parms.set_poly_modulus_degree(8)
+    parms.set_plain_modulus(257)
+
+    coeff = sealapi.CoeffModulus.Create(8, [40, 40])
+    parms.set_coeff_modulus(coeff)
+    ctx = sealapi.SEALContext.Create(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
+
+    keygen = sealapi.KeyGenerator(ctx)
+    galois_keys = keygen.galois_keys()
+
+    decryptor = sealapi.Decryptor(ctx, keygen.secret_key())
+    encryptor = sealapi.Encryptor(ctx, keygen.public_key())
+
+    evaluator = sealapi.Evaluator(ctx)
+    encoder = sealapi.BatchEncoder(ctx)
+
+    testcase = [1, 2, 3, 4, 5, 6, 7, 8]
+    # Input
+    # 1, 2, 3, 4,
+    # 5, 6, 7, 8
+
+    plain = sealapi.Plaintext()
+    encoder.encode(testcase, plain)
+
+    encrypted = sealapi.Ciphertext(ctx)
+    encryptor.encrypt(plain, encrypted)
+
+    evaluator.rotate_columns_inplace(encrypted, galois_keys)
+    decryptor.decrypt(encrypted, plain)
+    # Rotate columns
+    # 5, 6, 7, 8,
+    # 1, 2, 3, 4
+
+    assert encoder.decode_int64(plain) == [5, 6, 7, 8, 1, 2, 3, 4]
+
+    evaluator.rotate_rows_inplace(encrypted, -1, galois_keys)
+    decryptor.decrypt(encrypted, plain)
+    # Shift rows -1
+    # 8, 5, 6, 7,
+    # 4, 1, 2, 3,
+    assert encoder.decode_int64(plain) == [8, 5, 6, 7, 4, 1, 2, 3]
+
+    cout = sealapi.Ciphertext(ctx)
+    evaluator.rotate_rows(encrypted, 2, galois_keys, cout)
+    decryptor.decrypt(cout, plain)
+    # Shift rows +2
+    # 6, 7, 8, 5,
+    # 2, 3, 4, 1,
+    assert encoder.decode_int64(plain) == [6, 7, 8, 5, 2, 3, 4, 1]
+
+    evaluator.rotate_columns(cout, galois_keys, encrypted)
+    decryptor.decrypt(encrypted, plain)
+    # Rotate columns
+    # 2, 3, 4, 1,
+    # 6, 7, 8, 5,
+    assert encoder.decode_int64(plain) == [2, 3, 4, 1, 6, 7, 8, 5]
+
+
+def test_evaluator_rotate_vector():
+    testcase = [complex(i, i) for i in range(4)]
+
+    slot_size = len(testcase)
+    delta = 1 << 30
+
+    parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.CKKS)
+    poly_modulus = 2 * slot_size
+    parms.set_poly_modulus_degree(poly_modulus)
+    parms.set_plain_modulus(0)
+
+    coeff = sealapi.CoeffModulus.Create(poly_modulus, [40, 40, 40, 40])
+    parms.set_coeff_modulus(coeff)
+    ctx = sealapi.SEALContext.Create(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
+
+    ctx = helper_context_ckks()
+
+    keygen = sealapi.KeyGenerator(ctx)
+    galois_keys = keygen.galois_keys()
+
+    decryptor = sealapi.Decryptor(ctx, keygen.secret_key())
+    encryptor = sealapi.Encryptor(ctx, keygen.public_key())
+
+    evaluator = sealapi.Evaluator(ctx)
+    encoder = sealapi.CKKSEncoder(ctx)
+
+    plain = sealapi.Plaintext()
+    encoder.encode(testcase, ctx.first_parms_id(), delta, plain)
+
+    encrypted = sealapi.Ciphertext(ctx)
+    encryptor.encrypt(plain, encrypted)
+
+    # inplace
+    steps = 1
+    evaluator.rotate_vector_inplace(encrypted, steps, galois_keys)
+    decryptor.decrypt(encrypted, plain)
+
+    decoded = encoder.decode_complex(plain)[:slot_size]
+
+    for idx in range(slot_size):
+        off = (idx + steps) % slot_size
+        assert abs(testcase[off].real - decoded[idx].real) < 0.1
+        assert abs(testcase[off].imag - decoded[idx].imag) < 0.1
+
+    # to another ciphertext
+    steps = -steps
+    out = sealapi.Ciphertext(ctx)
+    evaluator.rotate_vector(encrypted, steps, galois_keys, out)
+    decryptor.decrypt(out, plain)
+
+    decoded = encoder.decode_complex(plain)[:slot_size]
+
+    for idx in range(slot_size):
+        assert abs(testcase[idx].real - decoded[idx].real) < 0.1
+        assert abs(testcase[idx].imag - decoded[idx].imag) < 0.1
+
+
+def test_evaluator_conjugate():
+    testcase = [complex(i, i) for i in range(32)]
+
+    slot_size = len(testcase)
+    delta = 1 << 30
+
+    parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.CKKS)
+    poly_modulus = 2 * slot_size
+    parms.set_poly_modulus_degree(poly_modulus)
+    parms.set_plain_modulus(0)
+
+    coeff = sealapi.CoeffModulus.Create(poly_modulus, [40, 40, 40, 40])
+    parms.set_coeff_modulus(coeff)
+    ctx = sealapi.SEALContext.Create(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
+
+    ctx = helper_context_ckks()
+
+    keygen = sealapi.KeyGenerator(ctx)
+    galois_keys = keygen.galois_keys()
+
+    decryptor = sealapi.Decryptor(ctx, keygen.secret_key())
+    encryptor = sealapi.Encryptor(ctx, keygen.public_key())
+
+    evaluator = sealapi.Evaluator(ctx)
+    encoder = sealapi.CKKSEncoder(ctx)
+
+    plain = sealapi.Plaintext()
+    encoder.encode(testcase, ctx.first_parms_id(), delta, plain)
+
+    encrypted = sealapi.Ciphertext(ctx)
+    encryptor.encrypt(plain, encrypted)
+
+    evaluator.complex_conjugate_inplace(encrypted, galois_keys)
+    decryptor.decrypt(encrypted, plain)
+
+    decoded = encoder.decode_complex(plain)[:slot_size]
+
+    for idx in range(slot_size):
+        assert abs(testcase[idx].real - decoded[idx].real) < 0.1
+        assert abs(testcase[idx].imag + decoded[idx].imag) < 0.1
+
+    out = sealapi.Ciphertext(ctx)
+    evaluator.complex_conjugate(encrypted, galois_keys, out)
+    decryptor.decrypt(out, plain)
+
+    decoded = encoder.decode_complex(plain)[:slot_size]
+
+    for idx in range(slot_size):
+        assert abs(testcase[idx].real - decoded[idx].real) < 0.1
+        assert abs(testcase[idx].imag - decoded[idx].imag) < 0.1
