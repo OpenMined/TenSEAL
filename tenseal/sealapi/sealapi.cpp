@@ -11,11 +11,12 @@ namespace py = pybind11;
 
 /***
  *pybind11 issues:
- *  - rvalue arguments issues https://github.com/pybind/pybind11/pull/2046
- *  - variadic templates issues https://github.com/pybind/pybind11/issues/1469
- *  - no support for ostream/istream. BigUInt save/load
- *  - no support for std::byte. BigUInt::operator []
+ *  - no support for ostream/istream. eg. BigUInt save/load
+ *  - no support for std::byte. eg. BigUInt::operator []
+ *  - std::vector references not working as arguments, must return the value.
+ *  - unique_ptr references not allowed as arguments.
  ***/
+
 PYBIND11_MODULE(_sealapi_cpp, m) {
     m.doc() = "SEAL library bindings for Python";
 
@@ -847,32 +848,69 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("multiply",
              [](Evaluator &e, const Ciphertext &e1, const Ciphertext &e2,
                 Ciphertext &dst) { return e.multiply(e1, e2, dst); })
-
-        // TODO tests
-        .def("add_many", &Evaluator::add_many)
-        .def("relinearize_inplace", &Evaluator::relinearize_inplace)
-        .def("relinearize", &Evaluator::relinearize)
-        .def("mod_switch_to_next",
-             py::overload_cast<const Plaintext &, Plaintext &>(
-                 &Evaluator::mod_switch_to_next))
-        .def("mod_switch_to_next",
-             [](Evaluator &e, const Ciphertext &enc, Ciphertext &dst) {
-                 return e.mod_switch_to_next(enc, dst);
+        .def("add_plain_inplace", &Evaluator::add_plain_inplace)
+        .def("sub_plain_inplace", &Evaluator::sub_plain_inplace)
+        .def("multiply_plain_inplace",
+             [](Evaluator &e, Ciphertext &enc, const Plaintext &p) {
+                 return e.multiply_plain_inplace(enc, p);
              })
+        .def("add_plain", &Evaluator::add_plain)
+        .def("sub_plain", &Evaluator::sub_plain)
+        .def("multiply_plain",
+             [](Evaluator &e, const Ciphertext &enc, const Plaintext &p,
+                Ciphertext &out) { return e.multiply_plain(enc, p, out); })
         .def("mod_switch_to_next_inplace",
              [](Evaluator &e, Ciphertext &dst) {
                  return e.mod_switch_to_next_inplace(dst);
              })
+        .def("mod_switch_to_next",
+             [](Evaluator &e, const Ciphertext &enc, Ciphertext &dst) {
+                 return e.mod_switch_to_next(enc, dst);
+             })
+        .def("exponentiate_inplace",
+             [](Evaluator &e, Ciphertext &enc, std::uint64_t exponent,
+                const RelinKeys &relin_keys) {
+                 return e.exponentiate_inplace(enc, exponent, relin_keys);
+             })
+        .def("exponentiate",
+             [](Evaluator &e, const Ciphertext &enc, std::uint64_t exponent,
+                const RelinKeys &relin_keys, Ciphertext &out) {
+                 return e.exponentiate(enc, exponent, relin_keys, out);
+             })
+        .def("add_many", &Evaluator::add_many)
+        .def("multiply_many",
+             [](Evaluator &e, const std::vector<Ciphertext> &enc,
+                const RelinKeys &relin_keys, Ciphertext &dst) {
+                 return e.multiply_many(enc, relin_keys, dst);
+             })
+        .def("relinearize_inplace",
+             [](Evaluator &e, Ciphertext &enc, const RelinKeys &relin_keys) {
+                 return e.relinearize_inplace(enc, relin_keys);
+             })
+        .def(
+            "relinearize",
+            [](Evaluator &e, const Ciphertext &enc, const RelinKeys &relin_keys,
+               Ciphertext &out) { return e.relinearize(enc, relin_keys, out); })
+        .def("transform_to_ntt_inplace",
+             [](Evaluator &e, Plaintext &in, parms_id_type parms_id) {
+                 e.transform_to_ntt_inplace(in, parms_id);
+             })
+        .def("transform_to_ntt",
+             [](Evaluator &e, const Plaintext &in, parms_id_type parms_id,
+                Plaintext &dst) { e.transform_to_ntt(in, parms_id, dst); })
+        .def("mod_switch_to_next",
+             py::overload_cast<const Plaintext &, Plaintext &>(
+                 &Evaluator::mod_switch_to_next))
         .def("mod_switch_to_next_inplace",
              py::overload_cast<Plaintext &>(
                  &Evaluator::mod_switch_to_next_inplace))
         .def("mod_switch_to_inplace",
-             [](Evaluator &e, Ciphertext &dst, parms_id_type parms_id) {
-                 return e.mod_switch_to_inplace(dst, parms_id);
-             })
-        .def("mod_switch_to_inplace",
              py::overload_cast<Plaintext &, parms_id_type>(
                  &Evaluator::mod_switch_to_inplace))
+        .def("mod_switch_to_inplace",
+             [](Evaluator &e, Ciphertext &enc, parms_id_type parms_id) {
+                 return e.mod_switch_to_inplace(enc, parms_id);
+             })
         .def(
             "mod_switch_to",
             [](Evaluator &e, const Ciphertext &enc, parms_id_type parms_id,
@@ -880,29 +918,27 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("mod_switch_to",
              py::overload_cast<const Plaintext &, parms_id_type, Plaintext &>(
                  &Evaluator::mod_switch_to))
-        .def("rescale_to_next", &Evaluator::rescale_to_next)
-        .def("rescale_to_next_inplace", &Evaluator::rescale_to_next_inplace)
-        .def("rescale_to_inplace", &Evaluator::rescale_to_inplace)
-        .def("rescale_to", &Evaluator::rescale_to)
-        .def("multiply_many", &Evaluator::multiply_many)
-        .def("exponentiate_inplace", &Evaluator::exponentiate_inplace)
-        .def("exponentiate", &Evaluator::exponentiate)
-        .def("add_plain_inplace", &Evaluator::add_plain_inplace)
-        .def("add_plain", &Evaluator::add_plain)
-        .def("sub_plain_inplace", &Evaluator::sub_plain_inplace)
-        .def("sub_plain", &Evaluator::sub_plain)
-        .def("multiply_plain_inplace", &Evaluator::multiply_plain_inplace)
-        .def("multiply_plain", &Evaluator::multiply_plain)
-        .def("transform_to_ntt_inplace",
-             [](Evaluator &e, Plaintext &in, parms_id_type parms_id) {
-                 e.transform_to_ntt_inplace(in, parms_id);
+
+        .def("rescale_to_next",
+             [](Evaluator &e, const Ciphertext &enc, Ciphertext &dst) {
+                 return e.rescale_to_next(enc, dst);
              })
+        .def("rescale_to_next_inplace",
+             [](Evaluator &e, Ciphertext &enc) {
+                 return e.rescale_to_next_inplace(enc);
+             })
+        .def("rescale_to_inplace",
+             [](Evaluator &e, Ciphertext &enc, parms_id_type parms_id) {
+                 return e.rescale_to_inplace(enc, parms_id);
+             })
+
+        .def("rescale_to",
+             [](Evaluator &e, const Ciphertext &enc, parms_id_type parms_id,
+                Ciphertext &dst) { return e.rescale_to(enc, parms_id, dst); })
+
         .def("transform_to_ntt_inplace",
              py::overload_cast<Ciphertext &>(
                  &Evaluator::transform_to_ntt_inplace))
-        .def("transform_to_ntt",
-             [](Evaluator &e, const Plaintext &in, parms_id_type parms_id,
-                Plaintext &dst) { e.transform_to_ntt(in, parms_id, dst); })
         .def("transform_to_ntt",
              py::overload_cast<const Ciphertext &, Ciphertext &>(
                  &Evaluator::transform_to_ntt))
@@ -912,13 +948,28 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("transform_from_ntt",
              py::overload_cast<const Ciphertext &, Ciphertext &>(
                  &Evaluator::transform_from_ntt))
-        .def("apply_galois_inplace", &Evaluator::apply_galois_inplace)
-        .def("apply_galois", &Evaluator::apply_galois)
+
+        .def("apply_galois_inplace",
+             [](Evaluator &e, Ciphertext &encrypted, std::uint64_t galois_elt,
+                const GaloisKeys &galois_keys) {
+                 return e.apply_galois_inplace(encrypted, galois_elt,
+                                               galois_keys);
+             })
+        .def("apply_galois",
+             [](Evaluator &e, const Ciphertext &encrypted,
+                std::uint64_t galois_elt, const GaloisKeys &galois_keys,
+                Ciphertext &destination) {
+                 return e.apply_galois(encrypted, galois_elt, galois_keys,
+                                       destination);
+             })
+
+        // TODO tests
         .def("rotate_rows", &Evaluator::rotate_rows)
         .def("rotate_columns_inplace", &Evaluator::rotate_columns_inplace)
         .def("rotate_columns", &Evaluator::rotate_columns)
         .def("rotate_vector_inplace", &Evaluator::rotate_vector_inplace)
         .def("rotate_vector", &Evaluator::rotate_vector)
+
         .def("complex_conjugate_inplace", &Evaluator::complex_conjugate_inplace)
         .def("complex_conjugate", &Evaluator::complex_conjugate);
     /***
