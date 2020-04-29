@@ -2,6 +2,9 @@ import sys, os
 import pytest
 import tenseal.sealapi as sealapi
 
+from tempfile import NamedTemporaryFile
+from pathlib import Path
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils import *
 
@@ -14,6 +17,12 @@ def test_keygenerator_publickey(ctx):
     public_key = keygen.public_key()
     assert public_key.data().parms_id() == public_key.parms_id()
     assert public_key.data().poly_modulus_degree() == helper_poly_modulus_degree(ctx)
+
+    tmp = NamedTemporaryFile()
+    public_key.save(tmp.name)
+    save_test = sealapi.PublicKey()
+    save_test.load(ctx, tmp.name)
+    assert save_test.parms_id() == public_key.parms_id()
 
 
 @pytest.mark.parametrize(
@@ -31,6 +40,12 @@ def test_keygenerator_secretkey(ctx):
     coeff_mod_count = len(parms.coeff_modulus())
 
     assert secret_key.data().coeff_count() == coeff_mod_count * poly_modulus_degree
+
+    tmp = NamedTemporaryFile()
+    secret_key.save(tmp.name)
+    save_test = sealapi.SecretKey()
+    save_test.load(ctx, tmp.name)
+    assert save_test.data().parms_id() == secret_key.parms_id()
 
 
 @pytest.mark.parametrize(
@@ -54,6 +69,10 @@ def test_keygenerator_relinkeys(ctx):
     assert len(relin_keys.data()) == relin_keys.size()
     assert relin_keys.data(0)[0].data().poly_modulus_degree() == helper_poly_modulus_degree(ctx)
     assert len(relin_keys.parms_id()) == 4
+
+    tmp = NamedTemporaryFile()
+    keygen.relin_keys_save(tmp.name)
+    assert Path(tmp.name).stat().st_size > 0
 
 
 @pytest.mark.parametrize(
@@ -82,6 +101,10 @@ def test_keygenerator_galoiskeys(ctx):
         == poly_modulus_degree
     )
     assert len(galois_keys.parms_id()) == 4
+
+    tmp = NamedTemporaryFile()
+    keygen.galois_keys_save(tmp.name)
+    assert Path(tmp.name).stat().st_size > 0
 
 
 @pytest.mark.parametrize(

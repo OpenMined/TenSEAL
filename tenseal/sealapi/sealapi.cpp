@@ -5,6 +5,8 @@
 #include <pybind11/stl.h>
 #include <seal/seal.h>
 
+#include <fstream>
+
 using namespace seal;
 using namespace std;
 namespace py = pybind11;
@@ -61,6 +63,19 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def_static("of", &BigUInt::of)
         .def("duplicate_to", &BigUInt::duplicate_to)
         .def("duplicate_from", &BigUInt::duplicate_from)
+        .def("save_size", &BigUInt::save_size)
+        .def("save",
+             [](const BigUInt &b, std::string &path) {
+                 std::ofstream out(path, std::ofstream::binary);
+                 b.save(out);
+                 out.close();
+             })
+        .def("load",
+             [](BigUInt &p, std::string &path) {
+                 std::ifstream in(path, std::ifstream::binary);
+                 p.load(in);
+                 in.close();
+             })
 
         .def(py::self + py::self)
         .def(py::self + std::uint64_t())
@@ -124,6 +139,19 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("const_ratio", &SmallModulus::const_ratio)
         .def("is_zero", &SmallModulus::is_zero)
         .def("is_prime", &SmallModulus::is_prime)
+
+        .def("save",
+             [](const SmallModulus &s, std::string &path) {
+                 std::ofstream out(path, std::ofstream::binary);
+                 s.save(out);
+                 out.close();
+             })
+        .def("load",
+             [](SmallModulus &s, std::string &path) {
+                 std::ifstream in(path, std::ifstream::binary);
+                 s.load(in);
+                 in.close();
+             })
 
         .def(py::self == py::self)
         .def(py::self == std::uint64_t())
@@ -232,6 +260,18 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("coeff_modulus", &EncryptionParameters::coeff_modulus)
         .def("plain_modulus", &EncryptionParameters::plain_modulus)
         .def("random_generator", &EncryptionParameters::random_generator)
+        .def("save",
+             [](const EncryptionParameters &e, std::string &path) {
+                 std::ofstream out(path, std::ofstream::binary);
+                 e.save(out);
+                 out.close();
+             })
+        .def("load",
+             [](EncryptionParameters &e, std::string &path) {
+                 std::ifstream in(path, std::ifstream::binary);
+                 e.load(in);
+                 in.close();
+             })
         .def(py::self == py::self)
         .def(py::self != py::self);
     /***
@@ -328,7 +368,19 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def(py::init<>())
         .def("data", py::overload_cast<>(&PublicKey::data, py::const_),
              py::return_value_policy::reference)
-        .def("parms_id", py::overload_cast<>(&PublicKey::parms_id, py::const_));
+        .def("parms_id", py::overload_cast<>(&PublicKey::parms_id, py::const_))
+        .def("save",
+             [](const PublicKey &c, std::string &path) {
+                 std::ofstream out(path, std::ofstream::binary);
+                 c.save(out);
+                 out.close();
+             })
+        .def("load", [](PublicKey &c, std::shared_ptr<SEALContext> &context,
+                        std::string &path) {
+            std::ifstream in(path, std::ifstream::binary);
+            c.load(context, in);
+            in.close();
+        });
     /***
      * } "seal/publickey.h"
      *******************/
@@ -341,7 +393,19 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def(py::init<>())
         .def("data", py::overload_cast<>(&SecretKey::data, py::const_),
              py::return_value_policy::reference)
-        .def("parms_id", py::overload_cast<>(&SecretKey::parms_id, py::const_));
+        .def("parms_id", py::overload_cast<>(&SecretKey::parms_id, py::const_))
+        .def("save",
+             [](const SecretKey &s, std::string &path) {
+                 std::ofstream out(path, std::ofstream::binary);
+                 s.save(out);
+                 out.close();
+             })
+        .def("load", [](SecretKey &s, std::shared_ptr<SEALContext> &context,
+                        std::string &path) {
+            std::ifstream in(path, std::ifstream::binary);
+            s.load(context, in);
+            in.close();
+        });
     /***
      * } "seal/secretkey.h"
      *******************/
@@ -415,7 +479,25 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
                  &KeyGenerator::galois_keys))
         .def("galois_keys", py::overload_cast<const std::vector<int> &>(
                                 &KeyGenerator::galois_keys))
-        .def("galois_keys", py::overload_cast<>(&KeyGenerator::galois_keys));
+        .def("galois_keys", py::overload_cast<>(&KeyGenerator::galois_keys))
+        .def("galois_keys_save",
+             [](KeyGenerator &k, const std::vector<std::uint64_t> &galois_elts,
+                std::string &path) {
+                 std::ofstream out(path, std::ofstream::binary);
+                 k.galois_keys_save(galois_elts, out);
+                 out.close();
+             })
+        .def("galois_keys_save",
+             [](KeyGenerator &k, std::string &path) {
+                 std::ofstream out(path, std::ofstream::binary);
+                 k.galois_keys_save(out);
+                 out.close();
+             })
+        .def("relin_keys_save", [](KeyGenerator &k, std::string &path) {
+            std::ofstream out(path, std::ofstream::binary);
+            k.relin_keys_save(out);
+            out.close();
+        });
     /***
      * } "seal/keygenerator.h"
      *******************/
@@ -452,6 +534,19 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("is_ntt_form", &Plaintext::is_ntt_form)
         .def("parms_id", py::overload_cast<>(&Plaintext::parms_id, py::const_))
         .def("scale", py::overload_cast<>(&Plaintext::scale, py::const_))
+        .def("save",
+             [](const Plaintext &p, std::string &path) {
+                 std::ofstream out(path, std::ofstream::binary);
+                 p.save(out);
+                 out.close();
+             })
+        .def("load",
+             [](Plaintext &p, std::shared_ptr<SEALContext> &context,
+                std::string &path) {
+                 std::ifstream in(path, std::ifstream::binary);
+                 p.load(context, in);
+                 in.close();
+             })
 
         .def("__getitem__",
              py::overload_cast<std::size_t>(&Plaintext::operator[], py::const_))
@@ -500,6 +595,19 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("is_ntt_form", py::overload_cast<>(&Ciphertext::is_ntt_form))
         .def("parms_id", py::overload_cast<>(&Ciphertext::parms_id))
         .def("scale", py::overload_cast<>(&Ciphertext::scale))
+        .def("save",
+             [](const Ciphertext &c, std::string &path) {
+                 std::ofstream out(path, std::ofstream::binary);
+                 c.save(out);
+                 out.close();
+             })
+        .def("load",
+             [](Ciphertext &c, std::shared_ptr<SEALContext> ctx,
+                std::string &path) {
+                 std::ifstream in(path, std::ifstream::binary);
+                 c.load(ctx, in);
+                 in.close();
+             })
         .def("__getitem__", py::overload_cast<std::size_t>(
                                 &Ciphertext::operator[], py::const_));
     /***
@@ -550,6 +658,24 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("encrypt_zero_symmetric",
              [](Encryptor &e, parms_id_type parms_id, Ciphertext &dst) {
                  return e.encrypt_zero_symmetric(parms_id, dst);
+             })
+        .def("encrypt_symmetric_save",
+             [](Encryptor &e, const Plaintext &plain, std::string &path) {
+                 std::ofstream out(path, std::ofstream::binary);
+                 e.encrypt_symmetric_save(plain, out);
+                 out.close();
+             })
+        .def("encrypt_zero_symmetric_save",
+             [](Encryptor &e, std::string &path) {
+                 std::ofstream out(path, std::ofstream::binary);
+                 e.encrypt_zero_symmetric_save(out);
+                 out.close();
+             })
+        .def("encrypt_zero_symmetric_save",
+             [](Encryptor &e, parms_id_type parms_id, std::string &path) {
+                 std::ofstream out(path, std::ofstream::binary);
+                 e.encrypt_zero_symmetric_save(parms_id, out);
+                 out.close();
              });
     /***
      * } "seal/encryptor.h"
@@ -609,7 +735,18 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("clear", &IntArray64::clear)
         .def("reserve", &IntArray64::reserve)
         .def("shrink_to_fit", &IntArray64::shrink_to_fit)
-        .def("resize", &IntArray64::resize);
+        .def("resize", &IntArray64::resize)
+        .def("save",
+             [](const IntArray64 &a, std::string &path) {
+                 std::ofstream out(path, std::ofstream::binary);
+                 a.save(out);
+                 out.close();
+             })
+        .def("load", [](IntArray64 &a, std::string &path) {
+            std::ifstream in(path, std::ifstream::binary);
+            a.load(in);
+            in.close();
+        });
     /***
      * } "seal/intarray.h"
      *******************/

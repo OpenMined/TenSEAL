@@ -2,6 +2,8 @@ import sys, os
 import pytest
 import tenseal.sealapi as sealapi
 
+from tempfile import NamedTemporaryFile
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils import *
 
@@ -48,6 +50,17 @@ def test_biguint_sanity():
     assert testcase.bit_count() == 128
     testcase.resize(16)
     assert testcase.bit_count() == 16
+
+    tmp = NamedTemporaryFile()
+
+    testcase = sealapi.BigUInt(16, "123B")
+    testcase.save(tmp.name)
+
+    save_test = sealapi.BigUInt()
+    save_test.load(tmp.name)
+
+    assert save_test.bit_count() == 16
+    assert save_test == 0x123B
 
 
 def test_biguint_ops():
@@ -217,6 +230,12 @@ def test_intarray():
     assert int_arr.size() == 4
     assert int_arr.capacity() == 4
 
+    tmp = NamedTemporaryFile()
+    int_arr.save(tmp.name)
+    save_test = sealapi.IntArray()
+    save_test.load(tmp.name)
+    assert save_test[0] == 3
+
     int_arr.resize(10, True)
     assert int_arr.capacity() == 10
     assert int_arr.size() == 10
@@ -291,6 +310,15 @@ def test_plaintext():
     testcase = sealapi.Plaintext("7FFx^3 + 2x^1 + 3")
     assert testcase.is_ntt_form() is False
 
+    tmp = NamedTemporaryFile()
+    testcase = sealapi.Plaintext("7FFx^3 + 2x^1 + 3")
+    testcase.save(tmp.name)
+
+    ctx = helper_context_bfv()  # Plaintext load needs a context(??)
+    save_test = sealapi.Plaintext()
+    save_test.load(ctx, tmp.name)
+    assert save_test.coeff_count() == 4
+
 
 @pytest.mark.parametrize(
     "testcase", [[1, 2, 3, 4, 5, 6, 7, 8], [i for i in range(200)],],
@@ -310,12 +338,13 @@ def test_ciphertext(testcase, scheme, ctx):
     coeff_mod_count = len(parms.coeff_modulus())
 
     keygen = sealapi.KeyGenerator(ctx)
-    public_key = keygen.public_key()
 
     ciphertext = sealapi.Ciphertext(ctx)
     plaintext = helper_encode(scheme, ctx, testcase)
 
-    encryptor = sealapi.Encryptor(ctx, public_key)
+    encryptor = sealapi.Encryptor(ctx, keygen.public_key())
+    decryptor = sealapi.Decryptor(ctx, keygen.secret_key())
+
     encryptor.encrypt(plaintext, ciphertext)
 
     assert len(ciphertext.parms_id()) > 0
@@ -328,6 +357,14 @@ def test_ciphertext(testcase, scheme, ctx):
     assert ciphertext.size_capacity() == 2
     assert ciphertext.is_transparent() is False
     assert ciphertext.is_ntt_form() is (scheme == sealapi.SCHEME_TYPE.CKKS)
+
+    tmp = NamedTemporaryFile()
+    ciphertext.save(tmp.name)
+    save_test = sealapi.Ciphertext(ctx)
+    save_test.load(ctx, tmp.name)
+    decryptor.decrypt(save_test, plaintext)
+    decoded = helper_decode(scheme, ctx, plaintext)
+    is_close_enough(decoded[: len(testcase)], testcase)
 
     ciphertext.resize(ctx, 10)
     assert ciphertext.size() == 10

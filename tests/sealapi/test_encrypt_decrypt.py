@@ -2,6 +2,9 @@ import sys, os
 import pytest
 import tenseal.sealapi as sealapi
 
+from tempfile import NamedTemporaryFile
+from pathlib import Path
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils import *
 
@@ -27,6 +30,11 @@ def test_encryptor_bfv():
         plaintext_out = sealapi.Plaintext()
         decryptor.decrypt(ciphertext, plaintext_out)
         assert intenc.decode_int64(plaintext_out) == expected_value
+
+        tmp = NamedTemporaryFile()
+        encryptor.encrypt_symmetric_save(plaintext, tmp.name)
+        assert Path(tmp.name).stat().st_size > 0
+
         plaintext_out.set_zero()
 
         ciphertext = sealapi.Ciphertext(ctx)
@@ -34,6 +42,11 @@ def test_encryptor_bfv():
         plaintext_out = sealapi.Plaintext()
         decryptor.decrypt(ciphertext, plaintext_out)
         assert intenc.decode_int64(plaintext_out) == 0
+
+        tmp = NamedTemporaryFile()
+        encryptor.encrypt_zero_symmetric_save(tmp.name)
+        assert Path(tmp.name).stat().st_size > 0
+
         plaintext_out.set_zero()
 
     def _test_encryptor_pk_setup(encryptor):
