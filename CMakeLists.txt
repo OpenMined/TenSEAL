@@ -25,9 +25,3 @@ set(SEALAPI_SOURCES
 )
 pybind11_add_module(_sealapi_cpp ${SEALAPI_SOURCES})
 target_link_libraries(_sealapi_cpp PRIVATE seal)
-
-set(SEALAPI_UTIL_SOURCES
-    ${TENSEAL_BASEDIR}/sealapi/util/util.cpp
-)
-pybind11_add_module(_sealapi_util_cpp ${SEALAPI_UTIL_SOURCES})
-target_link_libraries(_sealapi_util_cpp PRIVATE seal)

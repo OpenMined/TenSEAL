@@ -349,7 +349,7 @@ def test_ciphertext(testcase, scheme, ctx):
 
     assert len(ciphertext.parms_id()) > 0
     assert ciphertext.scale() > 0
-    assert ciphertext.coeff_mod_count() == coeff_mod_count - 1
+    assert ciphertext.coeff_modulus_size() == coeff_mod_count - 1
 
     assert ciphertext.poly_modulus_degree() == poly_modulus_degree
     assert ciphertext.int_array().size() > 0

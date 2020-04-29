@@ -7,7 +7,7 @@ import _sealapi_cpp
 BigUInt = _sealapi_cpp.BigUInt
 
 ## seal/smallmodulus.h ##
-SmallModulus = _sealapi_cpp.SmallModulus
+Modulus = _sealapi_cpp.Modulus
 
 ## seal/serialization.h ##
 COMPR_MODE_TYPE = _sealapi_cpp.COMPR_MODE_TYPE
