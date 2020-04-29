@@ -25,110 +25,109 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
     /*******************
      * "seal/serializable.h" {
      ***/
-    py::class_<Serializable>(m, "Serializable", py::module_local())
-        /***
-         * } "seal/serializable.h"
-         *******************/
+    /***
+     * } "seal/serializable.h"
+     *******************/
 
-        /*******************
-         * "seal/biguint.h" {
-         ***/
-        py::class_<BigUInt>(m, "BigUInt", py::module_local())
-            .def(py::init<>())
-            .def(py::init<int>())
-            .def(py::init<const std::string &>())
-            .def(py::init<int, const std::string &>())
-            .def(py::init<int, std::uint64_t>())
-            .def(py::init<const BigUInt &>())
+    /*******************
+     * "seal/biguint.h" {
+     ***/
+    py::class_<BigUInt>(m, "BigUInt", py::module_local())
+        .def(py::init<>())
+        .def(py::init<int>())
+        .def(py::init<const std::string &>())
+        .def(py::init<int, const std::string &>())
+        .def(py::init<int, std::uint64_t>())
+        .def(py::init<const BigUInt &>())
 
-            .def("bit_count", &BigUInt::bit_count)
-            .def("data", py::overload_cast<>(&BigUInt::data),
-                 py::return_value_policy::reference)
-            .def("data", py::overload_cast<>(&BigUInt::data, py::const_),
-                 py::return_value_policy::reference)
-            .def("byte_count", &BigUInt::byte_count)
-            .def("uint64_count", &BigUInt::uint64_count)
-            .def("significant_bit_count", &BigUInt::significant_bit_count)
-            .def("to_double", &BigUInt::to_double)
-            .def("to_string", &BigUInt::to_string)
-            .def("to_dec_string", &BigUInt::to_dec_string)
-            .def("is_zero", &BigUInt::is_zero)
-            .def("set_zero", &BigUInt::set_zero)
-            .def("resize", &BigUInt::resize)
+        .def("bit_count", &BigUInt::bit_count)
+        .def("data", py::overload_cast<>(&BigUInt::data),
+             py::return_value_policy::reference)
+        .def("data", py::overload_cast<>(&BigUInt::data, py::const_),
+             py::return_value_policy::reference)
+        .def("byte_count", &BigUInt::byte_count)
+        .def("uint64_count", &BigUInt::uint64_count)
+        .def("significant_bit_count", &BigUInt::significant_bit_count)
+        .def("to_double", &BigUInt::to_double)
+        .def("to_string", &BigUInt::to_string)
+        .def("to_dec_string", &BigUInt::to_dec_string)
+        .def("is_zero", &BigUInt::is_zero)
+        .def("set_zero", &BigUInt::set_zero)
+        .def("resize", &BigUInt::resize)
 
-            .def("divrem", py::overload_cast<const BigUInt &, BigUInt &>(
-                               &BigUInt::divrem, py::const_))
-            .def("divrem", py::overload_cast<std::uint64_t, BigUInt &>(
-                               &BigUInt::divrem, py::const_))
-            .def("modinv", py::overload_cast<const BigUInt &>(&BigUInt::modinv,
-                                                              py::const_))
-            .def("modinv",
-                 py::overload_cast<std::uint64_t>(&BigUInt::modinv, py::const_))
-            .def("trymodinv", py::overload_cast<const BigUInt &, BigUInt &>(
-                                  &BigUInt::trymodinv, py::const_))
-            .def("trymodinv", py::overload_cast<std::uint64_t, BigUInt &>(
-                                  &BigUInt::trymodinv, py::const_))
-            .def_static("of", &BigUInt::of)
-            .def("duplicate_to", &BigUInt::duplicate_to)
-            .def("duplicate_from", &BigUInt::duplicate_from)
-            .def("save_size", &BigUInt::save_size)
-            .def("save",
-                 [](const BigUInt &b, std::string &path) {
-                     std::ofstream out(path, std::ofstream::binary);
-                     b.save(out);
-                     out.close();
-                 })
-            .def("load",
-                 [](BigUInt &p, std::string &path) {
-                     std::ifstream in(path, std::ifstream::binary);
-                     p.load(in);
-                     in.close();
-                 })
+        .def("divrem", py::overload_cast<const BigUInt &, BigUInt &>(
+                           &BigUInt::divrem, py::const_))
+        .def("divrem", py::overload_cast<std::uint64_t, BigUInt &>(
+                           &BigUInt::divrem, py::const_))
+        .def("modinv",
+             py::overload_cast<const BigUInt &>(&BigUInt::modinv, py::const_))
+        .def("modinv",
+             py::overload_cast<std::uint64_t>(&BigUInt::modinv, py::const_))
+        .def("trymodinv", py::overload_cast<const BigUInt &, BigUInt &>(
+                              &BigUInt::trymodinv, py::const_))
+        .def("trymodinv", py::overload_cast<std::uint64_t, BigUInt &>(
+                              &BigUInt::trymodinv, py::const_))
+        .def_static("of", &BigUInt::of)
+        .def("duplicate_to", &BigUInt::duplicate_to)
+        .def("duplicate_from", &BigUInt::duplicate_from)
+        .def("save_size", &BigUInt::save_size)
+        .def("save",
+             [](const BigUInt &b, std::string &path) {
+                 std::ofstream out(path, std::ofstream::binary);
+                 b.save(out);
+                 out.close();
+             })
+        .def("load",
+             [](BigUInt &p, std::string &path) {
+                 std::ifstream in(path, std::ifstream::binary);
+                 p.load(in);
+                 in.close();
+             })
 
-            .def(py::self + py::self)
-            .def(py::self + std::uint64_t())
-            .def(py::self - py::self)
-            .def(py::self - std::uint64_t())
-            .def(py::self * py::self)
-            .def(py::self * std::uint64_t())
-            .def(py::self / py::self)
-            .def(py::self / std::uint64_t())
-            .def(py::self ^ py::self)
-            .def(py::self ^ std::uint64_t())
-            .def(py::self & py::self)
-            .def(py::self & std::uint64_t())
-            .def(py::self | py::self)
-            .def(py::self | std::uint64_t())
-            .def(py::self < py::self)
-            .def(py::self < std::uint64_t())
-            .def(py::self > py::self)
-            .def(py::self > std::uint64_t())
-            .def(py::self <= py::self)
-            .def(py::self <= std::uint64_t())
-            .def(py::self >= py::self)
-            .def(py::self >= std::uint64_t())
-            .def(py::self == py::self)
-            .def(py::self == std::uint64_t())
-            .def(py::self != py::self)
-            .def(py::self != std::uint64_t())
-            .def(py::self >> int())
-            .def(py::self << int())
-            .def(py::self += py::self)
-            .def(py::self += std::uint64_t())
-            .def(py::self -= py::self)
-            .def(py::self -= std::uint64_t())
-            .def(py::self *= py::self)
-            .def(py::self *= std::uint64_t())
-            .def(py::self /= py::self)
-            .def(py::self /= std::uint64_t())
-            .def(py::self ^= py::self)
-            .def(py::self ^= std::uint64_t())
-            .def(py::self &= py::self)
-            .def(py::self &= std::uint64_t())
-            .def(py::self |= py::self)
-            .def(py::self |= std::uint64_t())
-            .def(py::self <<= int())
-            .def(py::self >>= int());
+        .def(py::self + py::self)
+        .def(py::self + std::uint64_t())
+        .def(py::self - py::self)
+        .def(py::self - std::uint64_t())
+        .def(py::self * py::self)
+        .def(py::self * std::uint64_t())
+        .def(py::self / py::self)
+        .def(py::self / std::uint64_t())
+        .def(py::self ^ py::self)
+        .def(py::self ^ std::uint64_t())
+        .def(py::self & py::self)
+        .def(py::self & std::uint64_t())
+        .def(py::self | py::self)
+        .def(py::self | std::uint64_t())
+        .def(py::self < py::self)
+        .def(py::self < std::uint64_t())
+        .def(py::self > py::self)
+        .def(py::self > std::uint64_t())
+        .def(py::self <= py::self)
+        .def(py::self <= std::uint64_t())
+        .def(py::self >= py::self)
+        .def(py::self >= std::uint64_t())
+        .def(py::self == py::self)
+        .def(py::self == std::uint64_t())
+        .def(py::self != py::self)
+        .def(py::self != std::uint64_t())
+        .def(py::self >> int())
+        .def(py::self << int())
+        .def(py::self += py::self)
+        .def(py::self += std::uint64_t())
+        .def(py::self -= py::self)
+        .def(py::self -= std::uint64_t())
+        .def(py::self *= py::self)
+        .def(py::self *= std::uint64_t())
+        .def(py::self /= py::self)
+        .def(py::self /= std::uint64_t())
+        .def(py::self ^= py::self)
+        .def(py::self ^= std::uint64_t())
+        .def(py::self &= py::self)
+        .def(py::self &= std::uint64_t())
+        .def(py::self |= py::self)
+        .def(py::self |= std::uint64_t())
+        .def(py::self <<= int())
+        .def(py::self >>= int());
     /***
      * } "seal/biguint.h"
      *******************/
