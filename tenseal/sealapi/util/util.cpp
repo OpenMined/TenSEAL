@@ -14,13 +14,21 @@ PYBIND11_MODULE(_sealapi_util_cpp, m) {
     // TODO
     // "seal/util/baseconverter.h"
     py::class_<util::BaseConverter>(m, "BaseConverter", py::module_local())
-        .def(py::init([]() { return new util::BaseConverter(MemoryManager::GetPool()); }))
-        .def(py::init([](const std::vector<SmallModulus> & coeff_base, std::size_t coeff_count,  const SmallModulus &small_plain_mod) { return new util::BaseConverter(coeff_base, coeff_count, small_plain_mod, MemoryManager::GetPool()); }))
+        .def(py::init(
+            []() { return new util::BaseConverter(MemoryManager::GetPool()); }))
+        .def(py::init([](const std::vector<SmallModulus> &coeff_base,
+                         std::size_t coeff_count,
+                         const SmallModulus &small_plain_mod) {
+            return new util::BaseConverter(coeff_base, coeff_count,
+                                           small_plain_mod,
+                                           MemoryManager::GetPool());
+        }))
         .def("generate", &util::BaseConverter::generate)
         .def("floor_last_coeff_modulus_inplace",
-                [](util::BaseConverter& b, std::uint64_t *rns_poly) {
-                    return b.floor_last_coeff_modulus_inplace(rns_poly, MemoryManager::GetPool());
-                })
+             [](util::BaseConverter &b, std::uint64_t *rns_poly) {
+                 return b.floor_last_coeff_modulus_inplace(
+                     rns_poly, MemoryManager::GetPool());
+             })
         .def("floor_last_coeff_modulus_ntt_inplace",
              &util::BaseConverter::floor_last_coeff_modulus_ntt_inplace)
         .def("round_last_coeff_modulus_inplace",
