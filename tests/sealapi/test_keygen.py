@@ -85,7 +85,7 @@ def test_keygenerator_galoiskeys(ctx):
     assert sealapi.GaloisKeys.get_index(idx) == (idx - 1) >> 1
 
     keygen = sealapi.KeyGenerator(ctx)
-    galois_keys = keygen.galois_keys()
+    galois_keys = keygen.galois_keys_local()
 
     assert galois_keys.has_key(idx) is True
 
@@ -118,7 +118,7 @@ def test_keygenerator_galoiskeys_with_steps(ctx):
     idx = sealapi.GaloisKeys.get_index(7)
 
     keygen = sealapi.KeyGenerator(ctx)
-    galois_keys = keygen.galois_keys([idx])
+    galois_keys = keygen.galois_keys_local([idx])
 
     assert galois_keys.has_key(idx) is True
 

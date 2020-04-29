@@ -599,7 +599,7 @@ def test_evaluator_galois():
     keygen = sealapi.KeyGenerator(ctx)
     public_key = keygen.public_key()
     secret_key = keygen.secret_key()
-    galois_keys = keygen.galois_keys([1, 3, 5])
+    galois_keys = keygen.galois_keys_local([1, 3, 5])
 
     decryptor = sealapi.Decryptor(ctx, secret_key)
     encryptor = sealapi.Encryptor(ctx, public_key)
@@ -629,7 +629,7 @@ def test_evaluator_rotate_bfv():
     ctx = sealapi.SEALContext.Create(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
 
     keygen = sealapi.KeyGenerator(ctx)
-    galois_keys = keygen.galois_keys()
+    galois_keys = keygen.galois_keys_local()
 
     decryptor = sealapi.Decryptor(ctx, keygen.secret_key())
     encryptor = sealapi.Encryptor(ctx, keygen.public_key())
@@ -697,7 +697,7 @@ def test_evaluator_rotate_vector():
     ctx = helper_context_ckks()
 
     keygen = sealapi.KeyGenerator(ctx)
-    galois_keys = keygen.galois_keys()
+    galois_keys = keygen.galois_keys_local()
 
     decryptor = sealapi.Decryptor(ctx, keygen.secret_key())
     encryptor = sealapi.Encryptor(ctx, keygen.public_key())
@@ -754,7 +754,7 @@ def test_evaluator_conjugate():
     ctx = helper_context_ckks()
 
     keygen = sealapi.KeyGenerator(ctx)
-    galois_keys = keygen.galois_keys()
+    galois_keys = keygen.galois_keys_local()
 
     decryptor = sealapi.Decryptor(ctx, keygen.secret_key())
     encryptor = sealapi.Encryptor(ctx, keygen.public_key())
