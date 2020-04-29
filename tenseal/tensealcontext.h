@@ -94,21 +94,19 @@ class TenSEALContext {
     Generate Galois keys using the secret key
     */
     void generate_galois_keys(SecretKey secret_key) {
-        KeyGenerator keygen =
-            KeyGenerator(this->_context, secret_key, *this->_public_key);
+        KeyGenerator keygen = KeyGenerator(this->_context, secret_key);
 
         this->_galois_keys =
-            shared_ptr<GaloisKeys>(new GaloisKeys(keygen.galois_keys()));
+            shared_ptr<GaloisKeys>(new GaloisKeys(keygen.galois_keys_local()));
     }
 
     /*
     Generate Relinearization keys using the secret key
     */
     void generate_relin_keys(SecretKey secret_key) {
-        KeyGenerator keygen =
-            KeyGenerator(this->_context, secret_key, *this->_public_key);
+        KeyGenerator keygen = KeyGenerator(this->_context, secret_key);
         this->_relin_keys =
-            shared_ptr<RelinKeys>(new RelinKeys(keygen.relin_keys()));
+            shared_ptr<RelinKeys>(new RelinKeys(keygen.relin_keys_local()));
     }
 
     /*
@@ -119,19 +117,19 @@ class TenSEALContext {
                              bool generate_relin_keys) {
         // create KeyGenerator object only if needed
         if (generate_galois_keys || generate_relin_keys) {
-            KeyGenerator keygen = KeyGenerator(
-                this->_context, *this->_secret_key, *this->_public_key);
+            KeyGenerator keygen =
+                KeyGenerator(this->_context, *this->_secret_key);
 
             // generate Galois Keys
             if (generate_galois_keys) {
                 this->_galois_keys = shared_ptr<GaloisKeys>(
-                    new GaloisKeys(keygen.galois_keys()));
+                    new GaloisKeys(keygen.galois_keys_local()));
             }
 
             // generate Relinearization Keys
             if (generate_relin_keys) {
-                this->_relin_keys =
-                    shared_ptr<RelinKeys>(new RelinKeys(keygen.relin_keys()));
+                this->_relin_keys = shared_ptr<RelinKeys>(
+                    new RelinKeys(keygen.relin_keys_local()));
             }
         }
 
