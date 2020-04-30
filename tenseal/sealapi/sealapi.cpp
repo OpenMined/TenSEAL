@@ -11,24 +11,29 @@ using namespace seal;
 using namespace std;
 namespace py = pybind11;
 
-/***
- *pybind11 issues:
- *  - no support for ostream/istream. eg. BigUInt save/load
- *  - no support for std::byte. eg. BigUInt::operator []
- *  - std::vector references not working as arguments, must return the value.
- *  - unique_ptr references not allowed as arguments.
- ***/
-
-PYBIND11_MODULE(_sealapi_cpp, m) {
-    m.doc() = "SEAL library bindings for Python";
-
+template <typename T>
+void bind_serializable(py::module &m, const std::string &name) {
     /*******************
      * "seal/serializable.h" {
      ***/
+    using type = Serializable<T>;
+    std::string class_name = "Serializable" + name;
+
+    py::class_<type>(m, class_name.c_str(), py::module_local())
+        .def(py::init<const type &>())
+        .def("save", [](const type &obj, std::string &path) {
+            std::ofstream out(path, std::ofstream::binary);
+            obj.save(out);
+            out.close();
+        });
+
     /***
      * } "seal/serializable.h"
      *******************/
+}
 
+PYBIND11_MODULE(_sealapi_cpp, m) {
+    m.doc() = "SEAL library bindings for Python";
     /*******************
      * "seal/biguint.h" {
      ***/
@@ -144,8 +149,12 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
     py::class_<Serialization::SEALHeader>(serialization, "SEALHeader",
                                           py::module_local())
         .def(py::init<>())
-        .def_readwrite("magic", &Serialization::SEALHeader::magic)
-        //.def_readwrite("zero_byte", &Serialization::SEALHeader::zero_byte)
+        .def_readonly("magic", &Serialization::SEALHeader::magic)
+        .def_readonly("header_size", &Serialization::SEALHeader::header_size)
+        .def_readonly("version_major",
+                      &Serialization::SEALHeader::version_major)
+        .def_readonly("version_minor",
+                      &Serialization::SEALHeader::version_minor)
         .def_readwrite("compr_mode", &Serialization::SEALHeader::compr_mode)
         .def_readwrite("size", &Serialization::SEALHeader::size)
         .def_readwrite("reserved", &Serialization::SEALHeader::reserved);
@@ -158,7 +167,24 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
                     py::overload_cast<std::uint8_t>(
                         &Serialization::IsSupportedComprMode))
         .def_static("ComprSizeEstimate", &Serialization::ComprSizeEstimate)
-        .def_static("IsValidHeader", &Serialization::IsValidHeader);
+        .def_static("IsValidHeader", &Serialization::IsValidHeader)
+        .def_static(
+            "SaveHeader",
+            [](const Serialization::SEALHeader &header, std::string &path) {
+                std::ofstream out(path, std::ofstream::binary);
+                Serialization::SaveHeader(header, out);
+                out.close();
+            })
+        .def_static("LoadHeader",
+                    [](std::string &path, Serialization::SEALHeader &header,
+                       bool try_upgrade_if_invalid) {
+                        std::ifstream in(path, std::ifstream::binary);
+                        Serialization::LoadHeader(in, header,
+                                                  try_upgrade_if_invalid);
+                        in.close();
+                    })
+
+        ;
     /***
      * } "seal/serialization.h"
      *******************/
@@ -307,8 +333,59 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
     /*******************
      * "seal/context.h" {
      ***/
-    py::class_<EncryptionParameterQualifiers>(
-        m, "EncryptionParameterQualifiers", py::module_local())
+    py::class_<EncryptionParameterQualifiers> epq(
+        m, "EncryptionParameterQualifiers", py::module_local());
+
+    py::enum_<EncryptionParameterQualifiers::error_type>(epq, "ERROR_TYPE",
+                                                         py::module_local())
+        .value("NONE", EncryptionParameterQualifiers::error_type::none)
+        .value("SUCCESS", EncryptionParameterQualifiers::error_type::success)
+        .value("INVALID_SCHEME",
+               EncryptionParameterQualifiers::error_type::invalid_scheme)
+        .value("INVALID_COEFF_MODULUS_SIZE",
+               EncryptionParameterQualifiers::error_type::
+                   invalid_coeff_modulus_size)
+        .value("INVALID_COEFF_MODULUS_BIT_COUNT",
+               EncryptionParameterQualifiers::error_type::
+                   invalid_coeff_modulus_bit_count)
+        .value("INVALID_COEFF_MODULUS_NO_NTT",
+               EncryptionParameterQualifiers::error_type::
+                   invalid_coeff_modulus_no_ntt)
+        .value("INVALID_POLY_MODULUS_DEGREE",
+               EncryptionParameterQualifiers::error_type::
+                   invalid_poly_modulus_degree)
+        .value("INVALID_POLY_MODULUS_NON_POWER_OF_TWO",
+               EncryptionParameterQualifiers::error_type::
+                   invalid_poly_modulus_degree_non_power_of_two)
+        .value("INVALID_PARAMETERS_TOO_LARGE",
+               EncryptionParameterQualifiers::error_type::
+                   invalid_parameters_too_large)
+        .value("INVALID_PARAMETERS_INSECURE",
+               EncryptionParameterQualifiers::error_type::
+                   invalid_parameters_insecure)
+        .value(
+            "FAILED_CREATING_RNS_BASE",
+            EncryptionParameterQualifiers::error_type::failed_creating_rns_base)
+        .value("INVALID_PLAIN_MODULUS_BIT_COUNT",
+               EncryptionParameterQualifiers::error_type::
+                   invalid_plain_modulus_bit_count)
+        .value("INVALID_PLAIN_MODULUS_COPRIMALITY",
+               EncryptionParameterQualifiers::error_type::
+                   invalid_plain_modulus_coprimality)
+        .value("INVALID_PLAIN_MODULUS_TOO_LARGE",
+               EncryptionParameterQualifiers::error_type::
+                   invalid_plain_modulus_too_large)
+        .value("INVALID_PLAIN_MODULUS_NONZERO",
+               EncryptionParameterQualifiers::error_type::
+                   invalid_plain_modulus_nonzero)
+        .value("FAILED_CREATING_RNS_TOOL",
+               EncryptionParameterQualifiers::error_type::
+                   failed_creating_rns_tool);
+
+    epq.def("parameter_error_name",
+            &EncryptionParameterQualifiers::parameter_error_name)
+        .def("parameter_error_message",
+             &EncryptionParameterQualifiers::parameter_error_message)
         .def("parameters_set", &EncryptionParameterQualifiers::parameters_set)
         .def_readwrite("using_fft", &EncryptionParameterQualifiers::using_fft)
         .def_readwrite("using_ntt", &EncryptionParameterQualifiers::using_ntt)
@@ -341,11 +418,20 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
              &SEALContext::ContextData::upper_half_threshold)
         .def("upper_half_increment",
              &SEALContext::ContextData::upper_half_increment)
-        //.def("coeff_mod_plain_modulus",
-        //     &SEALContext::ContextData::coeff_mod_plain_modulus)
+        .def("coeff_modulus_mod_plain_modulus",
+             &SEALContext::ContextData::coeff_modulus_mod_plain_modulus)
         .def("prev_context_data", &SEALContext::ContextData::prev_context_data)
         .def("next_context_data", &SEALContext::ContextData::next_context_data)
-        .def("chain_index", &SEALContext::ContextData::chain_index);
+        .def("chain_index", &SEALContext::ContextData::chain_index)
+
+        .def("rns_tool", &SEALContext::ContextData::rns_tool,
+             py::return_value_policy::reference)
+        .def("small_ntt_tables", &SEALContext::ContextData::small_ntt_tables,
+             py::return_value_policy::reference)
+        .def("plain_ntt_tables", &SEALContext::ContextData::plain_ntt_tables,
+             py::return_value_policy::reference)
+        .def("galois_tool", &SEALContext::ContextData::galois_tool,
+             py::return_value_policy::reference);
 
     sealContext.def_static("Create", &SEALContext::Create)
         .def("get_context_data", &SEALContext::get_context_data)
@@ -353,6 +439,8 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def("first_context_data", &SEALContext::first_context_data)
         .def("last_context_data", &SEALContext::last_context_data)
         .def("parameters_set", &SEALContext::parameters_set)
+        .def("parameters_error_name", &SEALContext::parameter_error_name)
+        .def("parameters_error_message", &SEALContext::parameter_error_message)
         .def("key_parms_id", &SEALContext::key_parms_id)
         .def("first_parms_id", &SEALContext::first_parms_id)
         .def("last_parms_id", &SEALContext::last_parms_id)
@@ -433,10 +521,24 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
              py::return_value_policy::reference)
         .def("parms_id", py::overload_cast<>(&RelinKeys::parms_id),
              py::return_value_policy::reference)
+        .def("save",
+             [](const RelinKeys &obj, std::string &path) {
+                 std::ofstream out(path, std::ofstream::binary);
+                 obj.save(out);
+                 out.close();
+             })
+        .def("load",
+             [](RelinKeys &obj, std::shared_ptr<SEALContext> &context,
+                std::string &path) {
+                 std::ifstream in(path, std::ifstream::binary);
+                 obj.load(context, in);
+                 in.close();
+             })
         // RelinKeys
         .def_static("get_index", &RelinKeys::get_index)
         .def("has_key", &RelinKeys::has_key)
         .def("key", &RelinKeys::key, py::return_value_policy::reference);
+    bind_serializable<RelinKeys>(m, "RelinKeys");
     /***
      * } "seal/relinkeys.h"
      *******************/
@@ -455,10 +557,24 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
              py::return_value_policy::reference)
         .def("parms_id", py::overload_cast<>(&GaloisKeys::parms_id),
              py::return_value_policy::reference)
+        .def("save",
+             [](const GaloisKeys &obj, std::string &path) {
+                 std::ofstream out(path, std::ofstream::binary);
+                 obj.save(out);
+                 out.close();
+             })
+        .def("load",
+             [](GaloisKeys &obj, std::shared_ptr<SEALContext> &context,
+                std::string &path) {
+                 std::ifstream in(path, std::ifstream::binary);
+                 obj.load(context, in);
+                 in.close();
+             })
         // GaloisKeys
         .def_static("get_index", &GaloisKeys::get_index)
         .def("has_key", &GaloisKeys::has_key)
         .def("key", &GaloisKeys::key);
+    bind_serializable<GaloisKeys>(m, "GaloisKeys");
     /***
      * } "seal/galoiskeys.h"
      *******************/
@@ -472,33 +588,22 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
         .def(py::init<std::shared_ptr<SEALContext>, const SecretKey &>())
         .def("secret_key", &KeyGenerator::secret_key)
         .def("public_key", &KeyGenerator::public_key)
+        .def("relin_keys_local",
+             py::overload_cast<>(&KeyGenerator::relin_keys_local))
         .def("relin_keys", py::overload_cast<>(&KeyGenerator::relin_keys))
         .def("galois_keys_local",
              py::overload_cast<const std::vector<std::uint32_t> &>(
                  &KeyGenerator::galois_keys_local))
+        .def("galois_keys",
+             py::overload_cast<const std::vector<std::uint32_t> &>(
+                 &KeyGenerator::galois_keys))
         .def("galois_keys_local", py::overload_cast<const std::vector<int> &>(
                                       &KeyGenerator::galois_keys_local))
+        .def("galois_keys", py::overload_cast<const std::vector<int> &>(
+                                &KeyGenerator::galois_keys))
         .def("galois_keys_local",
              py::overload_cast<>(&KeyGenerator::galois_keys_local))
-        /*.def("galois_keys_save",
-             [](KeyGenerator &k, const std::vector<std::uint64_t> &galois_elts,
-                std::string &path) {
-                 std::ofstream out(path, std::ofstream::binary);
-                 k.galois_keys_save(galois_elts, out);
-                 out.close();
-             })
-        .def("galois_keys_save",
-             [](KeyGenerator &k, std::string &path) {
-                 std::ofstream out(path, std::ofstream::binary);
-                 k.galois_keys_save(out);
-                 out.close();
-             })
-        .def("relin_keys_save", [](KeyGenerator &k, std::string &path) {
-            std::ofstream out(path, std::ofstream::binary);
-            k.relin_keys_save(out);
-            out.close();
-        })*/
-        ;
+        .def("galois_keys", py::overload_cast<>(&KeyGenerator::galois_keys));
     /***
      * } "seal/keygenerator.h"
      *******************/
@@ -611,6 +716,7 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
              })
         .def("__getitem__", py::overload_cast<std::size_t>(
                                 &Ciphertext::operator[], py::const_));
+    bind_serializable<Ciphertext>(m, "Ciphertext");
     /***
      * } "seal/ciphertext.h"
      *******************/
@@ -652,33 +758,24 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
              [](Encryptor &e, const Plaintext &plain, Ciphertext &dst) {
                  return e.encrypt_symmetric(plain, dst);
              })
+        .def("encrypt_symmetric",
+             [](Encryptor &e, const Plaintext &plain) {
+                 return e.encrypt_symmetric(plain);
+             })
         .def("encrypt_zero_symmetric",
              [](Encryptor &e, Ciphertext &dst) {
                  return e.encrypt_zero_symmetric(dst);
              })
         .def("encrypt_zero_symmetric",
+             [](Encryptor &e) { return e.encrypt_zero_symmetric(); })
+        .def("encrypt_zero_symmetric",
              [](Encryptor &e, parms_id_type parms_id, Ciphertext &dst) {
                  return e.encrypt_zero_symmetric(parms_id, dst);
              })
-        /*.def("encrypt_symmetric_save",
-             [](Encryptor &e, const Plaintext &plain, std::string &path) {
-                 std::ofstream out(path, std::ofstream::binary);
-                 e.encrypt_symmetric_save(plain, out);
-                 out.close();
-             })
-        .def("encrypt_zero_symmetric_save",
-             [](Encryptor &e, std::string &path) {
-                 std::ofstream out(path, std::ofstream::binary);
-                 e.encrypt_zero_symmetric_save(out);
-                 out.close();
-             })
-        .def("encrypt_zero_symmetric_save",
-             [](Encryptor &e, parms_id_type parms_id, std::string &path) {
-                 std::ofstream out(path, std::ofstream::binary);
-                 e.encrypt_zero_symmetric_save(parms_id, out);
-                 out.close();
-             })*/
-        ;
+        .def("encrypt_zero_symmetric",
+             [](Encryptor &e, parms_id_type parms_id) {
+                 return e.encrypt_zero_symmetric(parms_id);
+             });
     /***
      * } "seal/encryptor.h"
      *******************/

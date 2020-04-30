@@ -58,7 +58,7 @@ def test_keygenerator_relinkeys(ctx):
     assert sealapi.RelinKeys.get_index(index) == index - 2
 
     keygen = sealapi.KeyGenerator(ctx)
-    relin_keys = keygen.relin_keys()
+    relin_keys = keygen.relin_keys_local()
 
     assert relin_keys.has_key(2) is True
 
@@ -71,8 +71,16 @@ def test_keygenerator_relinkeys(ctx):
     assert len(relin_keys.parms_id()) == 4
 
     tmp = NamedTemporaryFile()
-    keygen.relin_keys_save(tmp.name)
+    serial = keygen.relin_keys()
+    serial.save(tmp.name)
     assert Path(tmp.name).stat().st_size > 0
+
+    tmp = NamedTemporaryFile()
+    keygen.relin_keys_local().save(tmp.name)
+    save_test = sealapi.RelinKeys()
+    assert save_test.has_key(2) is False
+    save_test.load(ctx, tmp.name)
+    assert save_test.has_key(2) is True
 
 
 @pytest.mark.parametrize(
@@ -103,8 +111,16 @@ def test_keygenerator_galoiskeys(ctx):
     assert len(galois_keys.parms_id()) == 4
 
     tmp = NamedTemporaryFile()
-    keygen.galois_keys_save(tmp.name)
+    serial = keygen.galois_keys()
+    serial.save(tmp.name)
     assert Path(tmp.name).stat().st_size > 0
+
+    tmp = NamedTemporaryFile()
+    keygen.galois_keys_local().save(tmp.name)
+    save_test = sealapi.GaloisKeys()
+    assert save_test.size() == 0
+    save_test.load(ctx, tmp.name)
+    assert save_test.size() > 0
 
 
 @pytest.mark.parametrize(
@@ -134,3 +150,8 @@ def test_keygenerator_galoiskeys_with_steps(ctx):
         == poly_modulus_degree
     )
     assert len(galois_keys.parms_id()) == 4
+
+    tmp = NamedTemporaryFile()
+    serial = keygen.galois_keys([idx])
+    serial.save(tmp.name)
+    assert Path(tmp.name).stat().st_size > 0

@@ -25,6 +25,7 @@ def test_encryptor_bfv():
     plaintext = intenc.encode(expected_value)
 
     def _test_encryptor_symmetric_setup(encryptor):
+        # encrypt symmetric
         ciphertext = sealapi.Ciphertext(ctx)
         encryptor.encrypt_symmetric(plaintext, ciphertext)
         plaintext_out = sealapi.Plaintext()
@@ -32,11 +33,13 @@ def test_encryptor_bfv():
         assert intenc.decode_int64(plaintext_out) == expected_value
 
         tmp = NamedTemporaryFile()
-        encryptor.encrypt_symmetric_save(plaintext, tmp.name)
+        serial = encryptor.encrypt_symmetric(plaintext)
+        serial.save(tmp.name)
         assert Path(tmp.name).stat().st_size > 0
 
         plaintext_out.set_zero()
 
+        # zero symmetric
         ciphertext = sealapi.Ciphertext(ctx)
         encryptor.encrypt_zero_symmetric(ciphertext)
         plaintext_out = sealapi.Plaintext()
@@ -44,10 +47,22 @@ def test_encryptor_bfv():
         assert intenc.decode_int64(plaintext_out) == 0
 
         tmp = NamedTemporaryFile()
-        encryptor.encrypt_zero_symmetric_save(tmp.name)
+        serial = encryptor.encrypt_zero_symmetric()
+        serial.save(tmp.name)
         assert Path(tmp.name).stat().st_size > 0
-
         plaintext_out.set_zero()
+
+        # zero symmetric parms_id
+        ciphertext = sealapi.Ciphertext(ctx)
+        encryptor.encrypt_zero_symmetric(ctx.last_parms_id(), ciphertext)
+        plaintext_out = sealapi.Plaintext()
+        decryptor.decrypt(ciphertext, plaintext_out)
+        assert intenc.decode_int64(plaintext_out) == 0
+
+        tmp = NamedTemporaryFile()
+        serial = encryptor.encrypt_zero_symmetric(ctx.last_parms_id())
+        serial.save(tmp.name)
+        assert Path(tmp.name).stat().st_size > 0
 
     def _test_encryptor_pk_setup(encryptor):
         ciphertext = sealapi.Ciphertext(ctx)
@@ -59,6 +74,13 @@ def test_encryptor_bfv():
 
         ciphertext = sealapi.Ciphertext(ctx)
         encryptor.encrypt_zero(ciphertext)
+        plaintext_out = sealapi.Plaintext()
+        decryptor.decrypt(ciphertext, plaintext_out)
+        assert intenc.decode_int64(plaintext_out) == 0
+        plaintext_out.set_zero()
+
+        ciphertext = sealapi.Ciphertext(ctx)
+        encryptor.encrypt_zero(ctx.last_parms_id(), ciphertext)
         plaintext_out = sealapi.Plaintext()
         decryptor.decrypt(ciphertext, plaintext_out)
         assert intenc.decode_int64(plaintext_out) == 0

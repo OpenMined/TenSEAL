@@ -7,8 +7,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils import *
 
 
-def test_smallmodulus():
-    testcase = sealapi.SmallModulus(1023)
+def test_modulus():
+    testcase = sealapi.Modulus(1023)
     assert testcase.bit_count() == 10
     assert testcase.uint64_count() == 1
     assert testcase.value() == 1023
@@ -19,24 +19,24 @@ def test_smallmodulus():
 
     tmp = NamedTemporaryFile()
     testcase.save(tmp.name)
-    save_test = sealapi.SmallModulus(0)
+    save_test = sealapi.Modulus(0)
     save_test.load(tmp.name)
     assert save_test.value() == 1023
 
-    testcase = sealapi.SmallModulus(15451)
+    testcase = sealapi.Modulus(15451)
     assert testcase.is_prime()
 
-    testcase = sealapi.SmallModulus(0)
+    testcase = sealapi.Modulus(0)
     assert testcase.is_zero()
 
     # operators
     start = 15451
-    left = sealapi.SmallModulus(start)
-    right = sealapi.SmallModulus(start)
+    left = sealapi.Modulus(start)
+    right = sealapi.Modulus(start)
     assert left == right
     assert left == start
 
-    right = sealapi.SmallModulus(start + 1)
+    right = sealapi.Modulus(start + 1)
     assert left != right
     assert right != start
     assert left < right
@@ -45,7 +45,7 @@ def test_smallmodulus():
     assert left <= start
     assert left <= start + 1
 
-    right = sealapi.SmallModulus(start - 1)
+    right = sealapi.Modulus(start - 1)
     assert left > right
     assert left > start - 1
     assert left >= right

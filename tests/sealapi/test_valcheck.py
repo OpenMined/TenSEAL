@@ -33,8 +33,8 @@ def test_valcheck(check):
     for key in [
         keygen.public_key(),
         keygen.secret_key(),
-        keygen.galois_keys(),
-        keygen.relin_keys(),
+        keygen.galois_keys_local(),
+        keygen.relin_keys_local(),
     ]:
         assert check(key, ctx) is True
         assert check(key, other_ctx) is False

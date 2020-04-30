@@ -7,6 +7,27 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils import *
 
 
+def test_context_encryptionparamsqualifiers():
+    error_type = sealapi.EncryptionParameterQualifiers.ERROR_TYPE
+
+    assert int(error_type.NONE) == -1
+    assert int(error_type.SUCCESS) == 0
+    assert int(error_type.INVALID_SCHEME) == 1
+    assert int(error_type.INVALID_COEFF_MODULUS_SIZE) == 2
+    assert int(error_type.INVALID_COEFF_MODULUS_BIT_COUNT) == 3
+    assert int(error_type.INVALID_COEFF_MODULUS_NO_NTT) == 4
+    assert int(error_type.INVALID_POLY_MODULUS_DEGREE) == 5
+    assert int(error_type.INVALID_POLY_MODULUS_NON_POWER_OF_TWO) == 6
+    assert int(error_type.INVALID_PARAMETERS_TOO_LARGE) == 7
+    assert int(error_type.INVALID_PARAMETERS_INSECURE) == 8
+    assert int(error_type.FAILED_CREATING_RNS_BASE) == 9
+    assert int(error_type.INVALID_PLAIN_MODULUS_BIT_COUNT) == 10
+    assert int(error_type.INVALID_PLAIN_MODULUS_COPRIMALITY) == 11
+    assert int(error_type.INVALID_PLAIN_MODULUS_TOO_LARGE) == 12
+    assert int(error_type.INVALID_PLAIN_MODULUS_NONZERO) == 13
+    assert int(error_type.FAILED_CREATING_RNS_TOOL) == 14
+
+
 @pytest.mark.parametrize(
     "scheme_id,scheme",
     [(0, sealapi.SCHEME_TYPE.NONE), (1, sealapi.SCHEME_TYPE.BFV), (2, sealapi.SCHEME_TYPE.CKKS)],
@@ -31,7 +52,7 @@ def test_encryptionparams_scheme_specific():
     testcase.set_coeff_modulus([])
 
     testcase = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.BFV)
-    testcase.set_plain_modulus(sealapi.SmallModulus(1023))
+    testcase.set_plain_modulus(sealapi.Modulus(1023))
     assert testcase.plain_modulus().value() == 1023
 
     testcase.set_random_generator(sealapi.BlakePRNGFactory())
@@ -46,25 +67,25 @@ def test_encryptionparams_scheme_settings(scheme):
     assert testcase.poly_modulus_degree() == 32768
 
     testcase = sealapi.EncryptionParameters(scheme)
-    testcase.set_coeff_modulus([sealapi.SmallModulus(1023), sealapi.SmallModulus(234)])
+    testcase.set_coeff_modulus([sealapi.Modulus(1023), sealapi.Modulus(234)])
     assert len(testcase.coeff_modulus()) == 2
     assert testcase.coeff_modulus()[0].value() == 1023
     assert testcase.coeff_modulus()[1].value() == 234
 
     left = sealapi.EncryptionParameters(scheme)
     left.set_poly_modulus_degree(32768)
-    left.set_coeff_modulus([sealapi.SmallModulus(1023), sealapi.SmallModulus(234)])
+    left.set_coeff_modulus([sealapi.Modulus(1023), sealapi.Modulus(234)])
 
     right = sealapi.EncryptionParameters(scheme)
     right.set_poly_modulus_degree(32768)
     assert left != right
 
-    right.set_coeff_modulus([sealapi.SmallModulus(1023), sealapi.SmallModulus(234)])
+    right.set_coeff_modulus([sealapi.Modulus(1023), sealapi.Modulus(234)])
     assert left == right
 
     testcase = sealapi.EncryptionParameters(scheme)
     testcase.set_poly_modulus_degree(32768)
-    testcase.set_coeff_modulus([sealapi.SmallModulus(1023), sealapi.SmallModulus(234)])
+    testcase.set_coeff_modulus([sealapi.Modulus(1023), sealapi.Modulus(234)])
 
     tmp = NamedTemporaryFile()
     testcase.save(tmp.name)
@@ -103,6 +124,8 @@ def test_context_sanity(sealctx):
 
 def context_asserts(sealctx, sec_level, scheme):
     assert sealctx.parameters_set() is True
+    assert sealctx.parameters_error_name() == "success"
+    assert sealctx.parameters_error_message() == "valid"
 
     orig_ctx_data = sealctx.key_context_data()
     parms = orig_ctx_data.parms()
@@ -111,7 +134,7 @@ def context_asserts(sealctx, sec_level, scheme):
 
     def context_data_sanity(ctx_data, ctx_alias, index):
         assert ctx_data.parms().poly_modulus_degree() == poly_modulus_degree
-        assert len(ctx_data.parms_id()) == len(ctx_alias.parms_id())
+        assert len(ctx_data.parms_id()) == 4
         assert ctx_data.chain_index() == ctx_alias.chain_index()
         assert ctx_data.chain_index() == index
         assert (
@@ -119,14 +142,20 @@ def context_asserts(sealctx, sec_level, scheme):
             and ctx_data.total_coeff_modulus() == ctx_alias.total_coeff_modulus()
         )
         assert ctx_data.total_coeff_modulus_bit_count() == ctx_alias.total_coeff_modulus_bit_count()
+
         assert ctx_data.plain_upper_half_threshold() == ctx_alias.plain_upper_half_threshold()
         assert ctx_data.coeff_div_plain_modulus() == ctx_alias.coeff_div_plain_modulus()
-        assert ctx_data.coeff_mod_plain_modulus() == ctx_alias.coeff_mod_plain_modulus()
         assert ctx_data.upper_half_increment() == ctx_alias.upper_half_increment()
         assert ctx_data.upper_half_threshold() == ctx_alias.upper_half_threshold()
 
+        # TODO
+        # assert ctx_data.rns_tool()
+        # assert ctx_data.small_ntt_tables()
+        # assert ctx_data.plain_ntt_tables()
+        # assert ctx_data.galois_tool()
+
         qualifiers = ctx_data.qualifiers()
-        assert qualifiers.parameters_set is True
+        assert qualifiers.parameters_set() is True
         assert qualifiers.using_fft is True
         assert qualifiers.using_ntt is True
         assert qualifiers.using_batching is True

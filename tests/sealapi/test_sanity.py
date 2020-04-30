@@ -183,7 +183,9 @@ def test_serialization_sanity():
 
     header = sealapi.Serialization.SEALHeader()
     assert header.magic == 0xA15E
-    assert header.zero_byte == 0
+    assert header.header_size == 0x10
+    assert header.version_major == 3
+    assert header.version_minor == 0x5
     assert header.compr_mode == sealapi.COMPR_MODE_TYPE.NONE
     assert header.size == 0
     assert header.reserved == 0
@@ -193,8 +195,16 @@ def test_serialization_sanity():
     header = sealapi.Serialization.SEALHeader()
     assert sealapi.Serialization.IsValidHeader(header) is True
 
-    header.magic = 0
-    assert sealapi.Serialization.IsValidHeader(header) is False
+    header = sealapi.Serialization.SEALHeader()
+    header.compr_mode = sealapi.COMPR_MODE_TYPE.DEFLATE
+
+    tmp = NamedTemporaryFile()
+    sealapi.Serialization.SaveHeader(header, tmp.name)
+    save_test = sealapi.Serialization.SEALHeader()
+    sealapi.Serialization.LoadHeader(tmp.name, save_test, True)
+    assert save_test.compr_mode == sealapi.COMPR_MODE_TYPE.DEFLATE
+    sealapi.Serialization.LoadHeader(tmp.name, save_test, False)
+    assert save_test.compr_mode == sealapi.COMPR_MODE_TYPE.DEFLATE
 
 
 @pytest.mark.parametrize(
