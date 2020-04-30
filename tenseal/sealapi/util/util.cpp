@@ -4,6 +4,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <seal/seal.h>
+#include <seal/util/polyarith.h>
+#include <seal/util/polyarithsmallmod.h>
+#include <seal/util/rlwe.h>
 
 #include <fstream>
 
@@ -14,6 +17,7 @@ namespace py = pybind11;
 
 PYBIND11_MODULE(_sealapi_util_cpp, m) {
     m.doc() = "SEAL util bindings for Python";
+
     /*******************
      * "util/rns.h" {
      ***/
@@ -136,8 +140,125 @@ PYBIND11_MODULE(_sealapi_util_cpp, m) {
         .def("m_sk", &RNSTool::m_sk)
         .def("t", &RNSTool::t)
         .def("gamma", &RNSTool::gamma);
-
     /***
      * } "util/rns.h"
+     *******************/
+
+    /*******************
+     * "util/ntt.h" {
+     ***/
+
+    py::class_<NTTTables>(m, "NTTTables", py::module_local())
+        .def(py::init<NTTTables &>())
+        .def(py::init<int, const Modulus &, MemoryPoolHandle>(), py::arg(),
+             py::arg(), py::arg() = MemoryManager::GetPool())
+        .def("get_root", &NTTTables::get_root)
+        .def("get_from_root_powers", &NTTTables::get_from_root_powers)
+        .def("get_from_scaled_root_powers",
+             &NTTTables::get_from_scaled_root_powers)
+        .def("get_from_inv_root_powers", &NTTTables::get_from_inv_root_powers)
+        .def("get_from_scaled_inv_root_powers",
+             &NTTTables::get_from_scaled_inv_root_powers)
+        .def("get_inv_degree_modulo", &NTTTables::get_inv_degree_modulo)
+        .def("modulus", &NTTTables::modulus)
+        .def("coeff_count_power", &NTTTables::coeff_count_power)
+        .def("coeff_count", &NTTTables::coeff_count)
+        .def("coeff_count", &NTTTables::coeff_count);
+    m.def("CreateNTTTables",
+          [](int coeff_count_power, const std::vector<Modulus> &modulus,
+             Pointer<NTTTables> &tables) {
+              return CreateNTTTables(coeff_count_power, modulus, tables,
+                                     MemoryManager::GetPool());
+          })
+        .def("ntt_negacyclic_harvey_lazy", &ntt_negacyclic_harvey_lazy)
+        .def("ntt_negacyclic_harvey", &ntt_negacyclic_harvey)
+        .def("inverse_ntt_negacyclic_harvey_lazy",
+             &inverse_ntt_negacyclic_harvey_lazy)
+        .def("inverse_ntt_negacyclic_harvey", &inverse_ntt_negacyclic_harvey);
+    /***
+     * } "util/ntt.h"
+     *******************/
+
+    /*******************
+     * "util/galois.h" {
+     ***/
+    py::class_<GaloisTool>(m, "GaloisTool", py::module_local())
+        .def(py::init<int, MemoryPoolHandle>(), py::arg(),
+             py::arg() = MemoryManager::GetPool())
+        .def("apply_galois", &GaloisTool::apply_galois)
+        .def("apply_galois_ntt", &GaloisTool::apply_galois_ntt)
+        .def("get_elts_from_steps", &GaloisTool::get_elts_from_steps)
+        .def("get_elts_all", &GaloisTool::get_elts_all)
+        .def_static("GetIndexFromElt", &GaloisTool::GetIndexFromElt);
+    /***
+     * } "util/galois.h"
+     *******************/
+
+    /*******************
+     * "util/polyarith.h" {
+     ***/
+    m.def("right_shift_poly_coeffs", &right_shift_poly_coeffs)
+        .def("negate_poly", &negate_poly)
+        .def("add_poly_poly", &add_poly_poly)
+        .def("sub_poly_poly", &sub_poly_poly)
+        .def("multiply_poly_poly", &multiply_poly_poly)
+        .def("poly_infty_norm", &poly_infty_norm)
+        .def("poly_eval_poly", &poly_eval_poly)
+        .def("exponentiate_poly", &exponentiate_poly);
+    /***
+     * } "util/polyarith.h"
+     *******************/
+
+    /*******************
+     * "util/rlwe.h" {
+     ***/
+    m.def("sample_poly_ternary", &sample_poly_ternary)
+        .def("sample_poly_normal", &sample_poly_normal)
+        .def("sample_poly_uniform", &sample_poly_uniform)
+        .def("encrypt_zero_asymmetric", &encrypt_zero_asymmetric)
+        .def("encrypt_zero_symmetric", &encrypt_zero_symmetric);
+    /***
+     * } "util/rlwe.h"
+     *******************/
+
+    /*******************
+     * "util/polyarithsmallmod.h" {
+     ***/
+    m.def("modulo_poly_coeffs", &modulo_poly_coeffs)
+        .def("modulo_poly_coeffs_63", &modulo_poly_coeffs_63)
+        .def("negate_poly_coeffmod", &negate_poly_coeffmod)
+        .def("add_poly_poly_coeffmod", &add_poly_poly_coeffmod)
+        .def("sub_poly_poly_coeffmod", &sub_poly_poly_coeffmod)
+        .def("multiply_poly_scalar_coeffmod", &multiply_poly_scalar_coeffmod)
+        .def("multiply_poly_poly_coeffmod",
+             py::overload_cast<const std::uint64_t *, std::size_t,
+                               const std::uint64_t *, std::size_t,
+                               const Modulus &, std::size_t, std::uint64_t *>(
+                 &multiply_poly_poly_coeffmod))
+        .def("multiply_poly_poly_coeffmod",
+             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
+                               std::size_t, const Modulus &, std::uint64_t *>(
+                 &multiply_poly_poly_coeffmod))
+        .def("multiply_truncate_poly_poly_coeffmod",
+             &multiply_truncate_poly_poly_coeffmod)
+        .def("divide_poly_poly_coeffmod_inplace",
+             &divide_poly_poly_coeffmod_inplace)
+        .def("divide_poly_poly_coeffmod", &divide_poly_poly_coeffmod)
+        .def("dyadic_product_coeffmod", &dyadic_product_coeffmod)
+        .def("poly_infty_norm_coeffmod", &poly_infty_norm_coeffmod)
+        .def("try_invert_poly_coeffmod", &try_invert_poly_coeffmod)
+        .def("negacyclic_shift_poly_coeffmod", &negacyclic_shift_poly_coeffmod)
+        .def("negacyclic_multiply_poly_mono_coeffmod",
+             &negacyclic_multiply_poly_mono_coeffmod);
+    /***
+     * } "util/polyarithsmallmod.h"
+     *******************/
+
+    /*******************
+     * "util/pointer.h" {
+     ***/
+
+    /***
+     * } "util/pointer.h"
      *******************/
 }
