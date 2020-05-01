@@ -29,6 +29,29 @@ poly_infty_norm = _sealapi_util_cpp.poly_infty_norm
 poly_eval_poly = _sealapi_util_cpp.poly_eval_poly
 exponentiate_poly = _sealapi_util_cpp.exponentiate_poly
 
+## util/polyarithmod.h ##
+negate_poly_coeffmod = _sealapi_util_cpp.negate_poly_coeffmod
+add_poly_poly_coeffmod = _sealapi_util_cpp.add_poly_poly_coeffmod
+sub_poly_poly_coeffmod = _sealapi_util_cpp.sub_poly_poly_coeffmod
+poly_infty_norm_coeffmod = _sealapi_util_cpp.poly_infty_norm_coeffmod
+
+## util/polycore.h ##
+poly_to_hex_string = _sealapi_util_cpp.poly_to_hex_string
+poly_to_dec_string = _sealapi_util_cpp.poly_to_dec_string
+allocate_poly = _sealapi_util_cpp.allocate_poly
+set_zero_poly = _sealapi_util_cpp.set_zero_poly
+allocate_zero_poly = _sealapi_util_cpp.allocate_zero_poly
+get_poly_coeff = _sealapi_util_cpp.get_poly_coeff
+set_poly_poly = _sealapi_util_cpp.set_poly_poly
+is_zero_poly = _sealapi_util_cpp.is_zero_poly
+is_equal_poly_poly = _sealapi_util_cpp.is_equal_poly_poly
+set_poly_poly = _sealapi_util_cpp.set_poly_poly
+is_one_zero_one_poly = _sealapi_util_cpp.is_one_zero_one_poly
+get_significant_coeff_count_poly = _sealapi_util_cpp.get_significant_coeff_count_poly
+duplicate_poly_if_needed = _sealapi_util_cpp.duplicate_poly_if_needed
+are_poly_coefficients_less_than = _sealapi_util_cpp.are_poly_coefficients_less_than
+
+
 ## util/rlwe.h ##
 sample_poly_ternary = _sealapi_util_cpp.sample_poly_ternary
 sample_poly_normal = _sealapi_util_cpp.sample_poly_normal
@@ -52,3 +75,148 @@ poly_infty_norm_coeffmod = _sealapi_util_cpp.poly_infty_norm_coeffmod
 try_invert_poly_coeffmod = _sealapi_util_cpp.try_invert_poly_coeffmod
 negacyclic_shift_poly_coeffmod = _sealapi_util_cpp.negacyclic_shift_poly_coeffmod
 negacyclic_multiply_poly_mono_coeffmod = _sealapi_util_cpp.negacyclic_multiply_poly_mono_coeffmod
+
+## util/uintcore.h ##
+uint_to_dec_string = _sealapi_util_cpp.uint_to_dec_string
+hex_string_to_uint = _sealapi_util_cpp.hex_string_to_uint
+set_zero_uint = _sealapi_util_cpp.set_zero_uint
+set_uint = _sealapi_util_cpp.set_uint
+set_uint_uint = _sealapi_util_cpp.set_uint_uint
+is_zero_uint = _sealapi_util_cpp.is_zero_uint
+is_equal_uint = _sealapi_util_cpp.is_equal_uint
+is_high_bit_set_uint = _sealapi_util_cpp.is_high_bit_set_uint
+is_bit_set_uint = _sealapi_util_cpp.is_bit_set_uint
+set_bit_uint = _sealapi_util_cpp.set_bit_uint
+get_significant_bit_count_uint = _sealapi_util_cpp.get_significant_bit_count_uint
+get_significant_uint64_count_uint = _sealapi_util_cpp.get_significant_uint64_count_uint
+get_nonzero_uint64_count_uint = _sealapi_util_cpp.get_nonzero_uint64_count_uint
+set_uint_uint = _sealapi_util_cpp.set_uint_uint
+get_power_of_two = _sealapi_util_cpp.get_power_of_two
+get_power_of_two_minus_one = _sealapi_util_cpp.get_power_of_two_minus_one
+get_power_of_two_uint = _sealapi_util_cpp.get_power_of_two_uint
+get_power_of_two_minus_one_uint = _sealapi_util_cpp.get_power_of_two_minus_one_uint
+filter_highbits_uint = _sealapi_util_cpp.filter_highbits_uint
+duplicate_uint_if_needed = _sealapi_util_cpp.duplicate_uint_if_needed
+compare_uint_uint = _sealapi_util_cpp.compare_uint_uint
+is_greater_than_uint_uint = _sealapi_util_cpp.is_greater_than_uint_uint
+is_greater_than_or_equal_uint_uint = _sealapi_util_cpp.is_greater_than_or_equal_uint_uint
+is_less_than_uint_uint = _sealapi_util_cpp.is_less_than_uint_uint
+is_less_than_or_equal_uint_uint = _sealapi_util_cpp.is_less_than_or_equal_uint_uint
+is_equal_uint_uint = _sealapi_util_cpp.is_equal_uint_uint
+is_not_equal_uint_uint = _sealapi_util_cpp.is_not_equal_uint_uint
+is_greater_than_uint_uint = _sealapi_util_cpp.is_greater_than_uint_uint
+is_greater_than_or_equal_uint_uint = _sealapi_util_cpp.is_greater_than_or_equal_uint_uint
+is_less_than_uint_uint = _sealapi_util_cpp.is_less_than_uint_uint
+is_less_than_or_equal_uint_uint = _sealapi_util_cpp.is_less_than_or_equal_uint_uint
+is_equal_uint_uint = _sealapi_util_cpp.is_equal_uint_uint
+is_not_equal_uint_uint = _sealapi_util_cpp.is_not_equal_uint_uint
+hamming_weight = _sealapi_util_cpp.hamming_weight
+hamming_weight_split = _sealapi_util_cpp.hamming_weight_split
+
+
+## util/uintarith.h ##
+
+add_uint_uint = _sealapi_util_cpp.add_uint_uint
+add_uint_uint64 = _sealapi_util_cpp.add_uint_uint64
+sub_uint_uint = _sealapi_util_cpp.sub_uint_uint
+sub_uint_uint64 = _sealapi_util_cpp.sub_uint_uint64
+increment_uint = _sealapi_util_cpp.increment_uint
+decrement_uint = _sealapi_util_cpp.decrement_uint
+negate_uint = _sealapi_util_cpp.negate_uint
+left_shift_uint = _sealapi_util_cpp.left_shift_uint
+right_shift_uint = _sealapi_util_cpp.right_shift_uint
+left_shift_uint128 = _sealapi_util_cpp.left_shift_uint128
+right_shift_uint128 = _sealapi_util_cpp.right_shift_uint128
+left_shift_uint192 = _sealapi_util_cpp.left_shift_uint192
+right_shift_uint192 = _sealapi_util_cpp.right_shift_uint192
+half_round_up_uint = _sealapi_util_cpp.half_round_up_uint
+not_uint = _sealapi_util_cpp.not_uint
+and_uint_uint = _sealapi_util_cpp.and_uint_uint
+or_uint_uint = _sealapi_util_cpp.or_uint_uint
+xor_uint_uint = _sealapi_util_cpp.xor_uint_uint
+multiply_uint_uint = _sealapi_util_cpp.multiply_uint_uint
+multiply_uint_uint = _sealapi_util_cpp.multiply_uint_uint
+multiply_uint_uint64 = _sealapi_util_cpp.multiply_uint_uint64
+multiply_truncate_uint_uint = _sealapi_util_cpp.multiply_truncate_uint_uint
+divide_uint_uint_inplace = _sealapi_util_cpp.divide_uint_uint_inplace
+divide_uint_uint = _sealapi_util_cpp.divide_uint_uint
+divide_uint128_uint64_inplace_generic = _sealapi_util_cpp.divide_uint128_uint64_inplace_generic
+divide_uint128_uint64_inplace = _sealapi_util_cpp.divide_uint128_uint64_inplace
+divide_uint192_uint64_inplace = _sealapi_util_cpp.divide_uint192_uint64_inplace
+exponentiate_uint = _sealapi_util_cpp.exponentiate_uint
+exponentiate_uint64_safe = _sealapi_util_cpp.exponentiate_uint64_safe
+exponentiate_uint64 = _sealapi_util_cpp.exponentiate_uint64
+
+## util/uintarithmod.h ##
+increment_uint_mod = _sealapi_util_cpp.increment_uint_mod
+decrement_uint_mod = _sealapi_util_cpp.decrement_uint_mod
+negate_uint_mod = _sealapi_util_cpp.negate_uint_mod
+div2_uint_mod = _sealapi_util_cpp.div2_uint_mod
+add_uint_uint_mod = _sealapi_util_cpp.add_uint_uint_mod
+sub_uint_uint_mod = _sealapi_util_cpp.sub_uint_uint_mod
+try_invert_uint_mod = _sealapi_util_cpp.try_invert_uint_mod
+
+
+## util/uintarithsmallmod.h  ##
+increment_uint_mod = _sealapi_util_cpp.increment_uint_mod
+decrement_uint_mod = _sealapi_util_cpp.decrement_uint_mod
+negate_uint_mod = _sealapi_util_cpp.negate_uint_mod
+div2_uint_mod = _sealapi_util_cpp.div2_uint_mod
+add_uint_uint_mod = _sealapi_util_cpp.add_uint_uint_mod
+sub_uint_uint_mod = _sealapi_util_cpp.sub_uint_uint_mod
+sub_uint_uint_mod = _sealapi_util_cpp.sub_uint_uint_mod
+barrett_reduce_128 = _sealapi_util_cpp.barrett_reduce_128
+barrett_reduce_63 = _sealapi_util_cpp.barrett_reduce_63
+multiply_uint_uint_mod = _sealapi_util_cpp.multiply_uint_uint_mod
+modulo_uint_inplace = _sealapi_util_cpp.modulo_uint_inplace
+modulo_uint = _sealapi_util_cpp.modulo_uint
+multiply_add_uint_mod = _sealapi_util_cpp.multiply_add_uint_mod
+try_invert_uint_mod = _sealapi_util_cpp.try_invert_uint_mod
+exponentiate_uint_mod = _sealapi_util_cpp.exponentiate_uint_mod
+divide_uint_uint_mod_inplace = _sealapi_util_cpp.divide_uint_uint_mod_inplace
+dot_product_mod = _sealapi_util_cpp.dot_product_mod
+
+## util/croots.h  ##
+ComplexRoots = _sealapi_util_cpp.ComplexRoots
+
+## util/numth.h ##
+naf = _sealapi_util_cpp.naf
+gcd = _sealapi_util_cpp.gcd
+xgcd = _sealapi_util_cpp.xgcd
+are_coprime = _sealapi_util_cpp.are_coprime
+multiplicative_orders = _sealapi_util_cpp.multiplicative_orders
+conjugate_classes = _sealapi_util_cpp.conjugate_classes
+babystep_giantstep = _sealapi_util_cpp.babystep_giantstep
+decompose_babystep_giantstep = _sealapi_util_cpp.decompose_babystep_giantstep
+is_prime = _sealapi_util_cpp.is_prime
+get_primes = _sealapi_util_cpp.get_primes
+get_prime = _sealapi_util_cpp.get_prime
+try_invert_uint_mod = _sealapi_util_cpp.try_invert_uint_mod
+is_primitive_root = _sealapi_util_cpp.is_primitive_root
+try_minimal_primitive_root = _sealapi_util_cpp.try_minimal_primitive_root
+
+## util/hestdparms.h ##
+SEAL_HE_STD_PARMS_128_TC = _sealapi_util_cpp.SEAL_HE_STD_PARMS_128_TC
+SEAL_HE_STD_PARMS_192_TC = _sealapi_util_cpp.SEAL_HE_STD_PARMS_192_TC
+SEAL_HE_STD_PARMS_256_TC = _sealapi_util_cpp.SEAL_HE_STD_PARMS_256_TC
+SEAL_HE_STD_PARMS_128_TQ = _sealapi_util_cpp.SEAL_HE_STD_PARMS_128_TQ
+SEAL_HE_STD_PARMS_192_TQ = _sealapi_util_cpp.SEAL_HE_STD_PARMS_192_TQ
+SEAL_HE_STD_PARMS_256_TQ = _sealapi_util_cpp.SEAL_HE_STD_PARMS_256_TQ
+
+## util/hestdparms.h ##
+
+multiply_add_plain_with_scaling_variant = _sealapi_util_cpp.multiply_add_plain_with_scaling_variant
+multiply_sub_plain_with_scaling_variant = _sealapi_util_cpp.multiply_sub_plain_with_scaling_variant
+
+## util/clipnormal.h ##
+ClippedNormalDistribution = _sealapi_util_cpp.ClippedNormalDistribution
+
+## util/hash.h ##
+HashFunction = _sealapi_util_cpp.HashFunction
+
+## util/pointer.h ##
+PointerComplexDouble = _sealapi_util_cpp.PointerComplexDouble
+PointerUInt64 = _sealapi_util_cpp.PointerUInt64
+PointerGaloisTool = _sealapi_util_cpp.PointerGaloisTool
+PointerNTTTables = _sealapi_util_cpp.PointerNTTTables
+PointerRNSTool = _sealapi_util_cpp.PointerRNSTool
