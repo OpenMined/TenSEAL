@@ -189,6 +189,8 @@ BFVVector& BFVVector::mul_plain_inplace(vector<int64_t> to_mul) {
 
     BatchEncoder batch_encoder(this->context->seal_context());
     Plaintext plaintext;
+    // prevent transparent ciphertext by adding a non-zero value
+    if (to_mul.size() + 1 <= batch_encoder.slot_count()) to_mul.push_back(1);
     batch_encoder.encode(to_mul, plaintext);
 
     this->context->evaluator->multiply_plain_inplace(this->ciphertext,
