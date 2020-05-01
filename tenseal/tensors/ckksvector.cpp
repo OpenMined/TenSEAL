@@ -186,6 +186,8 @@ CKKSVector& CKKSVector::mul_plain_inplace(vector<double> to_mul) {
 
     CKKSEncoder encoder(this->context->seal_context());
     Plaintext plaintext;
+    // prevent transparent ciphertext by adding a non-zero value
+    if (to_mul.size() + 1 <= encoder.slot_count()) to_mul.push_back(1);
     encoder.encode(to_mul, this->init_scale, plaintext);
     this->context->evaluator->multiply_plain_inplace(this->ciphertext,
                                                      plaintext);
