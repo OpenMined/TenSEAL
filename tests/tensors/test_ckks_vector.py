@@ -347,6 +347,18 @@ def test_mul_plain_inplace(context, scale, vec1, vec2):
     assert _almost_equal(decrypted_result, expected, 1), "Multiplication of vectors is incorrect."
 
 
+def test_mul_plain_zero(context, scale):
+    # from context
+    max_slots = 8192 // 2
+    pt = [0] * max_slots
+    ct = ts.ckks_vector(context, scale, [1] * max_slots)
+
+    with pytest.raises(RuntimeError) as e:
+        # the workaround of transparent ciphertext doesn't work when all slots are used
+        result = ct * pt
+    assert str(e.value) == "result ciphertext is transparent"
+
+
 def test_size(context, scale):
     for size in range(10):
         vec = ts.ckks_vector(context, scale, [1] * size)

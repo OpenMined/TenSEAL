@@ -325,6 +325,16 @@ def test_mul_plain_inplace(context, vec1, vec2):
     assert decrypted_result == expected, "Multiplication of vectors is incorrect."
 
 
+def test_mul_plain_zero(context):
+    pt = [0]
+    ct = ts.bfv_naive_vector(context, [1])
+
+    with pytest.raises(RuntimeError) as e:
+        # bfv_naive_vector can't be multiplied with zero value
+        result = ct * pt
+    assert str(e.value) == "result ciphertext is transparent"
+
+
 def test_size(context):
     for size in range(10):
         vec = ts.bfv_naive_vector(context, [1] * size)
