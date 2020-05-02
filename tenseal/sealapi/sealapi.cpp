@@ -271,7 +271,7 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
      * "seal/modulus.h" {
      ***/
 
-    py::class_<Modulus>(m, "Modulus", py::module_local())
+    py::class_<Modulus>(m, "Modulus")
         .def(py::init<std::uint64_t>())
         .def(py::init<const Modulus &>())
 

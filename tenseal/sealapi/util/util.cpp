@@ -35,7 +35,7 @@ void bind_pointer(py::module &m, const std::string &name) {
     using type = Pointer<T>;
     std::string class_name = "Pointer" + name;
 
-    py::class_<type>(m, class_name.c_str(), py::module_local())
+    py::class_<type>(m, class_name.c_str())
         .def(py::init<>())
         .def("__getitem__",
              py::overload_cast<std::size_t>(&type::operator[], py::const_))
@@ -46,7 +46,7 @@ void bind_pointer(py::module &m, const std::string &name) {
     using const_type = ConstPointer<T>;
     std::string const_class_name = "ConstPointer" + name;
 
-    py::class_<const_type>(m, const_class_name.c_str(), py::module_local())
+    py::class_<const_type>(m, const_class_name.c_str())
         .def(py::init<>())
         .def("__getitem__", py::overload_cast<std::size_t>(
                                 &const_type::operator[], py::const_))
@@ -61,11 +61,15 @@ void bind_pointer(py::module &m, const std::string &name) {
 PYBIND11_MODULE(_sealapi_util_cpp, m) {
     m.doc() = "SEAL util bindings for Python";
 
+    py::class_<MemoryPoolHandle>(m, "MemoryPoolHandle", py::module_local());
+
     /*******************
      * "util/rns.h" {
      ***/
     py::class_<RNSBase>(m, "RNSBase", py::module_local())
         .def(py::init<const RNSBase &>())
+        .def(py::init<const std::vector<Modulus> &, MemoryPoolHandle>(),
+             py::arg(), py::arg() = MemoryManager::GetPool())
         .def("__getitem__",
              py::overload_cast<std::size_t>(&RNSBase::operator[], py::const_))
         .def("size", &RNSBase::size)
@@ -81,33 +85,34 @@ PYBIND11_MODULE(_sealapi_util_cpp, m) {
         .def("drop", py::overload_cast<>(&RNSBase::drop, py::const_))
         .def("drop", py::overload_cast<Modulus>(&RNSBase::drop, py::const_))
         .def("decompose",
-             [](const RNSBase &obj, std::uint64_t *value) {
-                 return obj.decompose(value, MemoryManager::GetPool());
+             [](const RNSBase &obj, std::vector<std::uint64_t> &value) {
+                 std::vector<std::uint64_t> out = value;
+                 obj.decompose(out.data(), MemoryManager::GetPool());
+                 return out;
              })
         .def("decompose_array",
-             [](const RNSBase &obj, std::uint64_t *value, std::size_t count) {
-                 return obj.decompose_array(value, count,
-                                            MemoryManager::GetPool());
+             [](const RNSBase &obj, std::vector<std::uint64_t> &value,
+                std::size_t count) {
+                 std::vector<std::uint64_t> out = value;
+                 obj.decompose_array(out.data(), count,
+                                     MemoryManager::GetPool());
+                 return out;
              })
         .def("compose",
-             [](const RNSBase &obj, std::uint64_t *value) {
-                 return obj.compose(value, MemoryManager::GetPool());
+             [](const RNSBase &obj, std::vector<std::uint64_t> &value) {
+                 std::vector<std::uint64_t> out = value;
+                 obj.compose(out.data(), MemoryManager::GetPool());
+                 return out;
              })
         .def("compose_array",
-             [](const RNSBase &obj, std::uint64_t *value, std::size_t count) {
-                 return obj.compose_array(value, count,
-                                          MemoryManager::GetPool());
+             [](const RNSBase &obj, std::vector<std::uint64_t> &value,
+                std::size_t count) {
+                 std::vector<std::uint64_t> out = value;
+                 obj.compose_array(out.data(), count, MemoryManager::GetPool());
+                 return out;
              })
-        .def("base", &RNSBase::base, py::return_value_policy::reference)
         .def("base_prod", &RNSBase::base_prod,
-             py::return_value_policy::reference)
-        .def("punctured_prod_array", &RNSBase::punctured_prod_array,
-             py::return_value_policy::reference)
-        .def("inv_punctured_prod_mod_base_array",
-             &RNSBase::inv_punctured_prod_mod_base_array,
              py::return_value_policy::reference);
-
-    py::class_<MemoryPoolHandle>(m, "MemoryPoolHandle", py::module_local());
 
     py::class_<BaseConverter>(m, "BaseConverter", py::module_local())
         .def(py::init<const RNSBase &, const RNSBase &, MemoryPoolHandle>(),
@@ -116,19 +121,26 @@ PYBIND11_MODULE(_sealapi_util_cpp, m) {
         .def("obase_size", &BaseConverter::obase_size)
         .def("ibase", &BaseConverter::ibase)
         .def("obase", &BaseConverter::obase)
-        .def("fast_convert",
-             [](const BaseConverter &obj, const std::uint64_t *in,
-                std::uint64_t *out) {
-                 return obj.fast_convert(in, out, MemoryManager::GetPool());
-             })
+        .def(
+            "fast_convert",
+            [](const BaseConverter &obj, const std::vector<std::uint64_t> &in) {
+                std::vector<std::uint64_t> out(obj.obase_size());
+                obj.fast_convert(in.data(), out.data(),
+                                 MemoryManager::GetPool());
+                return out;
+            })
         .def("fast_convert_array",
-             [](const BaseConverter &obj, const std::uint64_t *in,
-                std::size_t count, std::uint64_t *out) {
-                 return obj.fast_convert_array(in, count, out,
-                                               MemoryManager::GetPool());
+             [](const BaseConverter &obj, const std::vector<std::uint64_t> &in,
+                std::size_t count) {
+                 std::vector<std::uint64_t> out(obj.obase_size() * count);
+                 obj.fast_convert_array(in.data(), count, out.data(),
+                                        MemoryManager::GetPool());
+
+                 return out;
              });
 
-    py::class_<RNSTool>(m, "RNSTool", py::module_local())
+    py::class_<RNSTool, std::shared_ptr<RNSTool>>(m, "RNSTool",
+                                                  py::module_local())
         .def(py::init<std::size_t, const RNSBase &, const Modulus &,
                       MemoryPoolHandle>(),
              py::arg(), py::arg(), py::arg(),
@@ -171,7 +183,6 @@ PYBIND11_MODULE(_sealapi_util_cpp, m) {
                  obj.decrypt_scale_and_round(input, destination,
                                              MemoryManager::GetPool());
              })
-
         .def("inv_q_last_mod_q", &RNSTool::inv_q_last_mod_q)
         .def("base_Bsk_small_ntt_tables", &RNSTool::base_Bsk_small_ntt_tables)
         .def("base_q", &RNSTool::base_q)
@@ -706,6 +717,7 @@ PYBIND11_MODULE(_sealapi_util_cpp, m) {
     /*******************
      * "util/pointer.h" {
      ***/
+    bind_pointer<Modulus>(m, "Modulus");
     bind_pointer<std::complex<double>>(m, "ComplexDouble");
     bind_pointer<std::uint64_t>(m, "UInt64");
     bind_pointer<GaloisTool>(m, "GaloisTool");
