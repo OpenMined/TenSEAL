@@ -14,7 +14,13 @@ from utils import *
     ],
 )
 @pytest.mark.parametrize(
-    "left", [[10, 100, 500, 600], [i for i in range(200)],],
+    "left",
+    [
+        [10, 100, 500, 600],
+        [i for i in range(200)],
+        [-i for i in range(200)],
+        [(-1) ** i * i for i in range(200)],
+    ],
 )
 def test_evaluator_unary(scheme, ctx, left):
     evaluator, encryptor, decryptor, _ = helper_generate_evaluator(ctx)
@@ -70,6 +76,10 @@ def test_evaluator_unary(scheme, ctx, left):
     [
         ([10, 100, 500, 600], [5, 50, 100, 500]),
         ([2 * i for i in range(200)], [5 * i for i in range(200)]),
+        ([2 * i for i in range(200)], [-2 * i for i in range(200)]),
+        ([2 * i for i in range(200)], [-5 * i for i in range(200)]),
+        ([-2 * i for i in range(200)], [5 * i for i in range(200)]),
+        ([-2 * i for i in range(200)], [-5 * i for i in range(200)]),
     ],
 )
 def test_evaluator_binary(scheme, ctx, left, right):
@@ -131,7 +141,13 @@ def test_evaluator_binary(scheme, ctx, left, right):
     ],
 )
 @pytest.mark.parametrize(
-    "left", [[10, 100, 500, 600], [i for i in range(200)],],
+    "left",
+    [
+        [10, 100, 500, 600],
+        [i for i in range(200)],
+        [-i for i in range(200)],
+        [(-1) ** i * i for i in range(200)],
+    ],
 )
 def test_evaluator_plain(scheme, ctx, left):
     evaluator, encryptor, decryptor, _ = helper_generate_evaluator(ctx)
