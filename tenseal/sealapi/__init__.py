@@ -20,6 +20,7 @@ Plaintext = _sealapi_cpp.Plaintext
 random_uint64 = _sealapi_cpp.random_uint64
 BlakePRNGFactory = _sealapi_cpp.BlakePRNGFactory
 BlakePRNG = _sealapi_cpp.BlakePRNG
+RandomToStandardAdapter = _sealapi_cpp.RandomToStandardAdapter
 
 ## seal/encryptionparams.h ##
 SCHEME_TYPE = _sealapi_cpp.SCHEME_TYPE

@@ -251,14 +251,99 @@ PYBIND11_MODULE(_sealapi_util_cpp, m) {
     /*******************
      * "util/polyarith.h" {
      ***/
-    m.def("right_shift_poly_coeffs", &right_shift_poly_coeffs)
-        .def("negate_poly", &negate_poly)
-        .def("add_poly_poly", &add_poly_poly)
-        .def("sub_poly_poly", &sub_poly_poly)
-        .def("multiply_poly_poly", &multiply_poly_poly)
-        .def("poly_infty_norm", &poly_infty_norm)
-        .def("poly_eval_poly", &poly_eval_poly)
-        .def("exponentiate_poly", &exponentiate_poly);
+    m.def("right_shift_poly_coeffs",
+          [](const std::vector<uint64_t> &poly, std::size_t coeff_count,
+             std::size_t uint64_cnt, int shift) {
+              std::vector<uint64_t> out(poly.size());
+              right_shift_poly_coeffs(poly.data(), coeff_count, uint64_cnt,
+                                      shift, out.data());
+              return out;
+          })
+        .def("negate_poly",
+             [](const std::vector<uint64_t> &poly, std::size_t coeff_count,
+                std::size_t uint64_cnt) {
+                 std::vector<uint64_t> out(coeff_count);
+                 negate_poly(poly.data(), coeff_count, uint64_cnt, out.data());
+                 return out;
+             })
+        .def("add_poly_poly",
+             [](const std::vector<std::uint64_t> &operand1,
+                const std::vector<std::uint64_t> &operand2,
+                std::size_t coeff_count, std::size_t coeff_uint64_count) {
+                 std::vector<uint64_t> out(coeff_count);
+                 add_poly_poly(operand1.data(), operand2.data(), coeff_count,
+                               coeff_uint64_count, out.data());
+                 return out;
+             })
+        .def("sub_poly_poly",
+             [](const std::vector<std::uint64_t> &operand1,
+                const std::vector<std::uint64_t> &operand2,
+                std::size_t coeff_count, std::size_t coeff_uint64_count) {
+                 std::vector<uint64_t> out(coeff_count);
+                 sub_poly_poly(operand1.data(), operand2.data(), coeff_count,
+                               coeff_uint64_count, out.data());
+                 return out;
+             })
+        .def("multiply_poly_poly",
+             [](const std::vector<std::uint64_t> &operand1,
+                std::size_t operand1_coeff_count,
+                std::size_t operand1_coeff_uint64_count,
+                const std::vector<std::uint64_t> &operand2,
+                std::size_t operand2_coeff_count,
+                std::size_t operand2_coeff_uint64_count,
+                std::size_t result_coeff_count,
+                std::size_t result_coeff_uint64_count) {
+                 std::vector<uint64_t> out(result_coeff_count);
+                 multiply_poly_poly(
+                     operand1.data(), operand1_coeff_count,
+                     operand1_coeff_uint64_count, operand2.data(),
+                     operand2_coeff_count, operand2_coeff_uint64_count,
+                     result_coeff_count, result_coeff_uint64_count, out.data(),
+                     MemoryManager::GetPool());
+                 return out;
+             })
+        .def("poly_infty_norm",
+             [](const std::vector<uint64_t> &poly, std::size_t coeff_count,
+                std::size_t coeff_uint64_count) {
+                 std::vector<uint64_t> out(coeff_count);
+                 poly_infty_norm(poly.data(), coeff_count, coeff_uint64_count,
+                                 out.data());
+                 return out;
+             })
+        .def("poly_eval_poly",
+             [](const std::vector<std::uint64_t> &poly_to_eval,
+                std::size_t poly_to_eval_coeff_count,
+                std::size_t poly_to_eval_coeff_uint64_count,
+                const std::vector<std::uint64_t> &value,
+                std::size_t value_coeff_count,
+                std::size_t value_coeff_uint64_count,
+                std::size_t result_coeff_count,
+                std::size_t result_coeff_uint64_count
+
+             ) {
+                 std::vector<uint64_t> out(result_coeff_count);
+                 poly_eval_poly(poly_to_eval.data(), poly_to_eval_coeff_count,
+                                poly_to_eval_coeff_uint64_count, value.data(),
+                                value_coeff_count, value_coeff_uint64_count,
+                                result_coeff_count, result_coeff_uint64_count,
+                                out.data(), MemoryManager::GetPool());
+                 return out;
+             })
+        .def("exponentiate_poly", [](const std::vector<std::uint64_t> poly,
+                                     std::size_t poly_coeff_count,
+                                     std::size_t poly_coeff_uint64_count,
+                                     const std::vector<std::uint64_t> &exponent,
+                                     std::size_t exponent_uint64_count,
+                                     std::size_t result_coeff_count,
+                                     std::size_t result_coeff_uint64_count) {
+            std::vector<uint64_t> out(result_coeff_count);
+            exponentiate_poly(poly.data(), poly_coeff_count,
+                              poly_coeff_uint64_count, exponent.data(),
+                              exponent_uint64_count, result_coeff_count,
+                              result_coeff_uint64_count, out.data(),
+                              MemoryManager::GetPool());
+            return out;
+        });
     /***
      * } "util/polyarith.h"
      *******************/
@@ -388,239 +473,6 @@ PYBIND11_MODULE(_sealapi_util_cpp, m) {
      *******************/
 
     /*******************
-     * "util/uintcore.h" {
-     ***/
-    m.def("uint_to_hex_string", &uint_to_hex_string)
-        .def("uint_to_dec_string", &uint_to_dec_string)
-        .def("hex_string_to_uint", &hex_string_to_uint)
-        .def("set_zero_uint", &set_zero_uint)
-        .def("set_uint", &set_uint)
-        .def("set_uint_uint",
-             py::overload_cast<const std::uint64_t *, std::size_t,
-                               std::uint64_t *>(&set_uint_uint))
-        .def("is_zero_uint", &is_zero_uint)
-        .def("is_equal_uint", &is_equal_uint)
-        .def("is_high_bit_set_uint", &is_high_bit_set_uint)
-        .def("is_bit_set_uint", &is_bit_set_uint)
-        .def("set_bit_uint", &set_bit_uint)
-        .def("get_significant_bit_count_uint", &get_significant_bit_count_uint)
-        .def("get_significant_uint64_count_uint",
-             &get_significant_uint64_count_uint)
-        .def("get_nonzero_uint64_count_uint", &get_nonzero_uint64_count_uint)
-        .def("set_uint_uint",
-             py::overload_cast<const std::uint64_t *, std::size_t, std::size_t,
-                               std::uint64_t *>(&set_uint_uint))
-        .def("get_power_of_two", &get_power_of_two)
-        .def("get_power_of_two_minus_one", &get_power_of_two_minus_one)
-        .def("get_power_of_two_uint", &get_power_of_two_uint)
-        .def("get_power_of_two_minus_one_uint",
-             &get_power_of_two_minus_one_uint)
-        .def("filter_highbits_uint", &filter_highbits_uint)
-        .def("duplicate_uint_if_needed", &duplicate_uint_if_needed)
-        .def("compare_uint_uint",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t>(&compare_uint_uint))
-        .def("compare_uint_uint",
-             py::overload_cast<const std::uint64_t *, std::size_t,
-                               const std::uint64_t *, std::size_t>(
-                 &compare_uint_uint))
-        .def("is_greater_than_uint_uint",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t>(&is_greater_than_uint_uint))
-        .def(
-            "is_greater_than_or_equal_uint_uint",
-            py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                              std::size_t>(&is_greater_than_or_equal_uint_uint))
-        .def("is_less_than_uint_uint",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t>(&is_less_than_uint_uint))
-        .def("is_less_than_or_equal_uint_uint",
-             py::overload_cast<const std::uint64_t *, std::size_t,
-                               const std::uint64_t *, std::size_t>(
-                 &is_less_than_or_equal_uint_uint))
-        .def("is_equal_uint_uint",
-             py::overload_cast<const std::uint64_t *, std::size_t,
-                               const std::uint64_t *, std::size_t>(
-                 &is_equal_uint_uint))
-        .def("is_not_equal_uint_uint",
-             py::overload_cast<const std::uint64_t *, std::size_t,
-                               const std::uint64_t *, std::size_t>(
-                 &is_not_equal_uint_uint))
-        .def("is_greater_than_uint_uint",
-             py::overload_cast<const std::uint64_t *, std::size_t,
-                               const std::uint64_t *, std::size_t>(
-                 &is_greater_than_uint_uint))
-        .def("is_greater_than_or_equal_uint_uint",
-             py::overload_cast<const std::uint64_t *, std::size_t,
-                               const std::uint64_t *, std::size_t>(
-                 &is_greater_than_or_equal_uint_uint))
-        .def("is_less_than_uint_uint",
-             py::overload_cast<const std::uint64_t *, std::size_t,
-                               const std::uint64_t *, std::size_t>(
-                 &is_less_than_uint_uint))
-        .def("is_less_than_or_equal_uint_uint",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t>(&is_less_than_or_equal_uint_uint))
-        .def("is_equal_uint_uint",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t>(&is_equal_uint_uint))
-        .def("is_not_equal_uint_uint",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t>(&is_not_equal_uint_uint))
-        .def("hamming_weight", &hamming_weight)
-        .def("hamming_weight_split", &hamming_weight_split);
-    /***
-     * } "util/uintcore.h"
-     *******************/
-
-    /*******************
-     * "util/uintarith.h" {
-     ***/
-    m.def("add_uint_uint",
-          py::overload_cast<const std::uint64_t *, std::size_t,
-                            const std::uint64_t *, std::size_t, unsigned char,
-                            std::size_t, std::uint64_t *>(&add_uint_uint))
-        .def("add_uint_uint",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t, std::uint64_t *>(&add_uint_uint))
-        .def("add_uint_uint64", &add_uint_uint64)
-        .def("sub_uint_uint",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t, std::uint64_t *>(&sub_uint_uint))
-        .def(
-            "sub_uint_uint",
-            py::overload_cast<const std::uint64_t *, std::size_t,
-                              const std::uint64_t *, std::size_t, unsigned char,
-                              std::size_t, std::uint64_t *>(&sub_uint_uint))
-        .def("sub_uint_uint64", &sub_uint_uint64)
-        .def("increment_uint", &increment_uint)
-        .def("decrement_uint", &decrement_uint)
-        .def("negate_uint", &negate_uint)
-        .def("left_shift_uint", &left_shift_uint)
-        .def("right_shift_uint", &right_shift_uint)
-        .def("left_shift_uint128", &left_shift_uint128)
-        .def("right_shift_uint128", &right_shift_uint128)
-        .def("left_shift_uint192", &left_shift_uint192)
-        .def("right_shift_uint192", &right_shift_uint192)
-        .def("half_round_up_uint", &half_round_up_uint)
-        .def("not_uint", &not_uint)
-        .def("and_uint_uint", &and_uint_uint)
-        .def("or_uint_uint", &or_uint_uint)
-        .def("xor_uint_uint", &xor_uint_uint)
-        .def("multiply_uint_uint",
-             py::overload_cast<const std::uint64_t *, std::size_t,
-                               const std::uint64_t *, std::size_t, std::size_t,
-                               std::uint64_t *>(&multiply_uint_uint))
-        .def("multiply_uint_uint",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t, std::uint64_t *>(
-                 &multiply_uint_uint))
-        .def("multiply_uint_uint64", &multiply_uint_uint64)
-        .def("multiply_truncate_uint_uint", &multiply_truncate_uint_uint)
-        .def("divide_uint_uint_inplace", &divide_uint_uint_inplace)
-        .def("divide_uint_uint", &divide_uint_uint)
-        .def("divide_uint128_uint64_inplace_generic",
-             &divide_uint128_uint64_inplace_generic)
-        .def("divide_uint128_uint64_inplace", &divide_uint128_uint64_inplace)
-        .def("divide_uint192_uint64_inplace", &divide_uint192_uint64_inplace)
-        .def("exponentiate_uint", &exponentiate_uint)
-        .def("exponentiate_uint64_safe", &exponentiate_uint64_safe)
-        .def("exponentiate_uint64", &exponentiate_uint64);
-    /***
-     * } "util/uintarith.h"
-     *******************/
-
-    /*******************
-     * "util/uintarithmod.h" {
-     ***/
-    m.def("increment_uint_mod",
-          py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                            std::size_t, std::uint64_t *>(&increment_uint_mod))
-        .def("decrement_uint_mod",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t, std::uint64_t *>(
-                 &decrement_uint_mod))
-        .def("negate_uint_mod",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t, std::uint64_t *>(&negate_uint_mod))
-        .def("div2_uint_mod",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t, std::uint64_t *>(&div2_uint_mod))
-        .def("add_uint_uint_mod",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               const std::uint64_t *, std::size_t,
-                               std::uint64_t *>(&add_uint_uint_mod))
-        .def("sub_uint_uint_mod",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               const std::uint64_t *, std::size_t,
-                               std::uint64_t *>(&sub_uint_uint_mod))
-        .def("try_invert_uint_mod",
-             [](const std::uint64_t *operand, const std::uint64_t *modulus,
-                std::size_t uint64_count, std::uint64_t *result) {
-                 return try_invert_uint_mod(operand, modulus, uint64_count,
-                                            result, MemoryManager::GetPool());
-             });
-    /***
-     * } "util/uintarithmod.h"
-     *******************/
-    /*******************
-     * "util/uintarithsmallmod.h" {
-     ***/
-    m.def(
-         "increment_uint_mod",
-         py::overload_cast<std::uint64_t, const Modulus &>(&increment_uint_mod))
-        .def("decrement_uint_mod",
-             py::overload_cast<std::uint64_t, const Modulus &>(
-                 &decrement_uint_mod))
-        .def(
-            "negate_uint_mod",
-            py::overload_cast<std::uint64_t, const Modulus &>(&negate_uint_mod))
-        .def("div2_uint_mod",
-             py::overload_cast<std::uint64_t, const Modulus &>(&div2_uint_mod))
-        .def("add_uint_uint_mod",
-             py::overload_cast<std::uint64_t, std::uint64_t, const Modulus &>(
-                 &add_uint_uint_mod))
-        .def("sub_uint_uint_mod",
-             py::overload_cast<std::uint64_t, std::uint64_t, const Modulus &>(
-                 &sub_uint_uint_mod))
-        .def("sub_uint_uint_mod",
-             py::overload_cast<std::uint64_t, std::uint64_t, const Modulus &>(
-                 &sub_uint_uint_mod))
-        .def("barrett_reduce_128", &barrett_reduce_128<std::uint64_t>)
-        .def("barrett_reduce_63", &barrett_reduce_63<std::uint64_t>)
-        .def("multiply_uint_uint_mod",
-             py::overload_cast<std::uint64_t, std::uint64_t, const Modulus &>(
-                 &multiply_uint_uint_mod))
-        .def("modulo_uint_inplace",
-             py::overload_cast<std::uint64_t *, std::uint64_t, const Modulus &>(
-                 &modulo_uint_inplace))
-        .def("modulo_uint",
-             py::overload_cast<const std::uint64_t *, std::size_t,
-                               const Modulus &>(&modulo_uint))
-        .def("multiply_add_uint_mod",
-             py::overload_cast<std::uint64_t, std::uint64_t, std::uint64_t,
-                               const Modulus &>(&multiply_add_uint_mod))
-        .def("try_invert_uint_mod",
-             py::overload_cast<std::uint64_t, const Modulus &, std::uint64_t &>(
-                 &try_invert_uint_mod))
-        .def("exponentiate_uint_mod",
-             py::overload_cast<std::uint64_t, std::uint64_t, const Modulus &>(
-                 &exponentiate_uint_mod))
-        .def("divide_uint_uint_mod_inplace",
-             [](std::uint64_t *numerator, const Modulus &modulus,
-                std::size_t uint64_count, std::uint64_t *quotient) {
-                 return divide_uint_uint_mod_inplace(numerator, modulus,
-                                                     uint64_count, quotient,
-                                                     MemoryManager::GetPool());
-             })
-        .def("dot_product_mod",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t, const Modulus &>(&dot_product_mod));
-    /***
-     * } "util/uintarithsmallmod.h"
-     *******************/
-
-    /*******************
      * "util/croots.h" {
      ***/
     py::class_<ComplexRoots>(m, "ComplexRoots", py::module_local())
@@ -693,13 +545,13 @@ PYBIND11_MODULE(_sealapi_util_cpp, m) {
         .def("mean", &ClippedNormalDistribution::mean)
         .def("standard_deviation",
              &ClippedNormalDistribution::standard_deviation)
+        .def("max_deviation", &ClippedNormalDistribution::max_deviation)
         .def("min", &ClippedNormalDistribution::min)
         .def("max", &ClippedNormalDistribution::max)
         .def("reset", &ClippedNormalDistribution::reset)
-        .def("param",
-             py::overload_cast<>(&ClippedNormalDistribution::param, py::const_))
-        .def("param", py::overload_cast<const ClippedNormalDistribution &>(
-                          &ClippedNormalDistribution::param));
+        .def("__call__", py::overload_cast<RandomToStandardAdapter &>(
+                             &ClippedNormalDistribution::operator()<
+                                 RandomToStandardAdapter>));
     /***
      * } "util/clipnormal.h"
      *******************/
@@ -708,7 +560,11 @@ PYBIND11_MODULE(_sealapi_util_cpp, m) {
      * "util/hash.h" {
      ***/
     py::class_<HashFunction>(m, "HashFunction", py::module_local())
-        .def_static("hash", &HashFunction::hash);
+        .def_static("hash", [](const std::vector<uint64_t> &in) {
+            HashFunction::hash_block_type out;
+            HashFunction::hash(in.data(), in.size(), out);
+            return out;
+        });
 
     /***
      * } "util/hash.h"

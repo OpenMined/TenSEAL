@@ -195,9 +195,9 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
     m.def("random_uint64", &random_uint64);
 
     py::class_<UniformRandomGenerator, std::shared_ptr<UniformRandomGenerator>>(
-        m, "UniformRandomGenerator", py::module_local());
+        m, "UniformRandomGenerator");
     py::class_<BlakePRNG, UniformRandomGenerator, std::shared_ptr<BlakePRNG>>(
-        m, "BlakePRNG", py::module_local())
+        m, "BlakePRNG")
         .def(py::init<random_seed_type>())
         .def("seed", &BlakePRNG::seed)
         .def("generate", py::overload_cast<>(&BlakePRNG::generate))
@@ -205,11 +205,10 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
 
     py::class_<UniformRandomGeneratorFactory,
                std::shared_ptr<UniformRandomGeneratorFactory>>(
-        m, "UniformRandomGeneratorFactory", py::module_local());
+        m, "UniformRandomGeneratorFactory");
 
     py::class_<BlakePRNGFactory, UniformRandomGeneratorFactory,
-               std::shared_ptr<BlakePRNGFactory>>(m, "BlakePRNGFactory",
-                                                  py::module_local())
+               std::shared_ptr<BlakePRNGFactory>>(m, "BlakePRNGFactory")
         .def(py::init<>())
         .def(py::init<random_seed_type>())
         .def("create", py::overload_cast<>(&BlakePRNGFactory::create),
@@ -218,6 +217,14 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
              py::overload_cast<random_seed_type>(&BlakePRNGFactory::create),
              py::return_value_policy::reference)
         .def_static("DefaultFactory", &BlakePRNGFactory::DefaultFactory);
+
+    py::class_<RandomToStandardAdapter,
+               std::shared_ptr<RandomToStandardAdapter>>(
+        m, "RandomToStandardAdapter")
+        .def(py::init<std::shared_ptr<UniformRandomGenerator>>())
+        .def("__call__", &RandomToStandardAdapter::operator())
+        .def("min", &RandomToStandardAdapter::min)
+        .def("max", &RandomToStandardAdapter::max);
     /***
      * } "seal/randomgen.h"
      *******************/

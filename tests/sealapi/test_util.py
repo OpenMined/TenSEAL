@@ -85,6 +85,91 @@ def test_util_baseconverter_conversion(test, out):
     assert conv == out
 
 
+def test_util_hestdparms():
+    assert util.SEAL_HE_STD_PARMS_128_TC(1024) == 27
+    assert util.SEAL_HE_STD_PARMS_192_TC(1024) == 19
+    assert util.SEAL_HE_STD_PARMS_256_TC(1024) == 14
+    assert util.SEAL_HE_STD_PARMS_128_TQ(1024) == 25
+    assert util.SEAL_HE_STD_PARMS_192_TQ(1024) == 17
+    assert util.SEAL_HE_STD_PARMS_256_TQ(1024) == 13
+
+
+def test_util_hash():
+    out = util.HashFunction.hash([1, 2, 3, 4])
+    assert len(out) == 4
+
+
+def test_util_clipnormal():
+    dist = util.ClippedNormalDistribution(50, 10, 20)
+    assert dist.mean() == 50
+    assert dist.standard_deviation() == 10
+    assert dist.max_deviation() == 20
+    assert dist.min() == 30
+    assert dist.max() == 70
+
+    generator = sealapi.BlakePRNGFactory.DefaultFactory().create()
+    adapter = sealapi.RandomToStandardAdapter(generator)
+
+    assert dist(adapter) != dist(adapter)
+
+
+def test_util_croots():
+    croot = util.ComplexRoots(4)
+    assert croot.get_root(5) == complex(0, 1)
+
+
+def test_util_polyarith():
+    assert util.right_shift_poly_coeffs([2, 4, 8], 3, 1, 1) == [1, 2, 4]
+    assert util.negate_poly([2, 4, 8], 3, 1) == [(1 << 64) - 2, (1 << 64) - 4, (1 << 64) - 8]
+    assert util.add_poly_poly([2, 4, 8], [3, 4, 5], 3, 1) == [5, 8, 13]
+    assert util.sub_poly_poly([4, 6, 8], [3, 4, 5], 3, 1) == [1, 2, 3]
+    assert util.multiply_poly_poly([1, 2], 2, 1, [1, 2, 3], 3, 1, 4, 1) == [1, 4, 7, 6]
+    assert util.poly_infty_norm([1, 2], 2, 1) == [2, 0]
+    assert util.poly_eval_poly([1, 0], 2, 1, [2, 1], 2, 1, 4, 1) == [1, 0, 0, 0]
+    assert util.exponentiate_poly([2, 3], 2, 1, [2], 1, 4, 1) == [4, 12, 9, 0]
+
+
+def test_util_polyarithsmallmod():
+    pass
+
+
+def test_util_polyarithmod():
+    pass
+
+
+def test_util_polycore():
+    pass
+
+
+def test_util_rlwe():
+    pass
+
+
+def test_util_numth():
+    assert util.naf(12) == [-4, 16]
+    assert util.gcd(12, 18) == 6
+    assert util.xgcd(12, 18) == (6, -1, 1)
+    assert util.are_coprime(9, 8) is True
+    assert util.are_coprime(9, 12) is False
+
+    assert util.is_prime(sealapi.Modulus(666013), 10) is True
+
+    assert len(util.get_primes(10, 8, 3)) == 3
+    assert util.get_prime(2, 4).value() == 13
+    # HANG
+    # assert util.multiplicative_orders([2], 3) == []
+
+
+#         .def("conjugate_classes", &conjugate_classes)
+#         .def("babystep_giantstep", &babystep_giantstep)
+#         .def("decompose_babystep_giantstep", &decompose_babystep_giantstep)
+#         .def("try_invert_uint_mod",
+#              py::overload_cast<std::uint64_t, std::uint64_t, std::uint64_t &>(
+#                  &try_invert_uint_mod))
+#         .def("is_primitive_root", &is_primitive_root)
+#         .def("try_minimal_primitive_root", &try_minimal_primitive_root);
+
+
 def test_util_rnstool():
     pass
     # poly_modulus_degree = 2
@@ -107,63 +192,7 @@ def test_util_galois():
     pass
 
 
-def test_util_polyarith():
-    pass
-
-
-def test_util_polyarithsmallmod():
-    pass
-
-
-def test_util_polyarithmod():
-    pass
-
-
-def test_util_polycore():
-    pass
-
-
-def test_util_rlwe():
-    pass
-
-
-def test_util_uintcore():
-    pass
-
-
-def test_util_uintarith():
-    pass
-
-
-def test_util_uintarithsmallmod():
-    pass
-
-
-def test_util_uintarithmod():
-    pass
-
-
-def test_util_croots():
-    pass
-
-
-def test_util_numth():
-    pass
-
-
-def test_util_hestdparms():
-    pass
-
-
 def test_util_scalingvariant():
-    pass
-
-
-def test_util_clipnormal():
-    pass
-
-
-def test_util_hash():
     pass
 
 

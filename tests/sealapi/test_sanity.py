@@ -224,6 +224,9 @@ def test_randomgen(factory):
     ]:
         assert generator.generate() != generator.generate()
 
+        adapter = sealapi.RandomToStandardAdapter(generator)
+        assert adapter() != adapter()
+
         for i in range(1024):
             generator.refresh()
             generator.generate()
