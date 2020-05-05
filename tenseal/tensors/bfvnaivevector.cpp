@@ -39,7 +39,7 @@ streamoff BFVNaiveVector::save_size() {
     return sum_save_size;
 }
 
-vector<int> BFVNaiveVector::decrypt() {
+vector<int64_t> BFVNaiveVector::decrypt() {
     if (this->context->decryptor == NULL) {
         // this->context was loaded with public keys only
         throw invalid_argument(
@@ -50,12 +50,12 @@ vector<int> BFVNaiveVector::decrypt() {
     return this->decrypt(this->context->secret_key());
 }
 
-vector<int> BFVNaiveVector::decrypt(SecretKey sk) {
+vector<int64_t> BFVNaiveVector::decrypt(SecretKey sk) {
     Plaintext plaintext;
     IntegerEncoder encoder(this->context->seal_context());
     Decryptor decryptor = Decryptor(this->context->seal_context(), sk);
 
-    vector<int> result;
+    vector<int64_t> result;
     result.reserve(this->ciphertexts.size());
 
     for (int i = 0; i < this->ciphertexts.size(); i++) {

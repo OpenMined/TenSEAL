@@ -27,8 +27,8 @@ class BFVNaiveVector {
     Decrypts and returns the plaintext representation of the encrypted vector of
     integers using the secret-key.
     */
-    vector<int> decrypt();
-    vector<int> decrypt(SecretKey sk);
+    vector<int64_t> decrypt();
+    vector<int64_t> decrypt(SecretKey sk);
 
     /*
     Returns the size of the encrypted vector.
