@@ -18,6 +18,8 @@
 
 #include <fstream>
 
+#include "bindings.h"
+
 using namespace seal;
 using namespace seal::util;
 using namespace std;
@@ -54,8 +56,8 @@ void bind_pointer(py::module &m, const std::string &name) {
      *******************/
 }
 
-PYBIND11_MODULE(_sealapi_util_cpp, m) {
-    m.doc() = "SEAL util bindings for Python";
+void bind_util_namespace(pybind11::module &m) {
+    m.doc() = "SEAL::util bindings for Python";
 
     py::class_<MemoryPoolHandle>(m, "MemoryPoolHandle", py::module_local());
 

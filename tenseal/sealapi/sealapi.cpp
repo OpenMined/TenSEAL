@@ -41,8 +41,11 @@ PYBIND11_MODULE(_sealapi_cpp, m) {
     bind_encrypt_decrypt(m);
     bind_context(m);
     bind_encoder_decoder(m);
-    bind_utils(m);
+    bind_helpers(m);
     bind_modulus(m);
+
+    auto util = m.def_submodule("util");
+    bind_util_namespace(util);
 
     bind_serializable<RelinKeys>(m, "RelinKeys");
     bind_serializable<GaloisKeys>(m, "GaloisKeys");

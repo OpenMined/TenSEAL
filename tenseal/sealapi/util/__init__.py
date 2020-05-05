@@ -1,7 +1,4 @@
-"""SEAL API util bindings.
-"""
-
-import _sealapi_util_cpp
+import _sealapi_cpp.util as _sealapi_util_cpp
 
 ## util/rns.h ##
 RNSBase = _sealapi_util_cpp.RNSBase

@@ -13,7 +13,7 @@ using namespace seal;
 using namespace std;
 namespace py = pybind11;
 
-void bind_utils(pybind11::module &m) {
+void bind_helpers(pybind11::module &m) {
     /*******************
      * "seal/biguint.h" {
      ***/
