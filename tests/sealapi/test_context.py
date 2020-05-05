@@ -148,11 +148,11 @@ def context_asserts(sealctx, sec_level, scheme):
         assert ctx_data.upper_half_increment() == ctx_alias.upper_half_increment()
         assert ctx_data.upper_half_threshold() == ctx_alias.upper_half_threshold()
 
-        # TODO
-        # assert ctx_data.rns_tool()
-        # assert ctx_data.small_ntt_tables()
-        # assert ctx_data.plain_ntt_tables()
-        # assert ctx_data.galois_tool()
+        assert ctx_data.rns_tool() != None
+        assert ctx_data.small_ntt_tables().coeff_count_power() > 0
+        if scheme == sealapi.SCHEME_TYPE.BFV:
+            assert ctx_data.plain_ntt_tables().coeff_count_power() > 0
+        assert len(ctx_data.galois_tool().get_elts_all()) > 0
 
         qualifiers = ctx_data.qualifiers()
         assert qualifiers.parameters_set() is True
