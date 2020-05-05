@@ -25,6 +25,13 @@ using namespace seal::util;
 using namespace std;
 namespace py = pybind11;
 
+/***
+ *Notes:
+ * Some methods, like add_poly_poly, have dedicated lambda implementation
+ *because uint64* is not handled as the start of an array by pybind, but as a
+ *value. We need to use std::vector explicitly.
+ * **/
+
 template <typename T>
 void bind_pointer(py::module &m, const std::string &name) {
     /*******************
@@ -234,11 +241,27 @@ void bind_util_namespace(pybind11::module &m) {
     /*******************
      * "util/galois.h" {
      ***/
-    py::class_<GaloisTool>(m, "GaloisTool", py::module_local())
+    py::class_<GaloisTool>(m, "GaloisTool")
         .def(py::init<int, MemoryPoolHandle>(), py::arg(),
              py::arg() = MemoryManager::GetPool())
-        .def("apply_galois", &GaloisTool::apply_galois)
-        .def("apply_galois_ntt", &GaloisTool::apply_galois_ntt)
+        .def(
+            "apply_galois",
+            [](const GaloisTool &obj, const std::vector<std::uint64_t> &operand,
+               std::uint32_t galois_elt, const Modulus &modulus,
+               std::size_t coeff_count) {
+                std::vector<uint64_t> out(galois_elt * coeff_count);
+                obj.apply_galois(operand.data(), galois_elt, modulus,
+                                 out.data());
+                return out;
+            })
+        .def("apply_galois_ntt",
+             [](GaloisTool &obj, const std::vector<std::uint64_t> &operand,
+                std::uint32_t galois_elt, std::size_t coeff_count) {
+                 std::vector<uint64_t> out(coeff_count * galois_elt);
+                 obj.apply_galois_ntt(operand.data(), galois_elt, out.data());
+                 return out;
+             })
+        .def("get_elt_from_step", &GaloisTool::get_elt_from_step)
         .def("get_elts_from_steps", &GaloisTool::get_elts_from_steps)
         .def("get_elts_all", &GaloisTool::get_elts_all)
         .def_static("GetIndexFromElt", &GaloisTool::GetIndexFromElt);
@@ -352,21 +375,27 @@ void bind_util_namespace(pybind11::module &m) {
     m.def("sample_poly_ternary",
           [](std::shared_ptr<UniformRandomGenerator> rng,
              const EncryptionParameters &parms) {
-              std::vector<uint64_t> out;
+              auto coeff_modulus = parms.coeff_modulus();
+              std::vector<uint64_t> out(coeff_modulus.size() *
+                                        parms.poly_modulus_degree());
               sample_poly_ternary(rng, parms, out.data());
               return out;
           })
         .def("sample_poly_normal",
              [](std::shared_ptr<UniformRandomGenerator> rng,
                 const EncryptionParameters &parms) {
-                 std::vector<uint64_t> out;
+                 auto coeff_modulus = parms.coeff_modulus();
+                 std::vector<uint64_t> out(coeff_modulus.size() *
+                                           parms.poly_modulus_degree());
                  sample_poly_normal(rng, parms, out.data());
                  return out;
              })
         .def("sample_poly_uniform",
              [](std::shared_ptr<UniformRandomGenerator> rng,
                 const EncryptionParameters &parms) {
-                 std::vector<uint64_t> out;
+                 auto coeff_modulus = parms.coeff_modulus();
+                 std::vector<uint64_t> out(coeff_modulus.size() *
+                                           parms.poly_modulus_degree());
                  sample_poly_uniform(rng, parms, out.data());
                  return out;
              });

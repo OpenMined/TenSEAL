@@ -1,6 +1,10 @@
+import os, sys
 import pytest
 import tenseal.sealapi as sealapi
 import tenseal.sealapi.util as util
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from utils import *
 
 
 def test_util_rns():
@@ -183,8 +187,58 @@ def test_util_pointer():
     assert util.PointerModulus() is not None
 
 
-def test_util_rlwe():
-    pass
+@pytest.mark.parametrize(
+    "params", [helper_params_bfv(), helper_params_ckks(),],
+)
+def test_util_rlwe(params):
+    generator = sealapi.BlakePRNGFactory.DefaultFactory().create()
+    assert (
+        len(util.sample_poly_ternary(generator, params))
+        == len(params.coeff_modulus()) * params.poly_modulus_degree()
+    )
+    assert (
+        len(util.sample_poly_normal(generator, params))
+        == len(params.coeff_modulus()) * params.poly_modulus_degree()
+    )
+    assert (
+        len(util.sample_poly_uniform(generator, params))
+        == len(params.coeff_modulus()) * params.poly_modulus_degree()
+    )
+
+
+def test_util_galois():
+    with pytest.raises(BaseException):
+        util.GaloisTool(0)
+
+    gtool = util.GaloisTool(3)
+    assert gtool.get_elt_from_step(0) == 15
+    assert gtool.get_elts_from_steps([0, 1, -3, 2, -2, 3, -1]) == [15, 3, 3, 9, 9, 11, 11]
+    assert gtool.get_elts_all() == [15, 3, 11, 9, 9]
+
+    poly_modulus_degree = 8
+    parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.CKKS)
+    parms.set_poly_modulus_degree(poly_modulus_degree)
+    coeff = sealapi.CoeffModulus.Create(poly_modulus_degree, [17])
+    parms.set_coeff_modulus(coeff)
+
+    ctx = sealapi.SEALContext.Create(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
+
+    gtool = ctx.key_context_data().galois_tool()
+    assert gtool.apply_galois(
+        [0, 1, 2, 3, 4, 5, 6, 7], 3, sealapi.Modulus(17), poly_modulus_degree - 1
+    )[:8] == [0, 14, 6, 1, 13, 7, 2, 12]
+
+    assert gtool.apply_galois_ntt([0, 1, 2, 3, 4, 5, 6, 7], 3, poly_modulus_degree - 1)[:8] == [
+        4,
+        5,
+        7,
+        6,
+        1,
+        0,
+        2,
+        3,
+    ]
+    assert 7 == util.GaloisTool.GetIndexFromElt(15)
 
 
 def test_util_numth():
@@ -227,8 +281,4 @@ def test_util_rnstool():
 
 
 def test_util_ntt():
-    pass
-
-
-def test_util_galois():
     pass
