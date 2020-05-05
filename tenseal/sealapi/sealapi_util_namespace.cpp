@@ -233,18 +233,22 @@ void bind_util_namespace(pybind11::module &m) {
         .def("ntt_negacyclic_harvey_lazy",
              [](std::vector<uint64_t> &op, const NTTTables &tables) {
                  ntt_negacyclic_harvey_lazy(op.data(), tables);
+                 return op;
              })
         .def("ntt_negacyclic_harvey",
              [](std::vector<uint64_t> &op, const NTTTables &tables) {
                  ntt_negacyclic_harvey(op.data(), tables);
+                 return op;
              })
         .def("inverse_ntt_negacyclic_harvey_lazy",
              [](std::vector<uint64_t> &op, const NTTTables &tables) {
                  inverse_ntt_negacyclic_harvey_lazy(op.data(), tables);
+                 return op;
              })
         .def("inverse_ntt_negacyclic_harvey",
              [](std::vector<uint64_t> &op, const NTTTables &tables) {
                  inverse_ntt_negacyclic_harvey_lazy(op.data(), tables);
+                 return op;
              });
     /***
      * } "util/ntt.h"
@@ -654,16 +658,9 @@ void bind_util_namespace(pybind11::module &m) {
              })
         .def("xgcd", &xgcd)
         .def("are_coprime", &are_coprime)
-        .def("multiplicative_orders", &multiplicative_orders)
-        .def("conjugate_classes", &conjugate_classes)
-        .def("babystep_giantstep", &babystep_giantstep)
-        .def("decompose_babystep_giantstep", &decompose_babystep_giantstep)
         .def("is_prime", &is_prime)
         .def("get_primes", &get_primes)
         .def("get_prime", &get_prime)
-        .def("try_invert_uint_mod",
-             py::overload_cast<std::uint64_t, std::uint64_t, std::uint64_t &>(
-                 &try_invert_uint_mod))
         .def("is_primitive_root", &is_primitive_root)
         .def("try_minimal_primitive_root", &try_minimal_primitive_root);
 
@@ -728,6 +725,7 @@ void bind_util_namespace(pybind11::module &m) {
     bind_pointer<GaloisTool>(m, "GaloisTool");
     bind_pointer<NTTTables>(m, "NTTTables");
     bind_pointer<RNSTool>(m, "RNSTool");
+    bind_pointer<RNSBase>(m, "RNSBase");
 
     /***
      * } "util/pointer.h"

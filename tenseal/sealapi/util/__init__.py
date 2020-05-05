@@ -66,14 +66,9 @@ naf = _sealapi_util_cpp.naf
 gcd = _sealapi_util_cpp.gcd
 xgcd = _sealapi_util_cpp.xgcd
 are_coprime = _sealapi_util_cpp.are_coprime
-multiplicative_orders = _sealapi_util_cpp.multiplicative_orders
-conjugate_classes = _sealapi_util_cpp.conjugate_classes
-babystep_giantstep = _sealapi_util_cpp.babystep_giantstep
-decompose_babystep_giantstep = _sealapi_util_cpp.decompose_babystep_giantstep
 is_prime = _sealapi_util_cpp.is_prime
 get_primes = _sealapi_util_cpp.get_primes
 get_prime = _sealapi_util_cpp.get_prime
-try_invert_uint_mod = _sealapi_util_cpp.try_invert_uint_mod
 is_primitive_root = _sealapi_util_cpp.is_primitive_root
 try_minimal_primitive_root = _sealapi_util_cpp.try_minimal_primitive_root
 

@@ -261,38 +261,12 @@ def test_util_ntt():
     )
     assert tables.get().coeff_count_power() == coeff_count_power
 
-    # data = [1,2,1,2]
-    # util.ntt_negacyclic_harvey(data, tables.get())
-    # assert data != [1,2,1,2]
-
-
-def test_util_rnstool():
-    return
-
-    poly_modulus_degree = 32
-    coeff_base_count = 4
-    prime_bit_count = 20
-    plain = sealapi.Modulus(65537)
-    coeff_base = util.RNSBase(
-        util.get_primes(poly_modulus_degree, prime_bit_count, coeff_base_count)
-    )
-    rns_tool = util.RNSTool(poly_modulus_degree, coeff_base, plain)
-
-    assert rns_tool.base_q().size() == 4
-    assert rns_tool.base_Bsk_m_tilde().size() == 6
-    assert rns_tool.base_Bsk_small_ntt_tables().size() == 1
-    assert rns_tool.base_B().size() == 1
-    assert rns_tool.base_Bsk().size() == 1
-    assert rns_tool.base_t_gamma().size() == 1
-    assert rns_tool.m_tilde().size() == 1
-    assert rns_tool.m_sk().size() == 1
-    assert rns_tool.t().size() == 1
-    assert rns_tool.gamma().size() == 1
-
-    # assert rns_tool.base_B().size() == 1
-    # assert rns_tool.base_Bsk().size() == 2
-    # assert rns_tool.base_Bsk_m_tilde().size() == 1
-    # assert rns_tool.base_t_gamma().size() == 1
+    data = [0] * ((1 << coeff_count_power) * 1)
+    data[0] = 1
+    assert util.ntt_negacyclic_harvey_lazy(data, tables.get()) != data
+    assert util.ntt_negacyclic_harvey(data, tables.get()) != data
+    assert util.inverse_ntt_negacyclic_harvey_lazy(data, tables.get()) != data
+    assert util.inverse_ntt_negacyclic_harvey(data, tables.get()) != data
 
 
 def test_util_numth():
@@ -306,15 +280,22 @@ def test_util_numth():
 
     assert len(util.get_primes(16, 20, 4)) == 4
     assert util.get_prime(2, 4).value() == 13
-    # HANG
-    # assert util.multiplicative_orders([2], 3) == []
+    assert util.is_primitive_root(16, 4, sealapi.Modulus(71)) == False
+    out = 10
+    assert util.try_minimal_primitive_root(4, sealapi.Modulus(71), out) == False
 
 
-#         .def("conjugate_classes", &conjugate_classes)
-#         .def("babystep_giantstep", &babystep_giantstep)
-#         .def("decompose_babystep_giantstep", &decompose_babystep_giantstep)
-#         .def("try_invert_uint_mod",
-#              py::overload_cast<std::uint64_t, std::uint64_t, std::uint64_t &>(
-#                  &try_invert_uint_mod))
-#         .def("is_primitive_root", &is_primitive_root)
-#         .def("try_minimal_primitive_root", &try_minimal_primitive_root);
+def test_util_rnstool_sanity():
+    poly_modulus_degree = 4
+    coeff_base_count = 4
+    prime_bit_count = 20
+    plain = sealapi.Modulus(65537)
+    coeff_base = util.RNSBase(
+        util.get_primes(poly_modulus_degree, prime_bit_count, coeff_base_count)
+    )
+    rns_tool = util.RNSTool(poly_modulus_degree, coeff_base, plain)
+
+    poly_modulus_degree = 2
+    plain = sealapi.Modulus(0)
+    coeff_base = util.RNSBase([sealapi.Modulus(3)])
+    rns_tool = util.RNSTool(poly_modulus_degree, coeff_base, plain)
