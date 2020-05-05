@@ -1,5 +1,5 @@
-#ifndef SEALAPI_H
-#define SEALAPI_H
+#ifndef TENSEAL_SEALAPI_BINDINGS_H
+#define TENSEAL_SEALAPI_BINDINGS_H
 
 #include <pybind11/pybind11.h>
 
@@ -10,4 +10,4 @@ void bind_encoder_decoder(pybind11::module &m);
 void bind_utils(pybind11::module &m);
 void bind_modulus(pybind11::module &m);
 
-#endif  // SEALAPI_H
+#endif  // TENSEAL_SEALAPI_BINDINGS_H

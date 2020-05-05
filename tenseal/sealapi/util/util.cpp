@@ -15,10 +15,6 @@
 #include <seal/util/polyarithsmallmod.h>
 #include <seal/util/rlwe.h>
 #include <seal/util/scalingvariant.h>
-#include <seal/util/uintarith.h>
-#include <seal/util/uintarithmod.h>
-#include <seal/util/uintarithsmallmod.h>
-#include <seal/util/uintcore.h>
 
 #include <fstream>
 
@@ -351,11 +347,27 @@ PYBIND11_MODULE(_sealapi_util_cpp, m) {
     /*******************
      * "util/rlwe.h" {
      ***/
-    m.def("sample_poly_ternary", &sample_poly_ternary)
-        .def("sample_poly_normal", &sample_poly_normal)
-        .def("sample_poly_uniform", &sample_poly_uniform)
-        .def("encrypt_zero_asymmetric", &encrypt_zero_asymmetric)
-        .def("encrypt_zero_symmetric", &encrypt_zero_symmetric);
+    m.def("sample_poly_ternary",
+          [](std::shared_ptr<UniformRandomGenerator> rng,
+             const EncryptionParameters &parms) {
+              std::vector<uint64_t> out;
+              sample_poly_ternary(rng, parms, out.data());
+              return out;
+          })
+        .def("sample_poly_normal",
+             [](std::shared_ptr<UniformRandomGenerator> rng,
+                const EncryptionParameters &parms) {
+                 std::vector<uint64_t> out;
+                 sample_poly_normal(rng, parms, out.data());
+                 return out;
+             })
+        .def("sample_poly_uniform",
+             [](std::shared_ptr<UniformRandomGenerator> rng,
+                const EncryptionParameters &parms) {
+                 std::vector<uint64_t> out;
+                 sample_poly_uniform(rng, parms, out.data());
+                 return out;
+             });
     /***
      * } "util/rlwe.h"
      *******************/
@@ -363,43 +375,144 @@ PYBIND11_MODULE(_sealapi_util_cpp, m) {
     /*******************
      * "util/polyarithsmallmod.h" {
      ***/
-    m.def("modulo_poly_coeffs", &modulo_poly_coeffs)
-        .def("modulo_poly_coeffs_63", &modulo_poly_coeffs_63)
+    m.def("modulo_poly_coeffs",
+          [](const std::vector<uint64_t> &poly, std::size_t coeff_count,
+             const Modulus &modulus) {
+              std::vector<uint64_t> out(coeff_count);
+              modulo_poly_coeffs(poly.data(), coeff_count, modulus, out.data());
+              return out;
+          })
+        .def("modulo_poly_coeffs_63",
+             [](const std::vector<uint64_t> &poly, std::size_t coeff_count,
+                const Modulus &modulus) {
+                 std::vector<uint64_t> out(coeff_count);
+                 modulo_poly_coeffs_63(poly.data(), coeff_count, modulus,
+                                       out.data());
+                 return out;
+             })
         .def("negate_poly_coeffmod",
-             py::overload_cast<const std::uint64_t *, std::size_t,
-                               const Modulus &, std::uint64_t *>(
-                 &negate_poly_coeffmod))
+             [](const std::vector<uint64_t> &poly, std::size_t coeff_count,
+                const Modulus &modulus) {
+                 std::vector<uint64_t> out(coeff_count);
+                 negate_poly_coeffmod(poly.data(), coeff_count, modulus,
+                                      out.data());
+                 return out;
+             })
         .def("add_poly_poly_coeffmod",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t, const Modulus &, std::uint64_t *>(
-                 &add_poly_poly_coeffmod))
+             [](const std::vector<uint64_t> &operand1,
+                const std::vector<uint64_t> &operand2, std::size_t coeff_count,
+                const Modulus &modulus) {
+                 std::vector<uint64_t> out(coeff_count);
+                 add_poly_poly_coeffmod(operand1.data(), operand2.data(),
+                                        coeff_count, modulus, out.data());
+                 return out;
+             })
         .def("sub_poly_poly_coeffmod",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t, const Modulus &, std::uint64_t *>(
-                 &sub_poly_poly_coeffmod))
-        .def("multiply_poly_scalar_coeffmod", &multiply_poly_scalar_coeffmod)
+             [](const std::vector<uint64_t> &operand1,
+                const std::vector<uint64_t> &operand2, std::size_t coeff_count,
+                const Modulus &modulus) {
+                 std::vector<uint64_t> out(coeff_count);
+                 sub_poly_poly_coeffmod(operand1.data(), operand2.data(),
+                                        coeff_count, modulus, out.data());
+                 return out;
+             })
+        .def("multiply_poly_scalar_coeffmod",
+             [](const std::vector<uint64_t> &poly, std::size_t coeff_count,
+                std::uint64_t scalar, const Modulus &modulus) {
+                 std::vector<uint64_t> out(coeff_count);
+                 multiply_poly_scalar_coeffmod(poly.data(), coeff_count, scalar,
+                                               modulus, out.data());
+                 return out;
+             })
         .def("multiply_poly_poly_coeffmod",
-             py::overload_cast<const std::uint64_t *, std::size_t,
-                               const std::uint64_t *, std::size_t,
-                               const Modulus &, std::size_t, std::uint64_t *>(
-                 &multiply_poly_poly_coeffmod))
+             [](const std::vector<std::uint64_t> &operand1,
+                std::size_t operand1_coeff_count,
+                const std::vector<std::uint64_t> &operand2,
+                std::size_t operand2_coeff_count, const Modulus &modulus,
+                std::size_t result_coeff_count) {
+                 std::vector<uint64_t> out(result_coeff_count);
+                 multiply_poly_poly_coeffmod(
+                     operand1.data(), operand1_coeff_count, operand2.data(),
+                     operand2_coeff_count, modulus, result_coeff_count,
+                     out.data());
+                 return out;
+             })
         .def("multiply_poly_poly_coeffmod",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t, const Modulus &, std::uint64_t *>(
-                 &multiply_poly_poly_coeffmod))
+             [](const std::vector<std::uint64_t> &operand1,
+                const std::vector<std::uint64_t> &operand2,
+                std::size_t coeff_count, const Modulus &modulus,
+                std::size_t result_coeff_count) {
+                 std::vector<uint64_t> out(coeff_count * coeff_count);
+                 multiply_poly_poly_coeffmod(operand1.data(), operand2.data(),
+                                             coeff_count, modulus, out.data());
+                 return out;
+             })
         .def("multiply_truncate_poly_poly_coeffmod",
-             &multiply_truncate_poly_poly_coeffmod)
-        .def("divide_poly_poly_coeffmod_inplace",
-             &divide_poly_poly_coeffmod_inplace)
-        .def("divide_poly_poly_coeffmod", &divide_poly_poly_coeffmod)
-        .def("dyadic_product_coeffmod", &dyadic_product_coeffmod)
+             [](const std::vector<std::uint64_t> &operand1,
+                const std::vector<std::uint64_t> &operand2,
+                std::size_t coeff_count, const Modulus &modulus,
+                std::size_t result_coeff_count) {
+                 std::vector<uint64_t> out(coeff_count * coeff_count);
+                 multiply_truncate_poly_poly_coeffmod(
+                     operand1.data(), operand2.data(), coeff_count, modulus,
+                     out.data());
+                 return out;
+             })
+        .def("divide_poly_poly_coeffmod",
+             [](const std::vector<std::uint64_t> &operand1,
+                const std::vector<std::uint64_t> &operand2,
+                std::size_t coeff_count, const Modulus &modulus) {
+                 std::vector<uint64_t> q(coeff_count);
+                 std::vector<uint64_t> r(coeff_count);
+                 divide_poly_poly_coeffmod(operand1.data(), operand2.data(),
+                                           coeff_count, modulus, q.data(),
+                                           r.data());
+                 return std::vector<std::vector<uint64_t>>{q, r};
+             })
+        .def("dyadic_product_coeffmod",
+             [](const std::vector<std::uint64_t> &operand1,
+                const std::vector<std::uint64_t> &operand2,
+                std::size_t coeff_count, const Modulus &modulus,
+                std::size_t result_coeff_count) {
+                 std::vector<uint64_t> out(coeff_count * coeff_count);
+                 dyadic_product_coeffmod(operand1.data(), operand2.data(),
+                                         coeff_count, modulus, out.data());
+                 return out;
+             })
         .def("poly_infty_norm_coeffmod",
-             py::overload_cast<const std::uint64_t *, std::size_t,
-                               const Modulus &>(&poly_infty_norm_coeffmod))
-        .def("try_invert_poly_coeffmod", &try_invert_poly_coeffmod)
-        .def("negacyclic_shift_poly_coeffmod", &negacyclic_shift_poly_coeffmod)
+             [](const std::vector<uint64_t> &poly, std::size_t coeff_count,
+                const Modulus &modulus) {
+                 return poly_infty_norm_coeffmod(poly.data(), coeff_count,
+                                                 modulus);
+             })
+        .def("try_invert_poly_coeffmod",
+             [](const std::vector<uint64_t> &poly,
+                const std::vector<uint64_t> &poly_modulus,
+                std::size_t coeff_count, const Modulus &modulus) {
+                 std::vector<uint64_t> out(coeff_count);
+                 try_invert_poly_coeffmod(poly.data(), poly_modulus.data(),
+                                          coeff_count, modulus, out.data(),
+                                          MemoryManager::GetPool());
+                 return out;
+             })
+        .def("negacyclic_shift_poly_coeffmod",
+             [](const std::vector<uint64_t> &poly, std::size_t coeff_count,
+                std::size_t shift, const Modulus &modulus) {
+                 std::vector<uint64_t> out(coeff_count);
+                 negacyclic_shift_poly_coeffmod(poly.data(), coeff_count, shift,
+                                                modulus, out.data());
+                 return out;
+             })
         .def("negacyclic_multiply_poly_mono_coeffmod",
-             &negacyclic_multiply_poly_mono_coeffmod);
+             [](const std::vector<uint64_t> &poly, std::size_t coeff_count,
+                std::uint64_t mono_coeff, std::size_t mono_exponent,
+                const Modulus &modulus) {
+                 std::vector<uint64_t> out(coeff_count);
+                 negacyclic_multiply_poly_mono_coeffmod(
+                     poly.data(), coeff_count, mono_coeff, mono_exponent,
+                     modulus, out.data(), MemoryManager::GetPool());
+                 return out;
+             });
     /***
      * } "util/polyarithsmallmod.h"
      *******************/
@@ -407,26 +520,49 @@ PYBIND11_MODULE(_sealapi_util_cpp, m) {
     /*******************
      * "util/polyarithmod.h" {
      ***/
-    m.def(
-         "negate_poly_coeffmod",
-         py::overload_cast<const std::uint64_t *, std::size_t,
-                           const std::uint64_t *, std::size_t, std::uint64_t *>(
-             &negate_poly_coeffmod))
+    m.def("negate_poly_coeffmod",
+          [](const std::vector<uint64_t> &poly, std::size_t coeff_count,
+             const std::vector<uint64_t> &coeff_modulus,
+             std::size_t coeff_uint64_count) {
+              std::vector<uint64_t> out(coeff_count);
+              negate_poly_coeffmod(poly.data(), coeff_count,
+                                   coeff_modulus.data(), coeff_uint64_count,
+                                   out.data());
+              return out;
+          })
         .def("add_poly_poly_coeffmod",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t, const std::uint64_t *, std::size_t,
-                               std::uint64_t *>(&add_poly_poly_coeffmod))
+             [](const std::vector<std::uint64_t> &operand1,
+                const std::vector<std::uint64_t> operand2,
+                std::size_t coeff_count,
+                const std::vector<std::uint64_t> &coeff_modulus,
+                std::size_t coeff_uint64_count) {
+                 std::vector<uint64_t> out(coeff_count);
+                 add_poly_poly_coeffmod(operand1.data(), operand2.data(),
+                                        coeff_count, coeff_modulus.data(),
+                                        coeff_uint64_count, out.data());
+                 return out;
+             })
         .def("sub_poly_poly_coeffmod",
-             py::overload_cast<const std::uint64_t *, const std::uint64_t *,
-                               std::size_t, const std::uint64_t *, std::size_t,
-                               std::uint64_t *>(&sub_poly_poly_coeffmod))
+             [](const std::vector<std::uint64_t> &operand1,
+                const std::vector<std::uint64_t> operand2,
+                std::size_t coeff_count,
+                const std::vector<std::uint64_t> &coeff_modulus,
+                std::size_t coeff_uint64_count) {
+                 std::vector<uint64_t> out(coeff_count);
+                 sub_poly_poly_coeffmod(operand1.data(), operand2.data(),
+                                        coeff_count, coeff_modulus.data(),
+                                        coeff_uint64_count, out.data());
+                 return out;
+             })
         .def("poly_infty_norm_coeffmod",
-             [](const std::uint64_t *poly, std::size_t coeff_count,
-                std::size_t coeff_uint64_count, const std::uint64_t *modulus,
-                std::uint64_t *result) {
-                 return poly_infty_norm_coeffmod(
-                     poly, coeff_count, coeff_uint64_count, modulus, result,
-                     MemoryManager::GetPool());
+             [](const std::vector<std::uint64_t> &poly, std::size_t coeff_count,
+                std::size_t coeff_uint64_count,
+                const std::vector<std::uint64_t> &modulus) {
+                 std::vector<uint64_t> out(coeff_count);
+                 poly_infty_norm_coeffmod(poly.data(), coeff_count,
+                                          coeff_uint64_count, modulus.data(),
+                                          out.data(), MemoryManager::GetPool());
+                 return out;
              });
 
     /***
@@ -436,38 +572,19 @@ PYBIND11_MODULE(_sealapi_util_cpp, m) {
     /*******************
      * "util/polycore.h" {
      ***/
-    m.def("poly_to_hex_string", &poly_to_hex_string)
-        .def("poly_to_dec_string", &poly_to_dec_string)
-        .def("allocate_poly", &allocate_poly)
-        .def("set_zero_poly", &set_zero_poly)
-        .def("allocate_zero_poly", &allocate_zero_poly)
-        .def("get_poly_coeff",
-             py::overload_cast<std::uint64_t *, std::size_t, std::size_t>(
-                 &get_poly_coeff))
-        .def("get_poly_coeff",
-             py::overload_cast<const std::uint64_t *, std::size_t, std::size_t>(
-                 &get_poly_coeff))
-        .def("set_poly_poly",
-             py::overload_cast<const std::uint64_t *, std::size_t, std::size_t,
-                               std::uint64_t *>(&set_poly_poly))
-        .def("is_zero_poly", &is_zero_poly)
-        .def("is_equal_poly_poly", &is_equal_poly_poly)
-        .def("set_poly_poly",
-             py::overload_cast<const std::uint64_t *, std::size_t, std::size_t,
-                               std::size_t, std::size_t, std::uint64_t *>(
-                 &set_poly_poly))
-        .def("is_one_zero_one_poly", &is_one_zero_one_poly)
-        .def("get_significant_coeff_count_poly",
-             &get_significant_coeff_count_poly)
-        .def("duplicate_poly_if_needed", &duplicate_poly_if_needed)
-        .def("are_poly_coefficients_less_than",
-             py::overload_cast<const std::uint64_t *, std::size_t, std::size_t,
-                               const std::uint64_t *, std::size_t>(
-                 &are_poly_coefficients_less_than))
-        .def(
-            "are_poly_coefficients_less_than",
-            py::overload_cast<const std::uint64_t *, std::size_t,
-                              std::uint64_t>(&are_poly_coefficients_less_than));
+    m.def("poly_to_hex_string",
+          [](const std::vector<uint64_t> &poly, std::size_t coeff_count,
+             std::size_t coeff_uint64_count) {
+              return poly_to_hex_string(poly.data(), coeff_count,
+                                        coeff_uint64_count);
+          })
+        .def("poly_to_dec_string",
+             [](const std::vector<uint64_t> &poly, std::size_t coeff_count,
+                std::size_t coeff_uint64_count) {
+                 return poly_to_dec_string(poly.data(), coeff_count,
+                                           coeff_uint64_count,
+                                           MemoryManager::GetPool());
+             });
     /***
      * } "util/polycore.h"
      *******************/
@@ -522,17 +639,6 @@ PYBIND11_MODULE(_sealapi_util_cpp, m) {
         .def("SEAL_HE_STD_PARMS_256_TQ", &SEAL_HE_STD_PARMS_256_TQ);
     /***
      * } "util/hestdparms.h"
-     *******************/
-
-    /*******************
-     * "util/scalingvariant.h" {
-     ***/
-    m.def("multiply_add_plain_with_scaling_variant",
-          &multiply_add_plain_with_scaling_variant)
-        .def("multiply_sub_plain_with_scaling_variant",
-             &multiply_sub_plain_with_scaling_variant);
-    /***
-     * } "util/scalingvariant.h"
      *******************/
 
     /*******************

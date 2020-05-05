@@ -130,15 +130,57 @@ def test_util_polyarith():
 
 
 def test_util_polyarithsmallmod():
-    pass
+    assert util.modulo_poly_coeffs([5, 6, 7, 8, 9], 5, sealapi.Modulus(2)) == [1, 0, 1, 0, 1]
+    assert util.modulo_poly_coeffs_63([66, 67, 68], 3, sealapi.Modulus(5)) == [1, 2, 3]
+    assert util.negate_poly_coeffmod([1, 2], 2, sealapi.Modulus(5)) == [4, 3]
+    assert util.add_poly_poly_coeffmod([1, 2], [11, 12], 2, sealapi.Modulus(5)) == [7, 9]
+    assert util.sub_poly_poly_coeffmod([11, 12], [1, 2], 2, sealapi.Modulus(5)) == [10, 10]
+    assert util.multiply_poly_scalar_coeffmod([1, 2], 2, 3, sealapi.Modulus(5)) == [3, 1]
+    assert util.multiply_poly_poly_coeffmod([1, 2], 2, [2, 3], 2, sealapi.Modulus(5), 4) == [
+        2,
+        2,
+        1,
+        0,
+    ]
+    assert util.multiply_poly_poly_coeffmod([1, 2], [2, 3], 2, sealapi.Modulus(5), 4) == [
+        2,
+        2,
+        1,
+        0,
+    ]
+    assert util.multiply_truncate_poly_poly_coeffmod([1, 2], [2, 3], 2, sealapi.Modulus(5), 4) == [
+        2,
+        2,
+        0,
+        0,
+    ]
+    assert util.divide_poly_poly_coeffmod([5, 7], [2, 3], 2, sealapi.Modulus(5)) == [[4, 0], [2, 5]]
+    assert util.dyadic_product_coeffmod([5, 7], [2, 3], 2, sealapi.Modulus(5), 4) == [0, 1, 0, 0]
+    assert util.poly_infty_norm_coeffmod([5, 7], 2, sealapi.Modulus(5)) == 2
+    assert util.try_invert_poly_coeffmod([1, 0], [4, 3], 2, sealapi.Modulus(5)) == [1, 0]
+    assert util.negacyclic_shift_poly_coeffmod([4, 3], 2, 1, sealapi.Modulus(5)) == [2, 4]
+    assert util.negacyclic_multiply_poly_mono_coeffmod([4, 3], 2, 1, 2, sealapi.Modulus(5)) == [
+        1,
+        2,
+    ]
 
 
 def test_util_polyarithmod():
-    pass
+    assert util.negate_poly_coeffmod([1, 2], 2, [5], 1) == [4, 3]
+    assert util.add_poly_poly_coeffmod([1, 2], [2, 3], 2, [5], 1) == [3, 0]
+    assert util.add_poly_poly_coeffmod([7, 5], [2, 3], 2, [5], 1) == [4, 3]
+    assert util.poly_infty_norm_coeffmod([0, 1], 2, 1, [5]) == [1, 0]
 
 
 def test_util_polycore():
-    pass
+    assert util.poly_to_hex_string([1, 2], 2, 1) == "2x^1 + 1"
+    assert util.poly_to_dec_string([1, 2], 2, 1) == "2x^1 + 1"
+
+
+def test_util_pointer():
+    assert util.PointerUInt64() is not None
+    assert util.PointerComplexDouble() is not None
+    assert util.PointerModulus() is not None
 
 
 def test_util_rlwe():
@@ -189,12 +231,4 @@ def test_util_ntt():
 
 
 def test_util_galois():
-    pass
-
-
-def test_util_scalingvariant():
-    pass
-
-
-def test_util_pointer():
     pass

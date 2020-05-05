@@ -38,26 +38,12 @@ poly_infty_norm_coeffmod = _sealapi_util_cpp.poly_infty_norm_coeffmod
 ## util/polycore.h ##
 poly_to_hex_string = _sealapi_util_cpp.poly_to_hex_string
 poly_to_dec_string = _sealapi_util_cpp.poly_to_dec_string
-allocate_poly = _sealapi_util_cpp.allocate_poly
-set_zero_poly = _sealapi_util_cpp.set_zero_poly
-allocate_zero_poly = _sealapi_util_cpp.allocate_zero_poly
-get_poly_coeff = _sealapi_util_cpp.get_poly_coeff
-set_poly_poly = _sealapi_util_cpp.set_poly_poly
-is_zero_poly = _sealapi_util_cpp.is_zero_poly
-is_equal_poly_poly = _sealapi_util_cpp.is_equal_poly_poly
-set_poly_poly = _sealapi_util_cpp.set_poly_poly
-is_one_zero_one_poly = _sealapi_util_cpp.is_one_zero_one_poly
-get_significant_coeff_count_poly = _sealapi_util_cpp.get_significant_coeff_count_poly
-duplicate_poly_if_needed = _sealapi_util_cpp.duplicate_poly_if_needed
-are_poly_coefficients_less_than = _sealapi_util_cpp.are_poly_coefficients_less_than
 
 
 ## util/rlwe.h ##
 sample_poly_ternary = _sealapi_util_cpp.sample_poly_ternary
 sample_poly_normal = _sealapi_util_cpp.sample_poly_normal
 sample_poly_uniform = _sealapi_util_cpp.sample_poly_uniform
-encrypt_zero_asymmetric = _sealapi_util_cpp.encrypt_zero_asymmetric
-encrypt_zero_symmetric = _sealapi_util_cpp.encrypt_zero_symmetric
 
 ## util/polyarithsmallmod.h ##
 modulo_poly_coeffs = _sealapi_util_cpp.modulo_poly_coeffs
@@ -68,7 +54,6 @@ sub_poly_poly_coeffmod = _sealapi_util_cpp.sub_poly_poly_coeffmod
 multiply_poly_scalar_coeffmod = _sealapi_util_cpp.multiply_poly_scalar_coeffmod
 multiply_poly_poly_coeffmod = _sealapi_util_cpp.multiply_poly_poly_coeffmod
 multiply_truncate_poly_poly_coeffmod = _sealapi_util_cpp.multiply_truncate_poly_poly_coeffmod
-divide_poly_poly_coeffmod_inplace = _sealapi_util_cpp.divide_poly_poly_coeffmod_inplace
 divide_poly_poly_coeffmod = _sealapi_util_cpp.divide_poly_poly_coeffmod
 dyadic_product_coeffmod = _sealapi_util_cpp.dyadic_product_coeffmod
 poly_infty_norm_coeffmod = _sealapi_util_cpp.poly_infty_norm_coeffmod
@@ -103,11 +88,6 @@ SEAL_HE_STD_PARMS_128_TQ = _sealapi_util_cpp.SEAL_HE_STD_PARMS_128_TQ
 SEAL_HE_STD_PARMS_192_TQ = _sealapi_util_cpp.SEAL_HE_STD_PARMS_192_TQ
 SEAL_HE_STD_PARMS_256_TQ = _sealapi_util_cpp.SEAL_HE_STD_PARMS_256_TQ
 
-## util/hestdparms.h ##
-
-multiply_add_plain_with_scaling_variant = _sealapi_util_cpp.multiply_add_plain_with_scaling_variant
-multiply_sub_plain_with_scaling_variant = _sealapi_util_cpp.multiply_sub_plain_with_scaling_variant
-
 ## util/clipnormal.h ##
 ClippedNormalDistribution = _sealapi_util_cpp.ClippedNormalDistribution
 
@@ -117,6 +97,7 @@ HashFunction = _sealapi_util_cpp.HashFunction
 ## util/pointer.h ##
 PointerComplexDouble = _sealapi_util_cpp.PointerComplexDouble
 PointerUInt64 = _sealapi_util_cpp.PointerUInt64
+PointerModulus = _sealapi_util_cpp.PointerModulus
 PointerGaloisTool = _sealapi_util_cpp.PointerGaloisTool
 PointerNTTTables = _sealapi_util_cpp.PointerNTTTables
 PointerRNSTool = _sealapi_util_cpp.PointerRNSTool
