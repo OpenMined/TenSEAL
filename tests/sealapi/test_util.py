@@ -118,8 +118,8 @@ def test_util_clipnormal():
 
 
 def test_util_croots():
-    croot = util.ComplexRoots(4)
-    assert croot.get_root(5) == complex(0, 1)
+    croot = util.ComplexRoots(16)
+    assert croot.get_root(5) != 0
 
 
 def test_util_polyarith():
@@ -137,8 +137,8 @@ def test_util_polyarithsmallmod():
     assert util.modulo_poly_coeffs([5, 6, 7, 8, 9], 5, sealapi.Modulus(2)) == [1, 0, 1, 0, 1]
     assert util.modulo_poly_coeffs_63([66, 67, 68], 3, sealapi.Modulus(5)) == [1, 2, 3]
     assert util.negate_poly_coeffmod([1, 2], 2, sealapi.Modulus(5)) == [4, 3]
-    assert util.add_poly_poly_coeffmod([1, 2], [11, 12], 2, sealapi.Modulus(5)) == [7, 9]
-    assert util.sub_poly_poly_coeffmod([11, 12], [1, 2], 2, sealapi.Modulus(5)) == [10, 10]
+    assert util.add_poly_poly_coeffmod([1, 2], [1, 2], 2, sealapi.Modulus(5)) == [2, 4]
+    assert util.sub_poly_poly_coeffmod([1, 2], [1, 2], 2, sealapi.Modulus(5)) == [0, 0]
     assert util.multiply_poly_scalar_coeffmod([1, 2], 2, 3, sealapi.Modulus(5)) == [3, 1]
     assert util.multiply_poly_poly_coeffmod([1, 2], 2, [2, 3], 2, sealapi.Modulus(5), 4) == [
         2,
@@ -158,21 +158,21 @@ def test_util_polyarithsmallmod():
         0,
         0,
     ]
-    assert util.divide_poly_poly_coeffmod([5, 7], [2, 3], 2, sealapi.Modulus(5)) == [[4, 0], [2, 5]]
+    assert util.divide_poly_poly_coeffmod([4, 3], [2, 3], 2, sealapi.Modulus(5)) == [[1, 0], [2, 0]]
     assert util.dyadic_product_coeffmod([5, 7], [2, 3], 2, sealapi.Modulus(5), 4) == [0, 1, 0, 0]
     assert util.poly_infty_norm_coeffmod([5, 7], 2, sealapi.Modulus(5)) == 2
     assert util.try_invert_poly_coeffmod([1, 0], [4, 3], 2, sealapi.Modulus(5)) == [1, 0]
     assert util.negacyclic_shift_poly_coeffmod([4, 3], 2, 1, sealapi.Modulus(5)) == [2, 4]
-    assert util.negacyclic_multiply_poly_mono_coeffmod([4, 3], 2, 1, 2, sealapi.Modulus(5)) == [
-        1,
-        2,
+    assert util.negacyclic_multiply_poly_mono_coeffmod([4, 3], 2, 2, 1, sealapi.Modulus(5)) == [
+        4,
+        3,
     ]
 
 
 def test_util_polyarithmod():
     assert util.negate_poly_coeffmod([1, 2], 2, [5], 1) == [4, 3]
     assert util.add_poly_poly_coeffmod([1, 2], [2, 3], 2, [5], 1) == [3, 0]
-    assert util.add_poly_poly_coeffmod([7, 5], [2, 3], 2, [5], 1) == [4, 3]
+    assert util.add_poly_poly_coeffmod([3, 4], [2, 3], 2, [5], 1) == [0, 2]
     assert util.poly_infty_norm_coeffmod([0, 1], 2, 1, [5]) == [1, 0]
 
 
@@ -241,6 +241,60 @@ def test_util_galois():
     assert 7 == util.GaloisTool.GetIndexFromElt(15)
 
 
+def test_util_ntt():
+    coeff_count_power = 10
+    tables = util.NTTTables(
+        coeff_count_power, sealapi.Modulus(util.get_prime(1 << coeff_count_power, 40))
+    )
+    assert tables.get_root() > 0
+    assert tables.get_from_root_powers(1) > 0
+    assert tables.get_from_scaled_root_powers(1) > 0
+    assert tables.get_from_inv_root_powers(1) > 0
+    assert tables.get_from_scaled_inv_root_powers(1) > 0
+    assert tables.get_inv_degree_modulo() > 0
+    assert tables.modulus() > 0
+    assert tables.coeff_count_power() == coeff_count_power
+    assert tables.coeff_count() == 1 << coeff_count_power
+
+    tables = util.CreateNTTTables(
+        coeff_count_power, [sealapi.Modulus(util.get_prime(1 << coeff_count_power, 40))]
+    )
+    assert tables.get().coeff_count_power() == coeff_count_power
+
+    # data = [1,2,1,2]
+    # util.ntt_negacyclic_harvey(data, tables.get())
+    # assert data != [1,2,1,2]
+
+
+def test_util_rnstool():
+    return
+
+    poly_modulus_degree = 32
+    coeff_base_count = 4
+    prime_bit_count = 20
+    plain = sealapi.Modulus(65537)
+    coeff_base = util.RNSBase(
+        util.get_primes(poly_modulus_degree, prime_bit_count, coeff_base_count)
+    )
+    rns_tool = util.RNSTool(poly_modulus_degree, coeff_base, plain)
+
+    assert rns_tool.base_q().size() == 4
+    assert rns_tool.base_Bsk_m_tilde().size() == 6
+    assert rns_tool.base_Bsk_small_ntt_tables().size() == 1
+    assert rns_tool.base_B().size() == 1
+    assert rns_tool.base_Bsk().size() == 1
+    assert rns_tool.base_t_gamma().size() == 1
+    assert rns_tool.m_tilde().size() == 1
+    assert rns_tool.m_sk().size() == 1
+    assert rns_tool.t().size() == 1
+    assert rns_tool.gamma().size() == 1
+
+    # assert rns_tool.base_B().size() == 1
+    # assert rns_tool.base_Bsk().size() == 2
+    # assert rns_tool.base_Bsk_m_tilde().size() == 1
+    # assert rns_tool.base_t_gamma().size() == 1
+
+
 def test_util_numth():
     assert util.naf(12) == [-4, 16]
     assert util.gcd(12, 18) == 6
@@ -250,7 +304,7 @@ def test_util_numth():
 
     assert util.is_prime(sealapi.Modulus(666013), 10) is True
 
-    assert len(util.get_primes(10, 8, 3)) == 3
+    assert len(util.get_primes(16, 20, 4)) == 4
     assert util.get_prime(2, 4).value() == 13
     # HANG
     # assert util.multiplicative_orders([2], 3) == []
@@ -264,21 +318,3 @@ def test_util_numth():
 #                  &try_invert_uint_mod))
 #         .def("is_primitive_root", &is_primitive_root)
 #         .def("try_minimal_primitive_root", &try_minimal_primitive_root);
-
-
-def test_util_rnstool():
-    pass
-    # poly_modulus_degree = 2
-    # plain = sealapi.Modulus(0)
-    # base = util.RNSBase([sealapi.Modulus(3)])
-    # rns_tool = util.RNSTool(poly_modulus_degree, base, plain)
-
-    # assert rns_tool.base_q().size() == 1
-    # assert rns_tool.base_B().size() == 1
-    # assert rns_tool.base_Bsk().size() == 2
-    # assert rns_tool.base_Bsk_m_tilde().size() == 1
-    # assert rns_tool.base_t_gamma().size() == 1
-
-
-def test_util_ntt():
-    pass

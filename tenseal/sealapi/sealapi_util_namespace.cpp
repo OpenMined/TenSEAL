@@ -40,7 +40,7 @@ void bind_pointer(py::module &m, const std::string &name) {
     using type = Pointer<T>;
     std::string class_name = "Pointer" + name;
 
-    py::class_<type>(m, class_name.c_str())
+    py::class_<type, std::shared_ptr<type>>(m, class_name.c_str())
         .def(py::init<>())
         .def("__getitem__",
              py::overload_cast<std::size_t>(&type::operator[], py::const_))
@@ -71,7 +71,8 @@ void bind_util_namespace(pybind11::module &m) {
     /*******************
      * "util/rns.h" {
      ***/
-    py::class_<RNSBase>(m, "RNSBase", py::module_local())
+    py::class_<RNSBase, std::shared_ptr<RNSBase>>(m, "RNSBase",
+                                                  py::module_local())
         .def(py::init<const RNSBase &>())
         .def(py::init<const std::vector<Modulus> &, MemoryPoolHandle>(),
              py::arg(), py::arg() = MemoryManager::GetPool())
@@ -221,19 +222,30 @@ void bind_util_namespace(pybind11::module &m) {
         .def("get_inv_degree_modulo", &NTTTables::get_inv_degree_modulo)
         .def("modulus", &NTTTables::modulus)
         .def("coeff_count_power", &NTTTables::coeff_count_power)
-        .def("coeff_count", &NTTTables::coeff_count)
         .def("coeff_count", &NTTTables::coeff_count);
     m.def("CreateNTTTables",
-          [](int coeff_count_power, const std::vector<Modulus> &modulus,
-             Pointer<NTTTables> &tables) {
-              return CreateNTTTables(coeff_count_power, modulus, tables,
-                                     MemoryManager::GetPool());
+          [](int coeff_count_power, const std::vector<Modulus> &modulus) {
+              Pointer<NTTTables> tables;
+              CreateNTTTables(coeff_count_power, modulus, tables,
+                              MemoryManager::GetPool());
+              return tables;
           })
-        .def("ntt_negacyclic_harvey_lazy", &ntt_negacyclic_harvey_lazy)
-        .def("ntt_negacyclic_harvey", &ntt_negacyclic_harvey)
+        .def("ntt_negacyclic_harvey_lazy",
+             [](std::vector<uint64_t> &op, const NTTTables &tables) {
+                 ntt_negacyclic_harvey_lazy(op.data(), tables);
+             })
+        .def("ntt_negacyclic_harvey",
+             [](std::vector<uint64_t> &op, const NTTTables &tables) {
+                 ntt_negacyclic_harvey(op.data(), tables);
+             })
         .def("inverse_ntt_negacyclic_harvey_lazy",
-             &inverse_ntt_negacyclic_harvey_lazy)
-        .def("inverse_ntt_negacyclic_harvey", &inverse_ntt_negacyclic_harvey);
+             [](std::vector<uint64_t> &op, const NTTTables &tables) {
+                 inverse_ntt_negacyclic_harvey_lazy(op.data(), tables);
+             })
+        .def("inverse_ntt_negacyclic_harvey",
+             [](std::vector<uint64_t> &op, const NTTTables &tables) {
+                 inverse_ntt_negacyclic_harvey_lazy(op.data(), tables);
+             });
     /***
      * } "util/ntt.h"
      *******************/
