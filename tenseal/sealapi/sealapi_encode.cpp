@@ -13,9 +13,9 @@ namespace py = pybind11;
 
 /***
  *Notes:
- * Some methods, like multiply_inplace, have dedicated lambda implementation
- *because pybind can't handle the std::vector references correctly, and we need
- *to return the new value instead.
+ * Some methods, like BatchEncoder::decode_uint64, have dedicated lambda
+ *implementation because pybind can't handle the std::vector references
+ *correctly, and we need to return the new value instead.
  * **/
 
 void bind_encoder_decoder(pybind11::module &m) {
