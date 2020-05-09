@@ -15,7 +15,10 @@ def _almost_equal(vec1, vec2, m_pow_ten):
 
 @pytest.fixture(scope="module")
 def context():
-    return ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
+    # we need to generate relin_keys for performing multiplication
+    context.generate_relin_keys()
+    return context
 
 
 @pytest.fixture(scope="module")
