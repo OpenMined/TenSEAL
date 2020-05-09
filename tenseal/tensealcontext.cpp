@@ -26,6 +26,8 @@ TenSEALContext::TenSEALContext(EncryptionParameters parms) {
     this->decryptor = shared_ptr<Decryptor>(
         new Decryptor(this->_context, *this->_secret_key));
     this->evaluator = shared_ptr<Evaluator>(new Evaluator(this->_context));
+    // TODO: can make this optional
+    this->generate_relin_keys();
 }
 
 TenSEALContext::TenSEALContext(const char* filename) { this->load(filename); }
