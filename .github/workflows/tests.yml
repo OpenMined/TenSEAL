@@ -7,7 +7,7 @@ on:
     types: [ opened, synchronize, reopened ]
 
 jobs:
-  build:
+  TenSEAL:
 
     runs-on: ubuntu-latest
     strategy:
@@ -49,4 +49,48 @@ jobs:
         pip install .
     - name: Test with pytest
       run: |
-        pytest -v ./tests
+        pytest -v --ignore=tests/sealapi ./tests
+
+  SEAL_API:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install cmake clang
+        python -m pip install --upgrade pip
+        pip install -r requirements_dev.txt
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 --config=.flake8 .
+        black --check .
+        # exit-zero treats all errors as warnings.
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
+    - name: Lint with clang-format
+      run: |
+        # lint files (all .cpp and .h files) inplace
+        find ./tenseal/ -iname *.h -o -iname *.cpp | xargs clang-format -i -style='file'
+        # print changes
+        git diff
+        # already well formated if 'git diff' doesn't output
+        ! ( git diff |  grep -q ^ ) || return 1
+    - name: Build the library
+      run: |
+        # fetch third_party libraries
+        git submodule init && git submodule update
+        # we need to install tenseal in order to build the cpp library
+        pip install .
+    - name: Test with pytest
+      run: |
+        pytest -v ./tests/sealapi
