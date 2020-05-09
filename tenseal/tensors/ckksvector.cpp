@@ -169,6 +169,10 @@ CKKSVector& CKKSVector::mul_inplace(CKKSVector to_mul) {
     this->context->evaluator->multiply_inplace(this->ciphertext,
                                                to_mul.ciphertext);
 
+    // relineraize after ciphertext-ciphertext multiplication
+    this->context->evaluator->relinearize_inplace(this->ciphertext,
+                                                  this->context->relin_keys());
+
     return *this;
 }
 
