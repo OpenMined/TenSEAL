@@ -94,10 +94,9 @@ class TenSEALContext {
     Generate Galois keys using the secret key
     */
     void generate_galois_keys() {
-        if (this->is_public()){
+        if (this->is_public()) {
             throw invalid_argument("you need to provide a secret_key");
-        }
-        else {
+        } else {
             this->generate_galois_keys(*this->_secret_key);
         }
     }
@@ -113,10 +112,9 @@ class TenSEALContext {
     Generate Relinearization keys using the secret key
     */
     void generate_relin_keys() {
-        if (this->is_public()){
+        if (this->is_public()) {
             throw invalid_argument("you need to provide a secret_key");
-        }
-        else {
+        } else {
             this->generate_relin_keys(*this->_secret_key);
         }
     }
