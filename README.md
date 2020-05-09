@@ -7,6 +7,13 @@
 
 TenSEAL is a library for doing homomorphic encryption operations on tensors, built on top of [Microsoft SEAL](https://github.com/Microsoft/SEAL). It provides ease of use through a Python API, while preserving efficiency by implementing most of its operations using C++.
 
+## Features
+
+- Encryption/Decryption of vectors of integers using BFV
+- Encryption/Decryption of vectors of real numbers using CKKS
+- Element-wise addition, substraction and multiplication of encrypted-encrypted vectors and encrypted-plain vectors
+- Complete SEAL API under `tenseal.sealapi`
+
 ## Installation
 
 #### Using pip
