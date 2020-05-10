@@ -3,14 +3,13 @@
 
 #include <seal/seal.h>
 
-#include <vector>
-
+#include "tensealencoder.h"
 #include "utils.h"
+
+namespace tenseal {
 
 using namespace seal;
 using namespace std;
-
-namespace tenseal {
 
 /*
 A store for keeping all the keys and parameters required to run an encrypted
@@ -30,6 +29,7 @@ class TenSEALContext {
     shared_ptr<Encryptor> encryptor;
     shared_ptr<Decryptor> decryptor;
     shared_ptr<Evaluator> evaluator;
+    shared_ptr<TenSEALEncoder> encoder;
 
     /*
     The way to instantiate TenSEALContext is through the Create function, it
@@ -187,5 +187,4 @@ class TenSEALContext {
 };
 
 }  // namespace tenseal
-
 #endif
