@@ -183,6 +183,11 @@ BFVNaiveVector& BFVNaiveVector::mul_inplace(BFVNaiveVector to_mul) {
     for (int i = 0; i < this->size(); i++) {
         this->context->evaluator->multiply_inplace(this->ciphertexts[i],
                                                    to_mul.ciphertexts[i]);
+
+        // TODO: make this optional
+        // relineraization after ciphertext-ciphertext multiplication
+        this->context->evaluator->relinearize_inplace(
+            this->ciphertexts[i], this->context->relin_keys());
     }
 
     return *this;
