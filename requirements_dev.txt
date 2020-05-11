@@ -4,3 +4,4 @@ flake8
 pytest>=5.4.1
 setuptools>=41.0.0
 pytest-benchmark
+pytest-benchmark[histogram]
