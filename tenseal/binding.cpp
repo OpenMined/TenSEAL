@@ -124,6 +124,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("mul_", &CKKSVector::mul_inplace)
         .def("mul_plain", &CKKSVector::mul_plain)
         .def("mul_plain_", &CKKSVector::mul_plain_inplace)
+        .def("matmul", &CKKSVector::matmul_right)
         // python arithmetic
         .def("__add__", &CKKSVector::add)
         .def("__add__", &CKKSVector::add_plain)

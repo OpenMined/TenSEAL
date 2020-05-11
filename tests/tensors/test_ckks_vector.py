@@ -359,6 +359,21 @@ def test_mul_plain_zero(context, scale):
     assert str(e.value) == "result ciphertext is transparent"
 
 
+@pytest.mark.parametrize(
+    "vec, matrix",
+    [
+        ([1, 2, 3], [[1, 2, 3], [1, 2, 3], [1, 2, 3]]),
+    ],
+)
+def test_vec_plain_matrix_mul(context, scale, vec, matrix):
+    import numpy as np
+    context.generate_galois_keys()
+    ct = ts.ckks_vector(context, scale, vec)
+    result = ct.matmul(matrix)
+    expected = (np.array(vec) @ np.array(matrix)).tolist()
+    assert _almost_equal(result.decrypt(), expected, 1)
+
+
 def test_size(context, scale):
     for size in range(10):
         vec = ts.ckks_vector(context, scale, [1] * size)

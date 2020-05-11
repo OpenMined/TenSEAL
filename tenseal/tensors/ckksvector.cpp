@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "../tensealcontext.h"
+#include "../utils.h"
 
 using namespace seal;
 using namespace std;
@@ -198,6 +199,46 @@ CKKSVector& CKKSVector::mul_plain_inplace(vector<double> to_mul) {
                                                      plaintext);
 
     return *this;
+}
+
+CKKSVector CKKSVector::matmul_right(const vector<vector<double>> matrix) {
+    // matrix is organized by rows
+    // _check_matrix(matrix, this->size())
+    size_t n_rows = matrix.size();
+    size_t n_cols = matrix[0].size();
+
+    if (this->size() != matrix.size()) {
+        cout << this->size() << " vs " << n_rows << endl;
+        throw invalid_argument("matrix shape doesn't match with vector size");
+    }
+
+    CKKSVector result_vector = *this;
+    CKKSEncoder encoder(this->context->seal_context());
+
+    Ciphertext ct;
+    Plaintext pt_diag;
+    vector<double> diag;
+    vector<Ciphertext> results;
+    results.reserve(n_rows);
+
+    for (size_t i = 0; i < n_rows; i++) {
+        diag = get_diagonal(matrix, -i);
+        replicate_vector(diag, encoder.slot_count());
+
+        rotate(diag.begin(), diag.begin() + diag.size() - i, diag.end());
+
+        encoder.encode(diag, this->init_scale, pt_diag);
+        this->context->evaluator->multiply_plain(this->ciphertext, pt_diag, ct);
+        // TODO: relin and rescale
+        this->context->evaluator->rotate_vector_inplace(
+            ct, i, this->context->galois_keys());
+        results.push_back(ct);
+    }
+
+    this->context->evaluator->add_many(results, result_vector.ciphertext);
+    result_vector._size = n_cols;
+
+    return result_vector;
 }
 
 }  // namespace tenseal
