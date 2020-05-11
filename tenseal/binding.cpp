@@ -125,6 +125,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("mul_plain", &CKKSVector::mul_plain)
         .def("mul_plain_", &CKKSVector::mul_plain_inplace)
         .def("matmul", &CKKSVector::matmul_right)
+        .def("mm", &CKKSVector::matmul_right)
         // python arithmetic
         .def("__add__", &CKKSVector::add)
         .def("__add__", &CKKSVector::add_plain)
@@ -137,7 +138,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__mul__", &CKKSVector::mul)
         .def("__mul__", &CKKSVector::mul_plain)
         .def("__imul__", &CKKSVector::mul_inplace)
-        .def("__imul__", &CKKSVector::mul_plain_inplace);
+        .def("__imul__", &CKKSVector::mul_plain_inplace)
+        .def("__matmul__", &CKKSVector::matmul_right);
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")
