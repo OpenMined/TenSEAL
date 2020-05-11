@@ -363,13 +363,19 @@ def test_mul_plain_zero(context, scale):
     "vec, matrix",
     [
         ([1, 2, 3], [[1, 2, 3], [1, 2, 3], [1, 2, 3]]),
+        ([0.7968, 0.7027, -0.5913], [[-0.0673, 0.2271], [-0.1252, 0.0273], [0.1905, -0.1435]]),
+        (
+            [0.2232, -2.0231],
+            [[1.5545, -0.8035, -0.5180, -0.0950], [0.2614, 0.7102, 0.2147, -0.6553]],
+        ),
     ],
 )
 def test_vec_plain_matrix_mul(context, scale, vec, matrix):
     import numpy as np
+
     context.generate_galois_keys()
     ct = ts.ckks_vector(context, scale, vec)
-    result = ct.matmul(matrix)
+    result = ct.mm(matrix)
     expected = (np.array(vec) @ np.array(matrix)).tolist()
     assert _almost_equal(result.decrypt(), expected, 1)
 
