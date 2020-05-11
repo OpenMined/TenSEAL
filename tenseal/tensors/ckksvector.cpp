@@ -201,7 +201,12 @@ CKKSVector& CKKSVector::mul_plain_inplace(vector<double> to_mul) {
     return *this;
 }
 
-CKKSVector CKKSVector::matmul_right(const vector<vector<double>> matrix) {
+CKKSVector CKKSVector::matmul(const vector<vector<double>> matrix) {
+    CKKSVector new_vector = *this;
+    return new_vector.matmul_inplace(matrix);
+}
+
+CKKSVector& CKKSVector::matmul_inplace(const vector<vector<double>> matrix) {
     // matrix is organized by rows
     // _check_matrix(matrix, this->size())
     size_t n_rows = matrix.size();
@@ -212,7 +217,6 @@ CKKSVector CKKSVector::matmul_right(const vector<vector<double>> matrix) {
         throw invalid_argument("matrix shape doesn't match with vector size");
     }
 
-    CKKSVector result_vector = *this;
     auto encoder = this->context->get_encoder<CKKSEncoder>();
 
     Ciphertext ct;
@@ -235,10 +239,10 @@ CKKSVector CKKSVector::matmul_right(const vector<vector<double>> matrix) {
         results.push_back(ct);
     }
 
-    this->context->evaluator->add_many(results, result_vector.ciphertext);
-    result_vector._size = n_cols;
+    this->context->evaluator->add_many(results, this->ciphertext);
+    this->_size = n_cols;
 
-    return result_vector;
+    return *this;
 }
 
 }  // namespace tenseal
