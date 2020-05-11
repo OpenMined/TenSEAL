@@ -38,6 +38,9 @@ Replicate the current vector as many times to fill `final_size` elements.
 */
 template <typename T>
 void replicate_vector(vector<T>& vec, size_t final_size) {
+    if (vec.empty()) {
+        throw invalid_argument("can't replicate an empty vector");
+    }
     size_t init_size = vec.size();
     vec.reserve(final_size);
     for (size_t i = 0; i < final_size - init_size; i++) {
