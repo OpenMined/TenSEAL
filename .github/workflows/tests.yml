@@ -49,7 +49,8 @@ jobs:
         pip install .
     - name: Test with pytest
       run: |
-        pytest -v --ignore=tests/sealapi ./tests
+        pytest -v --benchmark-skip --ignore=tests/sealapi ./tests
+        pytest -v --benchmark-autosave --benchmark-disable-gc --benchmark-histogram --benchmark-only --ignore=tests/sealapi ./tests
 
   SEAL_API:
 
