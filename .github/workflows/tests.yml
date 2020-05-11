@@ -29,14 +29,14 @@ jobs:
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 --config=.flake8 .
-        black --check .
+        flake8 --config=.flake8 --exclude=tenseal/sealapi,tests/sealapi .
+        black --check --exclude "sealapi" tenseal/ tests/
         # exit-zero treats all errors as warnings.
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
     - name: Lint with clang-format
       run: |
         # lint files (all .cpp and .h files) inplace
-        find ./tenseal/ -iname *.h -o -iname *.cpp | xargs clang-format -i -style='file'
+        find ./tenseal/  \( -iname *.h -o -iname *.cpp \) -a -not -path "*sealapi*" | xargs clang-format -i -style='file'
         # print changes
         git diff
         # already well formated if 'git diff' doesn't output
@@ -73,14 +73,12 @@ jobs:
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 --config=.flake8 .
-        black --check .
-        # exit-zero treats all errors as warnings.
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
+        flake8 --config=.flake8 ./tenseal/sealapi ./tests/sealapi
+        black --check tenseal/sealapi tests/sealapi
     - name: Lint with clang-format
       run: |
         # lint files (all .cpp and .h files) inplace
-        find ./tenseal/ -iname *.h -o -iname *.cpp | xargs clang-format -i -style='file'
+        find ./tenseal/sealapi -iname *.h -o -iname *.cpp | xargs clang-format -i -style='file'
         # print changes
         git diff
         # already well formated if 'git diff' doesn't output

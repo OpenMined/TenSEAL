@@ -3,14 +3,13 @@
 
 #include <seal/seal.h>
 
-#include <vector>
-
+#include "tensealencoder.h"
 #include "utils.h"
+
+namespace tenseal {
 
 using namespace seal;
 using namespace std;
-
-namespace tenseal {
 
 /*
 A store for keeping all the keys and parameters required to run an encrypted
@@ -169,6 +168,14 @@ class TenSEALContext {
     */
     shared_ptr<SEALContext> seal_context() { return _context; }
 
+    /*
+    Returns an encoder.
+    */
+    template <class T>
+    shared_ptr<T> get_encoder() {
+        return encoder_factory->get<T>();
+    }
+
    private:
     EncryptionParameters _parms;
     shared_ptr<SEALContext> _context;
@@ -176,6 +183,7 @@ class TenSEALContext {
     shared_ptr<SecretKey> _secret_key;
     shared_ptr<RelinKeys> _relin_keys;
     shared_ptr<GaloisKeys> _galois_keys;
+    shared_ptr<TenSEALEncoder> encoder_factory;
 
     TenSEALContext(EncryptionParameters parms);
     TenSEALContext(const char* filename);
@@ -187,5 +195,4 @@ class TenSEALContext {
 };
 
 }  // namespace tenseal
-
 #endif
