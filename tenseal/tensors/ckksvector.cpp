@@ -219,13 +219,14 @@ CKKSVector& CKKSVector::matmul_inplace(const vector<vector<double>>& matrix) {
 
     auto encoder = this->context->get_encoder<CKKSEncoder>();
 
-    Ciphertext ct;
-    Plaintext pt_diag;
-    vector<double> diag;
     vector<Ciphertext> results;
     results.reserve(n_rows);
 
     for (size_t i = 0; i < n_rows; i++) {
+        Ciphertext ct;
+        Plaintext pt_diag;
+        vector<double> diag;
+
         diag = get_diagonal(matrix, -i);
         replicate_vector(diag, encoder->slot_count());
 
