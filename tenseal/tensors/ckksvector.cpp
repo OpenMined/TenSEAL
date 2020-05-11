@@ -234,7 +234,6 @@ CKKSVector& CKKSVector::matmul_inplace(const vector<vector<double>>& matrix) {
 
         encoder->encode(diag, this->init_scale, pt_diag);
         this->context->evaluator->multiply_plain(this->ciphertext, pt_diag, ct);
-        // TODO: relin and rescale
         this->context->evaluator->rotate_vector_inplace(
             ct, i, this->context->galois_keys());
         results.push_back(ct);
@@ -242,6 +241,7 @@ CKKSVector& CKKSVector::matmul_inplace(const vector<vector<double>>& matrix) {
 
     this->context->evaluator->add_many(results, this->ciphertext);
     this->_size = n_cols;
+    // TODO: relin and rescale
 
     return *this;
 }
