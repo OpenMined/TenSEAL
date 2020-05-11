@@ -213,7 +213,7 @@ CKKSVector CKKSVector::matmul_right(const vector<vector<double>> matrix) {
     }
 
     CKKSVector result_vector = *this;
-    CKKSEncoder encoder(this->context->seal_context());
+    auto encoder = this->context->get_encoder<CKKSEncoder>();
 
     Ciphertext ct;
     Plaintext pt_diag;
@@ -223,11 +223,11 @@ CKKSVector CKKSVector::matmul_right(const vector<vector<double>> matrix) {
 
     for (size_t i = 0; i < n_rows; i++) {
         diag = get_diagonal(matrix, -i);
-        replicate_vector(diag, encoder.slot_count());
+        replicate_vector(diag, encoder->slot_count());
 
         rotate(diag.begin(), diag.begin() + diag.size() - i, diag.end());
 
-        encoder.encode(diag, this->init_scale, pt_diag);
+        encoder->encode(diag, this->init_scale, pt_diag);
         this->context->evaluator->multiply_plain(this->ciphertext, pt_diag, ct);
         // TODO: relin and rescale
         this->context->evaluator->rotate_vector_inplace(
