@@ -201,12 +201,12 @@ CKKSVector& CKKSVector::mul_plain_inplace(vector<double> to_mul) {
     return *this;
 }
 
-CKKSVector CKKSVector::matmul(const vector<vector<double>> matrix) {
+CKKSVector CKKSVector::matmul(const vector<vector<double>>& matrix) {
     CKKSVector new_vector = *this;
     return new_vector.matmul_inplace(matrix);
 }
 
-CKKSVector& CKKSVector::matmul_inplace(const vector<vector<double>> matrix) {
+CKKSVector& CKKSVector::matmul_inplace(const vector<vector<double>>& matrix) {
     // matrix is organized by rows
     // _check_matrix(matrix, this->size())
     size_t n_rows = matrix.size();

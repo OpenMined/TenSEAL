@@ -52,7 +52,7 @@ diagonal. It's important to note that diagonals here are of the size of the
 matrix, we rotate as we reach the boundaries of the matrix.
 */
 template <typename T>
-vector<T> get_diagonal(const vector<vector<T>> matrix, int k) {
+vector<T> get_diagonal(const vector<vector<T>>& matrix, int k) {
     size_t n_rows = matrix.size();
     size_t n_cols = matrix[0].size();
 
