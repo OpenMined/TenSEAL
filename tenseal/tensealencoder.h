@@ -13,6 +13,8 @@ using namespace seal;
 
 class TenSEALEncoder {
    public:
+    TenSEALEncoder() = delete;
+    TenSEALEncoder(TenSEALEncoder&) = delete;
     TenSEALEncoder(std::shared_ptr<SEALContext> context) : _context(context){};
 
     template <typename T>

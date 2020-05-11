@@ -22,7 +22,7 @@ TenSEALContext::TenSEALContext(EncryptionParameters parms) {
     this->decryptor =
         make_shared<Decryptor>(this->_context, *this->_secret_key);
     this->evaluator = make_shared<Evaluator>(this->_context);
-    this->encoder = make_shared<TenSEALEncoder>(this->_context);
+    this->encoder_factory = make_shared<TenSEALEncoder>(this->_context);
     // TODO: can make this optional
     this->generate_relin_keys();
 }

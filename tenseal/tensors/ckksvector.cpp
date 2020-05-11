@@ -43,7 +43,7 @@ vector<double> CKKSVector::decrypt() {
 
 vector<double> CKKSVector::decrypt(SecretKey sk) {
     Plaintext plaintext;
-    auto encoder = this->context->encoder->get<CKKSEncoder>();
+    auto encoder = this->context->get_encoder<CKKSEncoder>();
     Decryptor decryptor = Decryptor(this->context->seal_context(), sk);
 
     vector<double> result;
@@ -97,7 +97,7 @@ CKKSVector& CKKSVector::add_plain_inplace(vector<double> to_add) {
         throw invalid_argument("can't add vectors of different sizes");
     }
 
-    auto encoder = this->context->encoder->get<CKKSEncoder>();
+    auto encoder = this->context->get_encoder<CKKSEncoder>();
     Plaintext plaintext;
     encoder->encode(to_add, this->init_scale, plaintext);
     this->context->evaluator->add_plain_inplace(this->ciphertext, plaintext);
@@ -140,7 +140,7 @@ CKKSVector& CKKSVector::sub_plain_inplace(vector<double> to_sub) {
         throw invalid_argument("can't sub vectors of different sizes");
     }
 
-    auto encoder = this->context->encoder->get<CKKSEncoder>();
+    auto encoder = this->context->get_encoder<CKKSEncoder>();
     Plaintext plaintext;
     encoder->encode(to_sub, this->init_scale, plaintext);
     this->context->evaluator->sub_plain_inplace(this->ciphertext, plaintext);
@@ -189,7 +189,7 @@ CKKSVector& CKKSVector::mul_plain_inplace(vector<double> to_mul) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
 
-    auto encoder = this->context->encoder->get<CKKSEncoder>();
+    auto encoder = this->context->get_encoder<CKKSEncoder>();
     Plaintext plaintext;
     // prevent transparent ciphertext by adding a non-zero value
     if (to_mul.size() + 1 <= encoder->slot_count()) to_mul.push_back(1);

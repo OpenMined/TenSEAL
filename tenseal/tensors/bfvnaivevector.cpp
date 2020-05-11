@@ -52,7 +52,7 @@ vector<int64_t> BFVNaiveVector::decrypt() {
 
 vector<int64_t> BFVNaiveVector::decrypt(SecretKey sk) {
     Plaintext plaintext;
-    auto encoder = this->context->encoder->get<IntegerEncoder>();
+    auto encoder = this->context->get_encoder<IntegerEncoder>();
     Decryptor decryptor = Decryptor(this->context->seal_context(), sk);
 
     vector<int64_t> result;
@@ -104,7 +104,7 @@ BFVNaiveVector& BFVNaiveVector::add_plain_inplace(vector<int> to_add) {
         throw invalid_argument("can't add vectors of different sizes");
     }
 
-    auto encoder = this->context->encoder->get<IntegerEncoder>();
+    auto encoder = this->context->get_encoder<IntegerEncoder>();
     Plaintext pt;
     for (int i = 0; i < this->size(); i++) {
         pt = encoder->encode(to_add[i]);
@@ -152,7 +152,7 @@ BFVNaiveVector& BFVNaiveVector::sub_plain_inplace(vector<int> to_sub) {
         throw invalid_argument("can't sub vectors of different sizes");
     }
 
-    auto encoder = this->context->encoder->get<IntegerEncoder>();
+    auto encoder = this->context->get_encoder<IntegerEncoder>();
     Plaintext pt;
     for (int i = 0; i < this->size(); i++) {
         pt = encoder->encode(to_sub[i]);
@@ -205,7 +205,7 @@ BFVNaiveVector& BFVNaiveVector::mul_plain_inplace(vector<int> to_mul) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
 
-    auto encoder = this->context->encoder->get<IntegerEncoder>();
+    auto encoder = this->context->get_encoder<IntegerEncoder>();
     Plaintext pt;
     for (int i = 0; i < this->size(); i++) {
         pt = encoder->encode(to_mul[i]);
