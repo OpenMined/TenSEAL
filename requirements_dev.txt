@@ -1,7 +1,8 @@
 black>=10.3b0
 bumpversion>=0.5.3
 flake8
+numpy
 pytest>=5.4.1
-setuptools>=41.0.0
 pytest-benchmark
 pytest-benchmark[histogram]
+setuptools>=41.0.0
