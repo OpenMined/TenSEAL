@@ -45,13 +45,13 @@ vector<int64_t> BFVVector::decrypt() {
 
 vector<int64_t> BFVVector::decrypt(SecretKey sk) {
     Plaintext plaintext;
-    BatchEncoder batch_encoder(this->context->seal_context());
+    auto batch_encoder = this->context->get_encoder<BatchEncoder>();
     Decryptor decryptor = Decryptor(this->context->seal_context(), sk);
 
     vector<int64_t> result;
 
     decryptor.decrypt(this->ciphertext, plaintext);
-    batch_encoder.decode(plaintext, result);
+    batch_encoder->decode(plaintext, result);
 
     // result contains all slots of ciphertext (poly_modulus_degree)
     // we use the real vector size to delimit the resulting plaintext vector
@@ -96,10 +96,10 @@ BFVVector& BFVVector::add_plain_inplace(vector<int64_t> to_add) {
         throw invalid_argument("can't add vectors of different sizes");
     }
 
-    BatchEncoder batch_encoder(this->context->seal_context());
+    auto batch_encoder = this->context->get_encoder<BatchEncoder>();
     Plaintext plaintext;
 
-    batch_encoder.encode(to_add, plaintext);
+    batch_encoder->encode(to_add, plaintext);
     this->context->evaluator->add_plain_inplace(this->ciphertext, plaintext);
 
     return *this;
@@ -141,10 +141,10 @@ BFVVector& BFVVector::sub_plain_inplace(vector<int64_t> to_sub) {
         throw invalid_argument("can't sub vectors of different sizes");
     }
 
-    BatchEncoder batch_encoder(this->context->seal_context());
+    auto batch_encoder = this->context->get_encoder<BatchEncoder>();
     Plaintext plaintext;
 
-    batch_encoder.encode(to_sub, plaintext);
+    batch_encoder->encode(to_sub, plaintext);
     this->context->evaluator->sub_plain_inplace(this->ciphertext, plaintext);
 
     return *this;
@@ -192,11 +192,11 @@ BFVVector& BFVVector::mul_plain_inplace(vector<int64_t> to_mul) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
 
-    BatchEncoder batch_encoder(this->context->seal_context());
+    auto batch_encoder = this->context->get_encoder<BatchEncoder>();
     Plaintext plaintext;
     // prevent transparent ciphertext by adding a non-zero value
-    if (to_mul.size() + 1 <= batch_encoder.slot_count()) to_mul.push_back(1);
-    batch_encoder.encode(to_mul, plaintext);
+    if (to_mul.size() + 1 <= batch_encoder->slot_count()) to_mul.push_back(1);
+    batch_encoder->encode(to_mul, plaintext);
 
     this->context->evaluator->multiply_plain_inplace(this->ciphertext,
                                                      plaintext);

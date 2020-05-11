@@ -52,7 +52,7 @@ vector<int64_t> BFVNaiveVector::decrypt() {
 
 vector<int64_t> BFVNaiveVector::decrypt(SecretKey sk) {
     Plaintext plaintext;
-    IntegerEncoder encoder(this->context->seal_context());
+    auto encoder = this->context->get_encoder<IntegerEncoder>();
     Decryptor decryptor = Decryptor(this->context->seal_context(), sk);
 
     vector<int64_t> result;
@@ -60,7 +60,7 @@ vector<int64_t> BFVNaiveVector::decrypt(SecretKey sk) {
 
     for (int i = 0; i < this->ciphertexts.size(); i++) {
         decryptor.decrypt(this->ciphertexts[i], plaintext);
-        result.push_back(encoder.decode_int64(plaintext));
+        result.push_back(encoder->decode_int64(plaintext));
     }
 
     return result;
@@ -104,10 +104,10 @@ BFVNaiveVector& BFVNaiveVector::add_plain_inplace(vector<int> to_add) {
         throw invalid_argument("can't add vectors of different sizes");
     }
 
-    IntegerEncoder encoder(this->context->seal_context());
+    auto encoder = this->context->get_encoder<IntegerEncoder>();
     Plaintext pt;
     for (int i = 0; i < this->size(); i++) {
-        pt = encoder.encode(to_add[i]);
+        pt = encoder->encode(to_add[i]);
         this->context->evaluator->add_plain_inplace(this->ciphertexts[i], pt);
     }
 
@@ -152,10 +152,10 @@ BFVNaiveVector& BFVNaiveVector::sub_plain_inplace(vector<int> to_sub) {
         throw invalid_argument("can't sub vectors of different sizes");
     }
 
-    IntegerEncoder encoder(this->context->seal_context());
+    auto encoder = this->context->get_encoder<IntegerEncoder>();
     Plaintext pt;
     for (int i = 0; i < this->size(); i++) {
-        pt = encoder.encode(to_sub[i]);
+        pt = encoder->encode(to_sub[i]);
         this->context->evaluator->sub_plain_inplace(this->ciphertexts[i], pt);
     }
 
@@ -205,10 +205,10 @@ BFVNaiveVector& BFVNaiveVector::mul_plain_inplace(vector<int> to_mul) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
 
-    IntegerEncoder encoder(this->context->seal_context());
+    auto encoder = this->context->get_encoder<IntegerEncoder>();
     Plaintext pt;
     for (int i = 0; i < this->size(); i++) {
-        pt = encoder.encode(to_mul[i]);
+        pt = encoder->encode(to_mul[i]);
         this->context->evaluator->multiply_plain_inplace(this->ciphertexts[i],
                                                          pt);
     }
