@@ -378,6 +378,7 @@ def test_vec_plain_matrix_mul(context, scale, vec, matrix):
     result = ct.mm(matrix)
     expected = (np.array(vec) @ np.array(matrix)).tolist()
     assert _almost_equal(result.decrypt(), expected, 1), "Matrix multiplciation is incorrect."
+    assert _almost_equal(ct.decrypt(), vec, 1), "Something went wrong in memory."
 
 
 @pytest.mark.parametrize(
