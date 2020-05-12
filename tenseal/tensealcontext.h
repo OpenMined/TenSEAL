@@ -176,6 +176,19 @@ class TenSEALContext {
         return encoder_factory->get<T>();
     }
 
+    template <typename T, class Encoder>
+    void encode(vector<T>& vec, Plaintext& pt) {
+        if (std::is_same<Encoder, CKKSEncoder>::value) {
+            auto scale = pow(2.0, 40);
+            auto encoder = this->get_encoder<Encoder>();
+            encoder->encode(vec, scale, pt);
+        } else {
+            auto scale = pow(2.0, 40);
+            auto encoder = this->get_encoder<Encoder>();
+            encoder->encode(vec, scale, pt);
+        }
+    }
+
    private:
     EncryptionParameters _parms;
     shared_ptr<SEALContext> _context;

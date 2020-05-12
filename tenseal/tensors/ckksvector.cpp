@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 
+#include "../matrix_ops.h"
 #include "../tensealcontext.h"
 #include "../utils.h"
 
@@ -207,40 +208,10 @@ CKKSVector CKKSVector::matmul(const vector<vector<double>>& matrix) {
 }
 
 CKKSVector& CKKSVector::matmul_inplace(const vector<vector<double>>& matrix) {
-    // matrix is organized by rows
-    // _check_matrix(matrix, this->size())
-    size_t n_rows = matrix.size();
-    size_t n_cols = matrix[0].size();
-
-    if (this->size() != matrix.size()) {
-        cout << this->size() << " vs " << n_rows << endl;
-        throw invalid_argument("matrix shape doesn't match with vector size");
-    }
-
-    auto encoder = this->context->get_encoder<CKKSEncoder>();
-
-    vector<Ciphertext> results;
-    results.reserve(n_rows);
-
-    for (size_t i = 0; i < n_rows; i++) {
-        Ciphertext ct;
-        Plaintext pt_diag;
-        vector<double> diag;
-
-        diag = get_diagonal(matrix, -i);
-        replicate_vector(diag, encoder->slot_count());
-
-        rotate(diag.begin(), diag.begin() + diag.size() - i, diag.end());
-
-        encoder->encode(diag, this->init_scale, pt_diag);
-        this->context->evaluator->multiply_plain(this->ciphertext, pt_diag, ct);
-        this->context->evaluator->rotate_vector_inplace(
-            ct, i, this->context->galois_keys());
-        results.push_back(ct);
-    }
-
-    this->context->evaluator->add_many(results, this->ciphertext);
-    this->_size = n_cols;
+    this->ciphertext = diagonal_ct_vector_matmul<double, CKKSEncoder>(
+        this->context, this->ciphertext, this->size(), matrix);
+    
+    this->_size = matrix[0].size();;
     // TODO: relin and rescale
 
     return *this;
