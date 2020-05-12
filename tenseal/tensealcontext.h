@@ -176,17 +176,21 @@ class TenSEALContext {
         return encoder_factory->get<T>();
     }
 
-    template <typename T, class Encoder>
-    void encode(vector<T>& vec, Plaintext& pt) {
-        if (std::is_same<Encoder, CKKSEncoder>::value) {
-            auto scale = pow(2.0, 40);
-            auto encoder = this->get_encoder<Encoder>();
-            encoder->encode(vec, scale, pt);
-        } else {
-            auto scale = pow(2.0, 40);
-            auto encoder = this->get_encoder<Encoder>();
-            encoder->encode(vec, scale, pt);
-        }
+    /*
+    Template encoding functions to choose between the use of BatchEncoder or
+    CKKSEncoder.
+    */
+    template <class BatchEncoder>
+    void encode(vector<int64_t>& vec, Plaintext& pt) {
+        auto encoder = this->get_encoder<BatchEncoder>();
+        encoder->encode(vec, pt);
+    }
+
+    template <class CKKSEncoder>
+    void encode(vector<double>& vec, Plaintext& pt, double scale = 0) {
+        if (scale == 0) scale = pow(2, 40);  // TODO: get from TenSEALContext
+        auto encoder = this->get_encoder<CKKSEncoder>();
+        encoder->encode(vec, scale, pt);
     }
 
    private:

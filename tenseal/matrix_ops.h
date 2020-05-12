@@ -76,7 +76,7 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
 
         rotate(diag.begin(), diag.begin() + diag.size() - i, diag.end());
 
-        tenseal_context->encode<double, Encoder>(diag, pt_diag);
+        tenseal_context->encode<Encoder>(diag, pt_diag);
         tenseal_context->evaluator->multiply_plain(vec, pt_diag, ct);
         tenseal_context->evaluator->rotate_vector_inplace(
             ct, i, tenseal_context->galois_keys());
