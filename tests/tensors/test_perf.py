@@ -6,12 +6,6 @@ def gen_values(sz):
     return [i for i in range(sz)], [-(i ** 2) for i in range(sz)]
 
 
-def bfv_naive_test():
-    ctx = ts.context(ts.SCHEME_TYPE.BFV, 4096, 1024)
-    l, r = gen_values(200)
-    return ts.bfv_naive_vector(ctx, l), ts.bfv_naive_vector(ctx, r)
-
-
 def bfv_test():
     ctx = ts.context(ts.SCHEME_TYPE.BFV, 8192, 1032193)
     l, r = gen_values(200)
@@ -37,11 +31,11 @@ def helper_perf_multiply(generator):
     decrypted_result = result.decrypt()
 
 
-@pytest.mark.parametrize("generator", [bfv_naive_test, bfv_test, ckks_test,])
+@pytest.mark.parametrize("generator", [bfv_test, ckks_test])
 def test_perf_add(generator, benchmark):
     benchmark(helper_perf_add, generator)
 
 
-@pytest.mark.parametrize("generator", [bfv_naive_test, bfv_test, ckks_test,])
+@pytest.mark.parametrize("generator", [bfv_test, ckks_test])
 def test_perf_multiply(generator, benchmark):
     benchmark(helper_perf_multiply, generator)
