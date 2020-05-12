@@ -72,8 +72,8 @@ class CKKSVector {
     /*
     Matrix multiplication operations.
     */
-    CKKSVector matmul(const vector<vector<double>>& matrix);
-    CKKSVector& matmul_inplace(const vector<vector<double>>& matrix);
+    CKKSVector matmul_plain(const vector<vector<double>>& matrix);
+    CKKSVector& matmul_plain_inplace(const vector<vector<double>>& matrix);
 
    private:
     size_t _size;
