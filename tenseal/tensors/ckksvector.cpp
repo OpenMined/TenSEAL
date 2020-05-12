@@ -207,7 +207,8 @@ CKKSVector CKKSVector::matmul_plain(const vector<vector<double>>& matrix) {
     return new_vector.matmul_plain_inplace(matrix);
 }
 
-CKKSVector& CKKSVector::matmul_plain_inplace(const vector<vector<double>>& matrix) {
+CKKSVector& CKKSVector::matmul_plain_inplace(
+    const vector<vector<double>>& matrix) {
     this->ciphertext = diagonal_ct_vector_matmul<double, CKKSEncoder>(
         this->context, this->ciphertext, this->size(), matrix);
 
