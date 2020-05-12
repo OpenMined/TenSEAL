@@ -359,6 +359,49 @@ def test_mul_plain_zero(context, scale):
     assert str(e.value) == "result ciphertext is transparent"
 
 
+@pytest.mark.parametrize(
+    "vec, matrix",
+    [
+        ([1, 2, 3], [[1, 2, 3], [1, 2, 3], [1, 2, 3]]),
+        ([0.7968, 0.7027, -0.5913], [[-0.0673, 0.2271], [-0.1252, 0.0273], [0.1905, -0.1435]]),
+        (
+            [0.2232, -2.0231],
+            [[1.5545, -0.8035, -0.5180, -0.0950], [0.2614, 0.7102, 0.2147, -0.6553]],
+        ),
+    ],
+)
+def test_vec_plain_matrix_mul(context, scale, vec, matrix):
+    import numpy as np
+
+    context.generate_galois_keys()
+    ct = ts.ckks_vector(context, scale, vec)
+    result = ct.mm(matrix)
+    expected = (np.array(vec) @ np.array(matrix)).tolist()
+    assert _almost_equal(result.decrypt(), expected, 1), "Matrix multiplciation is incorrect."
+    assert _almost_equal(ct.decrypt(), vec, 1), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "vec, matrix",
+    [
+        ([1, 2, 3], [[1, 2, 3], [1, 2, 3], [1, 2, 3]]),
+        ([0.7968, 0.7027, -0.5913], [[-0.0673, 0.2271], [-0.1252, 0.0273], [0.1905, -0.1435]]),
+        (
+            [0.2232, -2.0231],
+            [[1.5545, -0.8035, -0.5180, -0.0950], [0.2614, 0.7102, 0.2147, -0.6553]],
+        ),
+    ],
+)
+def test_vec_plain_matrix_mul_inplace(context, scale, vec, matrix):
+    import numpy as np
+
+    context.generate_galois_keys()
+    ct = ts.ckks_vector(context, scale, vec)
+    ct.mm_(matrix)
+    expected = (np.array(vec) @ np.array(matrix)).tolist()
+    assert _almost_equal(ct.decrypt(), expected, 1), "Matrix multiplciation is incorrect."
+
+
 def test_size(context, scale):
     for size in range(10):
         vec = ts.ckks_vector(context, scale, [1] * size)

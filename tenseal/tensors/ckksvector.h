@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "../tensealcontext.h"
+#include "../utils.h"
 
 using namespace seal;
 using namespace std;
@@ -68,6 +69,12 @@ class CKKSVector {
     CKKSVector mul_plain(vector<double> to_mul);
     CKKSVector& mul_plain_inplace(vector<double> to_mul);
 
+    /*
+    Matrix multiplication operations.
+    */
+    CKKSVector matmul_plain(const vector<vector<double>>& matrix);
+    CKKSVector& matmul_plain_inplace(const vector<vector<double>>& matrix);
+
    private:
     size_t _size;
 
@@ -89,6 +96,8 @@ class CKKSVector {
 
         Ciphertext ciphertext(context->seal_context());
         Plaintext plaintext;
+        // TODO: get rid of this after fixing # 46
+        if (pt.size() != 0) replicate_vector(pt, encoder.slot_count());
         encoder.encode(pt, scale, plaintext);
         context->encryptor->encrypt(plaintext, ciphertext);
 

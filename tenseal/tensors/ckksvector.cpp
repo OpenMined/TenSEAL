@@ -5,7 +5,9 @@
 #include <memory>
 #include <vector>
 
+#include "../matrix_ops.h"
 #include "../tensealcontext.h"
+#include "../utils.h"
 
 using namespace seal;
 using namespace std;
@@ -197,6 +199,21 @@ CKKSVector& CKKSVector::mul_plain_inplace(vector<double> to_mul) {
     this->context->evaluator->multiply_plain_inplace(this->ciphertext,
                                                      plaintext);
 
+    return *this;
+}
+
+CKKSVector CKKSVector::matmul_plain(const vector<vector<double>>& matrix) {
+    CKKSVector new_vector = *this;
+    return new_vector.matmul_plain_inplace(matrix);
+}
+
+CKKSVector& CKKSVector::matmul_plain_inplace(
+    const vector<vector<double>>& matrix) {
+    this->ciphertext = diagonal_ct_vector_matmul<double, CKKSEncoder>(
+        this->context, this->ciphertext, this->size(), matrix);
+
+    this->_size = matrix[0].size();
+    // TODO: rescale (optional)
     return *this;
 }
 
