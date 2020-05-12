@@ -14,28 +14,6 @@ def _almost_equal(vec1, vec2, m_pow_ten):
 
 
 @pytest.mark.parametrize("plain_vec", [[], [0], [-1], [1], [73, 81, 90], [-73, -81, -90],])
-def test_bfv_naive_encryption_decryption(plain_vec):
-    context = ts.context(ts.SCHEME_TYPE.BFV, 4096, 1024)
-
-    bfv_vec = ts.bfv_naive_vector(context, plain_vec)
-    decrypted_vec = bfv_vec.decrypt()
-
-    assert decrypted_vec == plain_vec, "Decryption of vector is incorrect."
-
-
-@pytest.mark.parametrize("plain_vec", [[], [0], [-1], [1], [73, 81, 90], [-73, -81, -90],])
-def test_bfv_naive_secretkey_decryption(plain_vec):
-    context = ts.context(ts.SCHEME_TYPE.BFV, 4096, 1024)
-
-    bfv_vec = ts.bfv_naive_vector(context, plain_vec)
-    secret_key = context.secret_key()
-    context.make_context_public()
-    decrypted_vec = bfv_vec.decrypt(secret_key)
-
-    assert decrypted_vec == plain_vec, "Decryption of vector is incorrect."
-
-
-@pytest.mark.parametrize("plain_vec", [[], [0], [-1], [1], [73, 81, 90], [-73, -81, -90],])
 def test_bfv_encryption_decryption(plain_vec):
     context = ts.context(ts.SCHEME_TYPE.BFV, 8192, 1032193)
 

@@ -6,22 +6,6 @@ one for their specific use case.
 import _tenseal_cpp as _ts_cpp
 
 
-def bfv_naive_vector(context, plaintext_vector):
-    """Constructor method for the BFVNaiveVector object, which can store
-    a list of integers in encrypted form, using the BFV homomorphic encryption
-    scheme.
-
-    Args:
-        context: a TenSEALContext object, holding the encryption parameters and keys.
-        plaintext_vector: a list of integers to be encrypted.
-
-    Returns:
-        BFVNaiveVector object.
-    """
-
-    return _ts_cpp.BFVNaiveVector(context, plaintext_vector)
-
-
 def bfv_vector(context, plaintext_vector):
     """Constructor method for the BFVVector object, which can store a list
     of integers in encrypted form, using the BFV homomorphic encryption
@@ -55,4 +39,4 @@ def ckks_vector(context, scale, plaintext_vector):
     return _ts_cpp.CKKSVector(context, scale, plaintext_vector)
 
 
-__all__ = ["bfv_naive_vector", "bfv_vector", "ckks_vector"]
+__all__ = ["bfv_vector", "ckks_vector"]
