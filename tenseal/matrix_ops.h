@@ -15,8 +15,9 @@ using namespace std;
 /*
 Returns the k-th diagonal of a matrix. Positive values of k represent upper
 diagonals while negative values represent lower diagonal with 0 being the main
-diagonal. It's important to note that diagonals here are of the size of the
-matrix, we rotate as we reach the boundaries of the matrix.
+diagonal. It's important to note that diagonals are extended to fit the size of
+the matrix, we do that by rotating whenever we reach the boundaries of the
+matrix.
 */
 template <typename T>
 vector<T> get_diagonal(const vector<vector<T>>& matrix, int k) {
