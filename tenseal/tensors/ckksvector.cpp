@@ -212,9 +212,7 @@ CKKSVector& CKKSVector::matmul_inplace(const vector<vector<double>>& matrix) {
         this->context, this->ciphertext, this->size(), matrix);
 
     this->_size = matrix[0].size();
-    // TODO: relin and rescale (optional)
-    this->context->evaluator->relinearize_inplace(this->ciphertext,
-                                                  this->context->relin_keys());
+    // TODO: rescale (optional)
     return *this;
 }
 
