@@ -113,6 +113,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")
+        .def_property("global_scale", &TenSEALContext::global_scale,
+                      &TenSEALContext::set_global_scale)
         .def("new",
              py::overload_cast<scheme_type, size_t, uint64_t, vector<int>>(
                  &TenSEALContext::Create),
