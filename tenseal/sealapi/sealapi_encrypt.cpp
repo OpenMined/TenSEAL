@@ -204,9 +204,7 @@ void bind_encrypt_decrypt(pybind11::module &m) {
         .def("parms_id", py::overload_cast<>(&Plaintext::parms_id, py::const_))
         .def("scale", py::overload_cast<>(&Plaintext::scale, py::const_))
         .def("set_scale",
-             [](Plaintext &obj, double scale) {
-                 obj.scale() = scale;
-             })
+             [](Plaintext &obj, double scale) { obj.scale() = scale; })
         .def("save",
              [](const Plaintext &p, std::string &path) {
                  std::ofstream out(path, std::ofstream::binary);
@@ -269,9 +267,7 @@ void bind_encrypt_decrypt(pybind11::module &m) {
         .def("parms_id", py::overload_cast<>(&Ciphertext::parms_id))
         .def("scale", py::overload_cast<>(&Ciphertext::scale))
         .def("set_scale",
-             [](Ciphertext &obj, double scale) {
-                 obj.scale() = scale;
-             })
+             [](Ciphertext &obj, double scale) { obj.scale() = scale; })
         .def("save",
              [](const Ciphertext &c, std::string &path) {
                  std::ofstream out(path, std::ofstream::binary);
