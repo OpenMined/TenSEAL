@@ -1,5 +1,6 @@
 import tenseal as ts
 import pytest
+import numpy as np
 
 
 def _almost_equal(vec1, vec2, m_pow_ten):
@@ -371,8 +372,6 @@ def test_mul_plain_zero(context, scale):
     ],
 )
 def test_vec_plain_matrix_mul(context, scale, vec, matrix):
-    import numpy as np
-
     context.generate_galois_keys()
     ct = ts.ckks_vector(context, scale, vec)
     result = ct.mm(matrix)
@@ -393,13 +392,40 @@ def test_vec_plain_matrix_mul(context, scale, vec, matrix):
     ],
 )
 def test_vec_plain_matrix_mul_inplace(context, scale, vec, matrix):
-    import numpy as np
-
     context.generate_galois_keys()
     ct = ts.ckks_vector(context, scale, vec)
     ct.mm_(matrix)
     expected = (np.array(vec) @ np.array(matrix)).tolist()
     assert _almost_equal(ct.decrypt(), expected, 1), "Matrix multiplciation is incorrect."
+
+
+@pytest.mark.parametrize(
+    "vec, matrix1, matrix2",
+    [
+        ([1, 2, 3], [[1, 2, 3], [1, 2, 3], [1, 2, 3]], [[1, 2, 3], [1, 2, 3], [1, 2, 3]]),
+        (
+            [0.7968, 0.7027, -0.5913],
+            [[-0.0673, 0.2271], [-0.1252, 0.0273], [0.1905, -0.1435]],
+            [[1.5545, -0.8035, -0.5180, -0.0950], [0.2614, 0.7102, 0.2147, -0.6553]],
+        ),
+        (
+            [0.2232, -2.0231],
+            [[1.5545, -0.8035, -0.5180, -0.0950], [0.2614, 0.7102, 0.2147, -0.6553]],
+            [
+                [0.7282164096832275, -1.4397623538970947, -1.4735020399093628],
+                [-1.067466378211975, 0.6787762641906738, -1.720473051071167],
+                [0.08132505416870117, 0.04388974606990814, 0.3696863353252411],
+                [1.3272252082824707, 0.6236424446105957, -0.9497130513191223],
+            ],
+        ),
+    ],
+)
+def test_vec_plain_matrix_mul_depth2(context, scale, vec, matrix1, matrix2):
+    context.generate_galois_keys()
+    ct = ts.ckks_vector(context, scale, vec)
+    result = ct @ matrix1 @ matrix2
+    expected = (np.array(vec) @ np.array(matrix1) @ np.array(matrix2)).tolist()
+    assert _almost_equal(result.decrypt(), expected, 1), "Matrix multiplication is incorrect."
 
 
 def test_size(context, scale):
