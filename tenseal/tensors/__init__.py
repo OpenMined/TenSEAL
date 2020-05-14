@@ -22,21 +22,23 @@ def bfv_vector(context, plaintext_vector):
     return _ts_cpp.BFVVector(context, plaintext_vector)
 
 
-def ckks_vector(context, scale, plaintext_vector):
+def ckks_vector(context, plaintext_vector, scale=None):
     """Constructor method for the CKKSVector object, which can store a list
     of float numbers in encrypted form, using the CKKS homomorphic encryption
     scheme.
 
     Args:
         context: a TenSEALContext object, holding the encryption parameters and keys.
-        scale: the scale to be used to encode vector values.
         plaintext_vector: a list of float to be encrypted.
+        scale: the scale to be used to encode vector values.
+            CKKSVector will use the global_scale provided by the context if it's set to None.
 
     Returns:
         CKKSVector object.
     """
-
-    return _ts_cpp.CKKSVector(context, scale, plaintext_vector)
+    if scale is None:
+        return _ts_cpp.CKKSVector(context, plaintext_vector)
+    return _ts_cpp.CKKSVector(context, plaintext_vector, scale)
 
 
 __all__ = ["bfv_vector", "ckks_vector"]

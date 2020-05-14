@@ -15,12 +15,9 @@ def _almost_equal(vec1, vec2, m_pow_ten):
 
 @pytest.fixture(scope="module")
 def context():
-    return ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
-
-
-@pytest.fixture(scope="module")
-def scale():
-    return pow(2, 40)
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
+    context.global_scale = pow(2, 40)
+    return context
 
 
 @pytest.mark.parametrize(
@@ -38,9 +35,9 @@ def scale():
         ([1, 2], [-73, -10]),
     ],
 )
-def test_add(context, scale, vec1, vec2):
-    first_vec = ts.ckks_vector(context, scale, vec1)
-    second_vec = ts.ckks_vector(context, scale, vec2)
+def test_add(context, vec1, vec2):
+    first_vec = ts.ckks_vector(context, vec1)
+    second_vec = ts.ckks_vector(context, vec2)
     result = first_vec + second_vec
     expected = [v1 + v2 for v1, v2 in zip(vec1, vec2)]
 
@@ -66,9 +63,9 @@ def test_add(context, scale, vec1, vec2):
         ([1, 2], [-73, -10]),
     ],
 )
-def test_add_inplace(context, scale, vec1, vec2):
-    first_vec = ts.ckks_vector(context, scale, vec1)
-    second_vec = ts.ckks_vector(context, scale, vec2)
+def test_add_inplace(context, vec1, vec2):
+    first_vec = ts.ckks_vector(context, vec1)
+    second_vec = ts.ckks_vector(context, vec2)
     first_vec += second_vec
     expected = [v1 + v2 for v1, v2 in zip(vec1, vec2)]
 
@@ -93,8 +90,8 @@ def test_add_inplace(context, scale, vec1, vec2):
         ([1, 2], [-73, -10]),
     ],
 )
-def test_add_plain(context, scale, vec1, vec2):
-    first_vec = ts.ckks_vector(context, scale, vec1)
+def test_add_plain(context, vec1, vec2):
+    first_vec = ts.ckks_vector(context, vec1)
     second_vec = vec2
     result = first_vec + second_vec
     expected = [v1 + v2 for v1, v2 in zip(vec1, vec2)]
@@ -120,8 +117,8 @@ def test_add_plain(context, scale, vec1, vec2):
         ([1, 2], [-73, -10]),
     ],
 )
-def test_add_plain_inplace(context, scale, vec1, vec2):
-    first_vec = ts.ckks_vector(context, scale, vec1)
+def test_add_plain_inplace(context, vec1, vec2):
+    first_vec = ts.ckks_vector(context, vec1)
     second_vec = vec2
     first_vec += second_vec
     expected = [v1 + v2 for v1, v2 in zip(vec1, vec2)]
@@ -146,9 +143,9 @@ def test_add_plain_inplace(context, scale, vec1, vec2):
         ([1, 2], [-73, -10]),
     ],
 )
-def test_sub(context, scale, vec1, vec2):
-    first_vec = ts.ckks_vector(context, scale, vec1)
-    second_vec = ts.ckks_vector(context, scale, vec2)
+def test_sub(context, vec1, vec2):
+    first_vec = ts.ckks_vector(context, vec1)
+    second_vec = ts.ckks_vector(context, vec2)
     result = first_vec - second_vec
     expected = [v1 - v2 for v1, v2 in zip(vec1, vec2)]
 
@@ -174,9 +171,9 @@ def test_sub(context, scale, vec1, vec2):
         ([1, 2], [-73, -10]),
     ],
 )
-def test_sub_inplace(context, scale, vec1, vec2):
-    first_vec = ts.ckks_vector(context, scale, vec1)
-    second_vec = ts.ckks_vector(context, scale, vec2)
+def test_sub_inplace(context, vec1, vec2):
+    first_vec = ts.ckks_vector(context, vec1)
+    second_vec = ts.ckks_vector(context, vec2)
     first_vec -= second_vec
     expected = [v1 - v2 for v1, v2 in zip(vec1, vec2)]
 
@@ -201,8 +198,8 @@ def test_sub_inplace(context, scale, vec1, vec2):
         ([1, 2], [-73, -10]),
     ],
 )
-def test_sub_plain(context, scale, vec1, vec2):
-    first_vec = ts.ckks_vector(context, scale, vec1)
+def test_sub_plain(context, vec1, vec2):
+    first_vec = ts.ckks_vector(context, vec1)
     second_vec = vec2
     result = first_vec - second_vec
     expected = [v1 - v2 for v1, v2 in zip(vec1, vec2)]
@@ -228,8 +225,8 @@ def test_sub_plain(context, scale, vec1, vec2):
         ([1, 2], [-73, -10]),
     ],
 )
-def test_sub_plain_inplace(context, scale, vec1, vec2):
-    first_vec = ts.ckks_vector(context, scale, vec1)
+def test_sub_plain_inplace(context, vec1, vec2):
+    first_vec = ts.ckks_vector(context, vec1)
     second_vec = vec2
     first_vec -= second_vec
     expected = [v1 - v2 for v1, v2 in zip(vec1, vec2)]
@@ -254,9 +251,9 @@ def test_sub_plain_inplace(context, scale, vec1, vec2):
         ([1, 2], [-73, -10]),
     ],
 )
-def test_mul(context, scale, vec1, vec2):
-    first_vec = ts.ckks_vector(context, scale, vec1)
-    second_vec = ts.ckks_vector(context, scale, vec2)
+def test_mul(context, vec1, vec2):
+    first_vec = ts.ckks_vector(context, vec1)
+    second_vec = ts.ckks_vector(context, vec2)
     result = first_vec * second_vec
     expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
 
@@ -282,9 +279,9 @@ def test_mul(context, scale, vec1, vec2):
         ([1, 2], [-73, -10]),
     ],
 )
-def test_mul_inplace(context, scale, vec1, vec2):
-    first_vec = ts.ckks_vector(context, scale, vec1)
-    second_vec = ts.ckks_vector(context, scale, vec2)
+def test_mul_inplace(context, vec1, vec2):
+    first_vec = ts.ckks_vector(context, vec1)
+    second_vec = ts.ckks_vector(context, vec2)
     first_vec *= second_vec
     expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
 
@@ -309,8 +306,8 @@ def test_mul_inplace(context, scale, vec1, vec2):
         ([1, 2], [-73, -10]),
     ],
 )
-def test_mul_plain(context, scale, vec1, vec2):
-    first_vec = ts.ckks_vector(context, scale, vec1)
+def test_mul_plain(context, vec1, vec2):
+    first_vec = ts.ckks_vector(context, vec1)
     second_vec = vec2
     result = first_vec * second_vec
     expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
@@ -336,8 +333,8 @@ def test_mul_plain(context, scale, vec1, vec2):
         ([1, 2], [-73, -10]),
     ],
 )
-def test_mul_plain_inplace(context, scale, vec1, vec2):
-    first_vec = ts.ckks_vector(context, scale, vec1)
+def test_mul_plain_inplace(context, vec1, vec2):
+    first_vec = ts.ckks_vector(context, vec1)
     second_vec = vec2
     first_vec *= second_vec
     expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
@@ -347,11 +344,11 @@ def test_mul_plain_inplace(context, scale, vec1, vec2):
     assert _almost_equal(decrypted_result, expected, 1), "Multiplication of vectors is incorrect."
 
 
-def test_mul_plain_zero(context, scale):
+def test_mul_plain_zero(context):
     # from context
     max_slots = 8192 // 2
     pt = [0] * max_slots
-    ct = ts.ckks_vector(context, scale, [1] * max_slots)
+    ct = ts.ckks_vector(context, [1] * max_slots)
 
     with pytest.raises(RuntimeError) as e:
         # the workaround of transparent ciphertext doesn't work when all slots are used
@@ -370,11 +367,11 @@ def test_mul_plain_zero(context, scale):
         ),
     ],
 )
-def test_vec_plain_matrix_mul(context, scale, vec, matrix):
+def test_vec_plain_matrix_mul(context, vec, matrix):
     import numpy as np
 
     context.generate_galois_keys()
-    ct = ts.ckks_vector(context, scale, vec)
+    ct = ts.ckks_vector(context, vec)
     result = ct.mm(matrix)
     expected = (np.array(vec) @ np.array(matrix)).tolist()
     assert _almost_equal(result.decrypt(), expected, 1), "Matrix multiplciation is incorrect."
@@ -392,17 +389,17 @@ def test_vec_plain_matrix_mul(context, scale, vec, matrix):
         ),
     ],
 )
-def test_vec_plain_matrix_mul_inplace(context, scale, vec, matrix):
+def test_vec_plain_matrix_mul_inplace(context, vec, matrix):
     import numpy as np
 
     context.generate_galois_keys()
-    ct = ts.ckks_vector(context, scale, vec)
+    ct = ts.ckks_vector(context, vec)
     ct.mm_(matrix)
     expected = (np.array(vec) @ np.array(matrix)).tolist()
     assert _almost_equal(ct.decrypt(), expected, 1), "Matrix multiplciation is incorrect."
 
 
-def test_size(context, scale):
+def test_size(context):
     for size in range(10):
-        vec = ts.ckks_vector(context, scale, [1] * size)
+        vec = ts.ckks_vector(context, [1] * size)
         assert vec.size() == size, "Size of encrypted vector is incorrect."

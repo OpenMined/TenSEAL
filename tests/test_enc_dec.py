@@ -40,7 +40,17 @@ def test_ckks_encryption_decryption(plain_vec):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
     scale = pow(2, 40)
 
-    ckks_vec = ts.ckks_vector(context, scale, plain_vec)
+    ckks_vec = ts.ckks_vector(context, plain_vec, scale)
+    decrypted_vec = ckks_vec.decrypt()
+    assert _almost_equal(decrypted_vec, plain_vec, 1), "Decryption of vector is incorrect"
+
+
+@pytest.mark.parametrize("plain_vec", [[], [0], [-1], [1], [73, 81, 90], [-73, -81, -90],])
+def test_ckks_encryption_decryption_with_global_scale(plain_vec):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
+    context.global_scale = pow(2, 40)
+
+    ckks_vec = ts.ckks_vector(context, plain_vec)
     decrypted_vec = ckks_vec.decrypt()
     assert _almost_equal(decrypted_vec, plain_vec, 1), "Decryption of vector is incorrect"
 
@@ -50,7 +60,7 @@ def test_ckks_secretkey_decryption(plain_vec):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
     scale = pow(2, 40)
 
-    ckks_vec = ts.ckks_vector(context, scale, plain_vec)
+    ckks_vec = ts.ckks_vector(context, plain_vec, scale)
     secret_key = context.secret_key()
     context.make_context_public()
     decrypted_vec = ckks_vec.decrypt(secret_key)

@@ -74,7 +74,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__imul__", &BFVVector::mul_plain_inplace);
 
     py::class_<CKKSVector>(m, "CKKSVector")
-        .def(py::init<shared_ptr<TenSEALContext>&, double, vector<double>>())
+        // specifying scale
+        .def(py::init<shared_ptr<TenSEALContext>&, vector<double>, double>())
+        // using global_scale if set
+        .def(py::init<shared_ptr<TenSEALContext>&, vector<double>>())
         .def("size", &CKKSVector::size)
         .def("decrypt", py::overload_cast<>(&CKKSVector::decrypt))
         .def("decrypt", py::overload_cast<SecretKey>(&CKKSVector::decrypt))
