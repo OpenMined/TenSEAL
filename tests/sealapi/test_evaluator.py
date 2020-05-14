@@ -510,9 +510,9 @@ def test_evaluator_rescale(scheme, ctx, left):
     evaluator.square(cleft, cout)
     evaluator.relinearize_inplace(cout, relin_keys)
 
-    before = cout.scale()
+    before = cout.scale
     evaluator.rescale_to_next_inplace(cout)
-    after = cout.scale()
+    after = cout.scale
 
     assert after < before
 
@@ -526,9 +526,9 @@ def test_evaluator_rescale(scheme, ctx, left):
     evaluator.square(cleft, cout)
     evaluator.relinearize_inplace(cout, relin_keys)
 
-    before = cout.scale()
+    before = cout.scale
     evaluator.rescale_to_next(cout, cfinal)
-    after = cfinal.scale()
+    after = cfinal.scale
 
     assert after < before
 
@@ -541,9 +541,9 @@ def test_evaluator_rescale(scheme, ctx, left):
     evaluator.square(cleft, cout)
     evaluator.relinearize_inplace(cout, relin_keys)
 
-    before = cout.scale()
+    before = cout.scale
     evaluator.rescale_to_inplace(cout, ctx.last_parms_id())
-    after = cout.scale()
+    after = cout.scale
 
     assert after < before
 
@@ -557,9 +557,9 @@ def test_evaluator_rescale(scheme, ctx, left):
     evaluator.square(cleft, cout)
     evaluator.relinearize_inplace(cout, relin_keys)
 
-    before = cout.scale()
+    before = cout.scale
     evaluator.rescale_to(cout, ctx.last_parms_id(), cfinal)
-    after = cfinal.scale()
+    after = cfinal.scale
 
     assert after < before
 
