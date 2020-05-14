@@ -427,7 +427,7 @@ def test_vec_plain_matrix_mul_depth2(context, scale, vec, matrix1, matrix2):
     ct = ts.ckks_vector(context, scale, vec)
     result = ct @ matrix1 @ matrix2
     expected = (np.array(vec) @ np.array(matrix1) @ np.array(matrix2)).tolist()
-    assert _almost_equal(result.decrypt(), expected, 1), "Matrix multiplciation is incorrect."
+    assert _almost_equal(result.decrypt(), expected, 1), "Matrix multiplication is incorrect."
 
 
 def test_size(context, scale):
