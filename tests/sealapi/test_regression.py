@@ -28,7 +28,7 @@ def test_scale_manually():
     evaluator.rescale_to_next_inplace(cout)
     evaluator.mod_switch_to_inplace(pright, cout.parms_id())
 
-    cout.set_scale(pright.scale())
+    cout.scale = pright.scale
 
     evaluator.add_plain_inplace(cout, pright)
 
