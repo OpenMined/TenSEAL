@@ -28,7 +28,7 @@ This installs the last packaged version on [pypi](https://pypi.org/project/tense
 Supported platforms and their requirements are listed below: (this are only required for building TenSEAL from source)
 - **Linux:** A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0).
 - **macOS:** Xcode toolchain (>= 9.3)
-- **Windows:** Not supported yet, please use our [Docker image](#use-docker).
+- **Windows:** Microsoft Visual Studio (>= 10.0.40219.1, Visual Studio 2010 SP1 or later).
 
 If you want to install tenseal from the repository, you should first make sure to have the requirements for your platform (listed above) and [CMake (3.12 or higher)](https://cmake.org/install/) installed, then get the third party libraries (if you didn't already) by running the following command from the root directory of the project
 
@@ -36,6 +36,8 @@ If you want to install tenseal from the repository, you should first make sure t
 $ git submodule init
 $ git submodule update
 ```
+
+If you are on Windows, you will first need to build SEAL library using Visual Studio, you should use the solution file `SEAL.sln` in `third_party/SEAL` to build the project `native\src\SEAL.vcxproj` with `Configuration=Release` and `Platform=x64`. For more details check the instructions in [Building Microsoft SEAL](https://github.com/microsoft/SEAL#windows)
 
 You can then trigger the build and the installation
 

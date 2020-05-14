@@ -5,7 +5,18 @@ project(tenseal)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_subdirectory(third_party/SEAL)
+# For windows we should build SEAL using Microsoft Visual Studio
+# then link the library
+if (WIN32)
+    # including SEAL headers only
+    include_directories(third_party/SEAL/native/src)
+    # linking with the already build seal.lib via MSVC
+    LINK_LIBRARIES(${PROJECT_SOURCE_DIR}/third_party/SEAL/lib/x64/Release/seal.lib)
+else()
+    # building SEAL using cmake
+    add_subdirectory(third_party/SEAL)
+endif()
+
 add_subdirectory(third_party/pybind11)
 
 set(TENSEAL_BASEDIR tenseal)
@@ -17,7 +28,6 @@ set(SOURCES
     ${TENSEAL_BASEDIR}/tensors/ckksvector.cpp
 )
 pybind11_add_module(_tenseal_cpp ${SOURCES})
-target_link_libraries(_tenseal_cpp PRIVATE seal)
 
 set(SEALAPI_SOURCES
     ${TENSEAL_BASEDIR}/sealapi/sealapi.cpp
@@ -30,4 +40,8 @@ set(SEALAPI_SOURCES
     ${TENSEAL_BASEDIR}/sealapi/sealapi_util_namespace.cpp
 )
 pybind11_add_module(_sealapi_cpp ${SEALAPI_SOURCES})
-target_link_libraries(_sealapi_cpp PRIVATE seal)
+
+if(NOT WIN32)
+    target_link_libraries(_tenseal_cpp PRIVATE seal)
+    target_link_libraries(_sealapi_cpp PRIVATE seal)
+endif()
