@@ -372,8 +372,6 @@ def test_mul_plain_zero(context, scale):
     ],
 )
 def test_vec_plain_matrix_mul(context, scale, vec, matrix):
-    import numpy as np
-
     context.generate_galois_keys()
     ct = ts.ckks_vector(context, scale, vec)
     result = ct.mm(matrix)
