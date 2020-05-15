@@ -14,9 +14,17 @@ using namespace std;
 
 namespace tenseal {
 
-CKKSVector::CKKSVector(shared_ptr<TenSEALContext> context, double scale,
-                       vector<double> vec) {
+CKKSVector::CKKSVector(shared_ptr<TenSEALContext> context, vector<double> vec,
+                       double scale) {
     this->context = context;
+    if (scale == -1) {
+        if (context->global_scale() == -1) {
+            throw invalid_argument(
+                "you need to either provide a scale or set a global_scale in "
+                "the context");
+        }
+        scale = context->global_scale();
+    }
     this->init_scale = scale;
     // Encrypts the whole vector into a single ciphertext using CKKS batching
     this->ciphertext = CKKSVector::encrypt(context, scale, vec);

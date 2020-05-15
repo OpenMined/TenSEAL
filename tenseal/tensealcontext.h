@@ -193,6 +193,13 @@ class TenSEALContext {
         encoder->encode(vec, scale, pt);
     }
 
+    // TODO: check set scale if possible with current primes used and warn the
+    // user if it doesn't.
+    // Example: if using coeff_mod_bit_size of [60,40,40,60],
+    // the global scale should be set for 2**40
+    void set_global_scale(double scale) { this->_scale = scale; }
+    double global_scale() { return this->_scale; }
+
    private:
     EncryptionParameters _parms;
     shared_ptr<SEALContext> _context;
@@ -201,6 +208,11 @@ class TenSEALContext {
     shared_ptr<RelinKeys> _relin_keys;
     shared_ptr<GaloisKeys> _galois_keys;
     shared_ptr<TenSEALEncoder> encoder_factory;
+
+    /*
+    Stores a global scale used across ciphertext encrypted using CKKS.
+    */
+    double _scale = -1;
 
     TenSEALContext(EncryptionParameters parms);
     TenSEALContext(const char* filename);

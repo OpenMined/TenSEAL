@@ -16,7 +16,7 @@ def ckks_test():
     ctx = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
     l, r = gen_values(200)
     scale = 2 ** 40
-    return ts.ckks_vector(ctx, scale, l), ts.ckks_vector(ctx, scale, r)
+    return ts.ckks_vector(ctx, l, scale), ts.ckks_vector(ctx, r, scale)
 
 
 def helper_perf_add(generator):
