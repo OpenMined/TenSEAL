@@ -368,7 +368,7 @@ def test_mul_plain_zero(context):
         ),
     ],
 )
-def test_vec_plain_matrix_mul(context, scale, vec, matrix):
+def test_vec_plain_matrix_mul(context, vec, matrix):
     context.generate_galois_keys()
     ct = ts.ckks_vector(context, vec)
     result = ct.mm(matrix)
@@ -388,7 +388,7 @@ def test_vec_plain_matrix_mul(context, scale, vec, matrix):
         ),
     ],
 )
-def test_vec_plain_matrix_mul_inplace(context, scale, vec, matrix):
+def test_vec_plain_matrix_mul_inplace(context, vec, matrix):
     context.generate_galois_keys()
     ct = ts.ckks_vector(context, vec)
     ct.mm_(matrix)
@@ -417,15 +417,15 @@ def test_vec_plain_matrix_mul_inplace(context, scale, vec, matrix):
         ),
     ],
 )
-def test_vec_plain_matrix_mul_depth2(context, scale, vec, matrix1, matrix2):
+def test_vec_plain_matrix_mul_depth2(context, vec, matrix1, matrix2):
     context.generate_galois_keys()
-    ct = ts.ckks_vector(context, scale, vec)
+    ct = ts.ckks_vector(context, vec)
     result = ct @ matrix1 @ matrix2
     expected = (np.array(vec) @ np.array(matrix1) @ np.array(matrix2)).tolist()
     assert _almost_equal(result.decrypt(), expected, 1), "Matrix multiplication is incorrect."
 
 
-def test_size(context, scale):
+def test_size(context):
     for size in range(10):
         vec = ts.ckks_vector(context, [1] * size)
         assert vec.size() == size, "Size of encrypted vector is incorrect."
