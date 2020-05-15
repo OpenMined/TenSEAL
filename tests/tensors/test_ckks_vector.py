@@ -425,6 +425,21 @@ def test_vec_plain_matrix_mul_depth2(context, vec, matrix1, matrix2):
     assert _almost_equal(result.decrypt(), expected, 1), "Matrix multiplication is incorrect."
 
 
+@pytest.mark.parametrize(
+    "data, polynom",
+    [
+        ([0, 1, 2, 3, 4], lambda x: x * x + x),
+    ],
+)
+def test_polynomial(context, scale, data, polynom):
+    ct = ts.ckks_vector(context, scale, data)
+    expected = [polynom(x) for x in data]
+    result = polynom(ct)
+
+    decrypted_result = result.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Multiplication of vectors is incorrect."
+
+
 def test_size(context):
     for size in range(10):
         vec = ts.ckks_vector(context, [1] * size)

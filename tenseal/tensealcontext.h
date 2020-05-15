@@ -200,6 +200,17 @@ class TenSEALContext {
     void set_global_scale(double scale) { this->_scale = scale; }
     double global_scale() { return this->_scale; }
 
+    /*
+    Switch on/off automatic relinearization, rescaling, and mod swithcing.
+    */
+    // TODO: take into account possible parellel computation using this
+    void set_auto_relin(bool status) { this->_auto_relin = status; }
+    void set_auto_rescale(bool status) { this->_auto_rescale = status; }
+    void set_auto_mod_switch(bool status) { this->_auto_mod_switch = status; }
+    bool is_auto_relin() { return this->_auto_relin; }
+    bool is_auto_rescale() { return this->_auto_rescale; }
+    bool is_auto_mod_switch() { return this->_auto_mod_switch; }
+
    private:
     EncryptionParameters _parms;
     shared_ptr<SEALContext> _context;
@@ -213,6 +224,13 @@ class TenSEALContext {
     Stores a global scale used across ciphertext encrypted using CKKS.
     */
     double _scale = -1;
+
+    /*
+    Switches for automatic relinearization, rescaling, and modulus switching
+    */
+    bool _auto_relin = true;
+    bool _auto_rescale = true;
+    bool _auto_mod_switch = true;
 
     TenSEALContext(EncryptionParameters parms);
     TenSEALContext(const char* filename);
