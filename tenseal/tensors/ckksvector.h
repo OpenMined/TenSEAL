@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "../tensealcontext.h"
-#include "../utils.h"
+#include "../utils/utils.h"
 
 using namespace seal;
 using namespace std;

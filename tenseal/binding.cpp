@@ -8,7 +8,7 @@
 #include "tensealcontext.h"
 #include "tensors/bfvvector.h"
 #include "tensors/ckksvector.h"
-#include "utils.h"
+#include "utils/utils.h"
 
 using namespace tenseal;
 using namespace seal;

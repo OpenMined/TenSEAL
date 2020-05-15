@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "tensealcontext.h"
+
 using namespace seal;
 using namespace std;
 
@@ -37,6 +39,11 @@ EncryptionParameters create_ckks_parameters(size_t poly_modulus_degree,
 shared_ptr<seal::SEALContext> create_context(EncryptionParameters parms) {
     auto context = SEALContext::Create(parms);
     return context;
+}
+
+void set_to_same_mod(shared_ptr<TenSEALContext> context, Ciphertext& ct1,
+                     Ciphertext& ct2) {
+    cout << "HERE";
 }
 
 }  // namespace tenseal

@@ -1,5 +1,5 @@
-#ifndef TENSEAL_MATRIX_OPS_H
-#define TENSEAL_MATRIX_OPS_H
+#ifndef TENSEAL_UTILS_MATRIX_OPS_H
+#define TENSEAL_UTILS_MATRIX_OPS_H
 
 #include <seal/seal.h>
 

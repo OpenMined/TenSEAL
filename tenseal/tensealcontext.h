@@ -4,7 +4,7 @@
 #include <seal/seal.h>
 
 #include "tensealencoder.h"
-#include "utils.h"
+#include "utils/context.h"
 
 namespace tenseal {
 
