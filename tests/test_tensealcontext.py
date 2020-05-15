@@ -30,3 +30,12 @@ def test_generate_relin_keys():
 
     context.generate_relin_keys(secret_key)
     assert isinstance(context.relin_keys(), ts.RelinKeys), "Relin keys should be set"
+
+
+def test_global_scale():
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
+    # global scale shouldn't be set at first
+    assert context.global_scale == -1
+    for scale in [0, 1, 2, 2 ** 40]:
+        context.global_scale = scale
+        assert context.global_scale == scale

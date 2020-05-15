@@ -20,8 +20,8 @@ encryption scheme.
 */
 class CKKSVector {
    public:
-    CKKSVector(shared_ptr<TenSEALContext> context, double scale,
-               vector<double> vec);
+    CKKSVector(shared_ptr<TenSEALContext> context, vector<double> vec,
+               double scale = -1);
 
     CKKSVector(const CKKSVector& vec);
 
