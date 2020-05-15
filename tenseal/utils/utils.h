@@ -5,10 +5,10 @@
 
 #include <memory>
 
+namespace tenseal {
+
 using namespace seal;
 using namespace std;
-
-namespace tenseal {
 
 /*
 Replicate the current vector as many times to fill `final_size` elements.
@@ -31,6 +31,8 @@ modulus.
 */
 void set_to_same_mod(shared_ptr<TenSEALContext> context, Ciphertext& ct1,
                      Ciphertext& ct2);
+void set_to_same_mod(shared_ptr<TenSEALContext> context, Ciphertext& ct,
+                     Plaintext pt);
 
 }  // namespace tenseal
 

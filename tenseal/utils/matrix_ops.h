@@ -5,7 +5,7 @@
 
 #include <memory>
 
-#include "tensealcontext.h"
+#include "../tensealcontext.h"
 
 namespace tenseal {
 
