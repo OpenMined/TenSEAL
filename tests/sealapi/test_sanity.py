@@ -303,7 +303,7 @@ def test_plaintext():
     assert testcase.int_array()[3] == 0x7FF
     assert testcase.data(3) == 0x7FF
     assert testcase.parms_id() == [0, 0, 0, 0]
-    assert testcase.scale() == 1.0
+    assert testcase.scale == 1.0
     assert testcase[3] == 0x7FF
     assert testcase.to_string() == "7FFx^3 + 1x^1 + 3"
 
@@ -361,7 +361,7 @@ def test_ciphertext(testcase, scheme, ctx):
     encryptor.encrypt(plaintext, ciphertext)
 
     assert len(ciphertext.parms_id()) > 0
-    assert ciphertext.scale() > 0
+    assert ciphertext.scale > 0
     assert ciphertext.coeff_modulus_size() == coeff_mod_count - 1
 
     assert ciphertext.poly_modulus_degree() == poly_modulus_degree
