@@ -512,6 +512,23 @@ def test_simple_polynomial_rescale_off(context, data, polynom):
     assert str(e.value) == "scale mismatch"
 
 
+@pytest.mark.parametrize(
+    "poly_mod_degree, coeff_mod_bit_sizes, max_depth",
+    [(8192, [30, 20, 20, 30], 2), (8192, [60, 40, 40, 60], 2), (16384, [40, 21, 21, 21, 40], 3),],
+)
+def test_depth_max(poly_mod_degree, coeff_mod_bit_sizes, max_depth):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, poly_mod_degree, 0, coeff_mod_bit_sizes)
+    scale = 2 ** coeff_mod_bit_sizes[1]
+    context.global_scale = scale
+    vec = ts.ckks_vector(context, [1, 2, 3, 4])
+    for _ in range(max_depth):
+        vec *= vec
+
+    with pytest.raises(ValueError) as e:
+        vec *= vec
+    assert str(e.value) in ["scale out of bounds", "end of modulus switching chain reached"]
+
+
 def test_size(context):
     for size in range(10):
         vec = ts.ckks_vector(context, [1] * size)
