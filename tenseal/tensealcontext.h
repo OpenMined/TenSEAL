@@ -211,7 +211,7 @@ class TenSEALContext {
         // set it to status
         this->_auto_flags |= flag;
     }
-    
+
     void auto_rescale(bool status) {
         uint8_t flag = uint8_t(status) << 1;
         // switch it off
