@@ -32,11 +32,18 @@ modulus.
 template <typename T>
 void set_to_same_mod(shared_ptr<TenSEALContext> context, Ciphertext& ct,
                      T& other) {
-    size_t ct_idx =
-        context->seal_context()->get_context_data(ct.parms_id())->chain_index();
-    size_t other_idx = context->seal_context()
-                           ->get_context_data(other.parms_id())
-                           ->chain_index();
+    auto get_chain_index = [&](const auto& obj) -> size_t {
+        auto ctx_data =
+            context->seal_context()->get_context_data(obj.parms_id());
+        if (ctx_data == nullptr) {
+            throw runtime_error(
+                "SEAL: couldn't find context_data from params_id");
+        }
+        return ctx_data->chain_index();
+    };
+
+    size_t ct_idx = get_chain_index(ct);
+    size_t other_idx = get_chain_index(other);
 
     if (ct_idx == other_idx) return;
 
