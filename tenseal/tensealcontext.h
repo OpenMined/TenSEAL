@@ -201,7 +201,7 @@ class TenSEALContext {
     double global_scale() { return this->_scale; }
 
     /*
-    Switch on/off automatic relinearization, rescaling, and mod swithcing.
+    Switch on/off automatic relinearization, rescaling, and mod switching.
     */
     // TODO: take into account possible parellel computation using this
     void set_auto_relin(bool status) { this->_auto_relin = status; }
