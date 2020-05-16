@@ -197,19 +197,19 @@ class TenSEALContext {
     // user if it doesn't.
     // Example: if using coeff_mod_bit_size of [60,40,40,60],
     // the global scale should be set for 2**40
-    void set_global_scale(double scale) { this->_scale = scale; }
+    void global_scale(double scale) { this->_scale = scale; }
     double global_scale() { return this->_scale; }
 
     /*
     Switch on/off automatic relinearization, rescaling, and mod switching.
     */
     // TODO: take into account possible parellel computation using this
-    void set_auto_relin(bool status) { this->_auto_relin = status; }
-    void set_auto_rescale(bool status) { this->_auto_rescale = status; }
-    void set_auto_mod_switch(bool status) { this->_auto_mod_switch = status; }
-    bool is_auto_relin() { return this->_auto_relin; }
-    bool is_auto_rescale() { return this->_auto_rescale; }
-    bool is_auto_mod_switch() { return this->_auto_mod_switch; }
+    void auto_relin(bool status) { this->_auto_relin = status; }
+    void auto_rescale(bool status) { this->_auto_rescale = status; }
+    void auto_mod_switch(bool status) { this->_auto_mod_switch = status; }
+    bool auto_relin() { return this->_auto_relin; }
+    bool auto_rescale() { return this->_auto_rescale; }
+    bool auto_mod_switch() { return this->_auto_mod_switch; }
 
    private:
     EncryptionParameters _parms;

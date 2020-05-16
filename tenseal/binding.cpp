@@ -116,14 +116,18 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")
-        .def_property("global_scale", &TenSEALContext::global_scale,
-                      &TenSEALContext::set_global_scale)
-        .def_property("auto_relin", &TenSEALContext::is_auto_relin,
-                      &TenSEALContext::set_auto_relin)
-        .def_property("auto_rescale", &TenSEALContext::is_auto_rescale,
-                      &TenSEALContext::set_auto_rescale)
-        .def_property("auto_mod_switch", &TenSEALContext::is_auto_mod_switch,
-                      &TenSEALContext::set_auto_mod_switch)
+        .def_property("global_scale",
+                      py::overload_cast<>(&TenSEALContext::global_scale),
+                      py::overload_cast<double>(&TenSEALContext::global_scale))
+        .def_property("auto_relin",
+                      py::overload_cast<>(&TenSEALContext::auto_relin),
+                      py::overload_cast<bool>(&TenSEALContext::auto_relin))
+        .def_property("auto_rescale",
+                      py::overload_cast<>(&TenSEALContext::auto_rescale),
+                      py::overload_cast<bool>(&TenSEALContext::auto_rescale))
+        .def_property("auto_mod_switch",
+                      py::overload_cast<>(&TenSEALContext::auto_mod_switch),
+                      py::overload_cast<bool>(&TenSEALContext::auto_mod_switch))
         .def("new",
              py::overload_cast<scheme_type, size_t, uint64_t, vector<int>>(
                  &TenSEALContext::Create),
