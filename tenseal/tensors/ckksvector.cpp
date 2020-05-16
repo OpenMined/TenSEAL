@@ -5,9 +5,9 @@
 #include <memory>
 #include <vector>
 
-#include "../matrix_ops.h"
 #include "../tensealcontext.h"
-#include "../utils.h"
+#include "../utils/matrix_ops.h"
+#include "../utils/utils.h"
 
 using namespace seal;
 using namespace std;
@@ -90,6 +90,11 @@ CKKSVector& CKKSVector::add_inplace(CKKSVector to_add) {
         throw invalid_argument("can't add vectors of different sizes");
     }
 
+    if (this->context->is_auto_mod_switch() &&
+        this->ciphertext.parms_id() != to_add.ciphertext.parms_id()) {
+        set_to_same_mod(this->context, this->ciphertext, to_add.ciphertext);
+    }
+
     this->context->evaluator->add_inplace(this->ciphertext, to_add.ciphertext);
 
     return *this;
@@ -110,6 +115,12 @@ CKKSVector& CKKSVector::add_plain_inplace(vector<double> to_add) {
     auto encoder = this->context->get_encoder<CKKSEncoder>();
     Plaintext plaintext;
     encoder->encode(to_add, this->init_scale, plaintext);
+
+    if (this->context->is_auto_mod_switch() &&
+        this->ciphertext.parms_id() != plaintext.parms_id()) {
+        set_to_same_mod(this->context, this->ciphertext, plaintext);
+    }
+
     this->context->evaluator->add_plain_inplace(this->ciphertext, plaintext);
 
     return *this;
@@ -133,6 +144,11 @@ CKKSVector& CKKSVector::sub_inplace(CKKSVector to_sub) {
         throw invalid_argument("can't sub vectors of different sizes");
     }
 
+    if (this->context->is_auto_mod_switch() &&
+        this->ciphertext.parms_id() != to_sub.ciphertext.parms_id()) {
+        set_to_same_mod(this->context, this->ciphertext, to_sub.ciphertext);
+    }
+
     this->context->evaluator->sub_inplace(this->ciphertext, to_sub.ciphertext);
 
     return *this;
@@ -153,6 +169,12 @@ CKKSVector& CKKSVector::sub_plain_inplace(vector<double> to_sub) {
     auto encoder = this->context->get_encoder<CKKSEncoder>();
     Plaintext plaintext;
     encoder->encode(to_sub, this->init_scale, plaintext);
+
+    if (this->context->is_auto_mod_switch() &&
+        this->ciphertext.parms_id() != plaintext.parms_id()) {
+        set_to_same_mod(this->context, this->ciphertext, plaintext);
+    }
+
     this->context->evaluator->sub_plain_inplace(this->ciphertext, plaintext);
 
     return *this;
@@ -176,13 +198,23 @@ CKKSVector& CKKSVector::mul_inplace(CKKSVector to_mul) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
 
+    if (this->context->is_auto_mod_switch() &&
+        this->ciphertext.parms_id() != to_mul.ciphertext.parms_id()) {
+        set_to_same_mod(this->context, this->ciphertext, to_mul.ciphertext);
+    }
+
     this->context->evaluator->multiply_inplace(this->ciphertext,
                                                to_mul.ciphertext);
 
-    // TODO: can make this optional
-    // relineraize after ciphertext-ciphertext multiplication
-    this->context->evaluator->relinearize_inplace(this->ciphertext,
-                                                  this->context->relin_keys());
+    if (this->context->is_auto_relin()) {
+        this->context->evaluator->relinearize_inplace(
+            this->ciphertext, this->context->relin_keys());
+    }
+
+    if (this->context->is_auto_rescale()) {
+        this->context->evaluator->rescale_to_next_inplace(this->ciphertext);
+        this->ciphertext.scale() = this->context->global_scale();
+    }
 
     return *this;
 }
@@ -204,6 +236,12 @@ CKKSVector& CKKSVector::mul_plain_inplace(vector<double> to_mul) {
     // prevent transparent ciphertext by adding a non-zero value
     if (to_mul.size() + 1 <= encoder->slot_count()) to_mul.push_back(1);
     encoder->encode(to_mul, this->init_scale, plaintext);
+
+    if (this->context->is_auto_mod_switch() &&
+        this->ciphertext.parms_id() != plaintext.parms_id()) {
+        set_to_same_mod(this->context, this->ciphertext, plaintext);
+    }
+
     this->context->evaluator->multiply_plain_inplace(this->ciphertext,
                                                      plaintext);
 

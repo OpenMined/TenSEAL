@@ -41,9 +41,4 @@ shared_ptr<seal::SEALContext> create_context(EncryptionParameters parms) {
     return context;
 }
 
-void set_to_same_mod(shared_ptr<TenSEALContext> context, Ciphertext& ct1,
-                     Ciphertext& ct2) {
-    cout << "HERE";
-}
-
 }  // namespace tenseal

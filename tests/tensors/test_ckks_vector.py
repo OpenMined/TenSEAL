@@ -429,10 +429,13 @@ def test_vec_plain_matrix_mul_depth2(context, vec, matrix1, matrix2):
     "data, polynom",
     [
         ([0, 1, 2, 3, 4], lambda x: x * x + x),
+        ([0, 1, 2, 3, 4], lambda x: x * x - x),
+        ([0, 1, 2, 3, 4], lambda x: x * x * x),
+        ([0, 0, 0, 0, 0], lambda x: x * x * x),
     ],
 )
-def test_polynomial(context, scale, data, polynom):
-    ct = ts.ckks_vector(context, scale, data)
+def test_simple_polynomial(context, data, polynom):
+    ct = ts.ckks_vector(context, data)
     expected = [polynom(x) for x in data]
     result = polynom(ct)
 
