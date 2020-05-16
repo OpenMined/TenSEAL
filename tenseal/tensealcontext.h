@@ -204,12 +204,33 @@ class TenSEALContext {
     Switch on/off automatic relinearization, rescaling, and mod switching.
     */
     // TODO: take into account possible parellel computation using this
-    void auto_relin(bool status) { this->_auto_relin = status; }
-    void auto_rescale(bool status) { this->_auto_rescale = status; }
-    void auto_mod_switch(bool status) { this->_auto_mod_switch = status; }
-    bool auto_relin() { return this->_auto_relin; }
-    bool auto_rescale() { return this->_auto_rescale; }
-    bool auto_mod_switch() { return this->_auto_mod_switch; }
+    void auto_relin(bool status) {
+        uint8_t flag = uint8_t(status);
+        // switch it off
+        this->_auto_flags &= ~flag_auto_relin;
+        // set it to status
+        this->_auto_flags |= flag;
+    }
+    
+    void auto_rescale(bool status) {
+        uint8_t flag = uint8_t(status) << 1;
+        // switch it off
+        this->_auto_flags &= ~flag_auto_rescale;
+        // set it to status
+        this->_auto_flags |= flag;
+    }
+
+    void auto_mod_switch(bool status) {
+        uint8_t flag = uint8_t(status) << 2;
+        // switch it off
+        this->_auto_flags &= ~flag_auto_mod_switch;
+        // set it to status
+        this->_auto_flags |= flag;
+    }
+
+    bool auto_relin() { return this->_auto_flags & flag_auto_relin; }
+    bool auto_rescale() { return this->_auto_flags & flag_auto_rescale; }
+    bool auto_mod_switch() { return this->_auto_flags & flag_auto_mod_switch; }
 
    private:
     EncryptionParameters _parms;
@@ -228,9 +249,13 @@ class TenSEALContext {
     /*
     Switches for automatic relinearization, rescaling, and modulus switching
     */
-    bool _auto_relin = true;
-    bool _auto_rescale = true;
-    bool _auto_mod_switch = true;
+    enum {
+        flag_auto_relin = 1 << 0,
+        flag_auto_rescale = 1 << 1,
+        flag_auto_mod_switch = 1 << 2,
+    };
+    uint8_t _auto_flags =
+        flag_auto_relin | flag_auto_rescale | flag_auto_mod_switch;
 
     TenSEALContext(EncryptionParameters parms);
     TenSEALContext(const char* filename);

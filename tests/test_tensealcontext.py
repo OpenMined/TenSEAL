@@ -39,3 +39,42 @@ def test_global_scale():
     for scale in [0, 1, 2, 2 ** 40]:
         context.global_scale = scale
         assert context.global_scale == scale
+
+
+def test_auto_flags():
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
+    # default values
+    assert context.auto_relin == True
+    assert context.auto_rescale == True
+    assert context.auto_mod_switch == True
+
+    # switch on/off and check
+    context.auto_relin = False
+    assert context.auto_relin == False
+    assert context.auto_rescale == True
+    assert context.auto_mod_switch == True
+
+    context.auto_relin = True
+    assert context.auto_relin == True
+    assert context.auto_rescale == True
+    assert context.auto_mod_switch == True
+
+    context.auto_rescale = False
+    assert context.auto_relin == True
+    assert context.auto_rescale == False
+    assert context.auto_mod_switch == True
+
+    context.auto_rescale = True
+    assert context.auto_relin == True
+    assert context.auto_rescale == True
+    assert context.auto_mod_switch == True
+
+    context.auto_mod_switch = False
+    assert context.auto_relin == True
+    assert context.auto_rescale == True
+    assert context.auto_mod_switch == False
+
+    context.auto_mod_switch = True
+    assert context.auto_relin == True
+    assert context.auto_rescale == True
+    assert context.auto_mod_switch == True
