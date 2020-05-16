@@ -373,7 +373,7 @@ def test_mul_plain_zero(context):
 )
 def test_mul_without_global_scale(vec1, vec2):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
-    scale = 2**40
+    scale = 2 ** 40
 
     first_vec = ts.ckks_vector(context, vec1, scale=scale)
     second_vec = ts.ckks_vector(context, vec2, scale=scale)
