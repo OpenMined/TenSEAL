@@ -35,8 +35,8 @@ void set_to_same_mod(shared_ptr<TenSEALContext> context, Ciphertext& ct,
     size_t ct_idx =
         context->seal_context()->get_context_data(ct.parms_id())->chain_index();
     size_t other_idx = context->seal_context()
-                      ->get_context_data(other.parms_id())
-                      ->chain_index();
+                           ->get_context_data(other.parms_id())
+                           ->chain_index();
 
     if (ct_idx == other_idx) return;
 
@@ -45,6 +45,15 @@ void set_to_same_mod(shared_ptr<TenSEALContext> context, Ciphertext& ct,
     } else {
         context->evaluator->mod_switch_to_inplace(other, ct.parms_id());
     }
+}
+
+/*
+Check whether we should apply mod switching to one of the two elements.
+*/
+template <typename T>
+inline bool should_set_to_same_mod(shared_ptr<TenSEALContext> context,
+                                   Ciphertext& ct, T& other) {
+    return context->auto_mod_switch() && ct.parms_id() != other.parms_id();
 }
 
 }  // namespace tenseal
