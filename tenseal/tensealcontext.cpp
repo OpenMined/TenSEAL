@@ -2,8 +2,6 @@
 
 #include <seal/seal.h>
 
-#include "utils.h"
-
 namespace tenseal {
 
 using namespace seal;

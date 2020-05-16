@@ -4,7 +4,7 @@
 #include <seal/seal.h>
 
 #include "tensealencoder.h"
-#include "utils.h"
+#include "utils/context.h"
 
 namespace tenseal {
 
@@ -197,8 +197,40 @@ class TenSEALContext {
     // user if it doesn't.
     // Example: if using coeff_mod_bit_size of [60,40,40,60],
     // the global scale should be set for 2**40
-    void set_global_scale(double scale) { this->_scale = scale; }
+    void global_scale(double scale) { this->_scale = scale; }
     double global_scale() { return this->_scale; }
+
+    /*
+    Switch on/off automatic relinearization, rescaling, and mod switching.
+    */
+    // TODO: take into account possible parellel computation using this
+    void auto_relin(bool status) {
+        uint8_t flag = uint8_t(status);
+        // switch it off
+        this->_auto_flags &= ~flag_auto_relin;
+        // set it to status
+        this->_auto_flags |= flag;
+    }
+
+    void auto_rescale(bool status) {
+        uint8_t flag = uint8_t(status) << 1;
+        // switch it off
+        this->_auto_flags &= ~flag_auto_rescale;
+        // set it to status
+        this->_auto_flags |= flag;
+    }
+
+    void auto_mod_switch(bool status) {
+        uint8_t flag = uint8_t(status) << 2;
+        // switch it off
+        this->_auto_flags &= ~flag_auto_mod_switch;
+        // set it to status
+        this->_auto_flags |= flag;
+    }
+
+    bool auto_relin() { return this->_auto_flags & flag_auto_relin; }
+    bool auto_rescale() { return this->_auto_flags & flag_auto_rescale; }
+    bool auto_mod_switch() { return this->_auto_flags & flag_auto_mod_switch; }
 
    private:
     EncryptionParameters _parms;
@@ -213,6 +245,17 @@ class TenSEALContext {
     Stores a global scale used across ciphertext encrypted using CKKS.
     */
     double _scale = -1;
+
+    /*
+    Switches for automatic relinearization, rescaling, and modulus switching
+    */
+    enum {
+        flag_auto_relin = 1 << 0,
+        flag_auto_rescale = 1 << 1,
+        flag_auto_mod_switch = 1 << 2,
+    };
+    uint8_t _auto_flags =
+        flag_auto_relin | flag_auto_rescale | flag_auto_mod_switch;
 
     TenSEALContext(EncryptionParameters parms);
     TenSEALContext(const char* filename);

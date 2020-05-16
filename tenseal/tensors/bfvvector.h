@@ -8,10 +8,10 @@
 
 #include "../tensealcontext.h"
 
+namespace tenseal {
+
 using namespace seal;
 using namespace std;
-
-namespace tenseal {
 
 /*
 Holds a vector of integers in its encrypted form using the BFV homomorphic

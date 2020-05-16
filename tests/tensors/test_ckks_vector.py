@@ -358,6 +358,35 @@ def test_mul_plain_zero(context):
 
 
 @pytest.mark.parametrize(
+    "vec1, vec2",
+    [
+        ([0], [0]),
+        ([1], [0]),
+        ([-1], [0]),
+        ([-1], [-1]),
+        ([1], [1]),
+        ([-1], [1]),
+        ([1, 2, 3, 4], [4, 3, 2, 1]),
+        ([-1, -2], [-73, -10]),
+        ([1, 2], [-73, -10]),
+    ],
+)
+def test_mul_without_global_scale(vec1, vec2):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
+    scale = 2 ** 40
+
+    first_vec = ts.ckks_vector(context, vec1, scale=scale)
+    second_vec = ts.ckks_vector(context, vec2, scale=scale)
+    result = first_vec * second_vec
+    expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
+
+    # Decryption
+    decrypted_result = result.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Multiplication of vectors is incorrect."
+    assert _almost_equal(first_vec.decrypt(), vec1, 1), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
     "vec, matrix",
     [
         ([1, 2, 3], [[1, 2, 3], [1, 2, 3], [1, 2, 3]]),
@@ -423,6 +452,81 @@ def test_vec_plain_matrix_mul_depth2(context, vec, matrix1, matrix2):
     result = ct @ matrix1 @ matrix2
     expected = (np.array(vec) @ np.array(matrix1) @ np.array(matrix2)).tolist()
     assert _almost_equal(result.decrypt(), expected, 1), "Matrix multiplication is incorrect."
+
+
+@pytest.mark.parametrize(
+    "data, polynom",
+    [
+        ([0, 1, 2, 3, 4], lambda x: x * x + x),
+        ([0, 1, 2, 3, 4], lambda x: x * x - x),
+        ([0, 1, 2, 3, 4], lambda x: x * x * x),
+        ([0, 0, 0, 0, 0], lambda x: x * x * x),
+    ],
+)
+def test_simple_polynomial(context, data, polynom):
+    ct = ts.ckks_vector(context, data)
+    expected = [polynom(x) for x in data]
+    result = polynom(ct)
+
+    decrypted_result = result.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Polynomial evaluation is incorrect."
+    # adding plain vector at the end
+    result += data
+    expected = [expected[i] + data[i] for i in range(len(data))]
+    decrypted_result = result.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1)
+
+
+@pytest.mark.parametrize(
+    "data, polynom",
+    [
+        ([0, 1, 2, 3, 4], lambda x: x * x + x),
+        ([0, 1, 2, 3, 4], lambda x: x * x - x),
+        ([0, 1, 2, 3, 4], lambda x: x * x * x),
+        ([0, 0, 0, 0, 0], lambda x: x * x * x),
+    ],
+)
+def test_simple_polynomial_modswitch_off(context, data, polynom):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
+    context.global_scale = 2 ** 40
+    context.auto_mod_switch = False
+
+    ct = ts.ckks_vector(context, data)
+    with pytest.raises(ValueError) as e:
+        result = polynom(ct)
+    assert str(e.value) == "encrypted1 and encrypted2 parameter mismatch"
+
+
+@pytest.mark.parametrize(
+    "data, polynom",
+    [([0, 1, 2, 3, 4], lambda x: x * x + x), ([0, 1, 2, 3, 4], lambda x: x * x - x),],
+)
+def test_simple_polynomial_rescale_off(context, data, polynom):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
+    context.global_scale = 2 ** 40
+    context.auto_rescale = False
+
+    ct = ts.ckks_vector(context, data)
+    with pytest.raises(ValueError) as e:
+        result = polynom(ct)
+    assert str(e.value) == "scale mismatch"
+
+
+@pytest.mark.parametrize(
+    "poly_mod_degree, coeff_mod_bit_sizes, max_depth",
+    [(8192, [30, 20, 20, 30], 2), (8192, [60, 40, 40, 60], 2), (16384, [40, 21, 21, 21, 40], 3),],
+)
+def test_depth_max(poly_mod_degree, coeff_mod_bit_sizes, max_depth):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, poly_mod_degree, 0, coeff_mod_bit_sizes)
+    scale = 2 ** coeff_mod_bit_sizes[1]
+    context.global_scale = scale
+    vec = ts.ckks_vector(context, [1, 2, 3, 4])
+    for _ in range(max_depth):
+        vec *= vec
+
+    with pytest.raises(ValueError) as e:
+        vec *= vec
+    assert str(e.value) in ["scale out of bounds", "end of modulus switching chain reached"]
 
 
 def test_size(context):

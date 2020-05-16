@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "../tensealcontext.h"
+
 using namespace seal;
 using namespace std;
 
