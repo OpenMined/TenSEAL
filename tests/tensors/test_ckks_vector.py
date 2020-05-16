@@ -469,7 +469,47 @@ def test_simple_polynomial(context, data, polynom):
     result = polynom(ct)
 
     decrypted_result = result.decrypt()
-    assert _almost_equal(decrypted_result, expected, 1), "Multiplication of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, 1), "Polynomial evaluation is incorrect."
+    # adding plain vector at the end
+    result += data
+    expected = [expected[i] + data[i] for i in range(len(data))]
+    decrypted_result = result.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1)
+
+
+@pytest.mark.parametrize(
+    "data, polynom",
+    [
+        ([0, 1, 2, 3, 4], lambda x: x * x + x),
+        ([0, 1, 2, 3, 4], lambda x: x * x - x),
+        ([0, 1, 2, 3, 4], lambda x: x * x * x),
+        ([0, 0, 0, 0, 0], lambda x: x * x * x),
+    ],
+)
+def test_simple_polynomial_modswitch_off(context, data, polynom):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
+    context.global_scale = 2 ** 40
+    context.auto_mod_switch = False
+
+    ct = ts.ckks_vector(context, data)
+    with pytest.raises(ValueError) as e:
+        result = polynom(ct)
+    assert str(e.value) == "encrypted1 and encrypted2 parameter mismatch"
+
+
+@pytest.mark.parametrize(
+    "data, polynom",
+    [([0, 1, 2, 3, 4], lambda x: x * x + x), ([0, 1, 2, 3, 4], lambda x: x * x - x),],
+)
+def test_simple_polynomial_rescale_off(context, data, polynom):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
+    context.global_scale = 2 ** 40
+    context.auto_rescale = False
+
+    ct = ts.ckks_vector(context, data)
+    with pytest.raises(ValueError) as e:
+        result = polynom(ct)
+    assert str(e.value) == "scale mismatch"
 
 
 def test_size(context):
