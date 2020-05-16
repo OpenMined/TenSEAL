@@ -9,10 +9,10 @@
 #include "../tensealcontext.h"
 #include "../utils/utils.h"
 
+namespace tenseal {
+
 using namespace seal;
 using namespace std;
-
-namespace tenseal {
 
 /*
 Holds a vector of real numbers in its encrypted form using the CKKS homomorphic
