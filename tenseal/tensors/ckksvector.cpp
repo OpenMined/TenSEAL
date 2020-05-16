@@ -259,7 +259,12 @@ CKKSVector& CKKSVector::matmul_plain_inplace(
         this->context, this->ciphertext, this->size(), matrix);
 
     this->_size = matrix[0].size();
-    // TODO: rescale (optional)
+
+    if (this->context->is_auto_rescale()) {
+        this->context->evaluator->rescale_to_next_inplace(this->ciphertext);
+        this->ciphertext.scale() = this->context->global_scale();
+    }
+
     return *this;
 }
 

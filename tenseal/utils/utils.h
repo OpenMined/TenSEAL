@@ -32,19 +32,18 @@ modulus.
 template <typename T>
 void set_to_same_mod(shared_ptr<TenSEALContext> context, Ciphertext& ct,
                      T& other) {
-    size_t idx1 = context->seal_context()
-                    ->get_context_data(ct.parms_id())
-                    ->chain_index();
+    size_t idx1 =
+        context->seal_context()->get_context_data(ct.parms_id())->chain_index();
     size_t idx2 = context->seal_context()
-                    ->get_context_data(other.parms_id())
-                    ->chain_index();
+                      ->get_context_data(other.parms_id())
+                      ->chain_index();
+
+    if (idx1 == idx2) return;
 
     if (idx1 > idx2) {
-        context->evaluator->mod_switch_to_inplace(ct,
-                                                  other.parms_id());
+        context->evaluator->mod_switch_to_inplace(ct, other.parms_id());
     } else {
-        context->evaluator->mod_switch_to_inplace(other,
-                                                  ct.parms_id());
+        context->evaluator->mod_switch_to_inplace(other, ct.parms_id());
     }
 }
 

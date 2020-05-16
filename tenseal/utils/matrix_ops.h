@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "../tensealcontext.h"
+#include "../utils/utils.h"
 
 namespace tenseal {
 
@@ -51,7 +52,7 @@ Cryptology Conference (pp. 554-571). Springer, Berlin, Heidelberg.
 */
 template <typename T, class Encoder>
 Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
-                                     const Ciphertext& vec, size_t vector_size,
+                                     Ciphertext& vec, size_t vector_size,
                                      const vector<vector<T>>& matrix) {
     // matrix is organized by rows
     // _check_matrix(matrix, this->size())
@@ -78,7 +79,12 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
         rotate(diag.begin(), diag.begin() + diag.size() - i, diag.end());
 
         tenseal_context->encode<Encoder>(diag, pt_diag);
+
+        if (vec.parms_id() != pt_diag.parms_id()) {
+            set_to_same_mod(tenseal_context, vec, pt_diag);
+        }
         tenseal_context->evaluator->multiply_plain(vec, pt_diag, ct);
+
         tenseal_context->evaluator->rotate_vector_inplace(
             ct, i, tenseal_context->galois_keys());
         results.push_back(ct);
