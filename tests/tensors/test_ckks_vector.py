@@ -358,6 +358,35 @@ def test_mul_plain_zero(context):
 
 
 @pytest.mark.parametrize(
+    "vec1, vec2",
+    [
+        ([0], [0]),
+        ([1], [0]),
+        ([-1], [0]),
+        ([-1], [-1]),
+        ([1], [1]),
+        ([-1], [1]),
+        ([1, 2, 3, 4], [4, 3, 2, 1]),
+        ([-1, -2], [-73, -10]),
+        ([1, 2], [-73, -10]),
+    ],
+)
+def test_mul_without_global_scale(vec1, vec2):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
+    scale = 2**40
+
+    first_vec = ts.ckks_vector(context, vec1, scale=scale)
+    second_vec = ts.ckks_vector(context, vec2, scale=scale)
+    result = first_vec * second_vec
+    expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
+
+    # Decryption
+    decrypted_result = result.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Multiplication of vectors is incorrect."
+    assert _almost_equal(first_vec.decrypt(), vec1, 1), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
     "vec, matrix",
     [
         ([1, 2, 3], [[1, 2, 3], [1, 2, 3], [1, 2, 3]]),

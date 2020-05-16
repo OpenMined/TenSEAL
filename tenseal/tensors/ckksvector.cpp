@@ -213,7 +213,7 @@ CKKSVector& CKKSVector::mul_inplace(CKKSVector to_mul) {
 
     if (this->context->is_auto_rescale()) {
         this->context->evaluator->rescale_to_next_inplace(this->ciphertext);
-        this->ciphertext.scale() = this->context->global_scale();
+        this->ciphertext.scale() = this->init_scale;
     }
 
     return *this;
@@ -245,6 +245,11 @@ CKKSVector& CKKSVector::mul_plain_inplace(vector<double> to_mul) {
     this->context->evaluator->multiply_plain_inplace(this->ciphertext,
                                                      plaintext);
 
+    if (this->context->is_auto_rescale()) {
+        this->context->evaluator->rescale_to_next_inplace(this->ciphertext);
+        this->ciphertext.scale() = this->init_scale;
+    }
+
     return *this;
 }
 
@@ -262,7 +267,7 @@ CKKSVector& CKKSVector::matmul_plain_inplace(
 
     if (this->context->is_auto_rescale()) {
         this->context->evaluator->rescale_to_next_inplace(this->ciphertext);
-        this->ciphertext.scale() = this->context->global_scale();
+        this->ciphertext.scale() = this->init_scale;
     }
 
     return *this;
