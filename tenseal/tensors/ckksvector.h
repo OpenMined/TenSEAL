@@ -21,7 +21,7 @@ encryption scheme.
 class CKKSVector {
    public:
     CKKSVector(shared_ptr<TenSEALContext> context, vector<double> vec,
-               double scale = -1);
+               std::optional<double> scale = {});
 
     CKKSVector(const CKKSVector& vec);
 

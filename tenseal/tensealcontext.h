@@ -192,12 +192,10 @@ class TenSEALContext {
         return encoder_factory->slot_count<T>();
     }
 
-    // TODO: check set scale if possible with current primes used and warn the
-    // user if it doesn't.
-    // Example: if using coeff_mod_bit_size of [60,40,40,60],
-    // the global scale should be set for 2**40
-    void global_scale(double scale) { this->_scale = scale; }
-    double global_scale() { return this->_scale; }
+    // ciphertext scale setter(CKKS)
+    void global_scale(double scale) { encoder_factory->global_scale(scale); }
+    // ciphertext scale getter(CKKS)
+    double global_scale() { return encoder_factory->global_scale(); }
 
     /*
     Switch on/off automatic relinearization, rescaling, and mod switching.
@@ -239,11 +237,6 @@ class TenSEALContext {
     shared_ptr<RelinKeys> _relin_keys;
     shared_ptr<GaloisKeys> _galois_keys;
     shared_ptr<TenSEALEncoder> encoder_factory;
-
-    /*
-    Stores a global scale used across ciphertext encrypted using CKKS.
-    */
-    double _scale = -1;
 
     /*
     Switches for automatic relinearization, rescaling, and modulus switching
