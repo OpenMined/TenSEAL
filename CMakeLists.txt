@@ -5,6 +5,8 @@ project(tenseal)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
 # For windows we should build SEAL using Microsoft Visual Studio
 # then link the library
 if (WIN32)

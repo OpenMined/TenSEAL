@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "../tensealcontext.h"
+#include "tenseal/tensealcontext.h"
 
 using namespace seal;
 using namespace std;
