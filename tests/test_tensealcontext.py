@@ -1,3 +1,4 @@
+import pytest
 import tenseal as ts
 
 
@@ -35,7 +36,8 @@ def test_generate_relin_keys():
 def test_global_scale():
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
     # global scale shouldn't be set at first
-    assert context.global_scale == -1
+    with pytest.raises(ValueError) as e:
+        scale = context.global_scale
     for scale in [0, 1, 2, 2 ** 40]:
         context.global_scale = scale
         assert context.global_scale == scale

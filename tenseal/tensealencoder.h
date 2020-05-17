@@ -39,7 +39,11 @@ class TenSEALEncoder {
     template <class CKKSEncoder>
     void encode(std::vector<double>& vec, Plaintext& pt,
                 std::optional<double> optscale = {}) {
-        auto scale = optscale.value_or(global_scale());
+        double scale = 1.0;
+        if (optscale.has_value())
+            scale = optscale.value();
+        else
+            scale = global_scale();
 
         auto encoder = this->get<CKKSEncoder>();
         encoder->encode(vec, scale, pt);
