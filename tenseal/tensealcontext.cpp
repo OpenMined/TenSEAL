@@ -1,4 +1,4 @@
-#include "tensealcontext.h"
+#include "tenseal/tensealcontext.h"
 
 #include <seal/seal.h>
 

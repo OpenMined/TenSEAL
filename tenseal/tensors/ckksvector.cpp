@@ -1,4 +1,4 @@
-#include "ckksvector.h"
+#include "tenseal/tensors/ckksvector.h"
 
 #include <seal/seal.h>
 
