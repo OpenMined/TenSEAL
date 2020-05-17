@@ -72,7 +72,7 @@ class TenSEALEncoder {
     // Example: if using coeff_mod_bit_size of [60,40,40,60],
     // the global scale should be set for 2**40
     void global_scale(double scale) {
-        if (scale < 1.0) throw std::invalid_argument("invalid scale value");
+        if (scale < 0) throw std::invalid_argument("invalid scale value");
 
         this->_scale = scale;
     }
