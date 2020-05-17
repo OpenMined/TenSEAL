@@ -67,15 +67,12 @@ class TenSEALEncoder {
         return encoder->slot_count();
     }
 
-    // throws invalid_argument exception if the scale is incompatible with
-    // current primes used. Example: if using coeff_mod_bit_size of
-    // [60,40,40,60], the global scale should be set for 2**40
+    // TODO: check set scale if possible with current primes used and warn the
+    // user if it doesn't.
+    // Example: if using coeff_mod_bit_size of [60,40,40,60],
+    // the global scale should be set for 2**40
     void global_scale(double scale) {
-        auto parms_id = _context->first_parms_id();
-        auto ctx_data = _context->get_context_data(parms_id);
-        if (static_cast<int>(log2(scale)) >=
-            ctx_data->total_coeff_modulus_bit_count())
-            throw std::invalid_argument("invalid scale value");
+        if (scale < 1.0) throw std::invalid_argument("invalid scale value");
 
         this->_scale = scale;
     }
