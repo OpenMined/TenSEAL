@@ -76,10 +76,9 @@ class BFVVector {
 
     static Ciphertext encrypt(shared_ptr<TenSEALContext> context,
                               vector<int64_t> pt) {
-        BatchEncoder batch_encoder(context->seal_context());
         Ciphertext ciphertext(context->seal_context());
         Plaintext plaintext;
-        batch_encoder.encode(pt, plaintext);
+        context->encode<BatchEncoder>(pt, plaintext);
         context->encryptor->encrypt(plaintext, ciphertext);
 
         return ciphertext;
