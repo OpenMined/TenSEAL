@@ -169,28 +169,27 @@ class TenSEALContext {
     shared_ptr<SEALContext> seal_context() { return _context; }
 
     /*
-    Returns an encoder.
+    Template encoding function for the encoders.
     */
-    template <class T>
-    shared_ptr<T> get_encoder() {
-        return encoder_factory->get<T>();
+    template <typename T, typename... Args>
+    void encode(Args&&... args) {
+        encoder_factory->encode<T>(std::forward<Args>(args)...);
     }
 
     /*
-    Template encoding functions to choose between the use of BatchEncoder or
-    CKKSEncoder.
+    Template decoder function for the encoders.
     */
-    template <class BatchEncoder>
-    void encode(vector<int64_t>& vec, Plaintext& pt) {
-        auto encoder = this->get_encoder<BatchEncoder>();
-        encoder->encode(vec, pt);
+    template <class T, class R>
+    void decode(const Plaintext& pt, R& result) {
+        encoder_factory->decode<T>(pt, result);
     }
 
-    template <class CKKSEncoder>
-    void encode(vector<double>& vec, Plaintext& pt, double scale = 0) {
-        if (scale == 0) scale = pow(2, 40);  // TODO: get from TenSEALContext
-        auto encoder = this->get_encoder<CKKSEncoder>();
-        encoder->encode(vec, scale, pt);
+    /*
+    Template slot_count function for the encoders.
+    */
+    template <class T>
+    size_t slot_count() {
+        return encoder_factory->slot_count<T>();
     }
 
     // TODO: check set scale if possible with current primes used and warn the

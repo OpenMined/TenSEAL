@@ -73,8 +73,7 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
         vector<T> diag;
 
         diag = get_diagonal(matrix, -i);
-        replicate_vector(diag,
-                         tenseal_context->get_encoder<Encoder>()->slot_count());
+        replicate_vector(diag, tenseal_context->slot_count<Encoder>());
 
         rotate(diag.begin(), diag.begin() + diag.size() - i, diag.end());
 

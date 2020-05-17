@@ -53,14 +53,13 @@ vector<double> CKKSVector::decrypt() {
 
 vector<double> CKKSVector::decrypt(SecretKey sk) {
     Plaintext plaintext;
-    auto encoder = this->context->get_encoder<CKKSEncoder>();
     Decryptor decryptor = Decryptor(this->context->seal_context(), sk);
 
     vector<double> result;
     result.reserve(this->size());
 
     decryptor.decrypt(this->ciphertext, plaintext);
-    encoder->decode(plaintext, result);
+    this->context->decode<CKKSEncoder>(plaintext, result);
 
     // result contains all slots of ciphertext (n/2), but we may be using less
     // we use the size to delimit the resulting plaintext vector
@@ -112,9 +111,8 @@ CKKSVector& CKKSVector::add_plain_inplace(vector<double> to_add) {
         throw invalid_argument("can't add vectors of different sizes");
     }
 
-    auto encoder = this->context->get_encoder<CKKSEncoder>();
     Plaintext plaintext;
-    encoder->encode(to_add, this->init_scale, plaintext);
+    this->context->encode<CKKSEncoder>(to_add, plaintext, this->init_scale);
 
     if (should_set_to_same_mod(this->context, this->ciphertext, plaintext)) {
         set_to_same_mod(this->context, this->ciphertext, plaintext);
@@ -165,9 +163,8 @@ CKKSVector& CKKSVector::sub_plain_inplace(vector<double> to_sub) {
         throw invalid_argument("can't sub vectors of different sizes");
     }
 
-    auto encoder = this->context->get_encoder<CKKSEncoder>();
     Plaintext plaintext;
-    encoder->encode(to_sub, this->init_scale, plaintext);
+    this->context->encode<CKKSEncoder>(to_sub, plaintext, this->init_scale);
 
     if (should_set_to_same_mod(this->context, this->ciphertext, plaintext)) {
         set_to_same_mod(this->context, this->ciphertext, plaintext);
@@ -229,11 +226,11 @@ CKKSVector& CKKSVector::mul_plain_inplace(vector<double> to_mul) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
 
-    auto encoder = this->context->get_encoder<CKKSEncoder>();
     Plaintext plaintext;
     // prevent transparent ciphertext by adding a non-zero value
-    if (to_mul.size() + 1 <= encoder->slot_count()) to_mul.push_back(1);
-    encoder->encode(to_mul, this->init_scale, plaintext);
+    if (to_mul.size() + 1 <= this->context->slot_count<CKKSEncoder>())
+        to_mul.push_back(1);
+    this->context->encode<CKKSEncoder>(to_mul, plaintext, this->init_scale);
 
     if (should_set_to_same_mod(this->context, this->ciphertext, plaintext)) {
         set_to_same_mod(this->context, this->ciphertext, plaintext);
