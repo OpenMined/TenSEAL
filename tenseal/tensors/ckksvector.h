@@ -6,8 +6,8 @@
 #include <memory>
 #include <vector>
 
-#include "../tensealcontext.h"
-#include "../utils/utils.h"
+#include "tenseal/tensealcontext.h"
+#include "tenseal/utils/utils.h"
 
 namespace tenseal {
 

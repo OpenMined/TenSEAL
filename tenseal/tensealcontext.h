@@ -3,8 +3,8 @@
 
 #include <seal/seal.h>
 
-#include "tensealencoder.h"
-#include "utils/context.h"
+#include "tenseal/tensealencoder.h"
+#include "tenseal/utils/context.h"
 
 namespace tenseal {
 

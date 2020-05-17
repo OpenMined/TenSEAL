@@ -1,13 +1,13 @@
-#include "ckksvector.h"
+#include "tenseal/tensors/ckksvector.h"
 
 #include <seal/seal.h>
 
 #include <memory>
 #include <vector>
 
-#include "../tensealcontext.h"
-#include "../utils/matrix_ops.h"
-#include "../utils/utils.h"
+#include "tenseal/tensealcontext.h"
+#include "tenseal/utils/matrix_ops.h"
+#include "tenseal/utils/utils.h"
 
 using namespace seal;
 using namespace std;

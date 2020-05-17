@@ -5,10 +5,10 @@
 #include <memory>
 #include <vector>
 
-#include "tensealcontext.h"
-#include "tensors/bfvvector.h"
-#include "tensors/ckksvector.h"
-#include "utils/utils.h"
+#include "tenseal/tensealcontext.h"
+#include "tenseal/tensors/bfvvector.h"
+#include "tenseal/tensors/ckksvector.h"
+#include "tenseal/utils/utils.h"
 
 using namespace tenseal;
 using namespace seal;
