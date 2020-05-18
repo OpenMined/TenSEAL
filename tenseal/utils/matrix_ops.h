@@ -63,9 +63,12 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
         throw invalid_argument("matrix shape doesn't match with vector size");
     }
 
-    vector<Ciphertext> results;
     Ciphertext result;
-    results.reserve(n_rows);
+    // result should have the same scale and modulus as vec * pt_diag (ct)
+    tenseal_context->encryptor->encrypt_zero(vec.parms_id(), result);
+    result.scale() = vec.scale() * tenseal_context->global_scale();
+
+    auto galois_keys = tenseal_context->galois_keys();
 
     for (size_t i = 0; i < n_rows; i++) {
         Ciphertext ct;
@@ -86,11 +89,11 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
         tenseal_context->evaluator->multiply_plain(vec, pt_diag, ct);
 
         tenseal_context->evaluator->rotate_vector_inplace(
-            ct, i, tenseal_context->galois_keys());
-        results.push_back(ct);
-    }
+            ct, i, galois_keys);
 
-    tenseal_context->evaluator->add_many(results, result);
+        // accumulate results
+        tenseal_context->evaluator->add_inplace(result, ct);
+    }
 
     return result;
 }
