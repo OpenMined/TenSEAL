@@ -21,7 +21,8 @@ the matrix, we do that by rotating whenever we reach the boundaries of the
 matrix.
 */
 template <typename T>
-vector<T> get_diagonal(const vector<vector<T>>& matrix, int k, size_t max_size) {
+vector<T> get_diagonal(const vector<vector<T>>& matrix, int k,
+                       size_t max_size) {
     size_t n_rows = matrix.size();
     size_t n_cols = matrix[0].size();
 
