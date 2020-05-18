@@ -21,7 +21,7 @@ encryption scheme.
 class CKKSVector {
    public:
     CKKSVector(shared_ptr<TenSEALContext> context, vector<double> vec,
-               double scale = -1);
+               std::optional<double> scale = {});
 
     CKKSVector(const CKKSVector& vec);
 
@@ -86,9 +86,8 @@ class CKKSVector {
 
     static Ciphertext encrypt(shared_ptr<TenSEALContext> context, double scale,
                               vector<double> pt) {
-        CKKSEncoder encoder(context->seal_context());
-
-        if (pt.size() > encoder.slot_count())
+        auto slot_count = context->slot_count<CKKSEncoder>();
+        if (pt.size() > slot_count)
             // number of slots available is poly_modulus_degree / 2
             throw invalid_argument(
                 "can't encrypt vectors of this size, please use a larger "
@@ -97,8 +96,8 @@ class CKKSVector {
         Ciphertext ciphertext(context->seal_context());
         Plaintext plaintext;
         // TODO: get rid of this after fixing # 46
-        if (pt.size() != 0) replicate_vector(pt, encoder.slot_count());
-        encoder.encode(pt, scale, plaintext);
+        if (pt.size() != 0) replicate_vector(pt, slot_count);
+        context->encode<CKKSEncoder>(pt, plaintext, scale);
         context->encryptor->encrypt(plaintext, ciphertext);
 
         return ciphertext;

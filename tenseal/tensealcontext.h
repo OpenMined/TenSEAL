@@ -169,36 +169,33 @@ class TenSEALContext {
     shared_ptr<SEALContext> seal_context() { return _context; }
 
     /*
-    Returns an encoder.
+    Template encoding function for the encoders.
     */
-    template <class T>
-    shared_ptr<T> get_encoder() {
-        return encoder_factory->get<T>();
+    template <typename T, typename... Args>
+    void encode(Args&&... args) {
+        encoder_factory->encode<T>(std::forward<Args>(args)...);
     }
 
     /*
-    Template encoding functions to choose between the use of BatchEncoder or
-    CKKSEncoder.
+    Template decoder function for the encoders.
     */
-    template <class BatchEncoder>
-    void encode(vector<int64_t>& vec, Plaintext& pt) {
-        auto encoder = this->get_encoder<BatchEncoder>();
-        encoder->encode(vec, pt);
+    template <class T, class R>
+    void decode(const Plaintext& pt, R& result) {
+        encoder_factory->decode<T>(pt, result);
     }
 
-    template <class CKKSEncoder>
-    void encode(vector<double>& vec, Plaintext& pt, double scale = 0) {
-        if (scale == 0) scale = pow(2, 40);  // TODO: get from TenSEALContext
-        auto encoder = this->get_encoder<CKKSEncoder>();
-        encoder->encode(vec, scale, pt);
+    /*
+    Template slot_count function for the encoders.
+    */
+    template <class T>
+    size_t slot_count() {
+        return encoder_factory->slot_count<T>();
     }
 
-    // TODO: check set scale if possible with current primes used and warn the
-    // user if it doesn't.
-    // Example: if using coeff_mod_bit_size of [60,40,40,60],
-    // the global scale should be set for 2**40
-    void global_scale(double scale) { this->_scale = scale; }
-    double global_scale() { return this->_scale; }
+    // ciphertext scale setter(CKKS)
+    void global_scale(double scale) { encoder_factory->global_scale(scale); }
+    // ciphertext scale getter(CKKS)
+    double global_scale() { return encoder_factory->global_scale(); }
 
     /*
     Switch on/off automatic relinearization, rescaling, and mod switching.
@@ -240,11 +237,6 @@ class TenSEALContext {
     shared_ptr<RelinKeys> _relin_keys;
     shared_ptr<GaloisKeys> _galois_keys;
     shared_ptr<TenSEALEncoder> encoder_factory;
-
-    /*
-    Stores a global scale used across ciphertext encrypted using CKKS.
-    */
-    double _scale = -1;
 
     /*
     Switches for automatic relinearization, rescaling, and modulus switching
