@@ -1,23 +1,31 @@
 name: Docker Image
 
 on:
-  push:
-    branches:
-      - master
+  release:
+    types: [created]
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   publish:
     name: Build and publish
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        python-version:
+          - 3.8
+          - 3.7
+          - 3.6
     steps:
       - uses: actions/checkout@v2
-      
+
       - uses: docker/build-push-action@v1
         with:
           username: ${{ secrets.DOCKER_LOGIN }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: openmined/tenseal
+          dockerfile: docker-images/Dockerfile-py${{ matrix.python-version }}
+          if: ${{ matrix.python-version == '3.8'}}
           tags: latest
-          tag_with_sha: true
+          tag_with_ref: true
           add_git_labels: true
