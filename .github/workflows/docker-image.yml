@@ -3,8 +3,6 @@ name: Docker Image
 on:
   release:
     types: [created]
-  pull_request:
-    types: [opened, synchronize, reopened]
 
 jobs:
   publish:
@@ -13,19 +11,28 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - 3.8
-          - 3.7
-          - 3.6
+          - 36
+          - 37
+          - 38
+    env:
+      IMAGE: openmined/tenseal
+
     steps:
       - uses: actions/checkout@v2
 
-      - uses: docker/build-push-action@v1
-        with:
-          username: ${{ secrets.DOCKER_LOGIN }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: openmined/tenseal
-          dockerfile: docker-images/Dockerfile-py${{ matrix.python-version }}
-          if: ${{ matrix.python-version == '3.8'}}
-          tags: latest
-          tag_with_ref: true
-          add_git_labels: true
+      - name: build image
+        run: docker build -t $IMAGE -f docker-images/Dockerfile-py${{ matrix.python-version }} .
+
+      - name: docker login
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" |  docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
+
+      - name: tag and push image
+        run: |
+          docker tag $IMAGE $IMAGE:${{ github.event.release.tag_name }}-py${{ matrix.python-version }}
+          docker push $IMAGE:${{ github.event.release.tag_name }}-py${{ matrix.python-version }} .
+
+      - name: tag and push latest image
+        if: ${{ matrix.python-version == 38}}
+        run: |
+          docker tag $IMAGE $IMAGE:latest
+          docker push $IMAGE:latest
