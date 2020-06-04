@@ -36,12 +36,17 @@ class CKKSVector {
     Returns the size of the encrypted vector.
     */
     size_t size();
+    size_t ciphertext_size();
 
     /*
     Returns an upper bound on the size of the CKKSVector, as if it was written
     to an output stream.
     */
     streamoff save_size();
+    /*
+    Returns the serialized version of the ciphertext
+    */
+    string save_ciphertext();
 
     /*
     Encrypted evaluation function operates on two encrypted vectors and

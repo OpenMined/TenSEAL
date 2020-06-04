@@ -36,6 +36,13 @@ CKKSVector::CKKSVector(const CKKSVector& vec) {
 }
 
 size_t CKKSVector::size() { return this->_size; }
+size_t CKKSVector::ciphertext_size() { return this->ciphertext.size(); }
+
+string CKKSVector::save_ciphertext() {
+    std::stringstream stream;
+    this->ciphertext.save(stream);
+    return stream.str();
+}
 
 vector<double> CKKSVector::decrypt() {
     if (this->context->decryptor == NULL) {
