@@ -36,6 +36,11 @@ class BFVVector {
     size_t size();
 
     /*
+    Returns the size of the ciphertext.
+    */
+    size_t ciphertext_size();
+
+    /*
     Returns an upper bound on the size of the BFVVector, as if it was written
     to an output stream.
     */

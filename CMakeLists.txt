@@ -54,7 +54,7 @@ endif()
 ################################
 ADD_SUBDIRECTORY (third_party/googletest)
 enable_testing()
-include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR} third_party/SEAL)
+include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR} ${gmock_SOURCE_DIR}/include third_party/SEAL)
 
 ################################
 # Unit Tests
@@ -62,6 +62,8 @@ include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR} third_party/
 set(TENSEAL_TESTS_BASEDIR tests/cpp)
 set(TESTING_SOURCES
     ${TENSEAL_TESTS_BASEDIR}/tensealcontext_test.cpp
+    ${TENSEAL_TESTS_BASEDIR}/tensors/ckksvector_test.cpp
+    ${TENSEAL_TESTS_BASEDIR}/tensors/bfvvector_test.cpp
 )
 add_executable(tenseal_tests ${TESTING_SOURCES} ${SOURCES} )
 target_link_libraries(tenseal_tests PRIVATE gtest gtest_main seal libtenseal)

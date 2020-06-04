@@ -27,6 +27,7 @@ BFVVector::BFVVector(const BFVVector& vec) {
 }
 
 size_t BFVVector::size() { return this->_size; }
+size_t BFVVector::ciphertext_size() { return this->ciphertext.size(); }
 
 streamoff BFVVector::save_size() {
     return this->ciphertext.save_size(compr_mode_type::none);
@@ -169,11 +170,11 @@ BFVVector& BFVVector::mul_inplace(BFVVector to_mul) {
     this->context->evaluator->multiply_inplace(this->ciphertext,
                                                to_mul.ciphertext);
 
-    // TODO: make this optional
-    // relineraization after ciphertext-ciphertext multiplication
-    this->context->evaluator->relinearize_inplace(this->ciphertext,
-                                                  *this->context->relin_keys());
-
+    if (this->context->auto_relin()) {
+        // relineraization after ciphertext-ciphertext multiplication
+        this->context->evaluator->relinearize_inplace(
+            this->ciphertext, *this->context->relin_keys());
+    }
     return *this;
 }
 
