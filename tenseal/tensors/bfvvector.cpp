@@ -43,9 +43,9 @@ vector<int64_t> BFVVector::decrypt() {
     return this->decrypt(this->context->secret_key());
 }
 
-vector<int64_t> BFVVector::decrypt(SecretKey sk) {
+vector<int64_t> BFVVector::decrypt(const shared_ptr<SecretKey>& sk) {
     Plaintext plaintext;
-    Decryptor decryptor = Decryptor(this->context->seal_context(), sk);
+    Decryptor decryptor = Decryptor(this->context->seal_context(), *sk);
 
     vector<int64_t> result;
 

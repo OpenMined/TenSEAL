@@ -61,17 +61,17 @@ class TenSEALContext {
         return shared_ptr<TenSEALContext>(new TenSEALContext(filename));
     }
 
-    PublicKey public_key() { return *this->_public_key; }
-    SecretKey secret_key() {
+    auto public_key() { return this->_public_key; }
+    auto secret_key() {
         if (this->_secret_key == nullptr) {
             throw invalid_argument(
                 "the current context is public, it doesn't hold a Secret key");
         }
 
-        return *this->_secret_key;
+        return this->_secret_key;
     }
 
-    RelinKeys relin_keys() {
+    auto relin_keys() {
         if (this->_relin_keys == nullptr) {
             throw invalid_argument(
                 "the current context doesn't hold a Relinearization keys");
@@ -80,13 +80,13 @@ class TenSEALContext {
         return *this->_relin_keys;
     }
 
-    GaloisKeys galois_keys() {
+    auto galois_keys() {
         if (this->_galois_keys == nullptr) {
             throw invalid_argument(
                 "the current context doesn't hold a Galois keys");
         }
 
-        return *this->_galois_keys;
+        return this->_galois_keys;
     }
 
     /*

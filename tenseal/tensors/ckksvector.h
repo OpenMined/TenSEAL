@@ -30,7 +30,7 @@ class CKKSVector {
     real numbers using the secret-key.
     */
     vector<double> decrypt();
-    vector<double> decrypt(SecretKey sk);
+    vector<double> decrypt(const std::shared_ptr<SecretKey>& sk);
 
     /*
     Returns the size of the encrypted vector.

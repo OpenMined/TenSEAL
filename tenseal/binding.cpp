@@ -46,7 +46,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("size", &BFVVector::size)
         .def("save_size", &BFVVector::save_size)
         .def("decrypt", py::overload_cast<>(&BFVVector::decrypt))
-        .def("decrypt", py::overload_cast<SecretKey>(&BFVVector::decrypt))
+        .def("decrypt", py::overload_cast<const std::shared_ptr<SecretKey>&>(
+                            &BFVVector::decrypt))
         .def("add", &BFVVector::add)
         .def("add_", &BFVVector::add_inplace)
         .def("add_plain", &BFVVector::add_plain)
@@ -80,7 +81,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def(py::init<shared_ptr<TenSEALContext>&, vector<double>>())
         .def("size", &CKKSVector::size)
         .def("decrypt", py::overload_cast<>(&CKKSVector::decrypt))
-        .def("decrypt", py::overload_cast<SecretKey>(&CKKSVector::decrypt))
+        .def("decrypt", py::overload_cast<const shared_ptr<SecretKey>&>(
+                            &CKKSVector::decrypt))
         .def("save_size", &CKKSVector::save_size)
         .def("add", &CKKSVector::add)
         .def("add_", &CKKSVector::add_inplace)

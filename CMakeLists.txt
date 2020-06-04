@@ -23,13 +23,13 @@ add_subdirectory(third_party/pybind11)
 
 set(TENSEAL_BASEDIR tenseal)
 set(SOURCES
-    ${TENSEAL_BASEDIR}/binding.cpp
     ${TENSEAL_BASEDIR}/tensealcontext.cpp
     ${TENSEAL_BASEDIR}/tensors/bfvvector.cpp
     ${TENSEAL_BASEDIR}/tensors/ckksvector.cpp
     ${TENSEAL_BASEDIR}/utils/utils.cpp
 )
-pybind11_add_module(_tenseal_cpp ${SOURCES})
+add_library(libtenseal SHARED ${SOURCES})
+pybind11_add_module(_tenseal_cpp ${TENSEAL_BASEDIR}/binding.cpp)
 
 set(SEALAPI_SOURCES
     ${TENSEAL_BASEDIR}/sealapi/sealapi.cpp
@@ -44,7 +44,8 @@ set(SEALAPI_SOURCES
 pybind11_add_module(_sealapi_cpp ${SEALAPI_SOURCES})
 
 if(NOT WIN32)
-    target_link_libraries(_tenseal_cpp PRIVATE seal)
+    target_link_libraries(libtenseal PRIVATE seal)
+    target_link_libraries(_tenseal_cpp PRIVATE libtenseal seal)
     target_link_libraries(_sealapi_cpp PRIVATE seal)
 endif()
 
@@ -53,7 +54,7 @@ endif()
 ################################
 ADD_SUBDIRECTORY (third_party/googletest)
 enable_testing()
-include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR} third_party/SEAL)
 
 ################################
 # Unit Tests
@@ -61,6 +62,6 @@ include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 set(TESTING_SOURCES
     ${TENSEAL_BASEDIR}/tensealcontext_test.cpp
 )
-add_executable(tenseal_tests ${TESTING_SOURCES} )
-target_link_libraries(tenseal_tests gtest gtest_main)
+add_executable(tenseal_tests ${TESTING_SOURCES} ${SOURCES} )
+target_link_libraries(tenseal_tests PRIVATE gtest gtest_main seal libtenseal)
 add_test( tenseal_tests tenseal_tests )

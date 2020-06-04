@@ -48,7 +48,7 @@ vector<double> CKKSVector::decrypt() {
     return this->decrypt(this->context->secret_key());
 }
 
-vector<double> CKKSVector::decrypt(SecretKey sk) {
+vector<double> CKKSVector::decrypt(const shared_ptr<SecretKey>& sk) {
     Plaintext plaintext;
     Decryptor decryptor = Decryptor(this->context->seal_context(), sk);
 

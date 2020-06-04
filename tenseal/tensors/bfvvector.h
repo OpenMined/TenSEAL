@@ -28,7 +28,7 @@ class BFVVector {
     integers using the secret-key.
     */
     vector<int64_t> decrypt();
-    vector<int64_t> decrypt(SecretKey sk);
+    vector<int64_t> decrypt(const shared_ptr<SecretKey>& sk);
 
     /*
     Returns the size of the encrypted vector.
