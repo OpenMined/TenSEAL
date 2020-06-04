@@ -41,6 +41,10 @@ jobs:
         git diff
         # already well formated if 'git diff' doesn't output
         ! ( git diff |  grep -q ^ ) || return 1
+    - name: Test with gtest
+      run: |
+        cmake .
+        make && CTEST_OUTPUT_ON_FAILURE=1 make test
     - name: Build the library
       run: |
         # fetch third_party libraries
