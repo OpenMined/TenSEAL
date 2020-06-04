@@ -47,3 +47,20 @@ if(NOT WIN32)
     target_link_libraries(_tenseal_cpp PRIVATE seal)
     target_link_libraries(_sealapi_cpp PRIVATE seal)
 endif()
+
+################################
+# GTest
+################################
+ADD_SUBDIRECTORY (third_party/googletest)
+enable_testing()
+include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+
+################################
+# Unit Tests
+################################
+set(TESTING_SOURCES
+    ${TENSEAL_BASEDIR}/tensealcontext_test.cpp
+)
+add_executable(tenseal_tests ${TESTING_SOURCES} )
+target_link_libraries(tenseal_tests gtest gtest_main)
+add_test( tenseal_tests tenseal_tests )
