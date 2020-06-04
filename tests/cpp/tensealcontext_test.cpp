@@ -3,7 +3,6 @@
 #include "gtest/gtest.h"
 
 namespace tenseal {
-namespace {
 
 class TenSEALContextTest : public ::testing::Test {
    protected:
@@ -30,10 +29,11 @@ TEST_F(TenSEALContextTest, TestCreateBFVPublic) {
 
     EXPECT_THROW(ctx->galois_keys(), std::exception);
     EXPECT_THROW(ctx->secret_key(), std::exception);
-    // EXPECT_THROW(ctx->relin_keys(), std::exception);
 
     ctx->make_context_public(false, false);
     EXPECT_THROW(ctx->secret_key(), std::exception);
+    EXPECT_THROW(ctx->generate_galois_keys(), std::exception);
+    EXPECT_THROW(ctx->generate_relin_keys(), std::exception);
 }
 
 TEST_F(TenSEALContextTest, TestCreateCKKS) {
@@ -65,5 +65,4 @@ TEST_F(TenSEALContextTest, TestCreateFail) {
         std::exception);
 }
 
-}  // namespace
 }  // namespace tenseal

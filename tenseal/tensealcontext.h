@@ -131,7 +131,7 @@ class TenSEALContext {
     void make_context_public(bool generate_galois_keys,
                              bool generate_relin_keys) {
         // Check if already public
-        if (this->_secret_key == nullptr) {
+        if (this->is_public()) {
             return;
         }
         // create KeyGenerator object only if needed
