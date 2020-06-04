@@ -63,7 +63,7 @@ class TenSEALContext {
 
     auto public_key() { return this->_public_key; }
     auto secret_key() {
-        if (this->_secret_key == nullptr) {
+        if (is_public()) {
             throw invalid_argument(
                 "the current context is public, it doesn't hold a Secret key");
         }
@@ -74,7 +74,7 @@ class TenSEALContext {
     auto relin_keys() {
         if (this->_relin_keys == nullptr) {
             throw invalid_argument(
-                "the current context doesn't hold a Relinearization keys");
+                "the current context doesn't hold Relinearization keys");
         }
 
         return this->_relin_keys;
@@ -134,31 +134,35 @@ class TenSEALContext {
         if (this->is_public()) {
             return;
         }
-        // create KeyGenerator object only if needed
-        if (generate_galois_keys || generate_relin_keys) {
-            KeyGenerator keygen =
-                KeyGenerator(this->_context, *this->_secret_key);
 
-            // generate Galois Keys
-            if (generate_galois_keys) {
-                this->_galois_keys = shared_ptr<GaloisKeys>(
-                    new GaloisKeys(keygen.galois_keys_local()));
-            }
-
-            // generate Relinearization Keys
-            if (generate_relin_keys) {
-                this->_relin_keys = shared_ptr<RelinKeys>(
-                    new RelinKeys(keygen.relin_keys_local()));
-            }
-        }
-
-        // destory and set _secret_key and decryptor to null
+        // destroy and set _secret_key and decryptor to null
         this->_secret_key = nullptr;
         this->decryptor = nullptr;
+
+        // create KeyGenerator object only if needed
+        if (!generate_galois_keys && !generate_relin_keys) {
+            return;
+        }
+
+        KeyGenerator keygen = KeyGenerator(this->_context, *this->_secret_key);
+
+        // generate Galois Keys
+        this->_galois_keys = nullptr;
+        if (generate_galois_keys) {
+            this->_galois_keys = shared_ptr<GaloisKeys>(
+                new GaloisKeys(keygen.galois_keys_local()));
+        }
+
+        // generate Relinearization Keys
+        this->_relin_keys = nullptr;
+        if (generate_relin_keys) {
+            this->_relin_keys =
+                shared_ptr<RelinKeys>(new RelinKeys(keygen.relin_keys_local()));
+        }
     }
 
     bool is_public() { return this->_secret_key == nullptr; }
-    bool is_private() { return this->_secret_key != nullptr; }
+    bool is_private() { return !is_public(); }
 
     /*
     Save the attributes needed to restore the context later, public is for not

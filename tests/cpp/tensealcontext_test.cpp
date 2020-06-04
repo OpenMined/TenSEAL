@@ -28,6 +28,7 @@ TEST_F(TenSEALContextTest, TestCreateBFVPublic) {
     ctx->make_context_public(false, false);
 
     EXPECT_THROW(ctx->galois_keys(), std::exception);
+    EXPECT_THROW(ctx->relin_keys(), std::exception);
     EXPECT_THROW(ctx->secret_key(), std::exception);
 
     ctx->make_context_public(false, false);
