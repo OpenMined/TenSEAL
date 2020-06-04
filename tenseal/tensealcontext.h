@@ -77,7 +77,7 @@ class TenSEALContext {
                 "the current context doesn't hold a Relinearization keys");
         }
 
-        return *this->_relin_keys;
+        return this->_relin_keys;
     }
 
     auto galois_keys() {
@@ -130,6 +130,10 @@ class TenSEALContext {
     */
     void make_context_public(bool generate_galois_keys,
                              bool generate_relin_keys) {
+        // Check if already public
+        if (this->_secret_key == nullptr) {
+            return;
+        }
         // create KeyGenerator object only if needed
         if (generate_galois_keys || generate_relin_keys) {
             KeyGenerator keygen =

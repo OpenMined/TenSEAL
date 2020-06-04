@@ -172,7 +172,7 @@ BFVVector& BFVVector::mul_inplace(BFVVector to_mul) {
     // TODO: make this optional
     // relineraization after ciphertext-ciphertext multiplication
     this->context->evaluator->relinearize_inplace(this->ciphertext,
-                                                  this->context->relin_keys());
+                                                  *this->context->relin_keys());
 
     return *this;
 }

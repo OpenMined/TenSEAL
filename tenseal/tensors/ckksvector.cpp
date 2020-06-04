@@ -50,7 +50,7 @@ vector<double> CKKSVector::decrypt() {
 
 vector<double> CKKSVector::decrypt(const shared_ptr<SecretKey>& sk) {
     Plaintext plaintext;
-    Decryptor decryptor = Decryptor(this->context->seal_context(), sk);
+    Decryptor decryptor = Decryptor(this->context->seal_context(), *sk);
 
     vector<double> result;
     result.reserve(this->size());
@@ -200,7 +200,7 @@ CKKSVector& CKKSVector::mul_inplace(CKKSVector to_mul) {
 
     if (this->context->auto_relin()) {
         this->context->evaluator->relinearize_inplace(
-            this->ciphertext, this->context->relin_keys());
+            this->ciphertext, *this->context->relin_keys());
     }
 
     if (this->context->auto_rescale()) {

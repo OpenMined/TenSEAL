@@ -14,7 +14,26 @@ TEST_F(TenSEALContextTest, TestCreateBFV) {
     auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
 
     ASSERT_TRUE(ctx != nullptr);
-    // ASSERT_TRUE(ctx->public_key() != nullptr);
+    ASSERT_TRUE(ctx != nullptr);
+    ASSERT_TRUE(ctx->public_key() != nullptr);
+    ASSERT_TRUE(ctx->secret_key() != nullptr);
+    ASSERT_TRUE(ctx->relin_keys() != nullptr);
+    ASSERT_TRUE(ctx->is_private());
+    EXPECT_THROW(ctx->galois_keys(), std::exception);
+    ctx->generate_galois_keys();
+    ASSERT_TRUE(ctx->galois_keys() != nullptr);
+}
+
+TEST_F(TenSEALContextTest, TestCreateBFVPublic) {
+    auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
+    ctx->make_context_public(false, false);
+
+    EXPECT_THROW(ctx->galois_keys(), std::exception);
+    EXPECT_THROW(ctx->secret_key(), std::exception);
+    // EXPECT_THROW(ctx->relin_keys(), std::exception);
+
+    ctx->make_context_public(false, false);
+    EXPECT_THROW(ctx->secret_key(), std::exception);
 }
 
 TEST_F(TenSEALContextTest, TestCreateCKKS) {
@@ -24,6 +43,11 @@ TEST_F(TenSEALContextTest, TestCreateCKKS) {
     ASSERT_TRUE(ctx != nullptr);
     ASSERT_TRUE(ctx->public_key() != nullptr);
     ASSERT_TRUE(ctx->secret_key() != nullptr);
+    ASSERT_TRUE(ctx->relin_keys() != nullptr);
+    ASSERT_TRUE(ctx->is_private());
+    EXPECT_THROW(ctx->galois_keys(), std::exception);
+    ctx->generate_galois_keys();
+    ASSERT_TRUE(ctx->galois_keys() != nullptr);
 }
 
 TEST_F(TenSEALContextTest, TestCreateFail) {
