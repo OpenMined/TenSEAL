@@ -183,10 +183,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     py::class_<EncryptionParameters>(m, "EncryptionParameters");
     py::class_<SEALContext, std::shared_ptr<SEALContext>>(m, "SEALContext");
-    py::class_<PublicKey>(m, "PublicKey");
-    py::class_<SecretKey>(m, "SecretKey");
-    py::class_<RelinKeys>(m, "RelinKeys");
-    py::class_<GaloisKeys>(m, "GaloisKeys");
+    py::class_<PublicKey, std::shared_ptr<PublicKey>>(m, "PublicKey");
+    py::class_<SecretKey, std::shared_ptr<SecretKey>>(m, "SecretKey");
+    py::class_<RelinKeys, std::shared_ptr<RelinKeys>>(m, "RelinKeys");
+    py::class_<GaloisKeys, std::shared_ptr<GaloisKeys>>(m, "GaloisKeys");
 
     // globals
     py::enum_<scheme_type>(m, "SCHEME_TYPE")
