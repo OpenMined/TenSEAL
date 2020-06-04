@@ -167,3 +167,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# third party
+third_party/
