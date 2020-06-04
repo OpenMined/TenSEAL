@@ -43,6 +43,7 @@ jobs:
         ! ( git diff |  grep -q ^ ) || return 1
     - name: Test with gtest
       run: |
+        git submodule init && git submodule update
         cmake .
         make && CTEST_OUTPUT_ON_FAILURE=1 make test
     - name: Build the library
@@ -51,9 +52,6 @@ jobs:
         git submodule init && git submodule update
         # we need to install tenseal in order to build the cpp library
         pip install .
-    - name: Test with gtest
-      run: |
-        make && CTEST_OUTPUT_ON_FAILURE=1 make test
     - name: Test with pytest
       run: |
         pytest -v --ignore=tests/sealapi ./tests
