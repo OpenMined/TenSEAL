@@ -21,7 +21,8 @@ the matrix, we do that by rotating whenever we reach the boundaries of the
 matrix.
 */
 template <typename T>
-vector<T> get_diagonal(const vector<vector<T>>& matrix, int k) {
+vector<T> get_diagonal(const vector<vector<T>>& matrix, int k,
+                       size_t max_size) {
     size_t n_rows = matrix.size();
     size_t n_cols = matrix[0].size();
 
@@ -35,7 +36,8 @@ vector<T> get_diagonal(const vector<vector<T>>& matrix, int k) {
         r_offset = -k;
     }
 
-    for (size_t i = 0; i < n_rows * n_cols; i++) {
+    size_t diag_size = min(max_size, n_rows * n_cols);
+    for (size_t i = 0; i < diag_size; i++) {
         t_diag.push_back(
             matrix[(r_offset + i) % n_rows][(c_offset + i) % n_cols]);
     }
@@ -63,16 +65,19 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
         throw invalid_argument("matrix shape doesn't match with vector size");
     }
 
-    vector<Ciphertext> results;
     Ciphertext result;
-    results.reserve(n_rows);
+    // result should have the same scale and modulus as vec * pt_diag (ct)
+    tenseal_context->encryptor->encrypt_zero(vec.parms_id(), result);
+    result.scale() = vec.scale() * tenseal_context->global_scale();
+
+    auto galois_keys = tenseal_context->galois_keys();
 
     for (size_t i = 0; i < n_rows; i++) {
         Ciphertext ct;
         Plaintext pt_diag;
         vector<T> diag;
 
-        diag = get_diagonal(matrix, -i);
+        diag = get_diagonal(matrix, -i, tenseal_context->slot_count<Encoder>());
         replicate_vector(diag, tenseal_context->slot_count<Encoder>());
 
         rotate(diag.begin(), diag.begin() + diag.size() - i, diag.end());
@@ -84,12 +89,11 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
         }
         tenseal_context->evaluator->multiply_plain(vec, pt_diag, ct);
 
-        tenseal_context->evaluator->rotate_vector_inplace(
-            ct, i, tenseal_context->galois_keys());
-        results.push_back(ct);
-    }
+        tenseal_context->evaluator->rotate_vector_inplace(ct, i, galois_keys);
 
-    tenseal_context->evaluator->add_many(results, result);
+        // accumulate results
+        tenseal_context->evaluator->add_inplace(result, ct);
+    }
 
     return result;
 }
