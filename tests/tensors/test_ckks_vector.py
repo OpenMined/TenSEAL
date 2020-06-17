@@ -456,6 +456,7 @@ def test_dot_product_plain_inplace(context, vec1, vec2):
     decrypted_result = first_vec.decrypt()
     assert _almost_equal(decrypted_result, expected, 1), "Dot product of vectors is incorrect."
 
+
 def test_mul_plain_zero(context):
     # from context
     max_slots = 8192 // 2
