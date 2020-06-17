@@ -244,6 +244,34 @@ CKKSVector& CKKSVector::mul_plain_inplace(vector<double> to_mul) {
     return *this;
 }
 
+CKKSVector CKKSVector::dot_product(CKKSVector to_mul) {
+    CKKSVector new_vector = *this;
+    new_vector.dot_product_inplace(to_mul);
+
+    return new_vector;
+}
+
+CKKSVector& CKKSVector::dot_product_inplace(CKKSVector to_mul) {
+    this->mul_inplace(to_mul);
+    sum_vector(this->context, *this);
+    this->_size = 1;
+    return *this;
+}
+
+CKKSVector CKKSVector::dot_product_plain(vector<double> to_mul) {
+    CKKSVector new_vector = *this;
+    new_vector.dot_product_plain_inplace(to_mul);
+
+    return new_vector;
+}
+
+CKKSVector& CKKSVector::dot_product_plain_inplace(vector<double> to_mul) {
+    this->mul_plain_inplace(to_mul);
+    sum_vector(this->context, *this);
+    this->_size = 1;
+    return *this;
+}
+
 CKKSVector CKKSVector::matmul_plain(const vector<vector<double>>& matrix) {
     CKKSVector new_vector = *this;
     return new_vector.matmul_plain_inplace(matrix);
