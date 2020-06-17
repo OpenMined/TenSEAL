@@ -14,7 +14,7 @@ def _almost_equal(vec1, vec2, m_pow_ten):
     return True
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def context():
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
     context.global_scale = pow(2, 40)
@@ -344,6 +344,117 @@ def test_mul_plain_inplace(context, vec1, vec2):
     decrypted_result = first_vec.decrypt()
     assert _almost_equal(decrypted_result, expected, 1), "Multiplication of vectors is incorrect."
 
+
+@pytest.mark.parametrize(
+    "vec1, vec2",
+    [
+        ([], []),
+        ([0], [0]),
+        ([1], [0]),
+        ([-1], [0]),
+        ([-1], [-1]),
+        ([1], [1]),
+        ([-1], [1]),
+        ([1, 2, 3, 4], [4, 3, 2, 1]),
+        ([-1, -2], [-73, -10]),
+        ([1, 2], [-73, -10]),
+    ],
+)
+def test_dot_product(context, vec1, vec2):
+    context.generate_galois_keys()
+    first_vec = ts.ckks_vector(context, vec1)
+    second_vec = ts.ckks_vector(context, vec2)
+    result = first_vec.dot(second_vec)
+    expected = [sum([v1 * v2 for v1, v2 in zip(vec1, vec2)])]
+
+    # Decryption
+    decrypted_result = result.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Dot product of vectors is incorrect."
+    assert _almost_equal(first_vec.decrypt(), vec1, 1), "Something went wrong in memory."
+    assert _almost_equal(second_vec.decrypt(), vec2, 1), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "vec1, vec2",
+    [
+        ([], []),
+        ([0], [0]),
+        ([1], [0]),
+        ([-1], [0]),
+        ([-1], [-1]),
+        ([1], [1]),
+        ([-1], [1]),
+        ([1, 2, 3, 4], [4, 3, 2, 1]),
+        ([-1, -2], [-73, -10]),
+        ([1, 2], [-73, -10]),
+    ],
+)
+def test_dot_product_inplace(context, vec1, vec2):
+    context.generate_galois_keys()
+    first_vec = ts.ckks_vector(context, vec1)
+    second_vec = ts.ckks_vector(context, vec2)
+    first_vec.dot_(second_vec)
+    expected = [sum([v1 * v2 for v1, v2 in zip(vec1, vec2)])]
+
+    # Decryption
+    decrypted_result = first_vec.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Dot product of vectors is incorrect."
+    assert _almost_equal(second_vec.decrypt(), vec2, 1), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "vec1, vec2",
+    [
+        ([], []),
+        ([0], [0]),
+        ([1], [0]),
+        ([-1], [0]),
+        ([-1], [-1]),
+        ([1], [1]),
+        ([-1], [1]),
+        ([1, 2, 3, 4], [4, 3, 2, 1]),
+        ([-1, -2], [-73, -10]),
+        ([1, 2], [-73, -10]),
+    ],
+)
+def test_dot_product_plain(context, vec1, vec2):
+    context.generate_galois_keys()
+    first_vec = ts.ckks_vector(context, vec1)
+    second_vec = vec2
+    result = first_vec.dot(second_vec)
+    expected = [sum([v1 * v2 for v1, v2 in zip(vec1, vec2)])]
+
+    # Decryption
+    decrypted_result = result.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Dot product of vectors is incorrect."
+    assert _almost_equal(first_vec.decrypt(), vec1, 1), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "vec1, vec2",
+    [
+        ([], []),
+        ([0], [0]),
+        ([1], [0]),
+        ([-1], [0]),
+        ([-1], [-1]),
+        ([1], [1]),
+        ([-1], [1]),
+        ([1, 2, 3, 4], [4, 3, 2, 1]),
+        ([-1, -2], [-73, -10]),
+        ([1, 2], [-73, -10]),
+    ],
+)
+def test_dot_product_plain_inplace(context, vec1, vec2):
+    context.generate_galois_keys()
+    first_vec = ts.ckks_vector(context, vec1)
+    second_vec = vec2
+    first_vec.dot_(second_vec)
+    expected = [sum([v1 * v2 for v1, v2 in zip(vec1, vec2)])]
+
+    # Decryption
+    decrypted_result = first_vec.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Dot product of vectors is incorrect."
 
 def test_mul_plain_zero(context):
     # from context
