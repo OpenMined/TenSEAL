@@ -41,4 +41,16 @@ shared_ptr<seal::SEALContext> create_context(EncryptionParameters parms) {
     return context;
 }
 
+Ciphertext& sum_vector(shared_ptr<TenSEALContext> tenseal_context,
+                       Ciphertext& vector, size_t size) {
+    auto galois_keys = tenseal_context->galois_keys();
+    Ciphertext ct = vector;
+    for (size_t i = 1; i < size; i++) {
+        tenseal_context->evaluator->rotate_vector_inplace(ct, 1, galois_keys);
+        tenseal_context->evaluator->add_inplace(vector, ct);
+    }
+
+    return vector;
+}
+
 }  // namespace tenseal
