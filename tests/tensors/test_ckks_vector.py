@@ -473,7 +473,7 @@ def test_sum(context, vec1):
     context.generate_galois_keys()
     first_vec = ts.ckks_vector(context, vec1)
     result = first_vec.sum()
-    expected = [sum(vec1])]
+    expected = [sum(vec1)]
 
     # Decryption
     decrypted_result = result.decrypt()
@@ -497,7 +497,7 @@ def test_sum_inplace(context, vec1):
     context.generate_galois_keys()
     first_vec = ts.ckks_vector(context, vec1)
     result = first_vec.sum()
-    expected = [sum(vec1])]
+    expected = [sum(vec1)]
 
     # Decryption
     decrypted_result = result.decrypt()
