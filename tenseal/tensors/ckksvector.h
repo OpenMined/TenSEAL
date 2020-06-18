@@ -72,6 +72,15 @@ class CKKSVector {
     CKKSVector& mul_plain_inplace(vector<double> to_mul);
     CKKSVector dot_product_plain(vector<double> to_mul);
     CKKSVector& dot_product_plain_inplace(vector<double> to_mul);
+    
+    /*
+    Encrypted aggregation functions operates on a single encrypted vector 
+    (itself) and returns a new CKKSVector which is the result of its 
+    aggregation. (Currently only summation is implemented). in_place 
+    functions return a reference to the same object
+    */
+    CKKSVector sum();
+    CKKSVector& sum_inplace();
 
     /*
     Matrix multiplication operations.

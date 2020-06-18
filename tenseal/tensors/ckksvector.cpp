@@ -272,6 +272,18 @@ CKKSVector& CKKSVector::dot_product_plain_inplace(vector<double> to_mul) {
     return *this;
 }
 
+CKKSVector CKKSVector::sum() {
+    CKKSVector new_vector = *this;
+    new_vector.sum_inplace();
+    return new_vector;
+}
+
+CKKSVector& CKKSVector::sum_inplace() {
+    sum_vector(this->context, this->ciphertext, this->size());
+    this->_size = 1;
+    return *this;
+}
+
 CKKSVector CKKSVector::matmul_plain(const vector<vector<double>>& matrix) {
     CKKSVector new_vector = *this;
     return new_vector.matmul_plain_inplace(matrix);
