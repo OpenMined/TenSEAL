@@ -100,6 +100,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("dot", &CKKSVector::dot_product_plain)
         .def("dot_", &CKKSVector::dot_product_inplace)
         .def("dot_", &CKKSVector::dot_product_plain_inplace)
+        .def("sum", &CKKSVector::sum)
+        .def("sum_", &CKKSVector::sum_inplace)
         .def("matmul", &CKKSVector::matmul_plain)
         .def("matmul_", &CKKSVector::matmul_plain_inplace)
         .def("mm", &CKKSVector::matmul_plain)

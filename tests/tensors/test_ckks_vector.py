@@ -457,6 +457,53 @@ def test_dot_product_plain_inplace(context, vec1, vec2):
     assert _almost_equal(decrypted_result, expected, 1), "Dot product of vectors is incorrect."
 
 
+@pytest.mark.parametrize(
+    "vec1",
+    [
+        ([]),
+        ([0]),
+        ([-1, 1]),
+        ([-1, 0, 1]),
+        ([1, 2, 3, 4]),
+        ([-1, -2, -73, -10]),
+        ([1, 2, -73, -10]),
+    ],
+)
+def test_sum(context, vec1):
+    context.generate_galois_keys()
+    first_vec = ts.ckks_vector(context, vec1)
+    result = first_vec.sum()
+    expected = [sum(vec1)]
+
+    # Decryption
+    decrypted_result = result.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Sum of vector is incorrect."
+    assert _almost_equal(first_vec.decrypt(), vec1, 1), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "vec1",
+    [
+        ([]),
+        ([0]),
+        ([-1, 1]),
+        ([-1, 0, 1]),
+        ([1, 2, 3, 4]),
+        ([-1, -2, -73, -10]),
+        ([1, 2, -73, -10]),
+    ],
+)
+def test_sum_inplace(context, vec1):
+    context.generate_galois_keys()
+    first_vec = ts.ckks_vector(context, vec1)
+    result = first_vec.sum()
+    expected = [sum(vec1)]
+
+    # Decryption
+    decrypted_result = result.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Sum of vector is incorrect."
+
+
 def test_mul_plain_zero(context):
     # from context
     max_slots = 8192 // 2
