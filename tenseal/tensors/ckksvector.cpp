@@ -253,8 +253,7 @@ CKKSVector CKKSVector::dot_product(CKKSVector to_mul) {
 
 CKKSVector& CKKSVector::dot_product_inplace(CKKSVector to_mul) {
     this->mul_inplace(to_mul);
-    sum_vector(this->context, this->ciphertext, this->size());
-    this->_size = 1;
+    this->sum_inplace();
     return *this;
 }
 
@@ -267,8 +266,7 @@ CKKSVector CKKSVector::dot_product_plain(vector<double> to_mul) {
 
 CKKSVector& CKKSVector::dot_product_plain_inplace(vector<double> to_mul) {
     this->mul_plain_inplace(to_mul);
-    sum_vector(this->context, this->ciphertext, this->size());
-    this->_size = 1;
+    this->sum_inplace();
     return *this;
 }
 
