@@ -13,6 +13,7 @@ TenSEAL is a library for doing homomorphic encryption operations on tensors, bui
 - Encryption/Decryption of vectors of integers using BFV
 - Encryption/Decryption of vectors of real numbers using CKKS
 - Element-wise addition, substraction and multiplication of encrypted-encrypted vectors and encrypted-plain vectors
+- Dot product and vector-matrix multiplication
 - Complete SEAL API under `tenseal.sealapi`
 
 ## Installation
