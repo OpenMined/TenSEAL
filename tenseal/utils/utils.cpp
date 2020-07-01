@@ -63,13 +63,13 @@ Ciphertext& sum_vector(shared_ptr<TenSEALContext> tenseal_context,
     size_t bp2 = below_power2(size);
 
     if (bp2 != size) {
-        tenseal_context->evaluator->rotate_vector(vector, bp2, galois_keys,
+        tenseal_context->evaluator->rotate_vector(vector, bp2, *galois_keys,
                                                   rest);
         sum_vector(tenseal_context, rest, size - bp2);
     }
 
     for (size_t i = bp2 / 2; i > 0; i /= 2) {
-        tenseal_context->evaluator->rotate_vector(vector, i, galois_keys, tmp);
+        tenseal_context->evaluator->rotate_vector(vector, i, *galois_keys, tmp);
         tenseal_context->evaluator->add_inplace(vector, tmp);
         tmp = vector;
     }

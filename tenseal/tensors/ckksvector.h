@@ -43,10 +43,6 @@ class CKKSVector {
     to an output stream.
     */
     streamoff save_size();
-    /*
-    Returns the serialized version of the ciphertext
-    */
-    string save_ciphertext();
 
     /*
     Encrypted evaluation function operates on two encrypted vectors and
