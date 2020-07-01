@@ -41,11 +41,6 @@ jobs:
         git diff
         # already well formated if 'git diff' doesn't output
         ! ( git diff |  grep -q ^ ) || return 1
-    - name: Test with gtest
-      run: |
-        git submodule init && git submodule update
-        cmake .
-        make && CTEST_OUTPUT_ON_FAILURE=1 make test
     - name: Build the library
       run: |
         # fetch third_party libraries
@@ -55,6 +50,12 @@ jobs:
     - name: Test with pytest
       run: |
         pytest -v --ignore=tests/sealapi ./tests
+    - name: Test with gtest
+      run: |
+        git submodule init && git submodule update
+        cmake . -D BUILD_TEST=TRUE
+        make && CTEST_OUTPUT_ON_FAILURE=1 make test
+
 
   SEAL_API:
 
