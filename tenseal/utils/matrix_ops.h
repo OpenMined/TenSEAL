@@ -87,7 +87,8 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
         }
         tenseal_context->evaluator->multiply_plain(vec, pt_diag, ct);
 
-        tenseal_context->evaluator->rotate_vector_inplace(ct, i, *tenseal_context->galois_keys());
+        tenseal_context->evaluator->rotate_vector_inplace(
+            ct, i, *tenseal_context->galois_keys());
 
         // accumulate results
         tenseal_context->evaluator->add_inplace(result, ct);
