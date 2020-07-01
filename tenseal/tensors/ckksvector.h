@@ -60,6 +60,8 @@ class CKKSVector {
     CKKSVector& sub_inplace(CKKSVector to_sub);
     CKKSVector mul(CKKSVector to_mul);
     CKKSVector& mul_inplace(CKKSVector to_mul);
+    CKKSVector dot_product(CKKSVector to_mul);
+    CKKSVector& dot_product_inplace(CKKSVector to_mul);
 
     /*
     Plain evaluation function operates on an encrypted vector and plaintext
@@ -73,6 +75,10 @@ class CKKSVector {
     CKKSVector& sub_plain_inplace(vector<double> to_sub);
     CKKSVector mul_plain(vector<double> to_mul);
     CKKSVector& mul_plain_inplace(vector<double> to_mul);
+    CKKSVector dot_product_plain(vector<double> to_mul);
+    CKKSVector& dot_product_plain_inplace(vector<double> to_mul);
+    CKKSVector sum();
+    CKKSVector& sum_inplace();
 
     /*
     Matrix multiplication operations.

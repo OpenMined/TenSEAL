@@ -63,6 +63,13 @@ inline bool should_set_to_same_mod(shared_ptr<TenSEALContext> context,
     return context->auto_mod_switch() && ct.parms_id() != other.parms_id();
 }
 
+/*
+Sum the values in the vector.
+IMPORTANT: Tested only with CKKS.
+*/
+Ciphertext& sum_vector(shared_ptr<TenSEALContext> tenseal_context,
+                       Ciphertext& vector, size_t size);
+
 }  // namespace tenseal
 
 #endif
