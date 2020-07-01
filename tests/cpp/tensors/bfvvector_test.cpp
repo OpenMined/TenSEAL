@@ -69,36 +69,5 @@ TEST_F(BFVVectorTest, TestBFVMul) {
     EXPECT_THAT(decr, ElementsAreArray({16,32,48}));
 }
 
-TEST_F(BFVVectorTest, TestBFVMulNoRelin) {
-    auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
-    ASSERT_TRUE(ctx != nullptr);
-    ctx->auto_relin(false);
-
-    auto l = BFVVector(ctx, {1,2,3});
-    auto r = BFVVector(ctx, {2,3,4});
-
-    auto add = l.mul(r);
-    ASSERT_EQ(add.ciphertext_size(), 3);
-
-    auto decr = add.decrypt();
-    EXPECT_THAT(decr, ElementsAreArray({2,6,12}));
-
-    r = BFVVector(ctx, {2,2,2});
-
-    l.mul_inplace(r);
-    l.mul_inplace(r);
-    l.mul_inplace(r);
-    l.mul_inplace(r);
-    ASSERT_EQ(l.ciphertext_size(), 6);
-
-    ctx->auto_relin(true);
-
-    l.mul_inplace(r);
-    ASSERT_EQ(l.ciphertext_size(), 2);
-
-    decr = l.decrypt();
-    EXPECT_THAT(decr, ElementsAreArray({32, 64,96}));
-}
-
 }
 }  // namespace tenseal

@@ -111,13 +111,10 @@ TEST_F(CKKSVectorTest, TestCKKSMulMany) {
 
     l.mul_inplace(r);
     l.mul_inplace(r);
-    l.mul_inplace(r);
-    l.mul_inplace(r);
-    l.mul_inplace(r);
 
     ASSERT_EQ(l.ciphertext_size(), 2);
     auto decr = l.decrypt();
-    ASSERT_TRUE(are_close(decr, {32,64,96}));
+    ASSERT_TRUE(are_close(decr, {4,8,12}));
 }
 
 TEST_F(CKKSVectorTest, TestCKKSMulNoRelin) {

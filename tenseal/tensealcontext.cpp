@@ -124,6 +124,9 @@ void TenSEALContext::make_context_public(bool generate_galois_keys,
     this->_secret_key = nullptr;
     this->decryptor = nullptr;
 
+    this->_galois_keys = nullptr;
+    this->_relin_keys = nullptr;
+
     // create KeyGenerator object only if needed
     if (!generate_galois_keys && !generate_relin_keys) {
         return;
@@ -132,14 +135,12 @@ void TenSEALContext::make_context_public(bool generate_galois_keys,
     KeyGenerator keygen = KeyGenerator(this->_context, *this->_secret_key);
 
     // generate Galois Keys
-    this->_galois_keys = nullptr;
     if (generate_galois_keys) {
         this->_galois_keys =
             shared_ptr<GaloisKeys>(new GaloisKeys(keygen.galois_keys_local()));
     }
 
     // generate Relinearization Keys
-    this->_relin_keys = nullptr;
     if (generate_relin_keys) {
         this->_relin_keys =
             shared_ptr<RelinKeys>(new RelinKeys(keygen.relin_keys_local()));
@@ -162,6 +163,8 @@ double TenSEALContext::global_scale() {
 }
 
 void TenSEALContext::auto_relin(bool status) {
+    if (is_public()) return;
+
     uint8_t flag = uint8_t(status);
     // switch it off
     this->_auto_flags &= ~flag_auto_relin;
