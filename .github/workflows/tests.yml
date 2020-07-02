@@ -52,7 +52,6 @@ jobs:
         pytest -v --ignore=tests/sealapi ./tests
     - name: Test with gtest
       run: |
-        git submodule init && git submodule update
         cmake . -D BUILD_TEST=TRUE
         make && CTEST_OUTPUT_ON_FAILURE=1 make test
 
