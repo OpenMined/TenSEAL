@@ -36,6 +36,7 @@ CKKSVector::CKKSVector(const CKKSVector& vec) {
 }
 
 size_t CKKSVector::size() { return this->_size; }
+size_t CKKSVector::ciphertext_size() { return this->ciphertext.size(); }
 
 vector<double> CKKSVector::decrypt() {
     if (this->context->decryptor == NULL) {
@@ -48,9 +49,9 @@ vector<double> CKKSVector::decrypt() {
     return this->decrypt(this->context->secret_key());
 }
 
-vector<double> CKKSVector::decrypt(SecretKey sk) {
+vector<double> CKKSVector::decrypt(const shared_ptr<SecretKey>& sk) {
     Plaintext plaintext;
-    Decryptor decryptor = Decryptor(this->context->seal_context(), sk);
+    Decryptor decryptor = Decryptor(this->context->seal_context(), *sk);
 
     vector<double> result;
     result.reserve(this->size());
@@ -200,7 +201,7 @@ CKKSVector& CKKSVector::mul_inplace(CKKSVector to_mul) {
 
     if (this->context->auto_relin()) {
         this->context->evaluator->relinearize_inplace(
-            this->ciphertext, this->context->relin_keys());
+            this->ciphertext, *this->context->relin_keys());
     }
 
     if (this->context->auto_rescale()) {

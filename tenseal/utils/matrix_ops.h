@@ -70,8 +70,6 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
     tenseal_context->encryptor->encrypt_zero(vec.parms_id(), result);
     result.scale() = vec.scale() * tenseal_context->global_scale();
 
-    auto galois_keys = tenseal_context->galois_keys();
-
     for (size_t i = 0; i < n_rows; i++) {
         Ciphertext ct;
         Plaintext pt_diag;
@@ -89,7 +87,8 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
         }
         tenseal_context->evaluator->multiply_plain(vec, pt_diag, ct);
 
-        tenseal_context->evaluator->rotate_vector_inplace(ct, i, galois_keys);
+        tenseal_context->evaluator->rotate_vector_inplace(
+            ct, i, *tenseal_context->galois_keys());
 
         // accumulate results
         tenseal_context->evaluator->add_inplace(result, ct);

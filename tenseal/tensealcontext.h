@@ -37,124 +37,38 @@ class TenSEALContext {
     static shared_ptr<TenSEALContext> Create(scheme_type scheme,
                                              size_t poly_modulus_degree,
                                              uint64_t plain_modulus,
-                                             vector<int> coeff_mod_bit_sizes) {
-        EncryptionParameters parms;
-        switch (scheme) {
-            case scheme_type::BFV:
-                parms = create_bfv_parameters(
-                    poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes);
-                break;
+                                             vector<int> coeff_mod_bit_sizes);
+    static shared_ptr<TenSEALContext> Create(const char* filename);
 
-            case scheme_type::CKKS:
-                parms = create_ckks_parameters(poly_modulus_degree,
-                                               coeff_mod_bit_sizes);
-                break;
-
-            default:
-                throw invalid_argument("invalid scheme_type");
-        }
-
-        return shared_ptr<TenSEALContext>(new TenSEALContext(parms));
-    }
-
-    static shared_ptr<TenSEALContext> Create(const char* filename) {
-        return shared_ptr<TenSEALContext>(new TenSEALContext(filename));
-    }
-
-    PublicKey public_key() { return *this->_public_key; }
-    SecretKey secret_key() {
-        if (this->_secret_key == nullptr) {
-            throw invalid_argument(
-                "the current context is public, it doesn't hold a Secret key");
-        }
-
-        return *this->_secret_key;
-    }
-
-    RelinKeys relin_keys() {
-        if (this->_relin_keys == nullptr) {
-            throw invalid_argument(
-                "the current context doesn't hold a Relinearization keys");
-        }
-
-        return *this->_relin_keys;
-    }
-
-    GaloisKeys galois_keys() {
-        if (this->_galois_keys == nullptr) {
-            throw invalid_argument(
-                "the current context doesn't hold a Galois keys");
-        }
-
-        return *this->_galois_keys;
-    }
+    /*
+    Returns a pointer to the public key
+    */
+    shared_ptr<PublicKey> public_key();
+    shared_ptr<SecretKey> secret_key();
+    shared_ptr<RelinKeys> relin_keys();
+    shared_ptr<GaloisKeys> galois_keys();
 
     /*
     Generate Galois keys using the secret key
     */
-    void generate_galois_keys() {
-        if (this->is_public()) {
-            throw invalid_argument("you need to provide a secret_key");
-        } else {
-            this->generate_galois_keys(*this->_secret_key);
-        }
-    }
-
-    void generate_galois_keys(SecretKey secret_key) {
-        KeyGenerator keygen = KeyGenerator(this->_context, secret_key);
-
-        this->_galois_keys =
-            shared_ptr<GaloisKeys>(new GaloisKeys(keygen.galois_keys_local()));
-    }
+    void generate_galois_keys();
+    void generate_galois_keys(SecretKey secret_key);
 
     /*
     Generate Relinearization keys using the secret key
     */
-    void generate_relin_keys() {
-        if (this->is_public()) {
-            throw invalid_argument("you need to provide a secret_key");
-        } else {
-            this->generate_relin_keys(*this->_secret_key);
-        }
-    }
-
-    void generate_relin_keys(SecretKey secret_key) {
-        KeyGenerator keygen = KeyGenerator(this->_context, secret_key);
-        this->_relin_keys =
-            shared_ptr<RelinKeys>(new RelinKeys(keygen.relin_keys_local()));
-    }
+    void generate_relin_keys();
+    void generate_relin_keys(SecretKey secret_key);
 
     /*
     Generate Galois and Relinearization keys if needed, then destroy the
     _secret_key and set it to nullptr
     */
     void make_context_public(bool generate_galois_keys,
-                             bool generate_relin_keys) {
-        // create KeyGenerator object only if needed
-        if (generate_galois_keys || generate_relin_keys) {
-            KeyGenerator keygen =
-                KeyGenerator(this->_context, *this->_secret_key);
+                             bool generate_relin_keys);
 
-            // generate Galois Keys
-            if (generate_galois_keys) {
-                this->_galois_keys = shared_ptr<GaloisKeys>(
-                    new GaloisKeys(keygen.galois_keys_local()));
-            }
-
-            // generate Relinearization Keys
-            if (generate_relin_keys) {
-                this->_relin_keys = shared_ptr<RelinKeys>(
-                    new RelinKeys(keygen.relin_keys_local()));
-            }
-        }
-
-        // destory and set _secret_key and decryptor to null
-        this->_secret_key = nullptr;
-        this->decryptor = nullptr;
-    }
-
-    bool is_public() { return this->_secret_key == nullptr; }
-    bool is_private() { return this->_secret_key != nullptr; }
+    bool is_public();
+    bool is_private();
 
     /*
     Save the attributes needed to restore the context later, public is for not
@@ -166,7 +80,7 @@ class TenSEALContext {
     /*
     Returns the wrapped SEALContext object.
     */
-    shared_ptr<SEALContext> seal_context() { return _context; }
+    shared_ptr<SEALContext> seal_context();
 
     /*
     Template encoding function for the encoders.
@@ -193,41 +107,21 @@ class TenSEALContext {
     }
 
     // ciphertext scale setter(CKKS)
-    void global_scale(double scale) { encoder_factory->global_scale(scale); }
+    void global_scale(double scale);
     // ciphertext scale getter(CKKS)
-    double global_scale() { return encoder_factory->global_scale(); }
+    double global_scale();
 
     /*
     Switch on/off automatic relinearization, rescaling, and mod switching.
     */
     // TODO: take into account possible parellel computation using this
-    void auto_relin(bool status) {
-        uint8_t flag = uint8_t(status);
-        // switch it off
-        this->_auto_flags &= ~flag_auto_relin;
-        // set it to status
-        this->_auto_flags |= flag;
-    }
+    void auto_relin(bool status);
+    void auto_rescale(bool status);
+    void auto_mod_switch(bool status);
 
-    void auto_rescale(bool status) {
-        uint8_t flag = uint8_t(status) << 1;
-        // switch it off
-        this->_auto_flags &= ~flag_auto_rescale;
-        // set it to status
-        this->_auto_flags |= flag;
-    }
-
-    void auto_mod_switch(bool status) {
-        uint8_t flag = uint8_t(status) << 2;
-        // switch it off
-        this->_auto_flags &= ~flag_auto_mod_switch;
-        // set it to status
-        this->_auto_flags |= flag;
-    }
-
-    bool auto_relin() { return this->_auto_flags & flag_auto_relin; }
-    bool auto_rescale() { return this->_auto_flags & flag_auto_rescale; }
-    bool auto_mod_switch() { return this->_auto_flags & flag_auto_mod_switch; }
+    bool auto_relin();
+    bool auto_rescale();
+    bool auto_mod_switch();
 
    private:
     EncryptionParameters _parms;

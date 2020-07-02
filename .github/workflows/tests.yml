@@ -50,6 +50,11 @@ jobs:
     - name: Test with pytest
       run: |
         pytest -v --ignore=tests/sealapi ./tests
+    - name: Test with gtest
+      run: |
+        cmake . -D BUILD_TEST=TRUE
+        make && CTEST_OUTPUT_ON_FAILURE=1 make test
+
 
   SEAL_API:
 
