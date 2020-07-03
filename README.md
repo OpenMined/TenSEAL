@@ -47,7 +47,7 @@ You can then trigger the build and the installation
 $ pip install .
 ```
 
-### Use Docker
+#### Use Docker
 
 You can use our [Docker image](https://hub.docker.com/r/openmined/tenseal) for a ready to use environment with TenSEAL installed
 
@@ -60,6 +60,11 @@ You can also build your custom image, this might be handy for developers working
 ```bash
 $ docker image build --tag tenseal .
 ```
+
+## Support
+
+For support in using this library, please join the **#lib_tenseal** Slack channel. If you’d like to follow along with any code changes to the library, please join the **#code_tenseal** Slack channel. [Click here to join our Slack community!](https://slack.openmined.org)
+
 
 ## Tutorials
 
