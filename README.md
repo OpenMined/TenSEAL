@@ -10,11 +10,51 @@ TenSEAL is a library for doing homomorphic encryption operations on tensors, bui
 
 ## Features
 
-- Encryption/Decryption of vectors of integers using BFV
-- Encryption/Decryption of vectors of real numbers using CKKS
-- Element-wise addition, substraction and multiplication of encrypted-encrypted vectors and encrypted-plain vectors
-- Dot product and vector-matrix multiplication
-- Complete SEAL API under `tenseal.sealapi`
+- :key: Encryption/Decryption of vectors of integers using BFV
+- :old_key: Encryption/Decryption of vectors of real numbers using CKKS
+- :fire: Element-wise addition, substraction and multiplication of encrypted-encrypted vectors and encrypted-plain vectors
+- :cyclone: Dot product and vector-matrix multiplication
+- :zap: Complete SEAL API under `tenseal.sealapi`
+
+## Usage
+
+We show the basic operations over encrypted data, more advanced usage for machine learning applications can be found on our [tutorial section](#tutorials)
+
+```python
+import tenseal as ts
+
+# Setup TenSEAL context
+context = ts.context(
+            ts.SCHEME_TYPE.CKKS,
+            poly_modulus_degree=8192,
+            coeff_mod_bit_sizes=[60, 40, 40, 60]
+          )
+context.generate_galois_keys()
+context.global_scale = 2**40
+
+v1 = [0, 1, 2, 3, 4]
+v2 = [4, 3, 2, 1, 0]
+
+# encrypted vectors
+enc_v1 = ts.ckks_vector(context, v1)
+enc_v2 = ts.ckks_vector(context, v2)
+
+result = enc_v1 + enc_v2
+result.decrypt() # ~ [4, 4, 4, 4, 4]
+
+result = enc_v1.dot(enc_v2)
+result.decrypt() # ~ [10]
+
+matrix = [
+  [73, 0.5, 8],
+  [81, -5, 66],
+  [-100, -78, -2],
+  [0, 9, 17],
+  [69, 11 , 10],
+]
+result = enc_v1.matmul(matrix)
+result.decrypt() # ~ [157, -90, 153]
+```
 
 ## Installation
 
@@ -47,7 +87,7 @@ You can then trigger the build and the installation
 $ pip install .
 ```
 
-### Use Docker
+#### Use Docker
 
 You can use our [Docker image](https://hub.docker.com/r/openmined/tenseal) for a ready to use environment with TenSEAL installed
 
@@ -60,6 +100,11 @@ You can also build your custom image, this might be handy for developers working
 ```bash
 $ docker image build --tag tenseal .
 ```
+
+## Support
+
+For support in using this library, please join the **#lib_tenseal** Slack channel. If you’d like to follow along with any code changes to the library, please join the **#code_tenseal** Slack channel. [Click here to join our Slack community!](https://slack.openmined.org)
+
 
 ## Tutorials
 
