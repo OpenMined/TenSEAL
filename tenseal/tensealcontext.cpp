@@ -150,9 +150,6 @@ void TenSEALContext::make_context_public(bool generate_galois_keys,
 bool TenSEALContext::is_public() { return this->_secret_key == nullptr; }
 bool TenSEALContext::is_private() { return !is_public(); }
 
-void TenSEALContext::save_public(const char* filename);
-void TenSEALContext::save_private(const char* filename);
-
 shared_ptr<SEALContext> TenSEALContext::seal_context() { return _context; }
 
 void TenSEALContext::global_scale(double scale) {
