@@ -65,11 +65,17 @@ class CKKSVector {
     either addition, substraction or multiplication in an element-wise fashion.
     in_place functions return a reference to the same object.
     */
+    CKKSVector add_plain(double to_add);
     CKKSVector add_plain(vector<double> to_add);
+    CKKSVector& add_plain_inplace(double to_add);
     CKKSVector& add_plain_inplace(vector<double> to_add);
+    CKKSVector sub_plain(double to_sub);
     CKKSVector sub_plain(vector<double> to_sub);
+    CKKSVector& sub_plain_inplace(double to_sub);
     CKKSVector& sub_plain_inplace(vector<double> to_sub);
+    CKKSVector mul_plain(double to_mul);
     CKKSVector mul_plain(vector<double> to_mul);
+    CKKSVector& mul_plain_inplace(double to_mul);
     CKKSVector& mul_plain_inplace(vector<double> to_mul);
     CKKSVector dot_product_plain(vector<double> to_mul);
     CKKSVector& dot_product_plain_inplace(vector<double> to_mul);
