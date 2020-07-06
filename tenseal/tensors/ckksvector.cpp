@@ -3,8 +3,8 @@
 #include <seal/seal.h>
 
 #include <memory>
-#include <vector>
 #include <optional>
+#include <vector>
 
 #include "tenseal/tensealcontext.h"
 #include "tenseal/utils/matrix_ops.h"
