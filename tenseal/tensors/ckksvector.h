@@ -4,6 +4,7 @@
 #include <seal/seal.h>
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "tenseal/tensealcontext.h"
