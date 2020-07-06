@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <vector>
+#include <optional>
 
 #include "tenseal/tensealcontext.h"
 #include "tenseal/utils/matrix_ops.h"

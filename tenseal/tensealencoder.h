@@ -7,6 +7,7 @@
 #include <map>
 #include <typeindex>
 #include <vector>
+#include <optional>
 
 namespace tenseal {
 
