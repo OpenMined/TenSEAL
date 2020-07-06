@@ -5,6 +5,7 @@
 
 #include <any>
 #include <map>
+#include <optional>
 #include <typeindex>
 #include <vector>
 
