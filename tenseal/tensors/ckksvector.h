@@ -90,6 +90,16 @@ class CKKSVector {
     CKKSVector& matmul_plain_inplace(const vector<vector<double>>& matrix);
 
    private:
+    /*
+    Private evaluation functions to process both scalar and vector arguments.
+    */
+    template <typename T>
+    CKKSVector& _add_plain_inplace(T to_add);
+    template <typename T>
+    CKKSVector& _sub_plain_inplace(T to_sub);
+    template <typename T>
+    CKKSVector& _mul_plain_inplace(T to_mul);
+
     size_t _size;
 
     double init_scale;

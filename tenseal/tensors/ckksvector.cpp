@@ -105,23 +105,6 @@ CKKSVector CKKSVector::add_plain(vector<double> to_add) {
     return new_vector;
 }
 
-CKKSVector& CKKSVector::add_plain_inplace(vector<double> to_add) {
-    if (this->size() != to_add.size()) {
-        throw invalid_argument("can't add vectors of different sizes");
-    }
-
-    Plaintext plaintext;
-    this->context->encode<CKKSEncoder>(to_add, plaintext, this->init_scale);
-
-    if (should_set_to_same_mod(this->context, this->ciphertext, plaintext)) {
-        set_to_same_mod(this->context, this->ciphertext, plaintext);
-    }
-
-    this->context->evaluator->add_plain_inplace(this->ciphertext, plaintext);
-
-    return *this;
-}
-
 CKKSVector CKKSVector::add_plain(double to_add) {
     CKKSVector new_vector = *this;
     new_vector.add_plain_inplace(to_add);
@@ -129,7 +112,20 @@ CKKSVector CKKSVector::add_plain(double to_add) {
     return new_vector;
 }
 
+CKKSVector& CKKSVector::add_plain_inplace(vector<double> to_add) {
+    if (this->size() != to_add.size()) {
+        throw invalid_argument("can't add vectors of different sizes");
+    }
+
+    return this->_add_plain_inplace(to_add);
+}
+
 CKKSVector& CKKSVector::add_plain_inplace(double to_add) {
+    return this->_add_plain_inplace(to_add);
+}
+
+template <typename T>
+CKKSVector& CKKSVector::_add_plain_inplace(T to_add) {
     Plaintext plaintext;
     this->context->encode<CKKSEncoder>(to_add, plaintext, this->init_scale);
 
@@ -177,23 +173,6 @@ CKKSVector CKKSVector::sub_plain(vector<double> to_sub) {
     return new_vector;
 }
 
-CKKSVector& CKKSVector::sub_plain_inplace(vector<double> to_sub) {
-    if (this->size() != to_sub.size()) {
-        throw invalid_argument("can't sub vectors of different sizes");
-    }
-
-    Plaintext plaintext;
-    this->context->encode<CKKSEncoder>(to_sub, plaintext, this->init_scale);
-
-    if (should_set_to_same_mod(this->context, this->ciphertext, plaintext)) {
-        set_to_same_mod(this->context, this->ciphertext, plaintext);
-    }
-
-    this->context->evaluator->sub_plain_inplace(this->ciphertext, plaintext);
-
-    return *this;
-}
-
 CKKSVector CKKSVector::sub_plain(double to_sub) {
     CKKSVector new_vector = *this;
     new_vector.sub_plain_inplace(to_sub);
@@ -201,7 +180,20 @@ CKKSVector CKKSVector::sub_plain(double to_sub) {
     return new_vector;
 }
 
+CKKSVector& CKKSVector::sub_plain_inplace(vector<double> to_sub) {
+    if (this->size() != to_sub.size()) {
+        throw invalid_argument("can't sub vectors of different sizes");
+    }
+
+    return this->_sub_plain_inplace(to_sub);
+}
+
 CKKSVector& CKKSVector::sub_plain_inplace(double to_sub) {
+    return this->_sub_plain_inplace(to_sub);
+}
+
+template <typename T>
+CKKSVector& CKKSVector::_sub_plain_inplace(T to_sub) {
     Plaintext plaintext;
     this->context->encode<CKKSEncoder>(to_sub, plaintext, this->init_scale);
 
@@ -260,32 +252,6 @@ CKKSVector CKKSVector::mul_plain(vector<double> to_mul) {
     return new_vector;
 }
 
-CKKSVector& CKKSVector::mul_plain_inplace(vector<double> to_mul) {
-    if (this->size() != to_mul.size()) {
-        throw invalid_argument("can't multiply vectors of different sizes");
-    }
-
-    Plaintext plaintext;
-    // prevent transparent ciphertext by adding a non-zero value
-    if (to_mul.size() + 1 <= this->context->slot_count<CKKSEncoder>())
-        to_mul.push_back(1);
-    this->context->encode<CKKSEncoder>(to_mul, plaintext, this->init_scale);
-
-    if (should_set_to_same_mod(this->context, this->ciphertext, plaintext)) {
-        set_to_same_mod(this->context, this->ciphertext, plaintext);
-    }
-
-    this->context->evaluator->multiply_plain_inplace(this->ciphertext,
-                                                     plaintext);
-
-    if (this->context->auto_rescale()) {
-        this->context->evaluator->rescale_to_next_inplace(this->ciphertext);
-        this->ciphertext.scale() = this->init_scale;
-    }
-
-    return *this;
-}
-
 CKKSVector CKKSVector::mul_plain(double to_mul) {
     CKKSVector new_vector = *this;
     new_vector.mul_plain_inplace(to_mul);
@@ -293,7 +259,23 @@ CKKSVector CKKSVector::mul_plain(double to_mul) {
     return new_vector;
 }
 
+CKKSVector& CKKSVector::mul_plain_inplace(vector<double> to_mul) {
+    if (this->size() != to_mul.size()) {
+        throw invalid_argument("can't multiply vectors of different sizes");
+    }
+    // prevent transparent ciphertext by adding a non-zero value
+    if (to_mul.size() + 1 <= this->context->slot_count<CKKSEncoder>())
+        to_mul.push_back(1);
+
+    return this->_mul_plain_inplace(to_mul);
+}
+
 CKKSVector& CKKSVector::mul_plain_inplace(double to_mul) {
+    return this->_mul_plain_inplace(to_mul);
+}
+
+template <typename T>
+CKKSVector& CKKSVector::_mul_plain_inplace(T to_mul) {
     Plaintext plaintext;
     this->context->encode<CKKSEncoder>(to_mul, plaintext, this->init_scale);
 
