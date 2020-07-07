@@ -394,6 +394,7 @@ CKKSVector& CKKSVector::replicate_first_slot_inplace(size_t n) {
     // replicate
     Ciphertext masked = this->ciphertext;
     auto galois_keys = this->context->galois_keys();
+    // TODO: optimize n -> log(n)
     for (size_t i = 0; i < n; i++) {
         this->context->evaluator->rotate_vector_inplace(masked, -1,
                                                         *galois_keys);
