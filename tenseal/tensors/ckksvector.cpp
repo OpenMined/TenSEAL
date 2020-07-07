@@ -352,4 +352,24 @@ CKKSVector& CKKSVector::matmul_plain_inplace(
     return *this;
 }
 
+CKKSVector CKKSVector::replicate_first_slot(size_t n) {
+    CKKSVector new_vector = *this;
+    return new_vector.replicate_first_slot_inplace(n);
+}
+
+CKKSVector& CKKSVector::replicate_first_slot_inplace(size_t n) {
+    // mask
+    this->mul_plain_inplace(1);
+    // replicate
+    Ciphertext masked = this->ciphertext;
+    auto galois_keys = this->context->galois_keys();
+    for (size_t i = 0; i < n; i++) {
+        this->context->evaluator->rotate_vector_inplace(masked, 1,
+                                                        *galois_keys);
+        this->context->evaluator->add_inplace(this->ciphertext, masked);
+    }
+
+    return *this;
+}
+
 }  // namespace tenseal
