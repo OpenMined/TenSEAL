@@ -85,7 +85,15 @@ CKKSVector& CKKSVector::add_inplace(CKKSVector to_add) {
     }
 
     if (this->size() != to_add.size()) {
-        throw invalid_argument("can't add vectors of different sizes");
+        if (this->size() == 1) {
+            this->replicate_first_slot_inplace(to_add.size());
+            return this->add_inplace(to_add);
+        } else if (to_add.size() == 1) {
+            CKKSVector replicated = to_add.replicate_first_slot(this->size());
+            return this->add_inplace(replicated);
+        } else {
+            throw invalid_argument("can't add vectors of different sizes");
+        }
     }
 
     if (should_set_to_same_mod(this->context, this->ciphertext,
@@ -153,7 +161,15 @@ CKKSVector& CKKSVector::sub_inplace(CKKSVector to_sub) {
     }
 
     if (this->size() != to_sub.size()) {
-        throw invalid_argument("can't sub vectors of different sizes");
+        if (this->size() == 1) {
+            this->replicate_first_slot_inplace(to_sub.size());
+            return this->sub_inplace(to_sub);
+        } else if (to_sub.size() == 1) {
+            CKKSVector replicated = to_sub.replicate_first_slot(this->size());
+            return this->sub_inplace(replicated);
+        } else {
+            throw invalid_argument("can't sub vectors of different sizes");
+        }
     }
 
     if (should_set_to_same_mod(this->context, this->ciphertext,
