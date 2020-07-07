@@ -142,6 +142,7 @@ TEST_F(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
+    ctx->generate_galois_keys();
     ctx->global_scale(std::pow(2, 40));
 
     auto vec = CKKSVector(ctx, {1});
