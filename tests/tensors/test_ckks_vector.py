@@ -274,13 +274,22 @@ def test_sub_plain_inplace(context, vec1, vec2):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
+        ([1, 2, 3, 4], [2,]),
+        ([1, 0, -2, 73], [-5,]),
     ],
 )
 def test_mul(context, vec1, vec2):
     first_vec = ts.ckks_vector(context, vec1)
     second_vec = ts.ckks_vector(context, vec2)
+
+    # replicate for operation between n-sized and 1-sized vectors
+    if len(vec2) == 1:
+        # needed for replicating the first slot in the encrypted vector
+        context.generate_galois_keys()
+        expected = [v1 * v2 for v1, v2 in zip(vec1, vec2 * len(vec1))]
+    else:
+        expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
     result = first_vec * second_vec
-    expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
 
     # Decryption
     decrypted_result = result.decrypt()

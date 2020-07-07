@@ -46,8 +46,7 @@ class CKKSVector {
     streamoff save_size();
 
     /*
-    Replicate the first slot of a ciphertext n times. Requires a multiplication,
-    n
+    Replicate the first slot of a ciphertext n times. Requires a multiplication.
     */
     CKKSVector replicate_first_slot(size_t n);
     CKKSVector& replicate_first_slot_inplace(size_t n);

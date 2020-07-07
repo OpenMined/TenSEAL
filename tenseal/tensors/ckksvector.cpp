@@ -221,7 +221,15 @@ CKKSVector& CKKSVector::mul_inplace(CKKSVector to_mul) {
     }
 
     if (this->size() != to_mul.size()) {
-        throw invalid_argument("can't multiply vectors of different sizes");
+        if (this->size() == 1) {
+            this->replicate_first_slot_inplace(to_mul.size());
+            return this->mul_inplace(to_mul);
+        } else if (to_mul.size() == 1) {
+            CKKSVector replicated = to_mul.replicate_first_slot(this->size());
+            return this->mul_inplace(replicated);
+        } else {
+            throw invalid_argument("can't multiply vectors of different sizes");
+        }
     }
 
     if (should_set_to_same_mod(this->context, this->ciphertext,
@@ -359,12 +367,19 @@ CKKSVector CKKSVector::replicate_first_slot(size_t n) {
 
 CKKSVector& CKKSVector::replicate_first_slot_inplace(size_t n) {
     // mask
-    this->mul_plain_inplace(1);
+    vector<double> mask = {1};
+    // TODO: remove this after resolving issue of transparent ciphertext
+    // which adds a 1 at the end
+    for (size_t i = 0; i < n - 1; i++) mask.push_back(0);
+    // this can also be put before the return after resolving the issue
+    this->_size = n;
+    this->mul_plain_inplace(mask);
+
     // replicate
     Ciphertext masked = this->ciphertext;
     auto galois_keys = this->context->galois_keys();
     for (size_t i = 0; i < n; i++) {
-        this->context->evaluator->rotate_vector_inplace(masked, 1,
+        this->context->evaluator->rotate_vector_inplace(masked, -1,
                                                         *galois_keys);
         this->context->evaluator->add_inplace(this->ciphertext, masked);
     }
