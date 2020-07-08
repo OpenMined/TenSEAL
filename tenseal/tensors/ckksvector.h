@@ -46,6 +46,12 @@ class CKKSVector {
     streamoff save_size();
 
     /*
+    Replicate the first slot of a ciphertext n times. Requires a multiplication.
+    */
+    CKKSVector replicate_first_slot(size_t n);
+    CKKSVector& replicate_first_slot_inplace(size_t n);
+
+    /*
     Encrypted evaluation function operates on two encrypted vectors and
     returns a new CKKSVector which is the result of either addition,
     substraction or multiplication in an element-wise fashion. in_place

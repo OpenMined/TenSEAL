@@ -2,6 +2,7 @@
 
 #include <seal/seal.h>
 
+#include <cmath>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -85,7 +86,13 @@ CKKSVector& CKKSVector::add_inplace(CKKSVector to_add) {
     }
 
     if (this->size() != to_add.size()) {
-        throw invalid_argument("can't add vectors of different sizes");
+        if (this->size() == 1) {
+            this->replicate_first_slot_inplace(to_add.size());
+        } else if (to_add.size() == 1) {
+            to_add.replicate_first_slot_inplace(this->size());
+        } else {
+            throw invalid_argument("can't add vectors of different sizes");
+        }
     }
 
     if (should_set_to_same_mod(this->context, this->ciphertext,
@@ -153,7 +160,13 @@ CKKSVector& CKKSVector::sub_inplace(CKKSVector to_sub) {
     }
 
     if (this->size() != to_sub.size()) {
-        throw invalid_argument("can't sub vectors of different sizes");
+        if (this->size() == 1) {
+            this->replicate_first_slot_inplace(to_sub.size());
+        } else if (to_sub.size() == 1) {
+            to_sub.replicate_first_slot_inplace(this->size());
+        } else {
+            throw invalid_argument("can't sub vectors of different sizes");
+        }
     }
 
     if (should_set_to_same_mod(this->context, this->ciphertext,
@@ -221,7 +234,13 @@ CKKSVector& CKKSVector::mul_inplace(CKKSVector to_mul) {
     }
 
     if (this->size() != to_mul.size()) {
-        throw invalid_argument("can't multiply vectors of different sizes");
+        if (this->size() == 1) {
+            this->replicate_first_slot_inplace(to_mul.size());
+        } else if (to_mul.size() == 1) {
+            to_mul.replicate_first_slot_inplace(this->size());
+        } else {
+            throw invalid_argument("can't multiply vectors of different sizes");
+        }
     }
 
     if (should_set_to_same_mod(this->context, this->ciphertext,
@@ -347,6 +366,34 @@ CKKSVector& CKKSVector::matmul_plain_inplace(
     if (this->context->auto_rescale()) {
         this->context->evaluator->rescale_to_next_inplace(this->ciphertext);
         this->ciphertext.scale() = this->init_scale;
+    }
+
+    return *this;
+}
+
+CKKSVector CKKSVector::replicate_first_slot(size_t n) {
+    CKKSVector new_vector = *this;
+    return new_vector.replicate_first_slot_inplace(n);
+}
+
+CKKSVector& CKKSVector::replicate_first_slot_inplace(size_t n) {
+    // mask
+    // TODO: remove this after resolving issue of transparent ciphertext
+    // which adds a 1 at the end
+    vector<double> mask(n, 0);
+    mask[0] = 1;
+    // this can also be put before the return after resolving the issue
+    this->_size = n;
+    this->mul_plain_inplace(mask);
+
+    // replicate
+    Ciphertext tmp = this->ciphertext;
+    auto galois_keys = this->context->galois_keys();
+    for (size_t i = 0; i < (size_t)ceil(log2(n)); i++) {
+        this->context->evaluator->rotate_vector_inplace(tmp, -pow(2, i),
+                                                        *galois_keys);
+        this->context->evaluator->add_inplace(this->ciphertext, tmp);
+        tmp = this->ciphertext;
     }
 
     return *this;
