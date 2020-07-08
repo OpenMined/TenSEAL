@@ -46,6 +46,12 @@ class CKKSVector {
     streamoff save_size();
 
     /*
+    Replicate the first slot of a ciphertext n times. Requires a multiplication.
+    */
+    CKKSVector replicate_first_slot(size_t n);
+    CKKSVector& replicate_first_slot_inplace(size_t n);
+
+    /*
     Encrypted evaluation function operates on two encrypted vectors and
     returns a new CKKSVector which is the result of either addition,
     substraction or multiplication in an element-wise fashion. in_place
@@ -66,11 +72,17 @@ class CKKSVector {
     either addition, substraction or multiplication in an element-wise fashion.
     in_place functions return a reference to the same object.
     */
+    CKKSVector add_plain(double to_add);
     CKKSVector add_plain(vector<double> to_add);
+    CKKSVector& add_plain_inplace(double to_add);
     CKKSVector& add_plain_inplace(vector<double> to_add);
+    CKKSVector sub_plain(double to_sub);
     CKKSVector sub_plain(vector<double> to_sub);
+    CKKSVector& sub_plain_inplace(double to_sub);
     CKKSVector& sub_plain_inplace(vector<double> to_sub);
+    CKKSVector mul_plain(double to_mul);
     CKKSVector mul_plain(vector<double> to_mul);
+    CKKSVector& mul_plain_inplace(double to_mul);
     CKKSVector& mul_plain_inplace(vector<double> to_mul);
     CKKSVector dot_product_plain(vector<double> to_mul);
     CKKSVector& dot_product_plain_inplace(vector<double> to_mul);
@@ -84,6 +96,16 @@ class CKKSVector {
     CKKSVector& matmul_plain_inplace(const vector<vector<double>>& matrix);
 
    private:
+    /*
+    Private evaluation functions to process both scalar and vector arguments.
+    */
+    template <typename T>
+    CKKSVector& _add_plain_inplace(T to_add);
+    template <typename T>
+    CKKSVector& _sub_plain_inplace(T to_sub);
+    template <typename T>
+    CKKSVector& _mul_plain_inplace(T to_mul);
+
     size_t _size;
 
     double init_scale;
