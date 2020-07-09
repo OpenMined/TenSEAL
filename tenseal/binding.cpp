@@ -84,6 +84,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("decrypt", py::overload_cast<const shared_ptr<SecretKey>&>(
                             &CKKSVector::decrypt))
         .def("save_size", &CKKSVector::save_size)
+        .def("neg", &CKKSVector::negate)
+        .def("neg_", &CKKSVector::negate_inplace)
+        .def("neg_inplace", &CKKSVector::negate_inplace)
         .def("add", &CKKSVector::add)
         .def("add_", &CKKSVector::add_inplace)
         .def("add_plain", py::overload_cast<double>(&CKKSVector::add_plain))
@@ -124,6 +127,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("mm", &CKKSVector::matmul_plain)
         .def("mm_", &CKKSVector::matmul_plain_inplace)
         // python arithmetic
+        .def("__neg__", &CKKSVector::negate)
         .def("__add__", &CKKSVector::add)
         .def("__add__", py::overload_cast<double>(&CKKSVector::add_plain))
         .def("__add__",
