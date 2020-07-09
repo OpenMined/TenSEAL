@@ -206,6 +206,20 @@ CKKSVector CKKSVector::sub_plain(double to_sub) {
     return new_vector;
 }
 
+CKKSVector CKKSVector::rsub_plain(vector<double> left_operand) {
+    CKKSVector new_vector = this->negate();
+    new_vector.add_plain_inplace(left_operand);
+
+    return new_vector;
+}
+
+CKKSVector CKKSVector::rsub_plain(double left_operand) {
+    CKKSVector new_vector = this->negate();
+    new_vector.add_plain_inplace(left_operand);
+
+    return new_vector;
+}
+
 CKKSVector& CKKSVector::sub_plain_inplace(vector<double> to_sub) {
     if (this->size() != to_sub.size()) {
         throw invalid_argument("can't sub vectors of different sizes");
