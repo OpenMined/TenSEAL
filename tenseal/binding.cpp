@@ -132,6 +132,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__add__", py::overload_cast<double>(&CKKSVector::add_plain))
         .def("__add__",
              py::overload_cast<vector<double>>(&CKKSVector::add_plain))
+        .def("__radd__", py::overload_cast<double>(&CKKSVector::add_plain))
+        .def("__radd__",
+             py::overload_cast<vector<double>>(&CKKSVector::add_plain))
         .def("__iadd__", &CKKSVector::add_inplace)
         .def("__iadd__",
              py::overload_cast<double>(&CKKSVector::add_plain_inplace))
@@ -141,6 +144,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__sub__", py::overload_cast<double>(&CKKSVector::sub_plain))
         .def("__sub__",
              py::overload_cast<vector<double>>(&CKKSVector::sub_plain))
+        // subtraction operation is anticommutative
+        .def("__rsub__", py::overload_cast<double>(&CKKSVector::rsub_plain))
+        .def("__rsub__",
+             py::overload_cast<vector<double>>(&CKKSVector::rsub_plain))
         .def("__isub__", &CKKSVector::sub_inplace)
         .def("__isub__",
              py::overload_cast<double>(&CKKSVector::sub_plain_inplace))
@@ -149,6 +156,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__mul__", &CKKSVector::mul)
         .def("__mul__", py::overload_cast<double>(&CKKSVector::mul_plain))
         .def("__mul__",
+             py::overload_cast<vector<double>>(&CKKSVector::mul_plain))
+        .def("__rmul__", py::overload_cast<double>(&CKKSVector::mul_plain))
+        .def("__rmul__",
              py::overload_cast<vector<double>>(&CKKSVector::mul_plain))
         .def("__imul__", &CKKSVector::mul_inplace)
         .def("__imul__",
