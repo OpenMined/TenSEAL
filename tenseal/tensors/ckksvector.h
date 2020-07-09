@@ -52,6 +52,12 @@ class CKKSVector {
     CKKSVector& replicate_first_slot_inplace(size_t n);
 
     /*
+    Negates a CKKSVector.
+    */
+    CKKSVector negate();
+    CKKSVector& negate_inplace();
+
+    /*
     Encrypted evaluation function operates on two encrypted vectors and
     returns a new CKKSVector which is the result of either addition,
     substraction or multiplication in an element-wise fashion. in_place

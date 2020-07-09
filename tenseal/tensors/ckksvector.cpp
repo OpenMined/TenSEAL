@@ -71,6 +71,19 @@ streamoff CKKSVector::save_size() {
     return this->ciphertext.save_size(compr_mode_type::none);
 }
 
+CKKSVector CKKSVector::negate() {
+    CKKSVector new_vector = *this;
+    new_vector.negate_inplace();
+
+    return new_vector;
+}
+
+CKKSVector& CKKSVector::negate_inplace() {
+    this->context->evaluator->negate_inplace(this->ciphertext);
+
+    return *this;
+}
+
 CKKSVector CKKSVector::add(CKKSVector to_add) {
     CKKSVector new_vector = *this;
     new_vector.add_inplace(to_add);
