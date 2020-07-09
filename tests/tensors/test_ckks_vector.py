@@ -22,6 +22,28 @@ def context():
 
 
 @pytest.mark.parametrize(
+    "plain_vec", [[], [0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
+)
+def test_negate(context, plain_vec):
+    ckks_vec = ts.ckks_vector(context, plain_vec)
+    expected = [-v for v in plain_vec]
+    result = -ckks_vec
+    decrypted_result = result.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Decryption of vector is incorrect"
+
+
+@pytest.mark.parametrize(
+    "plain_vec", [[], [0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
+)
+def test_negate_inplace(context, plain_vec):
+    ckks_vec = ts.ckks_vector(context, plain_vec)
+    expected = [-v for v in plain_vec]
+    ckks_vec.neg_()
+    decrypted_result = ckks_vec.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Decryption of vector is incorrect"
+
+
+@pytest.mark.parametrize(
     "vec1, vec2",
     [
         ([], []),
