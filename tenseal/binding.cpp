@@ -150,7 +150,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         operand.
         */
         .def("__rsub__",
-             [](CKKSVector vec, const double &left_operand) {
+             [](CKKSVector vec, double left_operand) {
                  // vec should be a copy so it might be safe to do inplace
                  vec.negate_inplace();
                  vec.add_plain_inplace(left_operand);
