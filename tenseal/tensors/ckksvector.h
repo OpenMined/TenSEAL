@@ -96,13 +96,6 @@ class CKKSVector {
     CKKSVector& sum_inplace();
 
     /*
-    Since subtraction operation is anticommutative, right subtraction operator
-    need to negate the vector then do an addition with left operand.
-    */
-    CKKSVector rsub_plain(double to_sub);
-    CKKSVector rsub_plain(vector<double> to_sub);
-
-    /*
     Matrix multiplication operations.
     */
     CKKSVector matmul_plain(const vector<vector<double>>& matrix);
