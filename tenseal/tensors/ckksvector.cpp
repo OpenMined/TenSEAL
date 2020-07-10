@@ -102,7 +102,7 @@ CKKSVector& CKKSVector::add_inplace(CKKSVector to_add) {
         if (this->size() == 1) {
             this->replicate_first_slot_inplace(to_add.size());
         } else if (to_add.size() == 1) {
-            to_add.replicate_first_slot_inplace(this->size());
+            to_add.replicate_first_slot(this->size());
         } else {
             throw invalid_argument("can't add vectors of different sizes");
         }
@@ -176,7 +176,7 @@ CKKSVector& CKKSVector::sub_inplace(CKKSVector to_sub) {
         if (this->size() == 1) {
             this->replicate_first_slot_inplace(to_sub.size());
         } else if (to_sub.size() == 1) {
-            to_sub.replicate_first_slot_inplace(this->size());
+            to_sub.replicate_first_slot(this->size());
         } else {
             throw invalid_argument("can't sub vectors of different sizes");
         }
@@ -250,7 +250,7 @@ CKKSVector& CKKSVector::mul_inplace(CKKSVector to_mul) {
         if (this->size() == 1) {
             this->replicate_first_slot_inplace(to_mul.size());
         } else if (to_mul.size() == 1) {
-            to_mul.replicate_first_slot_inplace(this->size());
+            to_mul.replicate_first_slot(this->size());
         } else {
             throw invalid_argument("can't multiply vectors of different sizes");
         }
