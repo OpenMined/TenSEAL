@@ -79,19 +79,19 @@ class CKKSVector {
     in_place functions return a reference to the same object.
     */
     CKKSVector add_plain(double to_add);
-    CKKSVector add_plain(vector<double> to_add);
+    CKKSVector add_plain(const vector<double>& to_add);
     CKKSVector& add_plain_inplace(double to_add);
-    CKKSVector& add_plain_inplace(vector<double> to_add);
+    CKKSVector& add_plain_inplace(const vector<double>& to_add);
     CKKSVector sub_plain(double to_sub);
-    CKKSVector sub_plain(vector<double> to_sub);
+    CKKSVector sub_plain(const vector<double>& to_sub);
     CKKSVector& sub_plain_inplace(double to_sub);
-    CKKSVector& sub_plain_inplace(vector<double> to_sub);
+    CKKSVector& sub_plain_inplace(const vector<double>& to_sub);
     CKKSVector mul_plain(double to_mul);
-    CKKSVector mul_plain(vector<double> to_mul);
+    CKKSVector mul_plain(const vector<double>& to_mul);
     CKKSVector& mul_plain_inplace(double to_mul);
-    CKKSVector& mul_plain_inplace(vector<double> to_mul);
-    CKKSVector dot_product_plain(vector<double> to_mul);
-    CKKSVector& dot_product_plain_inplace(vector<double> to_mul);
+    CKKSVector& mul_plain_inplace(const vector<double>& to_mul);
+    CKKSVector dot_product_plain(const vector<double>& to_mul);
+    CKKSVector& dot_product_plain_inplace(const vector<double>& to_mul);
     CKKSVector sum();
     CKKSVector& sum_inplace();
 
@@ -106,11 +106,11 @@ class CKKSVector {
     Private evaluation functions to process both scalar and vector arguments.
     */
     template <typename T>
-    CKKSVector& _add_plain_inplace(T to_add);
+    CKKSVector& _add_plain_inplace(const T& to_add);
     template <typename T>
-    CKKSVector& _sub_plain_inplace(T to_sub);
+    CKKSVector& _sub_plain_inplace(const T& to_sub);
     template <typename T>
-    CKKSVector& _mul_plain_inplace(T to_mul);
+    CKKSVector& _mul_plain_inplace(const T& to_mul);
 
     size_t _size;
 
