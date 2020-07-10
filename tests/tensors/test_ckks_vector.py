@@ -171,6 +171,38 @@ def test_add_plain(context, vec1, vec2):
         ([1, 2, 3, 4], -2),
     ],
 )
+def test_radd_plain(context, vec1, vec2):
+    first_vec = ts.ckks_vector(context, vec1)
+    result = vec2 + first_vec
+    if isinstance(vec2, list):
+        expected = [v1 + v2 for v1, v2 in zip(vec1, vec2)]
+    elif isinstance(vec2, (float, int)):
+        expected = [v1 + vec2 for v1 in vec1]
+
+    # Decryption
+    decrypted_result = result.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Addition of vectors is incorrect."
+    assert _almost_equal(first_vec.decrypt(), vec1, 1), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "vec1, vec2",
+    [
+        ([], []),
+        ([0], [0]),
+        ([1], [0]),
+        ([-1], [0]),
+        ([-1], [-1]),
+        ([1], [1]),
+        ([-1], [1]),
+        ([1, 2, 3, 4], [4, 3, 2, 1]),
+        ([-1, -2], [-73, -10]),
+        ([1, 2], [-73, -10]),
+        ([1, 2, 3, 4], 2),
+        ([1, 2, 3, 4], 0),
+        ([1, 2, 3, 4], -2),
+    ],
+)
 def test_add_plain_inplace(context, vec1, vec2):
     first_vec = ts.ckks_vector(context, vec1)
     second_vec = vec2
@@ -313,6 +345,38 @@ def test_sub_plain(context, vec1, vec2):
         ([1, 2, 3, 4], -2),
     ],
 )
+def test_rsub_plain(context, vec1, vec2):
+    first_vec = ts.ckks_vector(context, vec1)
+    result = vec2 - first_vec
+    if isinstance(vec2, list):
+        expected = [v2 - v1 for v1, v2 in zip(vec1, vec2)]
+    elif isinstance(vec2, (float, int)):
+        expected = [vec2 - v1 for v1 in vec1]
+
+    # Decryption
+    decrypted_result = result.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Substraction of vectors is incorrect."
+    assert _almost_equal(first_vec.decrypt(), vec1, 1), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "vec1, vec2",
+    [
+        ([], []),
+        ([0], [0]),
+        ([1], [0]),
+        ([-1], [0]),
+        ([-1], [-1]),
+        ([1], [1]),
+        ([-1], [1]),
+        ([1, 2, 3, 4], [4, 3, 2, 1]),
+        ([-1, -2], [-73, -10]),
+        ([1, 2], [-73, -10]),
+        ([1, 2, 3, 4], 2),
+        ([1, 2, 3, 4], 0),
+        ([1, 2, 3, 4], -2),
+    ],
+)
 def test_sub_plain_inplace(context, vec1, vec2):
     first_vec = ts.ckks_vector(context, vec1)
     second_vec = vec2
@@ -426,6 +490,38 @@ def test_mul_plain(context, vec1, vec2):
     first_vec = ts.ckks_vector(context, vec1)
     second_vec = vec2
     result = first_vec * second_vec
+    if isinstance(vec2, list):
+        expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
+    elif isinstance(vec2, (float, int)):
+        expected = [v1 * vec2 for v1 in vec1]
+
+    # Decryption
+    decrypted_result = result.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Multiplication of vectors is incorrect."
+    assert _almost_equal(first_vec.decrypt(), vec1, 1), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "vec1, vec2",
+    [
+        ([], []),
+        ([0], [0]),
+        ([1], [0]),
+        ([-1], [0]),
+        ([-1], [-1]),
+        ([1], [1]),
+        ([-1], [1]),
+        ([1, 2, 3, 4], [4, 3, 2, 1]),
+        ([-1, -2], [-73, -10]),
+        ([1, 2], [-73, -10]),
+        ([1, 2, 3, 4], 2),
+        # ([1, 2, 3, 4], 0),
+        ([1, 2, 3, 4], -2),
+    ],
+)
+def test_rmul_plain(context, vec1, vec2):
+    first_vec = ts.ckks_vector(context, vec1)
+    result = vec2 * first_vec
     if isinstance(vec2, list):
         expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
     elif isinstance(vec2, (float, int)):

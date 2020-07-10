@@ -42,11 +42,11 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         py::arg("encryption_parameters"));
 
     py::class_<BFVVector>(m, "BFVVector")
-        .def(py::init<shared_ptr<TenSEALContext>&, vector<int64_t>>())
+        .def(py::init<shared_ptr<TenSEALContext> &, vector<int64_t>>())
         .def("size", &BFVVector::size)
         .def("save_size", &BFVVector::save_size)
         .def("decrypt", py::overload_cast<>(&BFVVector::decrypt))
-        .def("decrypt", py::overload_cast<const std::shared_ptr<SecretKey>&>(
+        .def("decrypt", py::overload_cast<const std::shared_ptr<SecretKey> &>(
                             &BFVVector::decrypt))
         .def("add", &BFVVector::add)
         .def("add_", &BFVVector::add_inplace)
@@ -76,12 +76,12 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     py::class_<CKKSVector>(m, "CKKSVector")
         // specifying scale
-        .def(py::init<shared_ptr<TenSEALContext>&, vector<double>, double>())
+        .def(py::init<shared_ptr<TenSEALContext> &, vector<double>, double>())
         // using global_scale if set
-        .def(py::init<shared_ptr<TenSEALContext>&, vector<double>>())
+        .def(py::init<shared_ptr<TenSEALContext> &, vector<double>>())
         .def("size", &CKKSVector::size)
         .def("decrypt", py::overload_cast<>(&CKKSVector::decrypt))
-        .def("decrypt", py::overload_cast<const shared_ptr<SecretKey>&>(
+        .def("decrypt", py::overload_cast<const shared_ptr<SecretKey> &>(
                             &CKKSVector::decrypt))
         .def("save_size", &CKKSVector::save_size)
         .def("neg", &CKKSVector::negate)
@@ -132,6 +132,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__add__", py::overload_cast<double>(&CKKSVector::add_plain))
         .def("__add__",
              py::overload_cast<vector<double>>(&CKKSVector::add_plain))
+        .def("__radd__", py::overload_cast<double>(&CKKSVector::add_plain))
+        .def("__radd__",
+             py::overload_cast<vector<double>>(&CKKSVector::add_plain))
         .def("__iadd__", &CKKSVector::add_inplace)
         .def("__iadd__",
              py::overload_cast<double>(&CKKSVector::add_plain_inplace))
@@ -141,6 +144,25 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__sub__", py::overload_cast<double>(&CKKSVector::sub_plain))
         .def("__sub__",
              py::overload_cast<vector<double>>(&CKKSVector::sub_plain))
+        /*
+        Since subtraction operation is anticommutative, right subtraction
+        operator need to negate the vector then do an addition with left
+        operand.
+        */
+        .def("__rsub__",
+             [](CKKSVector vec, double left_operand) {
+                 // vec should be a copy so it might be safe to do inplace
+                 vec.negate_inplace();
+                 vec.add_plain_inplace(left_operand);
+                 return vec;
+             })
+        .def("__rsub__",
+             [](CKKSVector vec, const vector<double> &left_operand) {
+                 // vec should be a copy so it might be safe to do inplace
+                 vec.negate_inplace();
+                 vec.add_plain_inplace(left_operand);
+                 return vec;
+             })
         .def("__isub__", &CKKSVector::sub_inplace)
         .def("__isub__",
              py::overload_cast<double>(&CKKSVector::sub_plain_inplace))
@@ -149,6 +171,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__mul__", &CKKSVector::mul)
         .def("__mul__", py::overload_cast<double>(&CKKSVector::mul_plain))
         .def("__mul__",
+             py::overload_cast<vector<double>>(&CKKSVector::mul_plain))
+        .def("__rmul__", py::overload_cast<double>(&CKKSVector::mul_plain))
+        .def("__rmul__",
              py::overload_cast<vector<double>>(&CKKSVector::mul_plain))
         .def("__imul__", &CKKSVector::mul_inplace)
         .def("__imul__",
@@ -185,7 +210,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         )",
              py::arg("poly_modulus_degree"), py::arg("plain_modulus"),
              py::arg("coeff_mod_bit_sizes") = vector<int>())
-        .def("load", py::overload_cast<const char*>(&TenSEALContext::Create))
+        .def("load", py::overload_cast<const char *>(&TenSEALContext::Create))
         .def("save_public", &TenSEALContext::save_public, "save public keys.")
         .def("save_private", &TenSEALContext::save_private,
              "save private keys.")
@@ -217,7 +242,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
     // SEAL objects
 
     py::class_<KeyGenerator>(m, "KeyGenerator")
-        .def(py::init<std::shared_ptr<seal::SEALContext>&>())
+        .def(py::init<std::shared_ptr<seal::SEALContext> &>())
         .def("public_key", &KeyGenerator::public_key, "get the public key.")
         .def("secret_key", &KeyGenerator::secret_key, "get the secret key.")
         .def("relin_keys", py::overload_cast<>(&KeyGenerator::relin_keys),
