@@ -32,13 +32,13 @@ class TenSEALEncoder {
     Integer/BatchEncoder or CKKSEncoder.
     */
     template <class T>
-    void encode(std::vector<int64_t>& vec, Plaintext& pt) {
+    void encode(const std::vector<int64_t>& vec, Plaintext& pt) {
         auto encoder = this->get<T>();
         encoder->encode(vec, pt);
     }
 
     template <class CKKSEncoder>
-    void encode(std::vector<double>& vec, Plaintext& pt,
+    void encode(const std::vector<double>& vec, Plaintext& pt,
                 std::optional<double> optscale = {}) {
         double scale = 1.0;
         if (optscale.has_value())

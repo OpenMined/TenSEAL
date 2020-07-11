@@ -91,29 +91,29 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("add_", &CKKSVector::add_inplace)
         .def("add_plain", py::overload_cast<double>(&CKKSVector::add_plain))
         .def("add_plain",
-             py::overload_cast<vector<double>>(&CKKSVector::add_plain))
+             py::overload_cast<const vector<double> &>(&CKKSVector::add_plain))
         .def("add_plain_",
              py::overload_cast<double>(&CKKSVector::add_plain_inplace))
-        .def("add_plain_",
-             py::overload_cast<vector<double>>(&CKKSVector::add_plain_inplace))
+        .def("add_plain_", py::overload_cast<const vector<double> &>(
+                               &CKKSVector::add_plain_inplace))
         .def("sub", &CKKSVector::sub)
         .def("sub_", &CKKSVector::sub_inplace)
         .def("sub_plain", py::overload_cast<double>(&CKKSVector::sub_plain))
         .def("sub_plain",
-             py::overload_cast<vector<double>>(&CKKSVector::sub_plain))
+             py::overload_cast<const vector<double> &>(&CKKSVector::sub_plain))
         .def("sub_plain_",
              py::overload_cast<double>(&CKKSVector::sub_plain_inplace))
-        .def("sub_plain_",
-             py::overload_cast<vector<double>>(&CKKSVector::sub_plain_inplace))
+        .def("sub_plain_", py::overload_cast<const vector<double> &>(
+                               &CKKSVector::sub_plain_inplace))
         .def("mul", &CKKSVector::mul)
         .def("mul_", &CKKSVector::mul_inplace)
         .def("mul_plain", py::overload_cast<double>(&CKKSVector::mul_plain))
         .def("mul_plain",
-             py::overload_cast<vector<double>>(&CKKSVector::mul_plain))
+             py::overload_cast<const vector<double> &>(&CKKSVector::mul_plain))
         .def("mul_plain_",
              py::overload_cast<double>(&CKKSVector::mul_plain_inplace))
-        .def("mul_plain_",
-             py::overload_cast<vector<double>>(&CKKSVector::mul_plain_inplace))
+        .def("mul_plain_", py::overload_cast<const vector<double> &>(
+                               &CKKSVector::mul_plain_inplace))
         // because dot doesn't have a magic function like __add__
         // we prefer to overload it instead of having dot_plain functions
         .def("dot", &CKKSVector::dot_product)
@@ -131,19 +131,19 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__add__", &CKKSVector::add)
         .def("__add__", py::overload_cast<double>(&CKKSVector::add_plain))
         .def("__add__",
-             py::overload_cast<vector<double>>(&CKKSVector::add_plain))
+             py::overload_cast<const vector<double> &>(&CKKSVector::add_plain))
         .def("__radd__", py::overload_cast<double>(&CKKSVector::add_plain))
         .def("__radd__",
-             py::overload_cast<vector<double>>(&CKKSVector::add_plain))
+             py::overload_cast<const vector<double> &>(&CKKSVector::add_plain))
         .def("__iadd__", &CKKSVector::add_inplace)
         .def("__iadd__",
              py::overload_cast<double>(&CKKSVector::add_plain_inplace))
-        .def("__iadd__",
-             py::overload_cast<vector<double>>(&CKKSVector::add_plain_inplace))
+        .def("__iadd__", py::overload_cast<const vector<double> &>(
+                             &CKKSVector::add_plain_inplace))
         .def("__sub__", &CKKSVector::sub)
         .def("__sub__", py::overload_cast<double>(&CKKSVector::sub_plain))
         .def("__sub__",
-             py::overload_cast<vector<double>>(&CKKSVector::sub_plain))
+             py::overload_cast<const vector<double> &>(&CKKSVector::sub_plain))
         /*
         Since subtraction operation is anticommutative, right subtraction
         operator need to negate the vector then do an addition with left
@@ -166,20 +166,20 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__isub__", &CKKSVector::sub_inplace)
         .def("__isub__",
              py::overload_cast<double>(&CKKSVector::sub_plain_inplace))
-        .def("__isub__",
-             py::overload_cast<vector<double>>(&CKKSVector::sub_plain_inplace))
+        .def("__isub__", py::overload_cast<const vector<double> &>(
+                             &CKKSVector::sub_plain_inplace))
         .def("__mul__", &CKKSVector::mul)
         .def("__mul__", py::overload_cast<double>(&CKKSVector::mul_plain))
         .def("__mul__",
-             py::overload_cast<vector<double>>(&CKKSVector::mul_plain))
+             py::overload_cast<const vector<double> &>(&CKKSVector::mul_plain))
         .def("__rmul__", py::overload_cast<double>(&CKKSVector::mul_plain))
         .def("__rmul__",
-             py::overload_cast<vector<double>>(&CKKSVector::mul_plain))
+             py::overload_cast<const vector<double> &>(&CKKSVector::mul_plain))
         .def("__imul__", &CKKSVector::mul_inplace)
         .def("__imul__",
              py::overload_cast<double>(&CKKSVector::mul_plain_inplace))
-        .def("__imul__",
-             py::overload_cast<vector<double>>(&CKKSVector::mul_plain_inplace))
+        .def("__imul__", py::overload_cast<const vector<double> &>(
+                             &CKKSVector::mul_plain_inplace))
         .def("__matmul__", &CKKSVector::matmul_plain)
         .def("__imatmul__", &CKKSVector::matmul_plain_inplace);
 
