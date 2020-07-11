@@ -412,4 +412,59 @@ CKKSVector& CKKSVector::replicate_first_slot_inplace(size_t n) {
     return *this;
 }
 
+CKKSVector CKKSVector::polyval(const vector<double>& coefficients) {
+    CKKSVector new_vector = *this;
+    return new_vector.polyval_inplace(coefficients);
+}
+
+CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
+    size_t degree = coefficients.size();
+
+    if (degree == 0) {
+        throw invalid_argument(
+            "the coefficients vector need to have at least one element");
+    }
+
+    while (degree > 0) {
+        if (coefficients[degree - 1] == 0.0)
+            degree--;
+        else
+            break;
+    }
+
+    // null polynomial: output should be an encrypted 0
+    // we can multiply by 0, or return the encryption of zero
+    if (degree == 0) {
+        // we set the vector to the encryption of zero
+        this->context->encryptor->encrypt_zero(this->ciphertext);
+        return *this;
+    }
+
+    // set accumulator to the constant coefficient
+    CKKSVector acc = *this;
+    Plaintext const_coeff;
+
+    this->context->encode<CKKSEncoder>(coefficients[0], const_coeff,
+                                       this->init_scale);
+    this->context->encryptor->encrypt(const_coeff, acc.ciphertext);
+
+    // coefficients[1] * x
+    if (degree >= 1 && coefficients[1] != 0.0)
+        acc.add_inplace(this->mul_plain(coefficients[1]));
+
+    // coefficients[2] * x^2 + ... + coefficients[degree - 1 ] * x^(degree - 1)
+    for (size_t i = 2; i < degree; i++) {
+        this->mul_inplace(*this);
+
+        if (coefficients[i] == 1.0) {
+            acc.add_inplace(*this);
+        } else {
+            acc.add_inplace(this->mul_plain(coefficients[i]));
+        }
+    }
+
+    this->ciphertext = acc.ciphertext;
+    return *this;
+}
+
 }  // namespace tenseal

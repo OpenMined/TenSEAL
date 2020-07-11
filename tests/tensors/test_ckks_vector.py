@@ -860,33 +860,28 @@ def test_vec_plain_matrix_mul_depth2(context, vec, matrix1, matrix2):
 @pytest.mark.parametrize(
     "data, polynom",
     [
-        ([0, 1, 2, 3, 4], lambda x: x * x + x),
-        ([0, 1, 2, 3, 4], lambda x: x * x - x),
-        ([0, 1, 2, 3, 4], lambda x: x * x * x),
-        ([0, 0, 0, 0, 0], lambda x: x * x * x),
+        ([0, 1, 2, 3, 4], [0, 1, 1]),
+        ([0, 1, 2, 3, 4], [0, -1, 1]),
+        ([0, 1, 2, 3, 4], [0, 0, 0, 1]),
+        ([0, 0, 0, 0, 0], [0, 0, 0, 1]),
     ],
 )
 def test_simple_polynomial(context, data, polynom):
     ct = ts.ckks_vector(context, data)
-    expected = [polynom(x) for x in data]
-    result = polynom(ct)
+    expected = [np.polyval(polynom[::-1], x) for x in data]
+    result = ct.polyval(polynom)
 
     decrypted_result = result.decrypt()
     assert _almost_equal(decrypted_result, expected, 1), "Polynomial evaluation is incorrect."
-    # adding plain vector at the end
-    result += data
-    expected = [expected[i] + data[i] for i in range(len(data))]
-    decrypted_result = result.decrypt()
-    assert _almost_equal(decrypted_result, expected, 1)
 
 
 @pytest.mark.parametrize(
     "data, polynom",
     [
-        ([0, 1, 2, 3, 4], lambda x: x * x + x),
-        ([0, 1, 2, 3, 4], lambda x: x * x - x),
-        ([0, 1, 2, 3, 4], lambda x: x * x * x),
-        ([0, 0, 0, 0, 0], lambda x: x * x * x),
+        ([0, 1, 2, 3, 4], [0, 1, 1]),
+        ([0, 1, 2, 3, 4], [0, -1, 1]),
+        ([0, 1, 2, 3, 4], [0, 0, 0, 1]),
+        ([0, 0, 0, 0, 0], [0, 0, 0, 1]),
     ],
 )
 def test_simple_polynomial_modswitch_off(context, data, polynom):
@@ -896,13 +891,14 @@ def test_simple_polynomial_modswitch_off(context, data, polynom):
 
     ct = ts.ckks_vector(context, data)
     with pytest.raises(ValueError) as e:
-        result = polynom(ct)
-    assert str(e.value) == "encrypted1 and encrypted2 parameter mismatch"
+        result = ct.polyval(polynom)
+    # encrypted1 and encrypted2 parameter mismatch (or encrypted_ntt and plain_ntt)
+    assert "parameter mismatch" in str(e.value)
 
 
 @pytest.mark.parametrize(
     "data, polynom",
-    [([0, 1, 2, 3, 4], lambda x: x * x + x), ([0, 1, 2, 3, 4], lambda x: x * x - x),],
+    [([0, 1, 2, 3, 4], [0, 1, 1]), ([0, 1, 2, 3, 4], [0, -1, 1]),],
 )
 def test_simple_polynomial_rescale_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
@@ -911,7 +907,7 @@ def test_simple_polynomial_rescale_off(context, data, polynom):
 
     ct = ts.ckks_vector(context, data)
     with pytest.raises(ValueError) as e:
-        result = polynom(ct)
+        result = ct.polyval(polynom)
     assert str(e.value) == "scale mismatch"
 
 

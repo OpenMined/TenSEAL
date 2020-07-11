@@ -101,6 +101,13 @@ class CKKSVector {
     CKKSVector matmul_plain(const vector<vector<double>>& matrix);
     CKKSVector& matmul_plain_inplace(const vector<vector<double>>& matrix);
 
+    /*
+    Polynomial evaluation with `this` as variable.
+    p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] * x^i
+    */
+    CKKSVector polyval(const vector<double>& coefficients);
+    CKKSVector& polyval_inplace(const vector<double>& coefficients);
+
    private:
     /*
     Private evaluation functions to process both scalar and vector arguments.
