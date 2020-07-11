@@ -295,6 +295,7 @@ CKKSVector& CKKSVector::mul_plain_inplace(const vector<double>& to_mul) {
     if (this->size() != to_mul.size()) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
+    // TODO: rmeove this after fixing #36
     // prevent transparent ciphertext by adding a non-zero value
     vector<double> new_vec_to_mul(to_mul);
     if (new_vec_to_mul.size() + 1 <= this->context->slot_count<CKKSEncoder>())
