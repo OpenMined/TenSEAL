@@ -482,7 +482,7 @@ def test_mul_inplace(context, vec1, vec2):
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
         ([1, 2, 3, 4], 2),
-        # ([1, 2, 3, 4], 0),
+        ([1, 2, 3, 4], 0),
         ([1, 2, 3, 4], -2),
     ],
 )
@@ -515,7 +515,7 @@ def test_mul_plain(context, vec1, vec2):
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
         ([1, 2, 3, 4], 2),
-        # ([1, 2, 3, 4], 0),
+        ([1, 2, 3, 4], 0),
         ([1, 2, 3, 4], -2),
     ],
 )
@@ -547,7 +547,7 @@ def test_rmul_plain(context, vec1, vec2):
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
         ([1, 2, 3, 4], 2),
-        # ([1, 2, 3, 4], 0),
+        ([1, 2, 3, 4], 0),
         ([1, 2, 3, 4], -2),
     ],
 )
@@ -746,18 +746,6 @@ def test_sum_inplace(context, vec1):
     # Decryption
     decrypted_result = result.decrypt()
     assert _almost_equal(decrypted_result, expected, 1), "Sum of vector is incorrect."
-
-
-def test_mul_plain_zero(context):
-    # from context
-    max_slots = 8192 // 2
-    pt = [0] * max_slots
-    ct = ts.ckks_vector(context, [1] * max_slots)
-
-    with pytest.raises(RuntimeError) as e:
-        # the workaround of transparent ciphertext doesn't work when all slots are used
-        result = ct * pt
-    assert str(e.value) == "result ciphertext is transparent"
 
 
 @pytest.mark.parametrize(

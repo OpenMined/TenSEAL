@@ -331,18 +331,6 @@ def test_mul_plain_inplace(context, vec1, vec2):
     assert decrypted_result == expected, "Multiplication of vectors is incorrect."
 
 
-def test_mul_plain_zero(context):
-    # from context
-    max_slots = 8192
-    pt = [0] * max_slots
-    ct = ts.bfv_vector(context, [1] * max_slots)
-
-    with pytest.raises(RuntimeError) as e:
-        # the workaround of transparent ciphertext doesn't work when all slots are used
-        result = ct * pt
-    assert str(e.value) == "result ciphertext is transparent"
-
-
 def test_size(context):
     for size in range(10):
         vec = ts.bfv_vector(context, [1] * size)
