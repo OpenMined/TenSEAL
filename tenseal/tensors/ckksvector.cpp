@@ -317,6 +317,7 @@ CKKSVector& CKKSVector::_mul_plain_inplace(const T& to_mul) {
         this->context->evaluator->multiply_plain_inplace(this->ciphertext,
                                                          plaintext);
     } catch (const std::logic_error& e) {  // result ciphertext is transparent
+        // TODO: chech if error e is exactly a "ciphertext is transparent" error
         // replace by encryption of zero
         this->context->encryptor->encrypt_zero(this->ciphertext);
         this->ciphertext.scale() = this->init_scale;
@@ -505,7 +506,7 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
             if ((i & (i - 1)) == 0) {
                 x = get_x_degree(i, power_x);
                 x.mul_plain_inplace(coefficients[i]);
-            } else {
+            } else {  // first multiply x (this) with coeff to reduce depth
                 x = get_x_degree(i - 1, power_x);
                 x.mul_inplace(this->mul_plain(coefficients[i]));
             }

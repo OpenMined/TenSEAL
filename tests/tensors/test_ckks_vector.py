@@ -857,15 +857,38 @@ def test_vec_plain_matrix_mul_depth2(context, vec, matrix1, matrix2):
         ([0, 1, 2, 3, 4], [0, 1, 1]),
         ([0, 1, 2, 3, 4], [0, 1, 1, 0, 1]),
         # random coeff
+        ([0, 1, 2, 3, 4], [-4, -2, 5]),
         ([0, 0, 0, 0, 0], [0, 0, 0, 1]),
         ([0, 1, 2, 3, 4], [0, 0, 0, 1]),
         ([0, 1, 2, 3, 4], [3, 2, 4, 5]),
-        ([0, 1, 2, 3, 4], [-4, -2, 5]),
-        ([0, -1, 2, -3, 4], [5, -3, 4, 73]),
-        ([0, 1, -2, 3, -4], [-3, 0, 5, 1]),
+        ([0, -1, -2, -3, -4], [-3, -2, -4, -5, 1]),
     ],
 )
 def test_polynomial(context, data, polynom):
+    ct = ts.ckks_vector(context, data)
+    expected = [np.polyval(polynom[::-1], x) for x in data]
+    result = ct.polyval(polynom)
+
+    decrypted_result = result.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Polynomial evaluation is incorrect."
+
+
+@pytest.mark.parametrize(
+    "data, polynom",
+    [
+        ## high data may result in bigger error (2 is enough for 0.1 error)
+        ([2, 2, 2, 2, 2], [0, 1, 1, 0, 1, 0, 0, 0, 1]),
+        ([0, -1, 2, -3, 4], [5, -3, 4, 73, -3]),
+        ([0, 1, -2, 3, -4], [-3, 0, 5, 1, -2]),
+        ([0, -1, 1, -2, 2], [3, -7, 2, 0, 1, -1, 7, 2, -3]),
+        ([0, -1, 1, -2, 2], [3, -7, 2, 0, 1, -1, 7, 2, -3, -7, 2, 0, 1, -1, 7, 2, 1]),
+        ([0, -1, 1, -2, 2], [0] * 16 + [1]),
+    ],
+)
+def test_high_degree_polynomial(data, polynom):
+    # special context for higher depth
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 60])
+    context.global_scale = pow(2, 40)
     ct = ts.ckks_vector(context, data)
     expected = [np.polyval(polynom[::-1], x) for x in data]
     result = ct.polyval(polynom)
