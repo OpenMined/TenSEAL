@@ -319,6 +319,8 @@ CKKSVector& CKKSVector::_mul_plain_inplace(const T& to_mul) {
     } catch (const std::logic_error& e) {  // result ciphertext is transparent
         // replace by encryption of zero
         this->context->encryptor->encrypt_zero(this->ciphertext);
+        this->ciphertext.scale() = this->init_scale;
+        return *this;
     }
 
     if (this->context->auto_rescale()) {
@@ -445,9 +447,9 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     int degree = coefficients.size() - 1;
 
     while (degree >= 0) {
-        if (coefficients[degree] == 0.0) {
+        if (coefficients[degree] == 0.0)
             degree--;
-        } else
+        else
             break;
     }
 
