@@ -851,6 +851,8 @@ def test_vec_plain_matrix_mul_depth2(context, vec, matrix1, matrix2):
         # null polynom
         ([0, 1, 2, 3, 4], [0, 0, 0]),
         # power of two coeff
+        ([0, 1, 2, 3, 4], [0]),
+        ([0, 1, 2, 3, 4], [0,0,0]),
         ([0, 1, 2, 3, 4], [1, 1]),
         ([0, 1, 2, 3, 4], [0, 1, 1]),
         ([0, 1, 2, 3, 4], [0, 1, 1, 0, 1]),
@@ -894,8 +896,7 @@ def test_polynomial_modswitch_off(context, data, polynom):
 
 
 @pytest.mark.parametrize(
-    "data, polynom",
-    [([0, 1, 2, 3, 4], [0, 1, 1]), ([0, 1, 2, 3, 4], [0, -1, 1]),],
+    "data, polynom", [([0, 1, 2, 3, 4], [0, 1, 1]), ([0, 1, 2, 3, 4], [0, -1, 1]),],
 )
 def test_polynomial_rescale_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
