@@ -870,8 +870,8 @@ def test_simple_polynomial(context, data, polynom):
     [
         ([0, 1, 2, 3, 4], [0, 1, 1]),
         ([0, 1, 2, 3, 4], [0, -1, 1]),
-        ([0, 1, 2, 3, 4], [0, 0, 0, 1]),
-        ([0, 0, 0, 0, 0], [0, 0, 0, 1]),
+        ([0, 1, 2, 3, 4], [0, 1, 0, 1]),
+        ([0, 0, 0, 0, 0], [0, 1, 0, 1]),
     ],
 )
 def test_simple_polynomial_modswitch_off(context, data, polynom):
