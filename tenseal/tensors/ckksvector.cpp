@@ -468,8 +468,12 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     this->context->encryptor->encrypt(const_coeff, acc.ciphertext);
 
     // coefficients[1] * x
-    if (degree >= 1 && coefficients[1] != 0.0)
-        acc.add_inplace(this->mul_plain(coefficients[1]));
+    if (degree >= 1 && coefficients[1] != 0.0) {
+        if (coefficients[1] == 1.0)
+            acc.add_inplace(*this);
+        else
+            acc.add_inplace(this->mul_plain(coefficients[1]));
+    }
 
     // coefficients[2] * x^2 + ... + coefficients[degree] * x^(degree)
     map<int, CKKSVector> power_x;
@@ -484,10 +488,10 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     for (size_t i = 2; i <= degree; i++) {
         if (coefficients[i] == 0.0) continue;
 
+        x = get_x_degree(i, power_x);
         if (coefficients[i] == 1.0) {
-            acc.add_inplace(*this);
+            acc.add_inplace(x);
         } else {
-            x = get_x_degree(i, power_x);
             x.mul_plain_inplace(coefficients[i]);
             acc.add_inplace(x);
         }
