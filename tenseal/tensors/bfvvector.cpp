@@ -190,16 +190,16 @@ BFVVector& BFVVector::mul_plain_inplace(const vector<int64_t>& to_mul) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
 
-    // TODO: rmeove this after fixing #36
-    // prevent transparent ciphertext by adding a non-zero value
     Plaintext plaintext;
-    vector<int64_t> new_vec_to_mul(to_mul);
-    if (new_vec_to_mul.size() + 1 <= this->context->slot_count<BatchEncoder>())
-        new_vec_to_mul.push_back(1);
-    this->context->encode<BatchEncoder>(new_vec_to_mul, plaintext);
+    this->context->encode<BatchEncoder>(to_mul, plaintext);
 
-    this->context->evaluator->multiply_plain_inplace(this->ciphertext,
-                                                     plaintext);
+    try {
+        this->context->evaluator->multiply_plain_inplace(this->ciphertext,
+                                                         plaintext);
+    } catch (const std::logic_error& e) {  // result ciphertext is transparent
+        // replace by encryption of zero
+        this->context->encryptor->encrypt_zero(this->ciphertext);
+    }
 
     return *this;
 }
