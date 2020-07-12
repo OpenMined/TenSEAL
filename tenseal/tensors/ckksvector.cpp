@@ -475,6 +475,12 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
             acc.add_inplace(this->mul_plain(coefficients[1]));
     }
 
+    // doesn't need to continue
+    if (degree < 2) {
+        this->ciphertext = acc.ciphertext;
+        return *this;
+    }
+
     // coefficients[2] * x^2 + ... + coefficients[degree] * x^(degree)
     map<int, CKKSVector> power_x;
     CKKSVector x = *this;
