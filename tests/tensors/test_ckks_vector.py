@@ -856,7 +856,7 @@ def test_vec_plain_matrix_mul_depth2(context, vec, matrix1, matrix2):
         ([0, 1, -2, 3, -4], [-3, 0, 5, 1, -2]),
     ],
 )
-def test_simple_polynomial(context, data, polynom):
+def test_polynomial(context, data, polynom):
     ct = ts.ckks_vector(context, data)
     expected = [np.polyval(polynom[::-1], x) for x in data]
     result = ct.polyval(polynom)
@@ -874,7 +874,7 @@ def test_simple_polynomial(context, data, polynom):
         ([0, 0, 0, 0, 0], [0, 1, 0, 1]),
     ],
 )
-def test_simple_polynomial_modswitch_off(context, data, polynom):
+def test_polynomial_modswitch_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
     context.global_scale = 2 ** 40
     context.auto_mod_switch = False
@@ -890,7 +890,7 @@ def test_simple_polynomial_modswitch_off(context, data, polynom):
     "data, polynom",
     [([0, 1, 2, 3, 4], [0, 1, 1]), ([0, 1, 2, 3, 4], [0, -1, 1]),],
 )
-def test_simple_polynomial_rescale_off(context, data, polynom):
+def test_polynomial_rescale_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
     context.global_scale = 2 ** 40
     context.auto_rescale = False
