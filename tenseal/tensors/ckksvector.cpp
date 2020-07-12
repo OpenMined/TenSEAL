@@ -3,6 +3,7 @@
 #include <seal/seal.h>
 
 #include <cmath>
+#include <map>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -417,16 +418,34 @@ CKKSVector CKKSVector::polyval(const vector<double>& coefficients) {
     return new_vector.polyval_inplace(coefficients);
 }
 
-CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
-    size_t degree = coefficients.size();
+CKKSVector get_x_degree(int degree, map<int, CKKSVector>& terms) {
+    // check if degree is power of two
+    if ((degree & (degree - 1)) == 0) {
+        return terms.find(degree)->second;
+    }
+    // check if the term is already computed
+    auto term = terms.find(degree);
+    if (term != terms.end()) {
+        return term->second;
+    }
 
-    if (degree == 0) {
+    int closest_square = static_cast<int>(log2(degree));
+    CKKSVector x = terms.find(closest_square)->second;
+    x.mul_inplace(get_x_degree(degree - closest_square, terms));
+    terms.insert(make_pair(degree, x));
+    return x;
+}
+
+CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
+    if (coefficients.size() == 0) {
         throw invalid_argument(
             "the coefficients vector need to have at least one element");
     }
 
-    while (degree > 0) {
-        if (coefficients[degree - 1] == 0.0)
+    size_t degree = coefficients.size() - 1;
+
+    while (degree >= 0) {
+        if (coefficients[degree] == 0.0)
             degree--;
         else
             break;
@@ -434,7 +453,7 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
 
     // null polynomial: output should be an encrypted 0
     // we can multiply by 0, or return the encryption of zero
-    if (degree == 0) {
+    if (degree == -1) {
         // we set the vector to the encryption of zero
         this->context->encryptor->encrypt_zero(this->ciphertext);
         return *this;
@@ -452,14 +471,25 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     if (degree >= 1 && coefficients[1] != 0.0)
         acc.add_inplace(this->mul_plain(coefficients[1]));
 
-    // coefficients[2] * x^2 + ... + coefficients[degree - 1 ] * x^(degree - 1)
-    for (size_t i = 2; i < degree; i++) {
-        this->mul_inplace(*this);
+    // coefficients[2] * x^2 + ... + coefficients[degree] * x^(degree)
+    map<int, CKKSVector> power_x;
+    CKKSVector x = *this;
+    power_x.insert(make_pair(1, x));
+    for (size_t i = 1; i <= static_cast<size_t>(floor(log2(degree))); i++) {
+        // TODO: use square
+        x.mul_inplace(x);
+        power_x.insert(make_pair(1 << i, x));
+    }
+
+    for (size_t i = 2; i <= degree; i++) {
+        if (coefficients[i] == 0.0) continue;
 
         if (coefficients[i] == 1.0) {
             acc.add_inplace(*this);
         } else {
-            acc.add_inplace(this->mul_plain(coefficients[i]));
+            x = get_x_degree(i, power_x);
+            x.mul_plain_inplace(coefficients[i]);
+            acc.add_inplace(x);
         }
     }
 

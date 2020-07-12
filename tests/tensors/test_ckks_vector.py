@@ -852,6 +852,8 @@ def test_vec_plain_matrix_mul_depth2(context, vec, matrix1, matrix2):
         ([0, 1, 2, 3, 4], [0, -1, 1]),
         ([0, 1, 2, 3, 4], [0, 0, 0, 1]),
         ([0, 0, 0, 0, 0], [0, 0, 0, 1]),
+        ([0, -1, 2, -3, 4], [5, -3, 4, 73, 81]),
+        ([0, 1, -2, 3, -4], [-3, 0, 5, 1, -2]),
     ],
 )
 def test_simple_polynomial(context, data, polynom):
