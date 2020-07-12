@@ -429,9 +429,9 @@ CKKSVector get_x_degree(int degree, map<int, CKKSVector>& terms) {
         return term->second;
     }
 
-    int closest_square = static_cast<int>(log2(degree));
-    CKKSVector x = terms.find(closest_square)->second;
-    x.mul_inplace(get_x_degree(degree - closest_square, terms));
+    int closest_power_of_2 = static_cast<int>(floor(log2(degree)));
+    CKKSVector x = terms.find(closest_power_of_2)->second;
+    x.mul_inplace(get_x_degree(degree - closest_power_of_2, terms));
     terms.insert(make_pair(degree, x));
     return x;
 }
@@ -442,7 +442,7 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
             "the coefficients vector need to have at least one element");
     }
 
-    size_t degree = coefficients.size() - 1;
+    int degree = coefficients.size() - 1;
 
     while (degree >= 0) {
         if (coefficients[degree] == 0.0)
@@ -456,6 +456,7 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     if (degree == -1) {
         // we set the vector to the encryption of zero
         this->context->encryptor->encrypt_zero(this->ciphertext);
+        this->ciphertext.scale() = this->init_scale;
         return *this;
     }
 
@@ -485,13 +486,13 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     map<int, CKKSVector> power_x;
     CKKSVector x = *this;
     power_x.insert(make_pair(1, x));
-    for (size_t i = 1; i <= static_cast<size_t>(floor(log2(degree))); i++) {
+    for (int i = 1; i <= static_cast<int>(floor(log2(degree))); i++) {
         // TODO: use square
         x.mul_inplace(x);
         power_x.insert(make_pair(1 << i, x));
     }
 
-    for (size_t i = 2; i <= degree; i++) {
+    for (int i = 2; i <= degree; i++) {
         if (coefficients[i] == 0.0) continue;
 
         x = get_x_degree(i, power_x);
