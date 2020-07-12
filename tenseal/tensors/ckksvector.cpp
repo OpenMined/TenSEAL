@@ -497,11 +497,15 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     for (int i = 2; i <= degree; i++) {
         if (coefficients[i] == 0.0) continue;
 
-        x = get_x_degree(i, power_x);
         if (coefficients[i] == 1.0) {
+            x = get_x_degree(i, power_x);
             acc.add_inplace(x);
         } else {
-            x.mul_plain_inplace(coefficients[i]);
+            x = get_x_degree(i - (i % 2), power_x);
+            if (i % 2 == 0)
+                x.mul_plain_inplace(coefficients[i]);
+            else  // first multiply x (this) with coeff to reduce depth
+                x.mul_inplace(this->mul_plain(coefficients[i]));
             acc.add_inplace(x);
         }
     }
