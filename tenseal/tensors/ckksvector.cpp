@@ -501,11 +501,14 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
             x = get_x_degree(i, power_x);
             acc.add_inplace(x);
         } else {
-            x = get_x_degree(i - (i % 2), power_x);
-            if (i % 2 == 0)
+            // check if the degree is power of two
+            if ((i & (i - 1)) == 0) {
+                x = get_x_degree(i, power_x);
                 x.mul_plain_inplace(coefficients[i]);
-            else  // first multiply x (this) with coeff to reduce depth
+            } else {
+                x = get_x_degree(i - 1, power_x);
                 x.mul_inplace(this->mul_plain(coefficients[i]));
+            }
             acc.add_inplace(x);
         }
     }
