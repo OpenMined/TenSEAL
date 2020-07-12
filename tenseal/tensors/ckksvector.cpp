@@ -295,13 +295,8 @@ CKKSVector& CKKSVector::mul_plain_inplace(const vector<double>& to_mul) {
     if (this->size() != to_mul.size()) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
-    // TODO: rmeove this after fixing #36
-    // prevent transparent ciphertext by adding a non-zero value
-    vector<double> new_vec_to_mul(to_mul);
-    if (new_vec_to_mul.size() + 1 <= this->context->slot_count<CKKSEncoder>())
-        new_vec_to_mul.push_back(1);
 
-    return this->_mul_plain_inplace(new_vec_to_mul);
+    return this->_mul_plain_inplace(to_mul);
 }
 
 CKKSVector& CKKSVector::mul_plain_inplace(double to_mul) {
@@ -317,8 +312,13 @@ CKKSVector& CKKSVector::_mul_plain_inplace(const T& to_mul) {
         set_to_same_mod(this->context, this->ciphertext, plaintext);
     }
 
-    this->context->evaluator->multiply_plain_inplace(this->ciphertext,
-                                                     plaintext);
+    try {
+        this->context->evaluator->multiply_plain_inplace(this->ciphertext,
+                                                         plaintext);
+    } catch (const std::logic_error& e) {  // result ciphertext is transparent
+        // replace by encryption of zero
+        this->context->encryptor->encrypt_zero(this->ciphertext);
+    }
 
     if (this->context->auto_rescale()) {
         this->context->evaluator->rescale_to_next_inplace(this->ciphertext);
@@ -394,12 +394,8 @@ CKKSVector CKKSVector::replicate_first_slot(size_t n) {
 
 CKKSVector& CKKSVector::replicate_first_slot_inplace(size_t n) {
     // mask
-    // TODO: remove this after resolving issue of transparent ciphertext
-    // which adds a 1 at the end
-    vector<double> mask(n, 0);
+    vector<double> mask(this->_size, 0);
     mask[0] = 1;
-    // this can also be put before the return after resolving the issue
-    this->_size = n;
     this->mul_plain_inplace(mask);
 
     // replicate
@@ -412,6 +408,7 @@ CKKSVector& CKKSVector::replicate_first_slot_inplace(size_t n) {
         tmp = this->ciphertext;
     }
 
+    this->_size = n;
     return *this;
 }
 
