@@ -466,11 +466,8 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     }
 
     // set result accumulator to the constant coefficient
-    CKKSVector result = *this;
-    Plaintext const_coeff;
-    this->context->encode<CKKSEncoder>(coefficients[0], const_coeff,
-                                       this->init_scale);
-    this->context->encryptor->encrypt(const_coeff, result.ciphertext);
+    vector<double> cst_coeff(this->size(), coefficients[0]);
+    CKKSVector result(this->context, cst_coeff, this->init_scale);
 
     // pre-compute squares of x
     CKKSVector x = *this;
