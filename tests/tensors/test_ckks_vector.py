@@ -75,9 +75,11 @@ def test_power(context, plain_vec, power):
         ([1, -1, 2, -2], 1),
         ([1, -1, 2, -2], 2),
         ([1, -1, 2, -2], 3),
+        ([1, -2, 3, -4], 4),
         ([1, -2, 3, -4], 1),
         ([1, -2, 3, -4], 2),
         ([1, -2, 3, -4], 3),
+        ([1, -2, 3, -4], 4),
     ],
 )
 def test_power_inplace(context, plain_vec, power):
