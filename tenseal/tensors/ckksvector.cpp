@@ -3,7 +3,6 @@
 #include <seal/seal.h>
 
 #include <cmath>
-#include <map>
 #include <memory>
 #include <optional>
 #include <vector>
