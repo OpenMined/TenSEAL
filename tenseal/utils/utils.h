@@ -70,6 +70,28 @@ IMPORTANT: Tested only with CKKS.
 Ciphertext& sum_vector(shared_ptr<TenSEALContext> tenseal_context,
                        Ciphertext& vector, size_t size);
 
+template <typename T>
+T compute_polynomial_term(int degree, double coeff,
+                          const vector<T>& x_squares) {
+    if (degree < 1) {
+        throw invalid_argument("degree must be greater or equal to 1");
+    }
+
+    int closest_power_of_2 = static_cast<int>(floor(log2(degree)));
+    int new_degree = degree - (1 << closest_power_of_2);
+    T x = x_squares[closest_power_of_2];  // x^(2^closest_power_of_2)
+
+    if (new_degree == 0 && coeff != 1.0) {
+        // x^(2^closest_power_of_2) * coeff
+        x.mul_plain_inplace(coeff);
+    } else if (new_degree != 0) {
+        // x^(2^closest_power_of_2) * x^(new_degree) * coeff
+        x.mul_inplace(compute_polynomial_term(new_degree, coeff, x_squares));
+    }
+
+    return x;
+}
+
 }  // namespace tenseal
 
 #endif

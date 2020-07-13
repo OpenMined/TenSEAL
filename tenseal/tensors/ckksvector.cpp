@@ -421,27 +421,6 @@ CKKSVector CKKSVector::polyval(const vector<double>& coefficients) {
     return new_vector.polyval_inplace(coefficients);
 }
 
-CKKSVector compute_polynomial_term(int degree, double coeff,
-                                   const vector<CKKSVector>& x_squares) {
-    if (degree < 1) {
-        throw invalid_argument("degree must be greater or equal to 1");
-    }
-
-    int closest_power_of_2 = static_cast<int>(floor(log2(degree)));
-    int new_degree = degree - (1 << closest_power_of_2);
-    CKKSVector x = x_squares[closest_power_of_2];  // x^(2^closest_power_of_2)
-
-    if (new_degree == 0 && coeff != 1.0) {
-        // x^(2^closest_power_of_2) * coeff
-        x.mul_plain_inplace(coeff);
-    } else if (new_degree != 0) {
-        // x^(2^closest_power_of_2) * x^(new_degree) * coeff
-        x.mul_inplace(compute_polynomial_term(new_degree, coeff, x_squares));
-    }
-
-    return x;
-}
-
 CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     if (coefficients.size() == 0) {
         throw invalid_argument(
