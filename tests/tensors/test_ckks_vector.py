@@ -848,58 +848,112 @@ def test_vec_plain_matrix_mul_depth2(context, vec, matrix1, matrix2):
 @pytest.mark.parametrize(
     "data, polynom",
     [
-        ([0, 1, 2, 3, 4], lambda x: x * x + x),
-        ([0, 1, 2, 3, 4], lambda x: x * x - x),
-        ([0, 1, 2, 3, 4], lambda x: x * x * x),
-        ([0, 0, 0, 0, 0], lambda x: x * x * x),
+        # null polynom
+        ([0, 1, 2, 3, 4], [0]),
+        ([0, 1, 2, 3, 4], [0, 0]),
+        ([0, 1, 2, 3, 4], [0, 0, 0]),
+        # power of two coeff
+        ([0, 1, 2, 3, 4], [1, 1]),
+        ([0, 1, 2, 3, 4], [0, 1, 1]),
+        ([0, 1, 2, 3, 4], [0, 1, 1, 0, 1]),
+        # random coeff
+        ([0, 1, 2, 3, 4], [-4, -2, 5]),
+        ([0, 0, 0, 0, 0], [0, 0, 0, 1]),
+        ([0, 1, 2, 3, 4], [0, 0, 0, 1]),
+        ([0, 1, 2, 3, 4], [3, 2, 4, 5]),
+        ([0, -1, -2, -3, -4], [-3, -2, -4, -5, 1]),
     ],
 )
-def test_simple_polynomial(context, data, polynom):
+def test_polynomial(context, data, polynom):
     ct = ts.ckks_vector(context, data)
-    expected = [polynom(x) for x in data]
-    result = polynom(ct)
+    expected = [np.polyval(polynom[::-1], x) for x in data]
+    result = ct.polyval(polynom)
 
     decrypted_result = result.decrypt()
     assert _almost_equal(decrypted_result, expected, 1), "Polynomial evaluation is incorrect."
-    # adding plain vector at the end
-    result += data
-    expected = [expected[i] + data[i] for i in range(len(data))]
-    decrypted_result = result.decrypt()
-    assert _almost_equal(decrypted_result, expected, 1)
 
 
 @pytest.mark.parametrize(
     "data, polynom",
     [
-        ([0, 1, 2, 3, 4], lambda x: x * x + x),
-        ([0, 1, 2, 3, 4], lambda x: x * x - x),
-        ([0, 1, 2, 3, 4], lambda x: x * x * x),
-        ([0, 0, 0, 0, 0], lambda x: x * x * x),
+        ## high data may result in bigger error (2 is enough for 0.1 error)
+        ([2, 2, 2, 2, 2], [0, 1, 1, 0, 1, 0, 0, 0, 1]),
+        ([0, -1, 2, -3, 4], [5, -3, 4, 73, -3]),
+        ([0, 1, -2, 3, -4], [-3, 0, 5, 1, -2]),
+        ([0, -1, 1, -2, 2], [3, -7, 2, 0, 1, -1, 7, 2, -3]),
+        ([0, -1, 1, -2, 2], [3, -7, 2, 0, 1, -1, 7, 2, -3, -7, 2, 0, 1, -1, 7, 2, -2]),
+        ([0, -1, 1, -2, 2], [0] * 1 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 2 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 3 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 4 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 5 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 6 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 7 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 8 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 9 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 10 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 11 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 12 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 13 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 14 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 15 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 16 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 16 + [2]),
     ],
 )
-def test_simple_polynomial_modswitch_off(context, data, polynom):
+def test_high_degree_polynomial(data, polynom):
+    # special context for higher depth
+    context = ts.context(
+        ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 40, 60]
+    )
+    context.global_scale = pow(2, 40)
+    ct = ts.ckks_vector(context, data)
+    expected = [np.polyval(polynom[::-1], x) for x in data]
+    result = ct.polyval(polynom)
+
+    decrypted_result = result.decrypt()
+    if len(polynom) >= 13:
+        # we allow greater error since some polynomial has terms with a high exponent
+        error_tolerance = -1
+    else:
+        error_tolerance = 1
+    assert _almost_equal(
+        decrypted_result, expected, error_tolerance
+    ), "Polynomial evaluation is incorrect."
+
+
+@pytest.mark.parametrize(
+    "data, polynom",
+    [
+        ([0, 1, 2, 3, 4], [0, 1, 1]),
+        ([0, 1, 2, 3, 4], [0, -1, 1]),
+        ([0, 1, 2, 3, 4], [0, 1, 0, 1]),
+        ([0, 0, 0, 0, 0], [0, 1, 0, 1]),
+    ],
+)
+def test_polynomial_modswitch_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
     context.global_scale = 2 ** 40
     context.auto_mod_switch = False
 
     ct = ts.ckks_vector(context, data)
     with pytest.raises(ValueError) as e:
-        result = polynom(ct)
-    assert str(e.value) == "encrypted1 and encrypted2 parameter mismatch"
+        result = ct.polyval(polynom)
+    # encrypted1 and encrypted2 parameter mismatch (or encrypted_ntt and plain_ntt)
+    assert "parameter mismatch" in str(e.value)
 
 
 @pytest.mark.parametrize(
-    "data, polynom",
-    [([0, 1, 2, 3, 4], lambda x: x * x + x), ([0, 1, 2, 3, 4], lambda x: x * x - x),],
+    "data, polynom", [([0, 1, 2, 3, 4], [0, 1, 1]), ([0, 1, 2, 3, 4], [0, -1, 1]),],
 )
-def test_simple_polynomial_rescale_off(context, data, polynom):
+def test_polynomial_rescale_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
     context.global_scale = 2 ** 40
     context.auto_rescale = False
 
     ct = ts.ckks_vector(context, data)
     with pytest.raises(ValueError) as e:
-        result = polynom(ct)
+        result = ct.polyval(polynom)
     assert str(e.value) == "scale mismatch"
 
 

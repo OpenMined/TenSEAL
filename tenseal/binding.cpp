@@ -114,6 +114,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              py::overload_cast<double>(&CKKSVector::mul_plain_inplace))
         .def("mul_plain_", py::overload_cast<const vector<double> &>(
                                &CKKSVector::mul_plain_inplace))
+        .def("polyval", &CKKSVector::polyval)
+        .def("polyval_", &CKKSVector::polyval_inplace)
         // because dot doesn't have a magic function like __add__
         // we prefer to overload it instead of having dot_plain functions
         .def("dot", &CKKSVector::dot_product)

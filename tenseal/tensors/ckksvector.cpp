@@ -316,8 +316,11 @@ CKKSVector& CKKSVector::_mul_plain_inplace(const T& to_mul) {
         this->context->evaluator->multiply_plain_inplace(this->ciphertext,
                                                          plaintext);
     } catch (const std::logic_error& e) {  // result ciphertext is transparent
+        // TODO: chech if error e is exactly a "ciphertext is transparent" error
         // replace by encryption of zero
         this->context->encryptor->encrypt_zero(this->ciphertext);
+        this->ciphertext.scale() = this->init_scale;
+        return *this;
     }
 
     if (this->context->auto_rescale()) {
@@ -409,6 +412,61 @@ CKKSVector& CKKSVector::replicate_first_slot_inplace(size_t n) {
     }
 
     this->_size = n;
+    return *this;
+}
+
+CKKSVector CKKSVector::polyval(const vector<double>& coefficients) {
+    CKKSVector new_vector = *this;
+    return new_vector.polyval_inplace(coefficients);
+}
+
+CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
+    if (coefficients.size() == 0) {
+        throw invalid_argument(
+            "the coefficients vector need to have at least one element");
+    }
+
+    int degree = static_cast<int>(coefficients.size()) - 1;
+    while (degree >= 0) {
+        if (coefficients[degree] == 0.0)
+            degree--;
+        else
+            break;
+    }
+
+    // null polynomial: output should be an encrypted 0
+    // we can multiply by 0, or return the encryption of zero
+    if (degree == -1) {
+        // we set the vector to the encryption of zero
+        this->context->encryptor->encrypt_zero(this->ciphertext);
+        this->ciphertext.scale() = this->init_scale;
+        return *this;
+    }
+
+    // set result accumulator to the constant coefficient
+    vector<double> cst_coeff(this->size(), coefficients[0]);
+    CKKSVector result(this->context, cst_coeff, this->init_scale);
+
+    // pre-compute squares of x
+    CKKSVector x = *this;
+    int max_square = static_cast<int>(floor(log2(degree)));
+    vector<CKKSVector> x_squares;
+    x_squares.reserve(max_square + 1);
+    x_squares.push_back(x);  // x
+    for (int i = 1; i <= max_square; i++) {
+        // TODO: use square
+        x.mul_inplace(x);
+        x_squares.push_back(x);  // x^(2^i)
+    }
+
+    // coefficients[1] * x + ... + coefficients[degree] * x^(degree)
+    for (int i = 1; i <= degree; i++) {
+        if (coefficients[i] == 0.0) continue;
+        x = compute_polynomial_term(i, coefficients[i], x_squares);
+        result.add_inplace(x);
+    }
+
+    this->ciphertext = result.ciphertext;
     return *this;
 }
 
