@@ -881,20 +881,41 @@ def test_polynomial(context, data, polynom):
         ([0, -1, 2, -3, 4], [5, -3, 4, 73, -3]),
         ([0, 1, -2, 3, -4], [-3, 0, 5, 1, -2]),
         ([0, -1, 1, -2, 2], [3, -7, 2, 0, 1, -1, 7, 2, -3]),
-        ([0, -1, 1, -2, 2], [3, -7, 2, 0, 1, -1, 7, 2, -3, -7, 2, 0, 1, -1, 7, 2, 1]),
+        ([0, -1, 1, -2, 2], [3, -7, 2, 0, 1, -1, 7, 2, -3, -7, 2, 0, 1, -1, 7, 2, -2]),
+        ([0, -1, 1, -2, 2], [0] * 1 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 2 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 3 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 4 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 5 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 6 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 7 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 8 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 9 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 10 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 11 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 12 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 13 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 14 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 15 + [1]),
         ([0, -1, 1, -2, 2], [0] * 16 + [1]),
+        ([0, -1, 1, -2, 2], [0] * 16 + [2]),
     ],
 )
 def test_high_degree_polynomial(data, polynom):
     # special context for higher depth
-    context = ts.context(ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 60])
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 40, 60])
     context.global_scale = pow(2, 40)
     ct = ts.ckks_vector(context, data)
     expected = [np.polyval(polynom[::-1], x) for x in data]
     result = ct.polyval(polynom)
 
     decrypted_result = result.decrypt()
-    assert _almost_equal(decrypted_result, expected, 1), "Polynomial evaluation is incorrect."
+    if len(polynom) >= 13:
+        # we allow greater error since some polynomial has terms with a high exponent
+        error_tolerance = -1
+    else:
+        error_tolerance = 1
+    assert _almost_equal(decrypted_result, expected, error_tolerance), "Polynomial evaluation is incorrect."
 
 
 @pytest.mark.parametrize(
