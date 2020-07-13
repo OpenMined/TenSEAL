@@ -426,7 +426,7 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
             "the coefficients vector need to have at least one element");
     }
 
-    int degree = coefficients.size() - 1;
+    int degree = static_cast<int>(coefficients.size()) - 1;
     while (degree >= 0) {
         if (coefficients[degree] == 0.0)
             degree--;
