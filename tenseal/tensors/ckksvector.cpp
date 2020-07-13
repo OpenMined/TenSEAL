@@ -115,9 +115,15 @@ CKKSVector CKKSVector::power(int power) {
 }
 
 CKKSVector& CKKSVector::power_inplace(int power) {
-    if (power <= 0) {
-        throw invalid_argument(
-            "can't compute CKKSVector to a null or a negative power");
+    if (power < 0) {
+        throw invalid_argument("can't compute CKKSVector to a negative power");
+    }
+
+    // if the power is zero, return a new encrypted vector of ones
+    if (power == 0) {
+        vector<double> ones(this->size(), 1);
+        *this = CKKSVector(this->context, ones, this->init_scale);
+        return *this;
     }
 
     if (power == 1) {
