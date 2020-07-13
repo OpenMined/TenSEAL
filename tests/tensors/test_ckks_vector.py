@@ -44,6 +44,96 @@ def test_negate_inplace(context, plain_vec):
 
 
 @pytest.mark.parametrize(
+    "plain_vec, power",
+    [
+        ([], 2),
+        ([0], 3),
+        ([1, -1, 2, -2], 1),
+        ([1, -1, 2, -2], 2),
+        ([1, -1, 2, -2], 3),
+        ([1, -2, 3, -4], 1),
+        ([1, -2, 3, -4], 2),
+        ([1, -2, 3, -4], 3),
+    ],
+)
+def test_power(context, plain_vec, power):
+    ckks_vec = ts.ckks_vector(context, plain_vec)
+    expected = [np.power(v, power) for v in plain_vec]
+    new_vec = ckks_vec ** power
+    decrypted_result = new_vec.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Decryption of vector is incorrect"
+    assert _almost_equal(ckks_vec.decrypt(), plain_vec, 1), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "plain_vec, power",
+    [
+        ([], 2),
+        ([0], 3),
+        ([1, -1, 2, -2], 1),
+        ([1, -1, 2, -2], 2),
+        ([1, -1, 2, -2], 3),
+        ([1, -2, 3, -4], 1),
+        ([1, -2, 3, -4], 2),
+        ([1, -2, 3, -4], 3),
+    ],
+)
+def test_power_inplace(context, plain_vec, power):
+    ckks_vec = ts.ckks_vector(context, plain_vec)
+    expected = [np.power(v, power) for v in plain_vec]
+    ckks_vec **= power
+    decrypted_result = ckks_vec.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Decryption of vector is incorrect"
+
+
+@pytest.mark.parametrize(
+    "plain_vec",
+    [
+        [],
+        [0],
+        [1],
+        [2],
+        [1, -1, 2, -2],
+        [1, -1, 6, -2],
+        [2, 1, -2, -2],
+        [1, -2, 3, -4],
+        [3, -2, 5, -4],
+        [1, -4, 3, 5],
+    ],
+)
+def test_square(context, plain_vec):
+    ckks_vec = ts.ckks_vector(context, plain_vec)
+    expected = [np.power(v, 2) for v in plain_vec]
+    new_vec = ckks_vec.square()
+    decrypted_result = new_vec.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Decryption of vector is incorrect"
+    assert _almost_equal(ckks_vec.decrypt(), plain_vec, 1), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "plain_vec",
+    [
+        [],
+        [0],
+        [1],
+        [2],
+        [1, -1, 2, -2],
+        [1, -1, 6, -2],
+        [2, 1, -2, -2],
+        [1, -2, 3, -4],
+        [3, -2, 5, -4],
+        [1, -4, 3, 5],
+    ],
+)
+def test_square_inplace(context, plain_vec):
+    ckks_vec = ts.ckks_vector(context, plain_vec)
+    expected = [np.power(v, 2) for v in plain_vec]
+    ckks_vec.square_()
+    decrypted_result = ckks_vec.decrypt()
+    assert _almost_equal(decrypted_result, expected, 1), "Decryption of vector is incorrect"
+
+
+@pytest.mark.parametrize(
     "vec1, vec2",
     [
         ([], []),
