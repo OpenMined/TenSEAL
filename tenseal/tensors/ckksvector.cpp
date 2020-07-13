@@ -84,6 +84,62 @@ CKKSVector& CKKSVector::negate_inplace() {
     return *this;
 }
 
+CKKSVector CKKSVector::square() {
+    CKKSVector new_vector = *this;
+    new_vector.square_inplace();
+
+    return new_vector;
+}
+
+CKKSVector& CKKSVector::square_inplace() {
+    this->context->evaluator->square_inplace(this->ciphertext);
+
+    if (this->context->auto_relin()) {
+        this->context->evaluator->relinearize_inplace(
+            this->ciphertext, *this->context->relin_keys());
+    }
+
+    if (this->context->auto_rescale()) {
+        this->context->evaluator->rescale_to_next_inplace(this->ciphertext);
+        this->ciphertext.scale() = this->init_scale;
+    }
+
+    return *this;
+}
+
+CKKSVector CKKSVector::power(int power) {
+    CKKSVector new_vector = *this;
+    new_vector.power_inplace(power);
+
+    return new_vector;
+}
+
+CKKSVector& CKKSVector::power_inplace(int power) {
+    if (power <= 0) {
+        throw invalid_argument(
+            "can't compute CKKSVector to a null or a negative power");
+    }
+
+    if (power == 1) {
+        return *this;
+    }
+
+    if (power == 2) {
+        this->square_inplace();
+        return *this;
+    }
+
+    int closest_power_of_2 = 1 << static_cast<int>(floor(log2(power)));
+    power -= closest_power_of_2;
+    if (power == 0) {
+        this->power_inplace(closest_power_of_2 / 2)
+            .mul_inplace(this->power(closest_power_of_2 / 2));
+    } else {
+        this->power_inplace(power).mul_inplace(this->power(closest_power_of_2));
+    }
+    return *this;
+}
+
 CKKSVector CKKSVector::add(CKKSVector to_add) {
     CKKSVector new_vector = *this;
     new_vector.add_inplace(to_add);
