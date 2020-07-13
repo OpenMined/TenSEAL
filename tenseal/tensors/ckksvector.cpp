@@ -421,21 +421,24 @@ CKKSVector CKKSVector::polyval(const vector<double>& coefficients) {
     return new_vector.polyval_inplace(coefficients);
 }
 
-CKKSVector get_x_degree(int degree, map<int, CKKSVector>& terms) {
-    // check if degree is power of two
-    if ((degree & (degree - 1)) == 0) {
-        return terms.find(degree)->second;
-    }
-    // check if the term is already computed
-    auto term = terms.find(degree);
-    if (term != terms.end()) {
-        return term->second;
+CKKSVector compute_polynomial_term(int degree, double coeff,
+                                   const vector<CKKSVector>& x_squares) {
+    if (degree < 1) {
+        throw invalid_argument("degree must be greater or equal to 1");
     }
 
     int closest_power_of_2 = static_cast<int>(floor(log2(degree)));
-    CKKSVector x = terms.find(closest_power_of_2)->second;
-    x.mul_inplace(get_x_degree(degree - closest_power_of_2, terms));
-    terms.insert(make_pair(degree, x));
+    int new_degree = degree - (1 << closest_power_of_2);
+    CKKSVector x = x_squares[closest_power_of_2];  // x^(2^closest_power_of_2)
+
+    if (new_degree == 0 && coeff != 1.0) {
+        // x^(2^closest_power_of_2) * coeff
+        x.mul_plain_inplace(coeff);
+    } else if (new_degree != 0) {
+        // x^(2^closest_power_of_2) * x^(new_degree) * coeff
+        x.mul_inplace(compute_polynomial_term(new_degree, coeff, x_squares));
+    }
+
     return x;
 }
 
@@ -446,7 +449,6 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     }
 
     int degree = coefficients.size() - 1;
-
     while (degree >= 0) {
         if (coefficients[degree] == 0.0)
             degree--;
@@ -463,58 +465,34 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
         return *this;
     }
 
-    // set accumulator to the constant coefficient
-    CKKSVector acc = *this;
+    // set result accumulator to the constant coefficient
+    CKKSVector result = *this;
     Plaintext const_coeff;
-
     this->context->encode<CKKSEncoder>(coefficients[0], const_coeff,
                                        this->init_scale);
-    this->context->encryptor->encrypt(const_coeff, acc.ciphertext);
+    this->context->encryptor->encrypt(const_coeff, result.ciphertext);
 
-    // coefficients[1] * x
-    if (degree >= 1 && coefficients[1] != 0.0) {
-        if (coefficients[1] == 1.0)
-            acc.add_inplace(*this);
-        else
-            acc.add_inplace(this->mul_plain(coefficients[1]));
-    }
-
-    // doesn't need to continue
-    if (degree < 2) {
-        this->ciphertext = acc.ciphertext;
-        return *this;
-    }
-
-    // coefficients[2] * x^2 + ... + coefficients[degree] * x^(degree)
-    map<int, CKKSVector> power_x;
+    // pre-compute squares of x
     CKKSVector x = *this;
-    power_x.insert(make_pair(1, x));
-    for (int i = 1; i <= static_cast<int>(floor(log2(degree))); i++) {
+    int max_square = static_cast<int>(floor(log2(degree)));
+    cout << "max square " << max_square << endl;
+    vector<CKKSVector> x_squares;
+    x_squares.reserve(max_square + 1);
+    x_squares.push_back(x);  // x
+    for (int i = 0; i < max_square; i++) {
         // TODO: use square
         x.mul_inplace(x);
-        power_x.insert(make_pair(1 << i, x));
+        x_squares.push_back(x);  // x^(2^(i+1))
     }
 
-    for (int i = 2; i <= degree; i++) {
+    // coefficients[1] * x + ... + coefficients[degree] * x^(degree)
+    for (int i = 1; i <= degree; i++) {
         if (coefficients[i] == 0.0) continue;
-
-        if (coefficients[i] == 1.0) {
-            x = get_x_degree(i, power_x);
-            acc.add_inplace(x);
-        } else {
-            // check if the degree is power of two
-            if ((i & (i - 1)) == 0) {
-                x = get_x_degree(i, power_x);
-                x.mul_plain_inplace(coefficients[i]);
-            } else {  // first multiply x (this) with coeff to reduce depth
-                x = get_x_degree(i - 1, power_x);
-                x.mul_inplace(this->mul_plain(coefficients[i]));
-            }
-            acc.add_inplace(x);
-        }
+        x = compute_polynomial_term(i, coefficients[i], x_squares);
+        result.add_inplace(x);
     }
 
-    this->ciphertext = acc.ciphertext;
+    this->ciphertext = result.ciphertext;
     return *this;
 }
 
