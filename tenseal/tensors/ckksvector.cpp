@@ -510,8 +510,7 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     x_squares.reserve(max_square + 1);
     x_squares.push_back(x);  // x
     for (int i = 1; i <= max_square; i++) {
-        // TODO: use square
-        x.mul_inplace(x);
+        x.square_inplace();
         x_squares.push_back(x);  // x^(2^i)
     }
 
