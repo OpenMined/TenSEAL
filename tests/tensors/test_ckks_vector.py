@@ -903,7 +903,9 @@ def test_polynomial(context, data, polynom):
 )
 def test_high_degree_polynomial(data, polynom):
     # special context for higher depth
-    context = ts.context(ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 40, 60])
+    context = ts.context(
+        ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 40, 60]
+    )
     context.global_scale = pow(2, 40)
     ct = ts.ckks_vector(context, data)
     expected = [np.polyval(polynom[::-1], x) for x in data]
@@ -915,7 +917,9 @@ def test_high_degree_polynomial(data, polynom):
         error_tolerance = -1
     else:
         error_tolerance = 1
-    assert _almost_equal(decrypted_result, expected, error_tolerance), "Polynomial evaluation is incorrect."
+    assert _almost_equal(
+        decrypted_result, expected, error_tolerance
+    ), "Polynomial evaluation is incorrect."
 
 
 @pytest.mark.parametrize(
