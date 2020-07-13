@@ -450,14 +450,12 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     // pre-compute squares of x
     CKKSVector x = *this;
     int max_square = static_cast<int>(floor(log2(degree)));
-    cout << "max square " << max_square << endl;
-    vector<CKKSVector> x_squares;
-    x_squares.reserve(max_square + 1);
-    x_squares.push_back(x);  // x
-    for (int i = 0; i < max_square; i++) {
+    vector<CKKSVector> x_squares(max_square + 1);
+    x_squares[0] = x;  // x
+    for (int i = 1; i <= max_square; i++) {
         // TODO: use square
         x.mul_inplace(x);
-        x_squares.push_back(x);  // x^(2^(i+1))
+        x_squares[i] = x;  // x^(2^(i+1))
     }
 
     // coefficients[1] * x + ... + coefficients[degree] * x^(degree)
