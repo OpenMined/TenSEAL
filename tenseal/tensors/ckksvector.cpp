@@ -107,18 +107,14 @@ CKKSVector& CKKSVector::square_inplace() {
     return *this;
 }
 
-CKKSVector CKKSVector::power(int power) {
+CKKSVector CKKSVector::power(unsigned int power) {
     CKKSVector new_vector = *this;
     new_vector.power_inplace(power);
 
     return new_vector;
 }
 
-CKKSVector& CKKSVector::power_inplace(int power) {
-    if (power < 0) {
-        throw invalid_argument("can't compute CKKSVector to a negative power");
-    }
-
+CKKSVector& CKKSVector::power_inplace(unsigned int power) {
     // if the power is zero, return a new encrypted vector of ones
     if (power == 0) {
         vector<double> ones(this->size(), 1);
@@ -138,8 +134,7 @@ CKKSVector& CKKSVector::power_inplace(int power) {
     int closest_power_of_2 = 1 << static_cast<int>(floor(log2(power)));
     power -= closest_power_of_2;
     if (power == 0) {
-        this->power_inplace(closest_power_of_2 / 2)
-            .mul_inplace(this->power(closest_power_of_2 / 2));
+        this->power_inplace(closest_power_of_2 / 2).square_inplace();
     } else {
         this->power_inplace(power).mul_inplace(this->power(closest_power_of_2));
     }

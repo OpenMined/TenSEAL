@@ -66,8 +66,8 @@ class CKKSVector {
     /*
     Compute the power of the CKKSVector with minimal multiplication depth.
     */
-    CKKSVector power(int power);
-    CKKSVector& power_inplace(int power);
+    CKKSVector power(unsigned int power);
+    CKKSVector& power_inplace(unsigned int power);
 
     /*
     Encrypted evaluation function operates on two encrypted vectors and
