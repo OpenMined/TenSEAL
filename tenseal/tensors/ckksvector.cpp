@@ -136,7 +136,8 @@ CKKSVector& CKKSVector::power_inplace(unsigned int power) {
     if (power == 0) {
         this->power_inplace(closest_power_of_2 / 2).square_inplace();
     } else {
-        this->power_inplace(power).mul_inplace(this->power(closest_power_of_2));
+        CKKSVector closest_pow2_vector = this->power(closest_power_of_2);
+        this->power_inplace(power).mul_inplace(closest_pow2_vector);
     }
     return *this;
 }
