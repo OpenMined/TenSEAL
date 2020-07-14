@@ -65,12 +65,12 @@ class BFVVector {
     either addition, substraction or multiplication in an element-wise fashion.
     in_place functions return a reference to the same object.
     */
-    BFVVector add_plain(vector<int64_t> to_add);
-    BFVVector& add_plain_inplace(vector<int64_t> to_add);
-    BFVVector sub_plain(vector<int64_t> to_sub);
-    BFVVector& sub_plain_inplace(vector<int64_t> to_sub);
-    BFVVector mul_plain(vector<int64_t> to_mul);
-    BFVVector& mul_plain_inplace(vector<int64_t> to_mul);
+    BFVVector add_plain(const vector<int64_t>& to_add);
+    BFVVector& add_plain_inplace(const vector<int64_t>& to_add);
+    BFVVector sub_plain(const vector<int64_t>& to_sub);
+    BFVVector& sub_plain_inplace(const vector<int64_t>& to_sub);
+    BFVVector mul_plain(const vector<int64_t>& to_mul);
+    BFVVector& mul_plain_inplace(const vector<int64_t>& to_mul);
 
    private:
     size_t _size;
