@@ -212,10 +212,6 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         )",
              py::arg("poly_modulus_degree"), py::arg("plain_modulus"),
              py::arg("coeff_mod_bit_sizes") = vector<int>())
-        .def("load", py::overload_cast<const char *>(&TenSEALContext::Create))
-        .def("save_public", &TenSEALContext::save_public, "save public keys.")
-        .def("save_private", &TenSEALContext::save_private,
-             "save private keys.")
         .def("public_key", &TenSEALContext::public_key)
         .def("secret_key", &TenSEALContext::secret_key)
         .def("relin_keys", &TenSEALContext::relin_keys)

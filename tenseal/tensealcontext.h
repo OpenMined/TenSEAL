@@ -4,6 +4,7 @@
 #include <seal/seal.h>
 
 #include "tenseal/tensealencoder.h"
+#include "tenseal/proto/tensealcontext.pb.h"
 #include "tenseal/utils/context.h"
 
 namespace tenseal {
@@ -38,7 +39,6 @@ class TenSEALContext {
                                              size_t poly_modulus_degree,
                                              uint64_t plain_modulus,
                                              vector<int> coeff_mod_bit_sizes);
-    static shared_ptr<TenSEALContext> Create(const char* filename);
 
     /*
     Returns a pointer to the public key
@@ -69,13 +69,6 @@ class TenSEALContext {
 
     bool is_public();
     bool is_private();
-
-    /*
-    Save the attributes needed to restore the context later, public is for not
-    saving the secret_key.
-    */
-    void save_public(const char* filename);
-    void save_private(const char* filename);
 
     /*
     Returns the wrapped SEALContext object.
@@ -144,12 +137,6 @@ class TenSEALContext {
         flag_auto_relin | flag_auto_rescale | flag_auto_mod_switch;
 
     TenSEALContext(EncryptionParameters parms);
-    TenSEALContext(const char* filename);
-
-    /*
-    Load the context's attribute to restore a pre-saved TenSEALContext.
-    */
-    void load(const char* filename);
 };
 
 }  // namespace tenseal

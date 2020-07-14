@@ -25,14 +25,6 @@ TenSEALContext::TenSEALContext(EncryptionParameters parms) {
     this->generate_relin_keys();
 }
 
-TenSEALContext::TenSEALContext(const char* filename) { this->load(filename); }
-
-void TenSEALContext::load(const char* filename) {}
-
-void TenSEALContext::save_public(const char* filename) {}
-
-void TenSEALContext::save_private(const char* filename) {}
-
 shared_ptr<TenSEALContext> TenSEALContext::Create(
     scheme_type scheme, size_t poly_modulus_degree, uint64_t plain_modulus,
     vector<int> coeff_mod_bit_sizes) {
@@ -53,10 +45,6 @@ shared_ptr<TenSEALContext> TenSEALContext::Create(
     }
 
     return shared_ptr<TenSEALContext>(new TenSEALContext(parms));
-}
-
-shared_ptr<TenSEALContext> TenSEALContext::Create(const char* filename) {
-    return shared_ptr<TenSEALContext>(new TenSEALContext(filename));
 }
 
 shared_ptr<PublicKey> TenSEALContext::public_key() { return this->_public_key; }
