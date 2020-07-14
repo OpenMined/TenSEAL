@@ -5,10 +5,8 @@ package tenseal;
 
 //TenSEAL Private parameters
 message TenSEALPrivateProto {
-    // Bool to validate if the context is secret
-    bool is_secret = 1;
     // Serialized secret key
-    bytes secret_key = 2;
+    bytes secret_key = 1;
 }
 
 //TenSEAL Context parameters
@@ -20,5 +18,5 @@ message TenSEALContextProto {
     // Serialized public key
     bytes public_key = 3;
     // Optional private members
-    TenSEALPrivateProto private = 4;
+    TenSEALPrivateProto private_context = 4;
 }

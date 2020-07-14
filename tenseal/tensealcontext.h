@@ -67,8 +67,8 @@ class TenSEALContext {
     void make_context_public(bool generate_galois_keys,
                              bool generate_relin_keys);
 
-    bool is_public();
-    bool is_private();
+    bool is_public() const;
+    bool is_private() const;
 
     /*
     Returns the wrapped SEALContext object.
@@ -116,6 +116,9 @@ class TenSEALContext {
     bool auto_rescale();
     bool auto_mod_switch();
 
+    inline bool save(std::ostream& stream) const;
+    inline void load(std::istream& stream);
+
    private:
     EncryptionParameters _parms;
     shared_ptr<SEALContext> _context;
@@ -137,7 +140,9 @@ class TenSEALContext {
         flag_auto_relin | flag_auto_rescale | flag_auto_mod_switch;
 
     TenSEALContext(EncryptionParameters parms);
+    void base_setup(EncryptionParameters parms);
+    void keys_setup(optional<PublicKey> public_key = {},
+                    optional<SecretKey> secret_key = {});
 };
-
 }  // namespace tenseal
 #endif
