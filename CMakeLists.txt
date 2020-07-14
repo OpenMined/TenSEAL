@@ -25,6 +25,16 @@ add_subdirectory(tenseal/proto)
 ################################
 # Core
 ################################
+set(TENSEAL_PROTO_BASEDIR tenseal/proto)
+file(GLOB PROTOBUF_FILELIST ${TENSEAL_PROTO_BASEDIR}/*.proto)
+foreach( proto_file ${PROTOBUF_FILELIST} )
+   get_filename_component(proto_name ${proto_file} NAME_WE)
+   get_filename_component(proto_path ${TENSEAL_PROTO_BASEDIR} ABSOLUTE)
+   set_source_files_properties("${proto_path}/${proto_name}.pb.cc"
+                               "${proto_path}/${proto_name}.pb.h"
+                               PROPERTIES GENERATED TRUE)
+endforeach()
+
 set(TENSEAL_BASEDIR tenseal)
 set(SOURCES
     ${TENSEAL_BASEDIR}/tensealcontext.cpp
