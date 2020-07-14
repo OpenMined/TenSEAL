@@ -1,6 +1,7 @@
 #include "tenseal/tensealcontext.h"
 
-#include <seal/seal.h>
+#include "seal/seal.h"
+#include "tenseal/serialization.h"
 
 namespace tenseal {
 
