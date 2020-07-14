@@ -57,9 +57,13 @@ def test_negate_inplace(context, plain_vec):
         ([1, -2, 3, -4], 2),
         ([1, -2, 3, -4], 3),
         ([1, -2, 3, -4], 4),
+        ([1, -2, 3, -4], 5),
+        ([1, -2, 3, -4], 6),
     ],
 )
 def test_power(context, plain_vec, power):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 60])
+    context.global_scale = pow(2, 40)
     ckks_vec = ts.ckks_vector(context, plain_vec)
     expected = [np.power(v, power) for v in plain_vec]
     new_vec = ckks_vec ** power
@@ -82,9 +86,13 @@ def test_power(context, plain_vec, power):
         ([1, -2, 3, -4], 2),
         ([1, -2, 3, -4], 3),
         ([1, -2, 3, -4], 4),
+        ([1, -2, 3, -4], 5),
+        ([1, -2, 3, -4], 6),
     ],
 )
 def test_power_inplace(context, plain_vec, power):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 60])
+    context.global_scale = pow(2, 40)
     ckks_vec = ts.ckks_vector(context, plain_vec)
     expected = [np.power(v, power) for v in plain_vec]
     ckks_vec **= power
