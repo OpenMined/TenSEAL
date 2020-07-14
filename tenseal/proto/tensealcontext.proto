@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package tenseal;
+
+
+//TenSEAL Private parameters
+message TenSEALPrivateProto {
+    // Bool to validate if the context is secret
+    bool is_secret = 1;
+    // Serialized secret key
+    bytes secret_key = 2;
+}
+
+//TenSEAL Context parameters
+message TenSEALContextProto {
+    // Serialized homomorphic encryption parameters
+    bytes encryption_parameters = 1;
+    // Mask of internal flags
+    uint32 auto_flags = 2;
+    // Serialized public key
+    bytes public_key = 3;
+    // Optional private members
+    TenSEALPrivateProto private = 4;
+}

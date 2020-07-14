@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+add_subdirectory(tenseal/proto)
 
 # For windows we should build SEAL using Microsoft Visual Studio
 # then link the library
@@ -47,7 +48,7 @@ set(SEALAPI_SOURCES
 pybind11_add_module(_sealapi_cpp ${SEALAPI_SOURCES})
 
 if(NOT WIN32)
-    target_link_libraries(tenseal PRIVATE seal)
+    target_link_libraries(tenseal PRIVATE seal tenseal_proto)
     target_link_libraries(_tenseal_cpp PRIVATE seal)
     target_link_libraries(_sealapi_cpp PRIVATE seal)
 endif()
