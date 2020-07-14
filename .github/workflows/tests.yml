@@ -23,7 +23,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install cmake clang
+        sudo apt install cmake clang protobuf-compiler
         python -m pip install --upgrade pip
         pip install -r requirements_dev.txt
     - name: Lint with flake8
@@ -72,7 +72,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install cmake clang
+        sudo apt install cmake clang protobuf-compiler
         python -m pip install --upgrade pip
         pip install -r requirements_dev.txt
     - name: Lint with flake8
