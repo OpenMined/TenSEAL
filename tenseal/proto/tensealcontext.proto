@@ -7,6 +7,10 @@ package tenseal;
 message TenSEALPrivateProto {
     // Serialized secret key
     bytes secret_key = 1;
+    // Relin keys flag
+    bool relin_keys = 2;
+    // Galois keys flag
+    bool galois_keys = 3;
 }
 
 //TenSEAL Context parameters

@@ -226,15 +226,16 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("generate_galois_keys",
              py::overload_cast<>(&TenSEALContext::generate_galois_keys),
              "Generate Galois keys using the secret key")
-        .def(
-            "generate_galois_keys",
-            py::overload_cast<SecretKey>(&TenSEALContext::generate_galois_keys),
-            "Generate Galois keys using the secret key")
+        .def("generate_galois_keys",
+             py::overload_cast<const SecretKey &>(
+                 &TenSEALContext::generate_galois_keys),
+             "Generate Galois keys using the secret key")
         .def("generate_relin_keys",
              py::overload_cast<>(&TenSEALContext::generate_relin_keys),
              "Generate Relinearization keys using the secret key")
         .def("generate_relin_keys",
-             py::overload_cast<SecretKey>(&TenSEALContext::generate_relin_keys),
+             py::overload_cast<const SecretKey &>(
+                 &TenSEALContext::generate_relin_keys),
              "Generate Relinearization keys using the secret key");
 
     // SEAL objects

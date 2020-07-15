@@ -39,26 +39,28 @@ class TenSEALContext {
                                              size_t poly_modulus_degree,
                                              uint64_t plain_modulus,
                                              vector<int> coeff_mod_bit_sizes);
+    static shared_ptr<TenSEALContext> Create(istream& stream);
+    static shared_ptr<TenSEALContext> Create(const std::string& input);
 
     /*
     Returns a pointer to the public key
     */
-    shared_ptr<PublicKey> public_key();
-    shared_ptr<SecretKey> secret_key();
-    shared_ptr<RelinKeys> relin_keys();
-    shared_ptr<GaloisKeys> galois_keys();
+    shared_ptr<PublicKey> public_key() const;
+    shared_ptr<SecretKey> secret_key() const;
+    shared_ptr<RelinKeys> relin_keys() const;
+    shared_ptr<GaloisKeys> galois_keys() const;
 
     /*
     Generate Galois keys using the secret key
     */
     void generate_galois_keys();
-    void generate_galois_keys(SecretKey secret_key);
+    void generate_galois_keys(const SecretKey& secret_key);
 
     /*
     Generate Relinearization keys using the secret key
     */
     void generate_relin_keys();
-    void generate_relin_keys(SecretKey secret_key);
+    void generate_relin_keys(const SecretKey& secret_key);
 
     /*
     Generate Galois and Relinearization keys if needed, then destroy the
@@ -116,8 +118,9 @@ class TenSEALContext {
     bool auto_rescale();
     bool auto_mod_switch();
 
-    inline bool save(std::ostream& stream) const;
-    inline void load(std::istream& stream);
+    bool save(std::ostream& stream) const;
+    std::string save() const;
+    void load(std::istream& stream);
 
    private:
     EncryptionParameters _parms;
@@ -140,9 +143,13 @@ class TenSEALContext {
         flag_auto_relin | flag_auto_rescale | flag_auto_mod_switch;
 
     TenSEALContext(EncryptionParameters parms);
+    TenSEALContext(istream& stream);
+
     void base_setup(EncryptionParameters parms);
     void keys_setup(optional<PublicKey> public_key = {},
-                    optional<SecretKey> secret_key = {});
+                    optional<SecretKey> secret_key = {},
+                    bool generate_relin_keys = true,
+                    bool generate_galois_keys = false);
 };
 }  // namespace tenseal
 #endif

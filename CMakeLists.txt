@@ -60,7 +60,7 @@ pybind11_add_module(_sealapi_cpp ${SEALAPI_SOURCES})
 
 if(NOT WIN32)
     target_link_libraries(tenseal PRIVATE seal tenseal_proto)
-    target_link_libraries(_tenseal_cpp PRIVATE seal tenseal_proto)
+    target_link_libraries(_tenseal_cpp PRIVATE seal)
     target_link_libraries(_sealapi_cpp PRIVATE seal)
 endif()
 
@@ -79,6 +79,6 @@ if(${BUILD_TEST})
         ${TENSEAL_TESTS_BASEDIR}/tensors/bfvvector_test.cpp
     )
     add_executable(tenseal_tests ${TESTING_SOURCES} ${SOURCES} )
-    target_link_libraries(tenseal_tests PRIVATE gtest gtest_main seal tenseal)
+    target_link_libraries(tenseal_tests PRIVATE gtest gtest_main seal tenseal tenseal_proto)
     add_test( tenseal_tests tenseal_tests )
 endif()
