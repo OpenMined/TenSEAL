@@ -21,6 +21,7 @@ endif()
 
 add_subdirectory(third_party/pybind11)
 add_subdirectory(tenseal/proto)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 ################################
 # Core
