@@ -19,8 +19,10 @@ message TenSEALContextProto {
     bytes encryption_parameters = 1;
     // Mask of internal flags
     uint32 auto_flags = 2;
+    // Optional scale
+    double scale = 3;
     // Serialized public key
-    bytes public_key = 3;
+    bytes public_key = 4;
     // Optional private members
-    TenSEALPrivateProto private_context = 4;
+    TenSEALPrivateProto private_context = 5;
 }
