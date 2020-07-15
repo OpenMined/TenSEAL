@@ -52,7 +52,7 @@ jobs:
         pytest -v --ignore=tests/sealapi ./tests
     - name: Test with gtest
       run: |
-        cd tensel/proto
+        cd tenseal/proto
         cmake . && make
         cd -
 
