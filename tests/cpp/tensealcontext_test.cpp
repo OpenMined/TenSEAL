@@ -7,7 +7,11 @@ namespace tenseal {
 
 using namespace ::testing;
 
-class TenSEALContextSanityTest : public ::testing::Test {};
+class TenSEALContextSanityTest : public ::testing::Test {
+   protected:
+    void SetUp() {}
+    void TearDown() {}
+};
 
 TEST_F(TenSEALContextSanityTest, TestCreateFail) {
     EXPECT_THROW(
@@ -61,6 +65,9 @@ TEST_F(TenSEALContextSanityTest, TestSerialization) {
 }
 
 class TenSEALContextTest : public ::testing::TestWithParam</*serialize=*/bool> {
+   protected:
+    void SetUp() {}
+    void TearDown() {}
 };
 
 TEST_P(TenSEALContextTest, TestCreateBFV) {
