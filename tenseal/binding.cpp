@@ -86,7 +86,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("save_size", &CKKSVector::save_size)
         .def("neg", &CKKSVector::negate)
         .def("neg_", &CKKSVector::negate_inplace)
-        .def("neg_inplace", &CKKSVector::negate_inplace)
+        .def("square", &CKKSVector::square)
+        .def("square_", &CKKSVector::square_inplace)
+        .def("pow", &CKKSVector::power)
+        .def("pow_", &CKKSVector::power_inplace)
         .def("add", &CKKSVector::add)
         .def("add_", &CKKSVector::add_inplace)
         .def("add_plain", py::overload_cast<double>(&CKKSVector::add_plain))
@@ -130,6 +133,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("mm_", &CKKSVector::matmul_plain_inplace)
         // python arithmetic
         .def("__neg__", &CKKSVector::negate)
+        .def("__pow__", &CKKSVector::power)
+        .def("__ipow__", &CKKSVector::power_inplace)
         .def("__add__", &CKKSVector::add)
         .def("__add__", py::overload_cast<double>(&CKKSVector::add_plain))
         .def("__add__",

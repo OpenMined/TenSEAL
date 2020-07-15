@@ -84,6 +84,64 @@ CKKSVector& CKKSVector::negate_inplace() {
     return *this;
 }
 
+CKKSVector CKKSVector::square() {
+    CKKSVector new_vector = *this;
+    new_vector.square_inplace();
+
+    return new_vector;
+}
+
+CKKSVector& CKKSVector::square_inplace() {
+    this->context->evaluator->square_inplace(this->ciphertext);
+
+    if (this->context->auto_relin()) {
+        this->context->evaluator->relinearize_inplace(
+            this->ciphertext, *this->context->relin_keys());
+    }
+
+    if (this->context->auto_rescale()) {
+        this->context->evaluator->rescale_to_next_inplace(this->ciphertext);
+        this->ciphertext.scale() = this->init_scale;
+    }
+
+    return *this;
+}
+
+CKKSVector CKKSVector::power(unsigned int power) {
+    CKKSVector new_vector = *this;
+    new_vector.power_inplace(power);
+
+    return new_vector;
+}
+
+CKKSVector& CKKSVector::power_inplace(unsigned int power) {
+    // if the power is zero, return a new encrypted vector of ones
+    if (power == 0) {
+        vector<double> ones(this->size(), 1);
+        *this = CKKSVector(this->context, ones, this->init_scale);
+        return *this;
+    }
+
+    if (power == 1) {
+        return *this;
+    }
+
+    if (power == 2) {
+        this->square_inplace();
+        return *this;
+    }
+
+    int closest_power_of_2 = 1 << static_cast<int>(floor(log2(power)));
+    power -= closest_power_of_2;
+    if (power == 0) {
+        this->power_inplace(closest_power_of_2 / 2).square_inplace();
+    } else {
+        CKKSVector closest_pow2_vector = this->power(closest_power_of_2);
+        this->power_inplace(power).mul_inplace(closest_pow2_vector);
+    }
+    return *this;
+}
+
 CKKSVector CKKSVector::add(CKKSVector to_add) {
     CKKSVector new_vector = *this;
     new_vector.add_inplace(to_add);
@@ -454,8 +512,7 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     x_squares.reserve(max_square + 1);
     x_squares.push_back(x);  // x
     for (int i = 1; i <= max_square; i++) {
-        // TODO: use square
-        x.mul_inplace(x);
+        x.square_inplace();
         x_squares.push_back(x);  // x^(2^i)
     }
 
