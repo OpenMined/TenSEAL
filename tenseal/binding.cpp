@@ -236,7 +236,17 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("generate_relin_keys",
              py::overload_cast<const SecretKey &>(
                  &TenSEALContext::generate_relin_keys),
-             "Generate Relinearization keys using the secret key");
+             "Generate Relinearization keys using the secret key")
+        .def("__copy__",
+             [](const std::shared_ptr<TenSEALContext> &self) {
+                 auto buff = self->save();
+                 return TenSEALContext::Create(buff);
+             })
+        .def("__deepcopy__",
+             [](const std::shared_ptr<TenSEALContext> &self, py::dict) {
+                 auto buff = self->save();
+                 return TenSEALContext::Create(buff);
+             });
 
     // SEAL objects
 
