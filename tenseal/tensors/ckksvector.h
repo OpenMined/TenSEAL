@@ -58,6 +58,18 @@ class CKKSVector {
     CKKSVector& negate_inplace();
 
     /*
+    Compute the square of the CKKSVector.
+    */
+    CKKSVector square();
+    CKKSVector& square_inplace();
+
+    /*
+    Compute the power of the CKKSVector with minimal multiplication depth.
+    */
+    CKKSVector power(unsigned int power);
+    CKKSVector& power_inplace(unsigned int power);
+
+    /*
     Encrypted evaluation function operates on two encrypted vectors and
     returns a new CKKSVector which is the result of either addition,
     substraction or multiplication in an element-wise fashion. in_place
