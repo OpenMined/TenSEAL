@@ -109,6 +109,7 @@ For support in using this library, please join the **#lib_tenseal** Slack channe
 ## Tutorials
 
 - [Getting Started](tutorials%2FTutorial%200%20-%20Getting%20Started.ipynb)
+- [Tutorial 1 - Training and Evaluation of Logistic Regression on Encrypted Data](tutorials%2FTutorial%201%20-%20Training%20and%20Evaluation%20of%20Logistic%20Regression%20on%20Encrypted%20Data.ipynb)
 
 ## License
 
