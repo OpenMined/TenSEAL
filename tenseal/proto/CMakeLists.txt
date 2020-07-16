@@ -10,6 +10,3 @@ protobuf_generate_cpp(PROTO_SRC PROTO_INCL ${PROTOBUF_FILELIST})
 add_library(tenseal_proto ${PROTO_HEADER} ${PROTO_SRC})
 target_link_libraries(tenseal_proto INTERFACE ${Protobuf_LIBRARIES})
 set_property(TARGET tenseal_proto PROPERTY POSITION_INDEPENDENT_CODE ON)
-
-protobuf_generate_python(PROTO_PY ${PROTOBUF_FILELIST})
-add_custom_target(tenseal_proto_python ALL DEPENDS ${PROTO_PY})
