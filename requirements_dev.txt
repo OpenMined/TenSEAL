@@ -6,3 +6,4 @@ pytest>=5.4.1
 pytest-benchmark
 pytest-benchmark[histogram]
 setuptools>=41.0.0
+google-api-python-client

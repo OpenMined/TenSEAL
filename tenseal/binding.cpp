@@ -192,9 +192,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")
-        .def_property("global_scale",
-                      py::overload_cast<>(&TenSEALContext::global_scale),
-                      py::overload_cast<double>(&TenSEALContext::global_scale))
+        .def_property(
+            "global_scale",
+            py::overload_cast<>(&TenSEALContext::global_scale, py::const_),
+            py::overload_cast<double>(&TenSEALContext::global_scale))
         .def_property("auto_relin",
                       py::overload_cast<>(&TenSEALContext::auto_relin),
                       py::overload_cast<bool>(&TenSEALContext::auto_relin))
@@ -217,6 +218,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         )",
              py::arg("poly_modulus_degree"), py::arg("plain_modulus"),
              py::arg("coeff_mod_bit_sizes") = vector<int>())
+        .def("new",
+             py::overload_cast<const std::string &>(&TenSEALContext::Create))
         .def("public_key", &TenSEALContext::public_key)
         .def("secret_key", &TenSEALContext::secret_key)
         .def("relin_keys", &TenSEALContext::relin_keys)
@@ -242,6 +245,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              py::overload_cast<const SecretKey &>(
                  &TenSEALContext::generate_relin_keys),
              "Generate Relinearization keys using the secret key")
+        .def("save",
+             [](const TenSEALContext &obj) { return py::bytes(obj.save()); })
         .def("__copy__",
              [](const std::shared_ptr<TenSEALContext> &self) {
                  auto buff = self->save();
@@ -251,7 +256,16 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              [](const std::shared_ptr<TenSEALContext> &self, py::dict) {
                  auto buff = self->save();
                  return TenSEALContext::Create(buff);
-             });
+             })
+        .def(py::pickle(
+            [](const std::shared_ptr<TenSEALContext> &p) {
+                return py::make_tuple(p->save());
+            },
+            [](py::tuple t) {
+                if (t.size() != 1) throw std::runtime_error("Invalid state!");
+                auto p = TenSEALContext::Create(t[0].cast<std::string>());
+                return p;
+            }));
 
     // SEAL objects
 

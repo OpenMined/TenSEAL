@@ -55,12 +55,14 @@ class TenSEALContext {
     */
     void generate_galois_keys();
     void generate_galois_keys(const SecretKey& secret_key);
+    void generate_galois_keys(const std::string&);
 
     /*
     Generate Relinearization keys using the secret key
     */
     void generate_relin_keys();
     void generate_relin_keys(const SecretKey& secret_key);
+    void generate_relin_keys(const std::string&);
 
     /*
     Generate Galois and Relinearization keys if needed, then destroy the
@@ -104,7 +106,7 @@ class TenSEALContext {
     // ciphertext scale setter(CKKS)
     void global_scale(double scale);
     // ciphertext scale getter(CKKS)
-    double global_scale();
+    double global_scale() const;
 
     /*
     Switch on/off automatic relinearization, rescaling, and mod switching.

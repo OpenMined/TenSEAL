@@ -2,6 +2,7 @@
 
 #include "seal/seal.h"
 #include "tenseal/serialization.h"
+#include "tenseal/utils/scope.h"
 
 namespace tenseal {
 
@@ -132,6 +133,11 @@ void TenSEALContext::generate_galois_keys(const SecretKey& secret_key) {
         shared_ptr<GaloisKeys>(new GaloisKeys(keygen.galois_keys_local()));
 }
 
+void TenSEALContext::generate_galois_keys(const std::string& bytes) {
+    this->_galois_keys = make_shared<GaloisKeys>(
+        SEALDeserialize<GaloisKeys>(this->_context, bytes));
+}
+
 void TenSEALContext::generate_relin_keys() {
     if (this->is_public()) {
         throw invalid_argument("you need to provide a secret_key");
@@ -145,6 +151,11 @@ void TenSEALContext::generate_relin_keys(const SecretKey& secret_key) {
         shared_ptr<RelinKeys>(new RelinKeys(keygen.relin_keys_local()));
 }
 
+void TenSEALContext::generate_relin_keys(const std::string& bytes) {
+    this->_relin_keys = make_shared<RelinKeys>(
+        SEALDeserialize<RelinKeys>(this->_context, bytes));
+}
+
 void TenSEALContext::make_context_public(bool generate_galois_keys,
                                          bool generate_relin_keys) {
     // Check if already public
@@ -152,9 +163,11 @@ void TenSEALContext::make_context_public(bool generate_galois_keys,
         return;
     }
 
-    // destroy and set _secret_key and decryptor to null
-    this->_secret_key = nullptr;
-    this->decryptor = nullptr;
+    scope_guard guard([&]() {
+        // destroy and set _secret_key and decryptor to null
+        this->_secret_key = nullptr;
+        this->decryptor = nullptr;
+    });
 
     this->_galois_keys = nullptr;
     this->_relin_keys = nullptr;
@@ -187,7 +200,7 @@ shared_ptr<SEALContext> TenSEALContext::seal_context() { return _context; }
 void TenSEALContext::global_scale(double scale) {
     encoder_factory->global_scale(scale);
 }
-double TenSEALContext::global_scale() {
+double TenSEALContext::global_scale() const {
     return encoder_factory->global_scale();
 }
 
@@ -235,12 +248,22 @@ void TenSEALContext::load(std::istream& stream) {
 
     this->base_setup(
         SEALDeserialize<EncryptionParameters>(buffer.encryption_parameters()));
-    this->_auto_flags = buffer.auto_flags();
+    this->_auto_flags = buffer.public_context().auto_flags();
+    if (buffer.public_context().scale() >= 0) {
+        this->global_scale(buffer.public_context().scale());
+    }
 
-    auto public_key =
-        SEALDeserialize<PublicKey>(this->_context, buffer.public_key());
+    auto public_key = SEALDeserialize<PublicKey>(
+        this->_context, buffer.public_context().public_key());
+
     if (!buffer.has_private_context()) {
         this->keys_setup(public_key);
+        if (!buffer.public_context().galois_keys().empty()) {
+            this->generate_galois_keys(buffer.public_context().galois_keys());
+        }
+        if (!buffer.public_context().relin_keys().empty()) {
+            this->generate_relin_keys(buffer.public_context().relin_keys());
+        }
         return;
     }
 
@@ -255,9 +278,29 @@ bool TenSEALContext::save(std::ostream& stream) const {
     TenSEALContextProto buffer;
     *buffer.mutable_encryption_parameters() =
         SEALSerialize<EncryptionParameters>(this->_parms);
-    buffer.set_auto_flags(this->_auto_flags);
-    *buffer.mutable_public_key() =
+
+    TenSEALPublicProto public_buffer;
+    public_buffer.set_auto_flags(this->_auto_flags);
+    *public_buffer.mutable_public_key() =
         SEALSerialize<PublicKey>(*this->public_key());
+
+    try {
+        auto scale = this->global_scale();
+        public_buffer.set_scale(scale);
+    } catch (std::exception&) {
+        public_buffer.set_scale(-1);
+    }
+
+    if (this->is_public()) {
+        if (this->_galois_keys)
+            *public_buffer.mutable_galois_keys() =
+                SEALSerialize<GaloisKeys>(*this->_galois_keys);
+        if (this->_relin_keys)
+            *public_buffer.mutable_relin_keys() =
+                SEALSerialize<RelinKeys>(*this->_relin_keys);
+    }
+
+    *buffer.mutable_public_context() = public_buffer;
 
     if (this->is_public()) {
         return buffer.SerializeToOstream(&stream);
