@@ -72,22 +72,22 @@ def test_generate_galois_keys(duplicate):
 
 @pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
 def test_generate_relin_keys(duplicate):
+    # by default, Relin keys will be generated on context creation
     orig_context = ctx()
-    orig_context.generate_relin_keys()
-
     context = duplicate(orig_context)
     assert isinstance(context.relin_keys(), ts.RelinKeys), "Relin keys should be set"
+
+    orig_public_context = ctx()
+    orig_public_context.make_context_public(generate_galois_keys=False, generate_relin_keys=False)
+    context = duplicate(orig_public_context)
+    with pytest.raises(ValueError) as exc_info:
+        context.relin_keys()
+    assert exc_info.type is ValueError, "context shouldn't have Relin keys"
 
     orig_public_context = ctx()
     orig_public_context.make_context_public(generate_galois_keys=False, generate_relin_keys=True)
     context = duplicate(orig_public_context)
     assert isinstance(context.relin_keys(), ts.RelinKeys), "Relin keys should be set"
-
-    orig_public_context = ctx()
-    orig_public_context.make_context_public(generate_galois_keys=True, generate_relin_keys=True)
-    context = duplicate(orig_public_context)
-    assert isinstance(context.relin_keys(), ts.RelinKeys), "Relin keys should be set"
-    assert isinstance(context.galois_keys(), ts.GaloisKeys), "Galois keys should be set"
 
 
 @pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
