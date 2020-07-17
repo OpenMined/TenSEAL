@@ -49,6 +49,7 @@ def test_context_recreation(duplicate):
     context.make_context_public(generate_galois_keys=False, generate_relin_keys=False)
     assert orig_context.is_private() is True, "original TenSEALContext should stay private"
 
+
 @pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
 def test_generate_galois_keys(duplicate):
     orig_context = ctx()
@@ -69,6 +70,7 @@ def test_generate_galois_keys(duplicate):
     with pytest.raises(ValueError) as exc_info:
         orig_context.galois_keys()
     assert exc_info.type is ValueError, "orginal context shouldn't have Galois keys"
+
 
 @pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
 def test_generate_relin_keys(duplicate):
