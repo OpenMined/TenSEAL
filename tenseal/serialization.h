@@ -10,7 +10,7 @@ namespace tenseal {
 /**
  * Saves a SEAL object to a string.
  * Compatible SEAL types: Ciphertext, Plaintext, SecretKey, PublicKey,
- *GaloisKeys, RelinKeys.
+ *GaloisKeys, RelinKeys, EncryptionParameters, Modulus, BigUInt, IntArray.
  **/
 template <class T>
 std::string SEALSerialize(const T& sealobj) {
