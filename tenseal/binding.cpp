@@ -218,9 +218,6 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         )",
              py::arg("poly_modulus_degree"), py::arg("plain_modulus"),
              py::arg("coeff_mod_bit_sizes") = vector<int>())
-        .def("new",
-             py::overload_cast<const std::string &>(&TenSEALContext::Create))
-        .def("copy", &TenSEALContext::copy)
         .def("public_key", &TenSEALContext::public_key)
         .def("secret_key", &TenSEALContext::secret_key)
         .def("relin_keys", &TenSEALContext::relin_keys)
@@ -246,8 +243,11 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              py::overload_cast<const SecretKey &>(
                  &TenSEALContext::generate_relin_keys),
              "Generate Relinearization keys using the secret key")
-        .def("save",
+        .def("serialize",
              [](const TenSEALContext &obj) { return py::bytes(obj.save()); })
+        .def_static("deserialize", py::overload_cast<const std::string &>(
+                                       &TenSEALContext::Create))
+        .def("copy", &TenSEALContext::copy)
         .def("__copy__",
              [](const std::shared_ptr<TenSEALContext> &self) {
                  return self->copy();

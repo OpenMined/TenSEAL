@@ -57,7 +57,7 @@ def context_from(buff):
     Returns:
         A TenSEALContext object.
     """
-    return _ts_cpp.TenSEALContext.new(buff)
+    return _ts_cpp.TenSEALContext.deserialize(buff)
 
 
-__all__ = ["bfv_vector", "ckks_vector", "context" "__version__"]
+__all__ = ["bfv_vector", "ckks_vector", "context", "context_from", "__version__"]

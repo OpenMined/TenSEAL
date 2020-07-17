@@ -21,7 +21,7 @@ def internal_copy(ctx):
 
 
 def recreate(ctx):
-    proto = ctx.save()
+    proto = ctx.serialize()
     return ts.context_from(proto)
 
 
