@@ -3,6 +3,8 @@ import copy
 import pickle
 import tenseal as ts
 
+from tests.utils import *
+
 
 def ctx():
     return ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
@@ -144,3 +146,44 @@ def test_auto_flags(duplicate):
     assert context.auto_relin == True
     assert context.auto_rescale == True
     assert context.auto_mod_switch == True
+
+
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
+@pytest.mark.parametrize(
+    "vec1, vec2",
+    [
+        ([0], [0]),
+        ([1], [0]),
+        ([-1], [0]),
+        ([-1], [-1]),
+        ([1], [1]),
+        ([-1], [1]),
+        ([-1, -2], [-73, -10]),
+        ([1, 2], [-73, -10]),
+        ([1, 2, 3, 4], [4, 3, 2, 1]),
+        ([1, 2, 3, 4, 5, 6, 7, 8], [8, 7, 6, 5, 4, 3, 2, 1]),
+    ],
+)
+def test_sanity_keys_regeneration(duplicate, vec1, vec2):
+    orig_context = ctx()
+    orig_context.global_scale = pow(2, 40)
+    orig_context.generate_relin_keys()
+    orig_context.generate_galois_keys()
+    precision = 1
+
+    context = duplicate(orig_context)
+    assert isinstance(context.relin_keys(), ts.RelinKeys), "Relin keys should be set"
+    assert isinstance(context.galois_keys(), ts.GaloisKeys), "Galois keys should be set"
+
+    first_vec = ts.ckks_vector(context, vec1)
+    second_vec = ts.ckks_vector(context, vec2)
+    result = first_vec.dot(second_vec)
+    expected = [sum([v1 * v2 for v1, v2 in zip(vec1, vec2)])]
+
+    # Decryption
+    decrypted_result = result.decrypt()
+    assert almost_equal(
+        decrypted_result, expected, precision
+    ), "Dot product of vectors is incorrect."
+    assert almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
+    assert almost_equal(second_vec.decrypt(), vec2, precision), "Something went wrong in memory."
