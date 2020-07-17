@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.14)
-
 include(FindProtobuf)
 find_package(Protobuf REQUIRED)
 set(Protobuf_USE_STATIC_LIBS YES)
