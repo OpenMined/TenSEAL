@@ -2,6 +2,7 @@
 
 #include "seal/seal.h"
 #include "tenseal/serialization.h"
+#include "tenseal/utils/proto.h"
 #include "tenseal/utils/scope.h"
 
 namespace tenseal {
@@ -343,10 +344,10 @@ void TenSEALContext::load(const std::string& input) {
 std::string TenSEALContext::save() const {
     TenSEALContextProto buffer = this->save_proto();
     std::string output;
-    output.resize(buffer.ByteSizeLong());
+    output.resize(proto_bytes_size(buffer));
 
     if (!buffer.SerializeToArray((void*)output.c_str(),
-                                 buffer.ByteSizeLong())) {
+                                 proto_bytes_size(buffer))) {
         throw invalid_argument("failed to save proto");
     }
 
