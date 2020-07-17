@@ -268,8 +268,8 @@ void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
     auto secret_key = SEALDeserialize<SecretKey>(
         this->_context, buffer.private_context().secret_key());
     this->keys_setup(public_key, secret_key,
-                     buffer.private_context().relin_keys(),
-                     buffer.private_context().galois_keys());
+                     buffer.private_context().relin_keys_generated(),
+                     buffer.private_context().galois_keys_generated());
 }
 
 TenSEALContextProto TenSEALContext::save_proto() const {
@@ -307,8 +307,8 @@ TenSEALContextProto TenSEALContext::save_proto() const {
     TenSEALPrivateProto private_buffer;
     *private_buffer.mutable_secret_key() =
         SEALSerialize<SecretKey>(*this->secret_key());
-    private_buffer.set_galois_keys(this->_galois_keys != nullptr);
-    private_buffer.set_relin_keys(this->_relin_keys != nullptr);
+    private_buffer.set_galois_keys_generated(this->_galois_keys != nullptr);
+    private_buffer.set_relin_keys_generated(this->_relin_keys != nullptr);
 
     *buffer.mutable_private_context() = private_buffer;
     return buffer;

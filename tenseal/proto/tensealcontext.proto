@@ -8,9 +8,9 @@ message TenSEALPrivateProto {
     // Serialized secret key
     bytes secret_key = 1;
     // Relin keys flag
-    bool relin_keys = 2;
+    bool relin_keys_generated = 2;
     // Galois keys flag
-    bool galois_keys = 3;
+    bool galois_keys_generated = 3;
 }
 
 //TenSEAL Public parameters
