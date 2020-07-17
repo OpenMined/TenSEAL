@@ -44,6 +44,10 @@ def test_context_recreation(duplicate):
     context = duplicate(orig_context)
     assert context.is_public() is True, "TenSEALContext should be public"
 
+    orig_context = ctx()
+    context = duplicate(orig_context)
+    context.make_context_public(generate_galois_keys=False, generate_relin_keys=False)
+    assert orig_context.is_private() is True, "original TenSEALContext should stay private"
 
 @pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
 def test_generate_galois_keys(duplicate):
