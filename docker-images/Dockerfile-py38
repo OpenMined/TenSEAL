@@ -3,7 +3,7 @@ FROM python:3.8-slim-buster
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update
-RUN apt-get install -y git build-essential cmake
+RUN apt-get install -y git build-essential cmake libprotobuf-dev protobuf-compiler
 COPY ./ ./TenSEAL
 WORKDIR /TenSEAL
 # 3rd party libraries
