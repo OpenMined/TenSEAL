@@ -1,6 +1,9 @@
 #include "tenseal/tensealcontext.h"
 
-#include <seal/seal.h>
+#include "seal/seal.h"
+#include "tenseal/serialization.h"
+#include "tenseal/utils/proto.h"
+#include "tenseal/utils/scope.h"
 
 namespace tenseal {
 
@@ -8,30 +11,57 @@ using namespace seal;
 using namespace std;
 
 TenSEALContext::TenSEALContext(EncryptionParameters parms) {
-    this->_parms = parms;
-    this->_context = SEALContext::Create(parms);
-
-    KeyGenerator keygen = KeyGenerator(this->_context);
-
-    this->_public_key = make_shared<PublicKey>(keygen.public_key());
-    this->_secret_key = make_shared<SecretKey>(keygen.secret_key());
-    this->encryptor =
-        make_shared<Encryptor>(this->_context, *this->_public_key);
-    this->decryptor =
-        make_shared<Decryptor>(this->_context, *this->_secret_key);
-    this->evaluator = make_shared<Evaluator>(this->_context);
-    this->encoder_factory = make_shared<TenSEALEncoder>(this->_context);
-    // TODO: can make this optional
-    this->generate_relin_keys();
+    this->base_setup(parms);
+    this->keys_setup();
 }
 
-TenSEALContext::TenSEALContext(const char* filename) { this->load(filename); }
+TenSEALContext::TenSEALContext(istream& stream) { this->load(stream); }
+TenSEALContext::TenSEALContext(const std::string& input) { this->load(input); }
+TenSEALContext::TenSEALContext(const TenSEALContextProto& input) {
+    this->load_proto(input);
+}
 
-void TenSEALContext::load(const char* filename) {}
+void TenSEALContext::base_setup(EncryptionParameters parms) {
+    this->_parms = parms;
+    this->_context = SEALContext::Create(this->_parms);
 
-void TenSEALContext::save_public(const char* filename) {}
+    this->evaluator = make_shared<Evaluator>(this->_context);
+    this->encoder_factory = make_shared<TenSEALEncoder>(this->_context);
+}
 
-void TenSEALContext::save_private(const char* filename) {}
+void TenSEALContext::keys_setup(optional<PublicKey> public_key,
+                                optional<SecretKey> secret_key,
+                                bool generate_relin_keys,
+                                bool generate_galois_keys) {
+    if (!public_key && !secret_key) {
+        KeyGenerator keygen = KeyGenerator(this->_context);
+
+        this->_public_key = make_shared<PublicKey>(keygen.public_key());
+        this->_secret_key = make_shared<SecretKey>(keygen.secret_key());
+    }
+
+    if (public_key)
+        this->_public_key = make_shared<PublicKey>(public_key.value());
+
+    if (secret_key)
+        this->_secret_key = make_shared<SecretKey>(secret_key.value());
+
+    this->encryptor =
+        make_shared<Encryptor>(this->_context, *this->_public_key);
+
+    if (!this->_secret_key) return;
+
+    this->decryptor =
+        make_shared<Decryptor>(this->_context, *this->_secret_key);
+
+    if (generate_relin_keys) {
+        this->generate_relin_keys(*this->_secret_key);
+    }
+
+    if (generate_galois_keys) {
+        this->generate_galois_keys(*this->_secret_key);
+    }
+}
 
 shared_ptr<TenSEALContext> TenSEALContext::Create(
     scheme_type scheme, size_t poly_modulus_degree, uint64_t plain_modulus,
@@ -55,12 +85,18 @@ shared_ptr<TenSEALContext> TenSEALContext::Create(
     return shared_ptr<TenSEALContext>(new TenSEALContext(parms));
 }
 
-shared_ptr<TenSEALContext> TenSEALContext::Create(const char* filename) {
-    return shared_ptr<TenSEALContext>(new TenSEALContext(filename));
+shared_ptr<TenSEALContext> TenSEALContext::Create(istream& stream) {
+    return shared_ptr<TenSEALContext>(new TenSEALContext(stream));
 }
 
-shared_ptr<PublicKey> TenSEALContext::public_key() { return this->_public_key; }
-shared_ptr<SecretKey> TenSEALContext::secret_key() {
+shared_ptr<TenSEALContext> TenSEALContext::Create(const std::string& input) {
+    return shared_ptr<TenSEALContext>(new TenSEALContext(input));
+}
+
+shared_ptr<PublicKey> TenSEALContext::public_key() const {
+    return this->_public_key;
+}
+shared_ptr<SecretKey> TenSEALContext::secret_key() const {
     if (is_public()) {
         throw invalid_argument(
             "the current context is public, it doesn't hold a Secret key");
@@ -69,7 +105,7 @@ shared_ptr<SecretKey> TenSEALContext::secret_key() {
     return this->_secret_key;
 }
 
-shared_ptr<RelinKeys> TenSEALContext::relin_keys() {
+shared_ptr<RelinKeys> TenSEALContext::relin_keys() const {
     if (this->_relin_keys == nullptr) {
         throw invalid_argument(
             "the current context doesn't hold Relinearization keys");
@@ -78,7 +114,7 @@ shared_ptr<RelinKeys> TenSEALContext::relin_keys() {
     return this->_relin_keys;
 }
 
-shared_ptr<GaloisKeys> TenSEALContext::galois_keys() {
+shared_ptr<GaloisKeys> TenSEALContext::galois_keys() const {
     if (this->_galois_keys == nullptr) {
         throw invalid_argument(
             "the current context doesn't hold a Galois keys");
@@ -93,11 +129,16 @@ void TenSEALContext::generate_galois_keys() {
     this->generate_galois_keys(*this->_secret_key);
 }
 
-void TenSEALContext::generate_galois_keys(SecretKey secret_key) {
+void TenSEALContext::generate_galois_keys(const SecretKey& secret_key) {
     KeyGenerator keygen = KeyGenerator(this->_context, secret_key);
 
     this->_galois_keys =
         shared_ptr<GaloisKeys>(new GaloisKeys(keygen.galois_keys_local()));
+}
+
+void TenSEALContext::generate_galois_keys(const std::string& bytes) {
+    this->_galois_keys = make_shared<GaloisKeys>(
+        SEALDeserialize<GaloisKeys>(this->_context, bytes));
 }
 
 void TenSEALContext::generate_relin_keys() {
@@ -107,10 +148,15 @@ void TenSEALContext::generate_relin_keys() {
     this->generate_relin_keys(*this->_secret_key);
 }
 
-void TenSEALContext::generate_relin_keys(SecretKey secret_key) {
+void TenSEALContext::generate_relin_keys(const SecretKey& secret_key) {
     KeyGenerator keygen = KeyGenerator(this->_context, secret_key);
     this->_relin_keys =
         shared_ptr<RelinKeys>(new RelinKeys(keygen.relin_keys_local()));
+}
+
+void TenSEALContext::generate_relin_keys(const std::string& bytes) {
+    this->_relin_keys = make_shared<RelinKeys>(
+        SEALDeserialize<RelinKeys>(this->_context, bytes));
 }
 
 void TenSEALContext::make_context_public(bool generate_galois_keys,
@@ -120,9 +166,11 @@ void TenSEALContext::make_context_public(bool generate_galois_keys,
         return;
     }
 
-    // destroy and set _secret_key and decryptor to null
-    this->_secret_key = nullptr;
-    this->decryptor = nullptr;
+    scope_guard guard([&]() {
+        // destroy and set _secret_key and decryptor to null
+        this->_secret_key = nullptr;
+        this->decryptor = nullptr;
+    });
 
     this->_galois_keys = nullptr;
     this->_relin_keys = nullptr;
@@ -147,15 +195,15 @@ void TenSEALContext::make_context_public(bool generate_galois_keys,
     }
 }
 
-bool TenSEALContext::is_public() { return this->_secret_key == nullptr; }
-bool TenSEALContext::is_private() { return !is_public(); }
+bool TenSEALContext::is_public() const { return this->_secret_key == nullptr; }
+bool TenSEALContext::is_private() const { return !is_public(); }
 
 shared_ptr<SEALContext> TenSEALContext::seal_context() { return _context; }
 
 void TenSEALContext::global_scale(double scale) {
     encoder_factory->global_scale(scale);
 }
-double TenSEALContext::global_scale() {
+double TenSEALContext::global_scale() const {
     return encoder_factory->global_scale();
 }
 
@@ -194,4 +242,116 @@ bool TenSEALContext::auto_rescale() {
 bool TenSEALContext::auto_mod_switch() {
     return this->_auto_flags & flag_auto_mod_switch;
 }
+
+void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
+    this->base_setup(
+        SEALDeserialize<EncryptionParameters>(buffer.encryption_parameters()));
+    this->_auto_flags = buffer.public_context().auto_flags();
+    if (buffer.public_context().scale() >= 0) {
+        this->global_scale(buffer.public_context().scale());
+    }
+
+    auto public_key = SEALDeserialize<PublicKey>(
+        this->_context, buffer.public_context().public_key());
+
+    if (!buffer.has_private_context()) {
+        this->keys_setup(public_key);
+        if (!buffer.public_context().galois_keys().empty()) {
+            this->generate_galois_keys(buffer.public_context().galois_keys());
+        }
+        if (!buffer.public_context().relin_keys().empty()) {
+            this->generate_relin_keys(buffer.public_context().relin_keys());
+        }
+        return;
+    }
+
+    auto secret_key = SEALDeserialize<SecretKey>(
+        this->_context, buffer.private_context().secret_key());
+    this->keys_setup(public_key, secret_key,
+                     buffer.private_context().relin_keys_generated(),
+                     buffer.private_context().galois_keys_generated());
+}
+
+TenSEALContextProto TenSEALContext::save_proto() const {
+    TenSEALContextProto buffer;
+    *buffer.mutable_encryption_parameters() =
+        SEALSerialize<EncryptionParameters>(this->_parms);
+
+    TenSEALPublicProto public_buffer;
+    public_buffer.set_auto_flags(this->_auto_flags);
+    *public_buffer.mutable_public_key() =
+        SEALSerialize<PublicKey>(*this->public_key());
+
+    try {
+        auto scale = this->global_scale();
+        public_buffer.set_scale(scale);
+    } catch (std::exception&) {
+        public_buffer.set_scale(-1);
+    }
+
+    if (this->is_public()) {
+        if (this->_galois_keys)
+            *public_buffer.mutable_galois_keys() =
+                SEALSerialize<GaloisKeys>(*this->_galois_keys);
+        if (this->_relin_keys)
+            *public_buffer.mutable_relin_keys() =
+                SEALSerialize<RelinKeys>(*this->_relin_keys);
+    }
+
+    *buffer.mutable_public_context() = public_buffer;
+
+    if (this->is_public()) {
+        return buffer;
+    }
+
+    TenSEALPrivateProto private_buffer;
+    *private_buffer.mutable_secret_key() =
+        SEALSerialize<SecretKey>(*this->secret_key());
+    private_buffer.set_galois_keys_generated(this->_galois_keys != nullptr);
+    private_buffer.set_relin_keys_generated(this->_relin_keys != nullptr);
+
+    *buffer.mutable_private_context() = private_buffer;
+    return buffer;
+}
+
+std::shared_ptr<TenSEALContext> TenSEALContext::copy() const {
+    TenSEALContextProto buffer = this->save_proto();
+    return shared_ptr<TenSEALContext>(new TenSEALContext(buffer));
+}
+
+void TenSEALContext::load(std::istream& stream) {
+    TenSEALContextProto buffer;
+    if (!buffer.ParseFromIstream(&stream)) {
+        throw invalid_argument("failed to parse stream");
+    }
+
+    this->load_proto(buffer);
+}
+
+bool TenSEALContext::save(std::ostream& stream) const {
+    TenSEALContextProto buffer = this->save_proto();
+    return buffer.SerializeToOstream(&stream);
+}
+
+void TenSEALContext::load(const std::string& input) {
+    TenSEALContextProto buffer;
+    if (!buffer.ParseFromArray(input.c_str(), input.size())) {
+        throw invalid_argument("failed to parse stream");
+    }
+    this->load_proto(buffer);
+}
+
+std::string TenSEALContext::save() const {
+    TenSEALContextProto buffer = this->save_proto();
+    std::string output;
+    output.resize(proto_bytes_size(buffer));
+
+    if (!buffer.SerializeToArray((void*)output.c_str(),
+                                 proto_bytes_size(buffer))) {
+        throw invalid_argument("failed to save proto");
+    }
+
+    return output;
+}
+
 }  // namespace tenseal

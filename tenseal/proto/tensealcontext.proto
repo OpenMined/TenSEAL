@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package tenseal;
+
+
+//TenSEAL Private parameters
+message TenSEALPrivateProto {
+    // Serialized secret key
+    bytes secret_key = 1;
+    // Relin keys flag
+    bool relin_keys_generated = 2;
+    // Galois keys flag
+    bool galois_keys_generated = 3;
+}
+
+//TenSEAL Public parameters
+message TenSEALPublicProto {
+    // Serialized cepublicsecret key
+    bytes public_key = 1;
+    // Mask of internal flags
+    uint32 auto_flags = 2;
+    // Optional scale
+    double scale = 3;
+    // Generated relin keys
+    bytes relin_keys = 4;
+    // Generated Galois keys
+   bytes galois_keys = 5;
+}
+
+//TenSEAL Context parameters
+message TenSEALContextProto {
+    // Serialized homomorphic encryption parameters
+    bytes encryption_parameters = 1;
+    // Public members
+    TenSEALPublicProto public_context = 2;
+    // Optional private members
+    TenSEALPrivateProto private_context = 3;
+}

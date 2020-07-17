@@ -192,9 +192,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")
-        .def_property("global_scale",
-                      py::overload_cast<>(&TenSEALContext::global_scale),
-                      py::overload_cast<double>(&TenSEALContext::global_scale))
+        .def_property(
+            "global_scale",
+            py::overload_cast<>(&TenSEALContext::global_scale, py::const_),
+            py::overload_cast<double>(&TenSEALContext::global_scale))
         .def_property("auto_relin",
                       py::overload_cast<>(&TenSEALContext::auto_relin),
                       py::overload_cast<bool>(&TenSEALContext::auto_relin))
@@ -217,10 +218,6 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         )",
              py::arg("poly_modulus_degree"), py::arg("plain_modulus"),
              py::arg("coeff_mod_bit_sizes") = vector<int>())
-        .def("load", py::overload_cast<const char *>(&TenSEALContext::Create))
-        .def("save_public", &TenSEALContext::save_public, "save public keys.")
-        .def("save_private", &TenSEALContext::save_private,
-             "save private keys.")
         .def("public_key", &TenSEALContext::public_key)
         .def("secret_key", &TenSEALContext::secret_key)
         .def("relin_keys", &TenSEALContext::relin_keys)
@@ -235,16 +232,36 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("generate_galois_keys",
              py::overload_cast<>(&TenSEALContext::generate_galois_keys),
              "Generate Galois keys using the secret key")
-        .def(
-            "generate_galois_keys",
-            py::overload_cast<SecretKey>(&TenSEALContext::generate_galois_keys),
-            "Generate Galois keys using the secret key")
+        .def("generate_galois_keys",
+             py::overload_cast<const SecretKey &>(
+                 &TenSEALContext::generate_galois_keys),
+             "Generate Galois keys using the secret key")
         .def("generate_relin_keys",
              py::overload_cast<>(&TenSEALContext::generate_relin_keys),
              "Generate Relinearization keys using the secret key")
         .def("generate_relin_keys",
-             py::overload_cast<SecretKey>(&TenSEALContext::generate_relin_keys),
-             "Generate Relinearization keys using the secret key");
+             py::overload_cast<const SecretKey &>(
+                 &TenSEALContext::generate_relin_keys),
+             "Generate Relinearization keys using the secret key")
+        .def("serialize",
+             [](const TenSEALContext &obj) { return py::bytes(obj.save()); })
+        .def_static("deserialize", py::overload_cast<const std::string &>(
+                                       &TenSEALContext::Create))
+        .def("copy", &TenSEALContext::copy)
+        .def("__copy__",
+             [](const std::shared_ptr<TenSEALContext> &self) {
+                 return self->copy();
+             })
+        .def("__deepcopy__", [](const std::shared_ptr<TenSEALContext> &self,
+                                py::dict) { return self->copy(); })
+        .def(py::pickle(
+            [](const std::shared_ptr<TenSEALContext> &p) {
+                return py::make_tuple(py::bytes(p->save()));
+            },
+            [](py::tuple t) {
+                if (t.size() != 1) throw std::runtime_error("Invalid state!");
+                return TenSEALContext::Create(t[0].cast<std::string>());
+            }));
 
     // SEAL objects
 
