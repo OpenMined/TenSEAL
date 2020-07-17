@@ -15,6 +15,10 @@ TenSEALContext::TenSEALContext(EncryptionParameters parms) {
 }
 
 TenSEALContext::TenSEALContext(istream& stream) { this->load(stream); }
+TenSEALContext::TenSEALContext(const std::string& input) { this->load(input); }
+TenSEALContext::TenSEALContext(const TenSEALContextProto& input) {
+    this->load_proto(input);
+}
 
 void TenSEALContext::base_setup(EncryptionParameters parms) {
     this->_parms = parms;
@@ -85,9 +89,7 @@ shared_ptr<TenSEALContext> TenSEALContext::Create(istream& stream) {
 }
 
 shared_ptr<TenSEALContext> TenSEALContext::Create(const std::string& input) {
-    std::stringstream ss;
-    ss << input;
-    return shared_ptr<TenSEALContext>(new TenSEALContext(ss));
+    return shared_ptr<TenSEALContext>(new TenSEALContext(input));
 }
 
 shared_ptr<PublicKey> TenSEALContext::public_key() const {
@@ -240,12 +242,7 @@ bool TenSEALContext::auto_mod_switch() {
     return this->_auto_flags & flag_auto_mod_switch;
 }
 
-void TenSEALContext::load(std::istream& stream) {
-    TenSEALContextProto buffer;
-    if (!buffer.ParseFromIstream(&stream)) {
-        throw invalid_argument("failed to parse stream");
-    }
-
+void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
     this->base_setup(
         SEALDeserialize<EncryptionParameters>(buffer.encryption_parameters()));
     this->_auto_flags = buffer.public_context().auto_flags();
@@ -274,7 +271,7 @@ void TenSEALContext::load(std::istream& stream) {
                      buffer.private_context().galois_keys());
 }
 
-bool TenSEALContext::save(std::ostream& stream) const {
+TenSEALContextProto TenSEALContext::save_proto() const {
     TenSEALContextProto buffer;
     *buffer.mutable_encryption_parameters() =
         SEALSerialize<EncryptionParameters>(this->_parms);
@@ -303,7 +300,7 @@ bool TenSEALContext::save(std::ostream& stream) const {
     *buffer.mutable_public_context() = public_buffer;
 
     if (this->is_public()) {
-        return buffer.SerializeToOstream(&stream);
+        return buffer;
     }
 
     TenSEALPrivateProto private_buffer;
@@ -313,15 +310,47 @@ bool TenSEALContext::save(std::ostream& stream) const {
     private_buffer.set_relin_keys(this->_relin_keys != nullptr);
 
     *buffer.mutable_private_context() = private_buffer;
+    return buffer;
+}
+
+std::shared_ptr<TenSEALContext> TenSEALContext::copy() const {
+    TenSEALContextProto buffer = this->save_proto();
+    return shared_ptr<TenSEALContext>(new TenSEALContext(buffer));
+}
+
+void TenSEALContext::load(std::istream& stream) {
+    TenSEALContextProto buffer;
+    if (!buffer.ParseFromIstream(&stream)) {
+        throw invalid_argument("failed to parse stream");
+    }
+
+    this->load_proto(buffer);
+}
+
+bool TenSEALContext::save(std::ostream& stream) const {
+    TenSEALContextProto buffer = this->save_proto();
     return buffer.SerializeToOstream(&stream);
 }
 
+void TenSEALContext::load(const std::string& input) {
+    TenSEALContextProto buffer;
+    if (!buffer.ParseFromArray(input.c_str(), input.size())) {
+        throw invalid_argument("failed to parse stream");
+    }
+    this->load_proto(buffer);
+}
+
 std::string TenSEALContext::save() const {
-    std::stringstream ss;
+    TenSEALContextProto buffer = this->save_proto();
+    std::string output;
+    output.resize(buffer.ByteSizeLong());
 
-    this->save(ss);
+    if (!buffer.SerializeToArray((void*)output.c_str(),
+                                 buffer.ByteSizeLong())) {
+        throw invalid_argument("failed to save proto");
+    }
 
-    return ss.str();
+    return output;
 }
 
 }  // namespace tenseal

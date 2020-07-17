@@ -1,5 +1,6 @@
 import pytest
 import copy
+import pickle
 import tenseal as ts
 
 
@@ -15,12 +16,21 @@ def simple_copy(ctx):
     return copy.copy(ctx)
 
 
+def internal_copy(ctx):
+    return ctx.copy()
+
+
 def recreate(ctx):
     proto = ctx.save()
     return ts.context_from(proto)
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, recreate,])
+def pickled(ctx):
+    out = pickle.dumps(ctx)
+    return pickle.loads(out)
+
+
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
 def test_context_recreation(duplicate):
     orig_context = ctx()
     context = duplicate(orig_context)
@@ -33,7 +43,7 @@ def test_context_recreation(duplicate):
     assert context.is_public() is True, "TenSEALContext should be public"
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, recreate,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
 def test_generate_galois_keys(duplicate):
     orig_context = ctx()
     orig_context.generate_galois_keys()
@@ -48,7 +58,7 @@ def test_generate_galois_keys(duplicate):
     assert isinstance(context.galois_keys(), ts.GaloisKeys), "Galois keys should be set"
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, recreate,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
 def test_generate_relin_keys(duplicate):
     orig_context = ctx()
     orig_context.generate_relin_keys()
@@ -68,7 +78,7 @@ def test_generate_relin_keys(duplicate):
     assert isinstance(context.galois_keys(), ts.GaloisKeys), "Galois keys should be set"
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, recreate,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
 @pytest.mark.parametrize("scale", [0, 1, 2, 2 ** 40])
 def test_global_scale(duplicate, scale):
     orig_context = ctx()
@@ -82,7 +92,7 @@ def test_global_scale(duplicate, scale):
     assert context.global_scale == scale
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, recreate,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
 def test_auto_flags(duplicate):
     orig_context = ctx()
     context = duplicate(orig_context)

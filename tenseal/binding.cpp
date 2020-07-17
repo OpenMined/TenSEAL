@@ -220,6 +220,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              py::arg("coeff_mod_bit_sizes") = vector<int>())
         .def("new",
              py::overload_cast<const std::string &>(&TenSEALContext::Create))
+        .def("copy", &TenSEALContext::copy)
         .def("public_key", &TenSEALContext::public_key)
         .def("secret_key", &TenSEALContext::secret_key)
         .def("relin_keys", &TenSEALContext::relin_keys)
@@ -249,22 +250,17 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              [](const TenSEALContext &obj) { return py::bytes(obj.save()); })
         .def("__copy__",
              [](const std::shared_ptr<TenSEALContext> &self) {
-                 auto buff = self->save();
-                 return TenSEALContext::Create(buff);
+                 return self->copy();
              })
-        .def("__deepcopy__",
-             [](const std::shared_ptr<TenSEALContext> &self, py::dict) {
-                 auto buff = self->save();
-                 return TenSEALContext::Create(buff);
-             })
+        .def("__deepcopy__", [](const std::shared_ptr<TenSEALContext> &self,
+                                py::dict) { return self->copy(); })
         .def(py::pickle(
             [](const std::shared_ptr<TenSEALContext> &p) {
-                return py::make_tuple(p->save());
+                return py::make_tuple(py::bytes(p->save()));
             },
             [](py::tuple t) {
                 if (t.size() != 1) throw std::runtime_error("Invalid state!");
-                auto p = TenSEALContext::Create(t[0].cast<std::string>());
-                return p;
+                return TenSEALContext::Create(t[0].cast<std::string>());
             }));
 
     // SEAL objects

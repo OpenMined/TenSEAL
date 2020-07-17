@@ -120,9 +120,12 @@ class TenSEALContext {
     bool auto_rescale();
     bool auto_mod_switch();
 
+    void load(std::istream& stream);
+    void load(const std::string& input);
+
     bool save(std::ostream& stream) const;
     std::string save() const;
-    void load(std::istream& stream);
+    std::shared_ptr<TenSEALContext> copy() const;
 
    private:
     EncryptionParameters _parms;
@@ -146,12 +149,17 @@ class TenSEALContext {
 
     TenSEALContext(EncryptionParameters parms);
     TenSEALContext(istream& stream);
+    TenSEALContext(const std::string& stream);
+    TenSEALContext(const TenSEALContextProto& proto);
 
     void base_setup(EncryptionParameters parms);
     void keys_setup(optional<PublicKey> public_key = {},
                     optional<SecretKey> secret_key = {},
                     bool generate_relin_keys = true,
                     bool generate_galois_keys = false);
+
+    void load_proto(const TenSEALContextProto& buffer);
+    TenSEALContextProto save_proto() const;
 };
 }  // namespace tenseal
 #endif
