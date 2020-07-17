@@ -63,6 +63,12 @@ def test_generate_galois_keys(duplicate):
 
     assert isinstance(context.galois_keys(), ts.GaloisKeys), "Galois keys should be set"
 
+    orig_context = ctx()
+    context = duplicate(orig_context)
+    context.generate_galois_keys()
+    with pytest.raises(ValueError) as exc_info:
+        orig_context.galois_keys()
+    assert exc_info.type is ValueError, "orginal context shouldn't have Galois keys"
 
 @pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
 def test_generate_relin_keys(duplicate):
