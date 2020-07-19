@@ -138,7 +138,8 @@ void bind_util_namespace(pybind11::module &m) {
              [](const BaseConverter &obj, const std::vector<std::uint64_t> &in,
                 std::size_t count) {
                  std::vector<std::uint64_t> out(obj.obase_size() * count);
-                 obj.fast_convert_array(ConstRNSIter(in.data(), count), RNSIter(out.data(), count),
+                 obj.fast_convert_array(ConstRNSIter(in.data(), count),
+                                        RNSIter(out.data(), count),
                                         MemoryManager::GetPool());
 
                  return out;
@@ -159,33 +160,42 @@ void bind_util_namespace(pybind11::module &m) {
              [](const RNSTool &obj, std::uint64_t *input, std::size_t count,
                 const NTTTables *rns_ntt_tables) {
                  obj.divide_and_round_q_last_ntt_inplace(
-                     RNSIter(input, count), rns_ntt_tables, MemoryManager::GetPool());
+                     RNSIter(input, count), rns_ntt_tables,
+                     MemoryManager::GetPool());
              })
         .def("fastbconv_sk",
-             [](const RNSTool &obj, const std::uint64_t *input, std::size_t count,
-                std::uint64_t *destination) {
-                 obj.fastbconv_sk(ConstRNSIter(input, count), RNSIter(destination, count), MemoryManager::GetPool());
+             [](const RNSTool &obj, const std::uint64_t *input,
+                std::size_t count, std::uint64_t *destination) {
+                 obj.fastbconv_sk(ConstRNSIter(input, count),
+                                  RNSIter(destination, count),
+                                  MemoryManager::GetPool());
              })
         .def("sm_mrq",
-             [](const RNSTool &obj, const std::uint64_t *input, std::size_t count,
-                std::uint64_t *destination) {
-                 obj.sm_mrq(ConstRNSIter(input, count), RNSIter(destination, count), MemoryManager::GetPool());
+             [](const RNSTool &obj, const std::uint64_t *input,
+                std::size_t count, std::uint64_t *destination) {
+                 obj.sm_mrq(ConstRNSIter(input, count),
+                            RNSIter(destination, count),
+                            MemoryManager::GetPool());
              })
         .def("fast_floor",
-             [](const RNSTool &obj, const std::uint64_t *input, std::size_t count,
-                std::uint64_t *destination) {
-                 obj.fast_floor(ConstRNSIter(input, count), RNSIter(destination, count), MemoryManager::GetPool());
+             [](const RNSTool &obj, const std::uint64_t *input,
+                std::size_t count, std::uint64_t *destination) {
+                 obj.fast_floor(ConstRNSIter(input, count),
+                                RNSIter(destination, count),
+                                MemoryManager::GetPool());
              })
         .def("fastbconv_m_tilde",
-             [](const RNSTool &obj, const std::uint64_t *input, std::size_t count,
-                std::uint64_t *destination) {
-                 obj.fastbconv_m_tilde(ConstRNSIter(input, count), RNSIter(destination, count),
+             [](const RNSTool &obj, const std::uint64_t *input,
+                std::size_t count, std::uint64_t *destination) {
+                 obj.fastbconv_m_tilde(ConstRNSIter(input, count),
+                                       RNSIter(destination, count),
                                        MemoryManager::GetPool());
              })
         .def("decrypt_scale_and_round",
-             [](const RNSTool &obj, const std::uint64_t *input, std::size_t count,
-                std::uint64_t *destination) {
-                 obj.decrypt_scale_and_round(ConstRNSIter(input, count), destination,
+             [](const RNSTool &obj, const std::uint64_t *input,
+                std::size_t count, std::uint64_t *destination) {
+                 obj.decrypt_scale_and_round(ConstRNSIter(input, count),
+                                             destination,
                                              MemoryManager::GetPool());
              })
         .def("inv_q_last_mod_q", &RNSTool::inv_q_last_mod_q)
@@ -337,7 +347,7 @@ void bind_util_namespace(pybind11::module &m) {
                 const Modulus &modulus) {
                  std::vector<uint64_t> out(coeff_count);
                  add_poly_coeffmod(operand1.data(), operand2.data(),
-                                        coeff_count, modulus, out.data());
+                                   coeff_count, modulus, out.data());
                  return out;
              })
         .def("sub_poly_coeffmod",
@@ -346,7 +356,7 @@ void bind_util_namespace(pybind11::module &m) {
                 const Modulus &modulus) {
                  std::vector<uint64_t> out(coeff_count);
                  sub_poly_coeffmod(operand1.data(), operand2.data(),
-                                        coeff_count, modulus, out.data());
+                                   coeff_count, modulus, out.data());
                  return out;
              })
         .def("multiply_poly_scalar_coeffmod",
@@ -495,11 +505,11 @@ void bind_util_namespace(pybind11::module &m) {
      * } "util/hash.h"
      *******************/
 
-    py::class_<MultiplyUIntModOperand>(m, "MultiplyUIntModOperand", py::module_local())
+    py::class_<MultiplyUIntModOperand>(m, "MultiplyUIntModOperand",
+                                       py::module_local())
         .def(py::init<>())
         .def_readwrite("operand", &MultiplyUIntModOperand::operand)
         .def_readwrite("quotient", &MultiplyUIntModOperand::quotient);
-
 
     /*******************
      * "util/pointer.h" {
