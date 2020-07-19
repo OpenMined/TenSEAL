@@ -257,3 +257,12 @@ def test_util_rnstool_sanity():
     plain = sealapi.Modulus(0)
     coeff_base = util.RNSBase([sealapi.Modulus(3)])
     rns_tool = util.RNSTool(poly_modulus_degree, coeff_base, plain)
+
+
+def test_util_multiplyuintmodoperand_sanity():
+    mod = sealapi.Modulus(2147483647)
+    op = util.MultiplyUIntModOperand()
+    op.set(2147483646, mod)
+    op.set_quotient(mod)
+    assert op.operand == 2147483646
+    assert op.quotient == 18446744065119617019

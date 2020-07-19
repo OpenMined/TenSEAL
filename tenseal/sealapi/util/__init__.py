@@ -72,3 +72,6 @@ PointerModulus = _sealapi_util_cpp.PointerModulus
 PointerGaloisTool = _sealapi_util_cpp.PointerGaloisTool
 PointerNTTTables = _sealapi_util_cpp.PointerNTTTables
 PointerRNSTool = _sealapi_util_cpp.PointerRNSTool
+
+## util/uinitarithsmallmod.h ##
+MultiplyUIntModOperand = _sealapi_util_cpp.MultiplyUIntModOperand
