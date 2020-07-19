@@ -3,6 +3,7 @@
 
 #include <seal/seal.h>
 
+#include "tenseal/proto/tensealcontext.pb.h"
 #include "tenseal/tensealencoder.h"
 #include "tenseal/utils/context.h"
 
@@ -38,27 +39,30 @@ class TenSEALContext {
                                              size_t poly_modulus_degree,
                                              uint64_t plain_modulus,
                                              vector<int> coeff_mod_bit_sizes);
-    static shared_ptr<TenSEALContext> Create(const char* filename);
+    static shared_ptr<TenSEALContext> Create(istream& stream);
+    static shared_ptr<TenSEALContext> Create(const std::string& input);
 
     /*
     Returns a pointer to the public key
     */
-    shared_ptr<PublicKey> public_key();
-    shared_ptr<SecretKey> secret_key();
-    shared_ptr<RelinKeys> relin_keys();
-    shared_ptr<GaloisKeys> galois_keys();
+    shared_ptr<PublicKey> public_key() const;
+    shared_ptr<SecretKey> secret_key() const;
+    shared_ptr<RelinKeys> relin_keys() const;
+    shared_ptr<GaloisKeys> galois_keys() const;
 
     /*
     Generate Galois keys using the secret key
     */
     void generate_galois_keys();
-    void generate_galois_keys(SecretKey secret_key);
+    void generate_galois_keys(const SecretKey& secret_key);
+    void generate_galois_keys(const std::string&);
 
     /*
     Generate Relinearization keys using the secret key
     */
     void generate_relin_keys();
-    void generate_relin_keys(SecretKey secret_key);
+    void generate_relin_keys(const SecretKey& secret_key);
+    void generate_relin_keys(const std::string&);
 
     /*
     Generate Galois and Relinearization keys if needed, then destroy the
@@ -67,15 +71,8 @@ class TenSEALContext {
     void make_context_public(bool generate_galois_keys,
                              bool generate_relin_keys);
 
-    bool is_public();
-    bool is_private();
-
-    /*
-    Save the attributes needed to restore the context later, public is for not
-    saving the secret_key.
-    */
-    void save_public(const char* filename);
-    void save_private(const char* filename);
+    bool is_public() const;
+    bool is_private() const;
 
     /*
     Returns the wrapped SEALContext object.
@@ -109,7 +106,7 @@ class TenSEALContext {
     // ciphertext scale setter(CKKS)
     void global_scale(double scale);
     // ciphertext scale getter(CKKS)
-    double global_scale();
+    double global_scale() const;
 
     /*
     Switch on/off automatic relinearization, rescaling, and mod switching.
@@ -122,6 +119,13 @@ class TenSEALContext {
     bool auto_relin();
     bool auto_rescale();
     bool auto_mod_switch();
+
+    void load(std::istream& stream);
+    void load(const std::string& input);
+
+    bool save(std::ostream& stream) const;
+    std::string save() const;
+    std::shared_ptr<TenSEALContext> copy() const;
 
    private:
     EncryptionParameters _parms;
@@ -144,13 +148,18 @@ class TenSEALContext {
         flag_auto_relin | flag_auto_rescale | flag_auto_mod_switch;
 
     TenSEALContext(EncryptionParameters parms);
-    TenSEALContext(const char* filename);
+    TenSEALContext(istream& stream);
+    TenSEALContext(const std::string& stream);
+    TenSEALContext(const TenSEALContextProto& proto);
 
-    /*
-    Load the context's attribute to restore a pre-saved TenSEALContext.
-    */
-    void load(const char* filename);
+    void base_setup(EncryptionParameters parms);
+    void keys_setup(optional<PublicKey> public_key = {},
+                    optional<SecretKey> secret_key = {},
+                    bool generate_relin_keys = true,
+                    bool generate_galois_keys = false);
+
+    void load_proto(const TenSEALContextProto& buffer);
+    TenSEALContextProto save_proto() const;
 };
-
 }  // namespace tenseal
 #endif

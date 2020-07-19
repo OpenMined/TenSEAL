@@ -79,6 +79,9 @@ $ git submodule init
 $ git submodule update
 ```
 
+TenSEAL uses [Protocol Buffers](https://developers.google.com/protocol-buffers/docs/downloads) for serialization, and you will need the protocol buffer compiler too.
+
+
 If you are on Windows, you will first need to build SEAL library using Visual Studio, you should use the solution file `SEAL.sln` in `third_party/SEAL` to build the project `native\src\SEAL.vcxproj` with `Configuration=Release` and `Platform=x64`. For more details check the instructions in [Building Microsoft SEAL](https://github.com/microsoft/SEAL#windows)
 
 You can then trigger the build and the installation

@@ -48,4 +48,16 @@ def context(scheme, poly_modulus_degree, plain_modulus=None, coeff_mod_bit_sizes
     )
 
 
-__all__ = ["bfv_vector", "ckks_vector", "context" "__version__"]
+def context_from(buff):
+    """Construct a context from a serialized buffer.
+
+    Args:
+        buff : bytes buffer from the original context .
+
+    Returns:
+        A TenSEALContext object.
+    """
+    return _ts_cpp.TenSEALContext.deserialize(buff)
+
+
+__all__ = ["bfv_vector", "ckks_vector", "context", "context_from", "__version__"]
