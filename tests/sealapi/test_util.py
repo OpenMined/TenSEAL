@@ -51,9 +51,9 @@ def test_util_rns():
 
     base = util.RNSBase([sealapi.Modulus(3), sealapi.Modulus(5)])
     dec = base.decompose_array([14, 0], 1)
-    assert dec == [4, 0]
+    assert dec == [2, 4]
     comp = base.compose_array(dec, 1)
-    assert comp == [10, 0]
+    assert comp == [14, 0]
 
     assert base.base_prod() == 15
 
@@ -122,58 +122,19 @@ def test_util_croots():
     assert croot.get_root(5) != 0
 
 
-def test_util_polyarith():
-    assert util.right_shift_poly_coeffs([2, 4, 8], 3, 1, 1) == [1, 2, 4]
-    assert util.negate_poly([2, 4, 8], 3, 1) == [(1 << 64) - 2, (1 << 64) - 4, (1 << 64) - 8]
-    assert util.add_poly_poly([2, 4, 8], [3, 4, 5], 3, 1) == [5, 8, 13]
-    assert util.sub_poly_poly([4, 6, 8], [3, 4, 5], 3, 1) == [1, 2, 3]
-    assert util.multiply_poly_poly([1, 2], 2, 1, [1, 2, 3], 3, 1, 4, 1) == [1, 4, 7, 6]
-    assert util.poly_infty_norm([1, 2], 2, 1) == [2, 0]
-    assert util.poly_eval_poly([1, 0], 2, 1, [2, 1], 2, 1, 4, 1) == [1, 0, 0, 0]
-    assert util.exponentiate_poly([2, 3], 2, 1, [2], 1, 4, 1) == [4, 12, 9, 0]
-
-
 def test_util_polyarithsmallmod():
     assert util.modulo_poly_coeffs([5, 6, 7, 8, 9], 5, sealapi.Modulus(2)) == [1, 0, 1, 0, 1]
-    assert util.modulo_poly_coeffs_63([66, 67, 68], 3, sealapi.Modulus(5)) == [1, 2, 3]
     assert util.negate_poly_coeffmod([1, 2], 2, sealapi.Modulus(5)) == [4, 3]
-    assert util.add_poly_poly_coeffmod([1, 2], [1, 2], 2, sealapi.Modulus(5)) == [2, 4]
-    assert util.sub_poly_poly_coeffmod([1, 2], [1, 2], 2, sealapi.Modulus(5)) == [0, 0]
+    assert util.add_poly_coeffmod([1, 2], [1, 2], 2, sealapi.Modulus(5)) == [2, 4]
+    assert util.sub_poly_coeffmod([1, 2], [1, 2], 2, sealapi.Modulus(5)) == [0, 0]
     assert util.multiply_poly_scalar_coeffmod([1, 2], 2, 3, sealapi.Modulus(5)) == [3, 1]
-    assert util.multiply_poly_poly_coeffmod([1, 2], 2, [2, 3], 2, sealapi.Modulus(5), 4) == [
-        2,
-        2,
-        1,
-        0,
-    ]
-    assert util.multiply_poly_poly_coeffmod([1, 2], [2, 3], 2, sealapi.Modulus(5), 4) == [
-        2,
-        2,
-        1,
-        0,
-    ]
-    assert util.multiply_truncate_poly_poly_coeffmod([1, 2], [2, 3], 2, sealapi.Modulus(5), 4) == [
-        2,
-        2,
-        0,
-        0,
-    ]
-    assert util.divide_poly_poly_coeffmod([4, 3], [2, 3], 2, sealapi.Modulus(5)) == [[1, 0], [2, 0]]
     assert util.dyadic_product_coeffmod([5, 7], [2, 3], 2, sealapi.Modulus(5), 4) == [0, 1, 0, 0]
     assert util.poly_infty_norm_coeffmod([5, 7], 2, sealapi.Modulus(5)) == 2
-    assert util.try_invert_poly_coeffmod([1, 0], [4, 3], 2, sealapi.Modulus(5)) == [1, 0]
     assert util.negacyclic_shift_poly_coeffmod([4, 3], 2, 1, sealapi.Modulus(5)) == [2, 4]
     assert util.negacyclic_multiply_poly_mono_coeffmod([4, 3], 2, 2, 1, sealapi.Modulus(5)) == [
         4,
         3,
     ]
-
-
-def test_util_polyarithmod():
-    assert util.negate_poly_coeffmod([1, 2], 2, [5], 1) == [4, 3]
-    assert util.add_poly_poly_coeffmod([1, 2], [2, 3], 2, [5], 1) == [3, 0]
-    assert util.add_poly_poly_coeffmod([3, 4], [2, 3], 2, [5], 1) == [0, 2]
-    assert util.poly_infty_norm_coeffmod([0, 1], 2, 1, [5]) == [1, 0]
 
 
 def test_util_polycore():
@@ -247,11 +208,8 @@ def test_util_ntt():
         coeff_count_power, sealapi.Modulus(util.get_prime(1 << coeff_count_power, 40))
     )
     assert tables.get_root() > 0
-    assert tables.get_from_root_powers(1) > 0
-    assert tables.get_from_scaled_root_powers(1) > 0
-    assert tables.get_from_inv_root_powers(1) > 0
-    assert tables.get_from_scaled_inv_root_powers(1) > 0
-    assert tables.get_inv_degree_modulo() > 0
+    assert tables.get_from_root_powers(1).operand > 0
+    assert tables.get_from_inv_root_powers(1).operand > 0
     assert tables.modulus() > 0
     assert tables.coeff_count_power() == coeff_count_power
     assert tables.coeff_count() == 1 << coeff_count_power
