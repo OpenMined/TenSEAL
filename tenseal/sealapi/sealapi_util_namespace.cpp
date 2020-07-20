@@ -158,6 +158,7 @@ void bind_util_namespace(pybind11::module &m) {
                  obj.divide_and_round_q_last_inplace(
                      RNSIter(input.data(), poly_modulus_degree),
                      MemoryManager::GetPool());
+                 return input;
              })
         .def("divide_and_round_q_last_ntt_inplace",
              [](const RNSTool &obj, std::vector<uint64_t> &input,
@@ -166,49 +167,59 @@ void bind_util_namespace(pybind11::module &m) {
                  obj.divide_and_round_q_last_ntt_inplace(
                      RNSIter(input.data(), poly_modulus_degree), rns_ntt_tables,
                      MemoryManager::GetPool());
+                 return input;
              })
         .def("fastbconv_sk",
              [](const RNSTool &obj, const std::vector<uint64_t> &input,
-                std::vector<uint64_t> &destination,
                 std::size_t poly_modulus_degree) {
+                 std::vector<uint64_t> out(poly_modulus_degree *
+                                           obj.base_q()->size());
                  obj.fastbconv_sk(
                      ConstRNSIter(input.data(), poly_modulus_degree),
-                     RNSIter(destination.data(), poly_modulus_degree),
+                     RNSIter(out.data(), poly_modulus_degree),
                      MemoryManager::GetPool());
+                 return out;
              })
         .def("sm_mrq",
              [](const RNSTool &obj, const std::vector<uint64_t> &input,
-                std::vector<uint64_t> &destination,
                 std::size_t poly_modulus_degree) {
+                 std::vector<uint64_t> out(poly_modulus_degree *
+                                           obj.base_Bsk()->size());
                  obj.sm_mrq(ConstRNSIter(input.data(), poly_modulus_degree),
-                            RNSIter(destination.data(), poly_modulus_degree),
+                            RNSIter(out.data(), poly_modulus_degree),
                             MemoryManager::GetPool());
+                 return out;
              })
         .def("fast_floor",
              [](const RNSTool &obj, const std::vector<uint64_t> &input,
-                std::vector<uint64_t> &destination,
                 std::size_t poly_modulus_degree) {
-                 obj.fast_floor(
-                     ConstRNSIter(input.data(), poly_modulus_degree),
-                     RNSIter(destination.data(), poly_modulus_degree),
-                     MemoryManager::GetPool());
+                 std::vector<uint64_t> out(poly_modulus_degree *
+                                           obj.base_Bsk()->size());
+                 obj.fast_floor(ConstRNSIter(input.data(), poly_modulus_degree),
+                                RNSIter(out.data(), poly_modulus_degree),
+                                MemoryManager::GetPool());
+                 return out;
              })
         .def("fastbconv_m_tilde",
              [](const RNSTool &obj, const std::vector<uint64_t> &input,
-                std::vector<uint64_t> &destination,
                 std::size_t poly_modulus_degree) {
+                 std::vector<uint64_t> out(poly_modulus_degree *
+                                           obj.base_Bsk_m_tilde()->size());
                  obj.fastbconv_m_tilde(
                      ConstRNSIter(input.data(), poly_modulus_degree),
-                     RNSIter(destination.data(), poly_modulus_degree),
+                     RNSIter(out.data(), poly_modulus_degree),
                      MemoryManager::GetPool());
+                 return out;
              })
         .def("decrypt_scale_and_round",
              [](const RNSTool &obj, const std::vector<uint64_t> &input,
-                std::vector<uint64_t> &destination,
                 std::size_t poly_modulus_degree) {
+                 std::vector<uint64_t> out(poly_modulus_degree *
+                                           obj.base_q()->size());
                  obj.decrypt_scale_and_round(
                      ConstRNSIter(input.data(), poly_modulus_degree),
-                     CoeffIter(destination.data()), MemoryManager::GetPool());
+                     CoeffIter(out.data()), MemoryManager::GetPool());
+                 return out;
              })
         .def("inv_q_last_mod_q", &RNSTool::inv_q_last_mod_q)
         .def("base_Bsk_ntt_tables", &RNSTool::base_Bsk_ntt_tables)

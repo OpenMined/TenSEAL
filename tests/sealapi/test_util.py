@@ -258,6 +258,59 @@ def test_util_rnstool_sanity():
     coeff_base = util.RNSBase([sealapi.Modulus(3)])
     rns_tool = util.RNSTool(poly_modulus_degree, coeff_base, plain)
 
+    input = [1, 2, 1, 2]
+    dest = rns_tool.fastbconv_sk(input, poly_modulus_degree)
+    assert dest == [1, 2]
+
+    input = [
+        rns_tool.m_tilde().value(),
+        2 * rns_tool.m_tilde().value(),
+        rns_tool.m_tilde().value(),
+        2 * rns_tool.m_tilde().value(),
+        0,
+        0,
+    ]
+    dest = rns_tool.sm_mrq(input, poly_modulus_degree)
+    assert dest == [1, 2, 1, 2]
+
+    input = [15, 3, 15, 3, 15, 3]
+    dest = rns_tool.fast_floor(input, poly_modulus_degree)
+    assert dest == [5, 1, 5, 1]
+
+    input = [1, 2]
+    dest = rns_tool.fastbconv_m_tilde(input, poly_modulus_degree)
+    assert dest == [1, 2, 1, 2, 1, 2]
+
+    poly_modulus_degree = 2
+    plain = sealapi.Modulus(3)
+    coeff_base = util.RNSBase([sealapi.Modulus(5), sealapi.Modulus(7)])
+    rns_tool = util.RNSTool(poly_modulus_degree, coeff_base, plain)
+
+    input = [35, 70, 35, 70]
+    dest = rns_tool.decrypt_scale_and_round(input, poly_modulus_degree)
+    assert dest == [0, 0, 0, 0]
+    input = [29, 30 + 35, 29, 30 + 35]
+    dest = rns_tool.decrypt_scale_and_round(input, poly_modulus_degree)
+    assert dest == [2, 0, 0, 0]
+
+    poly_modulus_degree = 2
+    plain = sealapi.Modulus(0)
+    coeff_base = util.RNSBase([sealapi.Modulus(13), sealapi.Modulus(7)])
+    rns_tool = util.RNSTool(poly_modulus_degree, coeff_base, plain)
+
+    input = [12, 11, 4, 3]
+    dest = rns_tool.divide_and_round_q_last_inplace(input, poly_modulus_degree)
+    assert dest == [4, 3, 0, 6]
+
+    poly_modulus_degree = 2
+    plain = sealapi.Modulus(0)
+    coeff_base = util.RNSBase([sealapi.Modulus(53), sealapi.Modulus(13)])
+    rns_tool = util.RNSTool(poly_modulus_degree, coeff_base, plain)
+
+    input = [4, 12, 4, 12]
+    dest = rns_tool.divide_and_round_q_last_inplace(input, poly_modulus_degree)
+    assert dest == [0, 1, 10, 5]
+
 
 def test_util_multiplyuintmodoperand_sanity():
     mod = sealapi.Modulus(2147483647)
