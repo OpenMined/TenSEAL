@@ -9,10 +9,11 @@ on:
 jobs:
   TenSEAL:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
+        os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
     - uses: actions/checkout@v2
@@ -99,53 +100,6 @@ jobs:
       run: |
         pytest -v ./tests/sealapi
   
-  TenSEAL_WIN:
-
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        python-version: [3.6, 3.7, 3.8]
-      
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements_dev.txt
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 --config=.flake8 --exclude=tenseal/sealapi,tests/sealapi .
-        black --check --exclude "sealapi" tenseal/ tests/
-        # exit-zero treats all errors as warnings.
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
-    - name: Lint with clang-format
-      run: |
-        # lint files (all .cpp and .h files) inplace
-        find ./tenseal/  \( -iname *.h -o -iname *.cpp \) -a -not -path "*sealapi*" | xargs clang-format -i -style='file'
-        # print changes
-        git diff
-        # already well formated if 'git diff' doesn't output
-        ! ( git diff |  grep -q ^ ) || return 1
-    - name: Build the library
-      run: |
-        # fetch third_party libraries
-        git submodule init && git submodule update
-        # we need to install tenseal in order to build the cpp library
-        pip install .
-    - name: Test with pytest
-      run: |
-        pytest -v --ignore=tests/sealapi ./tests
-    - name: Test with gtest
-      run: |
-        cd tenseal/proto && cmake . && make && cd ../../
-        cmake . -D BUILD_TEST=TRUE
-        make && CTEST_OUTPUT_ON_FAILURE=1 make test
-
   SEAL_API_WIN:
 
     runs-on: windows-latest
@@ -163,19 +117,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements_dev.txt
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 --config=.flake8 ./tenseal/sealapi ./tests/sealapi
-        black --check tenseal/sealapi tests/sealapi
-    - name: Lint with clang-format
-      run: |
-        # lint files (all .cpp and .h files) inplace
-        find ./tenseal/sealapi -iname *.h -o -iname *.cpp | xargs clang-format -i -style='file'
-        # print changes
-        git diff
-        # already well formated if 'git diff' doesn't output
-        ! ( git diff |  grep -q ^ ) || return 1
     - name: Build the library
       run: |
         # fetch third_party libraries
@@ -186,53 +127,6 @@ jobs:
       run: |
         pytest -v ./tests/sealapi
   
-  TenSEAL_MAC:
-
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        python-version: [3.6, 3.7, 3.8]
-                    
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements_dev.txt
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 --config=.flake8 --exclude=tenseal/sealapi,tests/sealapi .
-        black --check --exclude "sealapi" tenseal/ tests/
-        # exit-zero treats all errors as warnings.
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
-    - name: Lint with clang-format
-      run: |
-        # lint files (all .cpp and .h files) inplace
-        find ./tenseal/  \( -iname *.h -o -iname *.cpp \) -a -not -path "*sealapi*" | xargs clang-format -i -style='file'
-        # print changes
-        git diff
-        # already well formated if 'git diff' doesn't output
-        ! ( git diff |  grep -q ^ ) || return 1
-    - name: Build the library
-      run: |
-        # fetch third_party libraries
-        git submodule init && git submodule update
-        # we need to install tenseal in order to build the cpp library
-        pip install .
-    - name: Test with pytest
-      run: |
-        pytest -v --ignore=tests/sealapi ./tests
-    - name: Test with gtest
-      run: |
-        cd tenseal/proto && cmake . && make && cd ../../
-        cmake . -D BUILD_TEST=TRUE
-        make && CTEST_OUTPUT_ON_FAILURE=1 make test
-
   SEAL_API_MAC:
 
     runs-on: macos-latest
@@ -250,19 +144,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements_dev.txt
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 --config=.flake8 ./tenseal/sealapi ./tests/sealapi
-        black --check tenseal/sealapi tests/sealapi
-    - name: Lint with clang-format
-      run: |
-        # lint files (all .cpp and .h files) inplace
-        find ./tenseal/sealapi -iname *.h -o -iname *.cpp | xargs clang-format -i -style='file'
-        # print changes
-        git diff
-        # already well formated if 'git diff' doesn't output
-        ! ( git diff |  grep -q ^ ) || return 1
     - name: Build the library
       run: |
         # fetch third_party libraries
