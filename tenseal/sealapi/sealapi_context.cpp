@@ -138,7 +138,8 @@ void bind_context(pybind11::module &m) {
         .def("total_coeff_modulus_bit_count",
              &SEALContext::ContextData::total_coeff_modulus_bit_count)
         .def("coeff_div_plain_modulus",
-             &SEALContext::ContextData::coeff_div_plain_modulus)
+             &SEALContext::ContextData::coeff_div_plain_modulus,
+             py::return_value_policy::reference)
         .def("plain_upper_half_threshold",
              &SEALContext::ContextData::plain_upper_half_threshold)
         .def("upper_half_threshold",
