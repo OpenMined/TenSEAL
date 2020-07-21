@@ -1,10 +1,8 @@
 name: Windows Package
 
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    types: [ opened, synchronize, reopened ]
+  release:
+    types: [created]
 
 jobs:
   deploy:
