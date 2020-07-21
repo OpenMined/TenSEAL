@@ -204,34 +204,34 @@ jobs:
             python -m pip install --upgrade pip
             pip install -r requirements_dev.txt
         - name: Lint with flake8
-            run: |
-              # stop the build if there are Python syntax errors or undefined names
-              flake8 --config=.flake8 --exclude=tenseal/sealapi,tests/sealapi .
-              black --check --exclude "sealapi" tenseal/ tests/
-              # exit-zero treats all errors as warnings.
-              flake8 . --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
+          run: |
+            # stop the build if there are Python syntax errors or undefined names
+            flake8 --config=.flake8 --exclude=tenseal/sealapi,tests/sealapi .
+            black --check --exclude "sealapi" tenseal/ tests/
+            # exit-zero treats all errors as warnings.
+            flake8 . --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
         - name: Lint with clang-format
-            run: |
-              # lint files (all .cpp and .h files) inplace
-              find ./tenseal/  \( -iname *.h -o -iname *.cpp \) -a -not -path "*sealapi*" | xargs clang-format -i -style='file'
-              # print changes
-              git diff
-              # already well formated if 'git diff' doesn't output
-              ! ( git diff |  grep -q ^ ) || return 1
+          run: |
+            # lint files (all .cpp and .h files) inplace
+            find ./tenseal/  \( -iname *.h -o -iname *.cpp \) -a -not -path "*sealapi*" | xargs clang-format -i -style='file'
+            # print changes
+            git diff
+            # already well formated if 'git diff' doesn't output
+            ! ( git diff |  grep -q ^ ) || return 1
         - name: Build the library
-            run: |
-              # fetch third_party libraries
-              git submodule init && git submodule update
-              # we need to install tenseal in order to build the cpp library
-              pip install .
+          run: |
+            # fetch third_party libraries
+            git submodule init && git submodule update
+            # we need to install tenseal in order to build the cpp library
+            pip install .
         - name: Test with pytest
-            run: |
-              pytest -v --ignore=tests/sealapi ./tests
+          run: |
+            pytest -v --ignore=tests/sealapi ./tests
         - name: Test with gtest
-            run: |
-              cd tenseal/proto && cmake . && make && cd ../../
-              cmake . -D BUILD_TEST=TRUE
-              make && CTEST_OUTPUT_ON_FAILURE=1 make test
+          run: |
+            cd tenseal/proto && cmake . && make && cd ../../
+            cmake . -D BUILD_TEST=TRUE
+            make && CTEST_OUTPUT_ON_FAILURE=1 make test
 
   SEAL_API_MAC:
 
