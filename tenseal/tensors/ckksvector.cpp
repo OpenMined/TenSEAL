@@ -435,7 +435,7 @@ CKKSVector CKKSVector::matmul_plain(const vector<vector<double>>& matrix) {
 
 CKKSVector& CKKSVector::matmul_plain_inplace(
     const vector<vector<double>>& matrix) {
-    this->ciphertext = diagonal_ct_vector_matmul<double, CKKSEncoder>(
+    this->ciphertext = diagonal_ct_vector_matmul_parallel<double, CKKSEncoder>(
         this->context, this->ciphertext, this->size(), matrix);
 
     this->_size = matrix[0].size();
