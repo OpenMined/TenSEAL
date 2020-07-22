@@ -15,6 +15,16 @@ using namespace seal;
 using namespace std;
 namespace py = pybind11;
 
+template <typename T>
+auto bind_pickle() {
+    return py::pickle(
+        [&](const T &p) { return py::make_tuple(py::bytes(p.save())); },
+        [&](py::tuple t) {
+            if (t.size() != 1) throw std::runtime_error("Invalid state!");
+            return T(t[0].cast<std::string>());
+        });
+}
+
 PYBIND11_MODULE(_tenseal_cpp, m) {
     m.doc() = "Library for doing homomorphic encryption operations on tensors";
 
@@ -43,6 +53,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     py::class_<BFVVector>(m, "BFVVector")
         .def(py::init<shared_ptr<TenSEALContext> &, vector<int64_t>>())
+        .def(py::init<const std::string &>())
         .def("size", &BFVVector::size)
         .def("decrypt", py::overload_cast<>(&BFVVector::decrypt))
         .def("decrypt", py::overload_cast<const std::shared_ptr<SecretKey> &>(
@@ -71,13 +82,21 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__mul__", &BFVVector::mul)
         .def("__mul__", &BFVVector::mul_plain)
         .def("__imul__", &BFVVector::mul_inplace)
-        .def("__imul__", &BFVVector::mul_plain_inplace);
+        .def("__imul__", &BFVVector::mul_plain_inplace)
+        .def("serialize",
+             [](const BFVVector &obj) { return py::bytes(obj.save()); })
+        .def("copy", &BFVVector::deepcopy)
+        .def("__copy__", [](const BFVVector &self) { return self.deepcopy(); })
+        .def("__deepcopy__",
+             [](const BFVVector &self, py::dict) { return self.deepcopy(); })
+        .def(bind_pickle<BFVVector>());
 
     py::class_<CKKSVector>(m, "CKKSVector")
         // specifying scale
         .def(py::init<shared_ptr<TenSEALContext> &, vector<double>, double>())
         // using global_scale if set
         .def(py::init<shared_ptr<TenSEALContext> &, vector<double>>())
+        .def(py::init<const std::string &>())
         .def("size", &CKKSVector::size)
         .def("decrypt", py::overload_cast<>(&CKKSVector::decrypt))
         .def("decrypt", py::overload_cast<const shared_ptr<SecretKey> &>(
@@ -186,7 +205,14 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__imul__", py::overload_cast<const vector<double> &>(
                              &CKKSVector::mul_plain_inplace))
         .def("__matmul__", &CKKSVector::matmul_plain)
-        .def("__imatmul__", &CKKSVector::matmul_plain_inplace);
+        .def("__imatmul__", &CKKSVector::matmul_plain_inplace)
+        .def("serialize",
+             [](const CKKSVector &obj) { return py::bytes(obj.save()); })
+        .def("copy", &CKKSVector::deepcopy)
+        .def("__copy__", [](const CKKSVector &self) { return self.deepcopy(); })
+        .def("__deepcopy__",
+             [](const CKKSVector &self, py::dict) { return self.deepcopy(); })
+        .def(bind_pickle<CKKSVector>());
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")
