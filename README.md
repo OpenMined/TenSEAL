@@ -101,7 +101,7 @@ $ docker container run --interactive --tty openmined/tenseal
 You can also build your custom image, this might be handy for developers working on the project
 
 ```bash
-$ docker build -t tenseal . -f docker-images/Dockerfile-py38
+$ docker build -t tenseal -f docker-images/Dockerfile-py38 .
 ```
 
 To interactively run this docker image as a container after it has been built you can run
