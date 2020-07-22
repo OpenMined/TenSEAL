@@ -47,8 +47,8 @@ CKKSVector::CKKSVector(const CKKSVectorProto& input) {
     this->load_proto(input);
 }
 
-size_t CKKSVector::size() { return this->_size; }
-size_t CKKSVector::ciphertext_size() { return this->ciphertext.size(); }
+size_t CKKSVector::size() const { return this->_size; }
+size_t CKKSVector::ciphertext_size() const { return this->ciphertext.size(); }
 
 vector<double> CKKSVector::decrypt() {
     if (this->context->decryptor == NULL) {
@@ -156,7 +156,7 @@ CKKSVector CKKSVector::add(CKKSVector to_add) {
 }
 
 CKKSVector& CKKSVector::add_inplace(CKKSVector to_add) {
-    if (this->context != to_add.context) {
+    if (!this->context->equals(to_add.context)) {
         // Different contexts means different parameters
         throw invalid_argument(
             "can't add vectors that have different contexts");
@@ -230,7 +230,7 @@ CKKSVector CKKSVector::sub(CKKSVector to_sub) {
 }
 
 CKKSVector& CKKSVector::sub_inplace(CKKSVector to_sub) {
-    if (this->context != to_sub.context) {
+    if (!this->context->equals(to_sub.context)) {
         // Different contexts means different parameters
         throw invalid_argument(
             "can't sub vectors that have different contexts");
@@ -304,7 +304,7 @@ CKKSVector CKKSVector::mul(CKKSVector to_mul) {
 }
 
 CKKSVector& CKKSVector::mul_inplace(CKKSVector to_mul) {
-    if (this->context != to_mul.context) {
+    if (!this->context->equals(to_mul.context)) {
         // Different contexts means different parameters
         throw invalid_argument(
             "can't multiply vectors that have different contexts");

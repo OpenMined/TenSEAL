@@ -22,6 +22,18 @@ def bfv_vector(context, plaintext_vector):
     return _ts_cpp.BFVVector(context, plaintext_vector)
 
 
+def bfv_vector_from(buff):
+    """Constructor method for the BFVVector object from a serialized protobuffer.
+    Args:
+        buff: The serialized protobuffer.
+
+    Returns:
+        BFVVector object.
+    """
+
+    return _ts_cpp.BFVVector(buff)
+
+
 def ckks_vector(context, plaintext_vector, scale=None):
     """Constructor method for the CKKSVector object, which can store a list
     of float numbers in encrypted form, using the CKKS homomorphic encryption
@@ -41,4 +53,16 @@ def ckks_vector(context, plaintext_vector, scale=None):
     return _ts_cpp.CKKSVector(context, plaintext_vector, scale)
 
 
-__all__ = ["bfv_vector", "ckks_vector"]
+def ckks_vector_from(buff):
+    """Constructor method for the CKKSVector object from a serialized protobuffer.
+
+    Args:
+        buff: The serialized protobuffer.
+
+    Returns:
+        CKKSVector object.
+    """
+    return _ts_cpp.CKKSVector(buff)
+
+
+__all__ = ["bfv_vector", "bfv_vector_from", "ckks_vector", "ckks_vector_from"]

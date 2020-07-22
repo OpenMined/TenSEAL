@@ -72,8 +72,7 @@ BFVVector BFVVector::add(BFVVector to_add) {
 }
 
 BFVVector& BFVVector::add_inplace(BFVVector to_add) {
-    // TODO: check the context parameters properly
-    if (this->context != to_add.context) {
+    if (!this->context->equals(to_add.context)) {
         // Different contexts means different parameters
         throw invalid_argument(
             "can't add vectors that have different contexts");
@@ -116,8 +115,7 @@ BFVVector BFVVector::sub(BFVVector to_sub) {
 }
 
 BFVVector& BFVVector::sub_inplace(BFVVector to_sub) {
-    // TODO: check the context parameters properly
-    if (this->context != to_sub.context) {
+    if (!this->context->equals(to_sub.context)) {
         // Different contexts means different parameters
         throw invalid_argument(
             "can't sub vectors that have different contexts");
@@ -160,8 +158,7 @@ BFVVector BFVVector::mul(BFVVector to_mul) {
 }
 
 BFVVector& BFVVector::mul_inplace(BFVVector to_mul) {
-    // TODO: check the context parameters properly
-    if (this->context != to_mul.context) {
+    if (!this->context->equals(to_mul.context)) {
         // Different contexts means different parameters
         throw invalid_argument(
             "can't mul vectors that have different contexts");

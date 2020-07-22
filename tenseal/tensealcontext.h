@@ -131,6 +131,10 @@ class TenSEALContext {
     void load_proto(const TenSEALContextProto& buffer);
     TenSEALContextProto save_proto() const;
 
+    // helpers
+    const EncryptionParameters& parms() { return _parms; }
+    bool equals(const std::shared_ptr<TenSEALContext>& other);
+
    private:
     EncryptionParameters _parms;
     shared_ptr<SEALContext> _context;

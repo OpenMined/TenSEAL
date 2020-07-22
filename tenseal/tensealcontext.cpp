@@ -248,6 +248,11 @@ bool TenSEALContext::auto_mod_switch() {
     return this->_auto_flags & flag_auto_mod_switch;
 }
 
+bool TenSEALContext::equals(const std::shared_ptr<TenSEALContext>& other) {
+    return this->parms() == other->parms() &&
+           this->is_public() == other->is_public();
+}
+
 void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
     this->base_setup(
         SEALDeserialize<EncryptionParameters>(buffer.encryption_parameters()));

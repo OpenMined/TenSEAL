@@ -41,8 +41,8 @@ class CKKSVector {
     /*
     Returns the size of the encrypted vector.
     */
-    size_t size();
-    size_t ciphertext_size();
+    size_t size() const;
+    size_t ciphertext_size() const;
 
     /*
     Replicate the first slot of a ciphertext n times. Requires a multiplication.
@@ -138,11 +138,8 @@ class CKKSVector {
     CKKSVector& _mul_plain_inplace(const T& to_mul);
 
     size_t _size;
-
     double init_scale;
-
     shared_ptr<TenSEALContext> context;
-
     Ciphertext ciphertext;
 
     static Ciphertext encrypt(shared_ptr<TenSEALContext> context, double scale,

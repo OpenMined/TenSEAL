@@ -85,6 +85,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__imul__", &BFVVector::mul_plain_inplace)
         .def("serialize",
              [](const BFVVector &obj) { return py::bytes(obj.save()); })
+        .def_static("deserialize",
+                    [](const std::string &buff) { return BFVVector(buff); })
         .def("copy", &BFVVector::deepcopy)
         .def("__copy__", [](const BFVVector &self) { return self.deepcopy(); })
         .def("__deepcopy__",
@@ -208,6 +210,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__imatmul__", &CKKSVector::matmul_plain_inplace)
         .def("serialize",
              [](const CKKSVector &obj) { return py::bytes(obj.save()); })
+        .def_static("deserialize",
+                    [](const std::string &buff) { return CKKSVector(buff); })
         .def("copy", &CKKSVector::deepcopy)
         .def("__copy__", [](const CKKSVector &self) { return self.deepcopy(); })
         .def("__deepcopy__",
