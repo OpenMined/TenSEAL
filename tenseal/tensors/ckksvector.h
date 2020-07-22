@@ -7,6 +7,7 @@
 #include <optional>
 #include <vector>
 
+#include "tenseal/proto/tensors.pb.h"
 #include "tenseal/tensealcontext.h"
 #include "tenseal/utils/utils.h"
 
@@ -26,6 +27,10 @@ class CKKSVector {
 
     CKKSVector(const CKKSVector& vec);
 
+    CKKSVector(const string& input);
+    CKKSVector(istream& input);
+    CKKSVector(const CKKSVectorProto& input);
+
     /*
     Decrypts and returns the plaintext representation of the encrypted vector of
     real numbers using the secret-key.
@@ -38,12 +43,6 @@ class CKKSVector {
     */
     size_t size();
     size_t ciphertext_size();
-
-    /*
-    Returns an upper bound on the size of the CKKSVector, as if it was written
-    to an output stream.
-    */
-    streamoff save_size();
 
     /*
     Replicate the first slot of a ciphertext n times. Requires a multiplication.
@@ -120,6 +119,13 @@ class CKKSVector {
     CKKSVector polyval(const vector<double>& coefficients);
     CKKSVector& polyval_inplace(const vector<double>& coefficients);
 
+    void load(std::istream& stream);
+    void load(const std::string& input);
+
+    bool save(std::ostream& stream) const;
+    std::string save() const;
+    CKKSVector deepcopy() const;
+
    private:
     /*
     Private evaluation functions to process both scalar and vector arguments.
@@ -157,6 +163,9 @@ class CKKSVector {
 
         return ciphertext;
     }
+
+    void load_proto(const CKKSVectorProto& buffer);
+    CKKSVectorProto save_proto() const;
 };
 
 }  // namespace tenseal

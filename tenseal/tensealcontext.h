@@ -41,6 +41,7 @@ class TenSEALContext {
                                              vector<int> coeff_mod_bit_sizes);
     static shared_ptr<TenSEALContext> Create(istream& stream);
     static shared_ptr<TenSEALContext> Create(const std::string& input);
+    static shared_ptr<TenSEALContext> Create(const TenSEALContextProto& input);
 
     /*
     Returns a pointer to the public key
@@ -127,6 +128,9 @@ class TenSEALContext {
     std::string save() const;
     std::shared_ptr<TenSEALContext> copy() const;
 
+    void load_proto(const TenSEALContextProto& buffer);
+    TenSEALContextProto save_proto() const;
+
    private:
     EncryptionParameters _parms;
     shared_ptr<SEALContext> _context;
@@ -157,9 +161,6 @@ class TenSEALContext {
                     optional<SecretKey> secret_key = {},
                     bool generate_relin_keys = true,
                     bool generate_galois_keys = false);
-
-    void load_proto(const TenSEALContextProto& buffer);
-    TenSEALContextProto save_proto() const;
 };
 }  // namespace tenseal
 #endif

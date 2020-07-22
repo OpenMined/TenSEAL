@@ -9,6 +9,8 @@
 
 #include "tenseal/tensealcontext.h"
 #include "tenseal/utils/matrix_ops.h"
+#include "tenseal/utils/proto.h"
+#include "tenseal/utils/serialization.h"
 #include "tenseal/utils/utils.h"
 
 using namespace seal;
@@ -35,6 +37,14 @@ CKKSVector::CKKSVector(const CKKSVector& vec) {
     this->init_scale = vec.init_scale;
     this->_size = vec._size;
     this->ciphertext = vec.ciphertext;
+}
+
+CKKSVector::CKKSVector(const string& input) { this->load(input); }
+
+CKKSVector::CKKSVector(istream& input) { this->load(input); }
+
+CKKSVector::CKKSVector(const CKKSVectorProto& input) {
+    this->load_proto(input);
 }
 
 size_t CKKSVector::size() { return this->_size; }
@@ -65,10 +75,6 @@ vector<double> CKKSVector::decrypt(const shared_ptr<SecretKey>& sk) {
     // we use the size to delimit the resulting plaintext vector
     vector<double> sub(result.cbegin(), result.cbegin() + this->size());
     return sub;
-}
-
-streamoff CKKSVector::save_size() {
-    return this->ciphertext.save_size(compr_mode_type::none);
 }
 
 CKKSVector CKKSVector::negate() {
@@ -525,6 +531,65 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
 
     this->ciphertext = result.ciphertext;
     return *this;
+}
+
+void CKKSVector::load_proto(const CKKSVectorProto& buffer) {
+    this->context = TenSEALContext::Create(buffer.context());
+    this->_size = buffer.size();
+    this->ciphertext = SEALDeserialize<Ciphertext>(
+        this->context->seal_context(), buffer.ciphertext());
+    this->init_scale = buffer.scale();
+}
+
+CKKSVectorProto CKKSVector::save_proto() const {
+    CKKSVectorProto buffer;
+
+    *buffer.mutable_context() = this->context->save_proto();
+    *buffer.mutable_ciphertext() = SEALSerialize<Ciphertext>(this->ciphertext);
+    buffer.set_size(this->_size);
+    buffer.set_scale(this->init_scale);
+
+    return buffer;
+}
+
+void CKKSVector::load(std::istream& stream) {
+    CKKSVectorProto buffer;
+    if (!buffer.ParseFromIstream(&stream)) {
+        throw invalid_argument("failed to parse CKKS stream");
+    }
+
+    this->load_proto(buffer);
+}
+
+void CKKSVector::load(const std::string& input) {
+    CKKSVectorProto buffer;
+    if (!buffer.ParseFromArray(input.c_str(), input.size())) {
+        throw invalid_argument("failed to parse CKKS stream");
+    }
+    this->load_proto(buffer);
+}
+
+bool CKKSVector::save(std::ostream& stream) const {
+    CKKSVectorProto buffer = this->save_proto();
+    return buffer.SerializeToOstream(&stream);
+}
+
+std::string CKKSVector::save() const {
+    auto buffer = this->save_proto();
+    std::string output;
+    output.resize(proto_bytes_size(buffer));
+
+    if (!buffer.SerializeToArray((void*)output.c_str(),
+                                 proto_bytes_size(buffer))) {
+        throw invalid_argument("failed to save CKKS proto");
+    }
+
+    return output;
+}
+
+CKKSVector CKKSVector::deepcopy() const {
+    CKKSVectorProto buffer = this->save_proto();
+    return CKKSVectorProto(buffer);
 }
 
 }  // namespace tenseal

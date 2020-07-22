@@ -6,6 +6,8 @@
 #include <vector>
 
 #include "tenseal/tensealcontext.h"
+#include "tenseal/utils/proto.h"
+#include "tenseal/utils/serialization.h"
 
 using namespace seal;
 using namespace std;
@@ -26,12 +28,14 @@ BFVVector::BFVVector(const BFVVector& vec) {
     this->ciphertext = vec.ciphertext;
 }
 
+BFVVector::BFVVector(const string& input) { this->load(input); }
+
+BFVVector::BFVVector(istream& input) { this->load(input); }
+
+BFVVector::BFVVector(const BFVVectorProto& input) { this->load_proto(input); }
+
 size_t BFVVector::size() { return this->_size; }
 size_t BFVVector::ciphertext_size() { return this->ciphertext.size(); }
-
-streamoff BFVVector::save_size() {
-    return this->ciphertext.save_size(compr_mode_type::none);
-}
 
 vector<int64_t> BFVVector::decrypt() {
     if (this->context->decryptor == NULL) {
@@ -204,4 +208,60 @@ BFVVector& BFVVector::mul_plain_inplace(const vector<int64_t>& to_mul) {
     return *this;
 }
 
+void BFVVector::load_proto(const BFVVectorProto& buffer) {
+    this->context = TenSEALContext::Create(buffer.context());
+    this->_size = buffer.size();
+    this->ciphertext = SEALDeserialize<Ciphertext>(
+        this->context->seal_context(), buffer.ciphertext());
+}
+
+BFVVectorProto BFVVector::save_proto() const {
+    BFVVectorProto buffer;
+
+    *buffer.mutable_context() = this->context->save_proto();
+    *buffer.mutable_ciphertext() = SEALSerialize<Ciphertext>(this->ciphertext);
+    buffer.set_size(this->_size);
+
+    return buffer;
+}
+
+void BFVVector::load(std::istream& stream) {
+    BFVVectorProto buffer;
+    if (!buffer.ParseFromIstream(&stream)) {
+        throw invalid_argument("failed to parse BFV stream");
+    }
+
+    this->load_proto(buffer);
+}
+
+void BFVVector::load(const std::string& input) {
+    BFVVectorProto buffer;
+    if (!buffer.ParseFromArray(input.c_str(), input.size())) {
+        throw invalid_argument("failed to parse BFV stream");
+    }
+    this->load_proto(buffer);
+}
+
+bool BFVVector::save(std::ostream& stream) const {
+    BFVVectorProto buffer = this->save_proto();
+    return buffer.SerializeToOstream(&stream);
+}
+
+std::string BFVVector::save() const {
+    auto buffer = this->save_proto();
+    std::string output;
+    output.resize(proto_bytes_size(buffer));
+
+    if (!buffer.SerializeToArray((void*)output.c_str(),
+                                 proto_bytes_size(buffer))) {
+        throw invalid_argument("failed to save proto");
+    }
+
+    return output;
+}
+
+BFVVector BFVVector::deepcopy() const {
+    BFVVectorProto buffer = this->save_proto();
+    return BFVVectorProto(buffer);
+}
 }  // namespace tenseal

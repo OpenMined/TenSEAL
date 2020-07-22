@@ -1,9 +1,9 @@
 #include "tenseal/tensealcontext.h"
 
 #include "seal/seal.h"
-#include "tenseal/serialization.h"
 #include "tenseal/utils/proto.h"
 #include "tenseal/utils/scope.h"
+#include "tenseal/utils/serialization.h"
 
 namespace tenseal {
 
@@ -90,6 +90,11 @@ shared_ptr<TenSEALContext> TenSEALContext::Create(istream& stream) {
 }
 
 shared_ptr<TenSEALContext> TenSEALContext::Create(const std::string& input) {
+    return shared_ptr<TenSEALContext>(new TenSEALContext(input));
+}
+
+shared_ptr<TenSEALContext> TenSEALContext::Create(
+    const TenSEALContextProto& input) {
     return shared_ptr<TenSEALContext>(new TenSEALContext(input));
 }
 

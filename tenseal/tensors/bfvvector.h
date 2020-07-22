@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 
+#include "tenseal/proto/tensors.pb.h"
 #include "tenseal/tensealcontext.h"
 
 namespace tenseal {
@@ -23,6 +24,10 @@ class BFVVector {
 
     BFVVector(const BFVVector& vec);
 
+    BFVVector(const string& input);
+    BFVVector(istream& input);
+    BFVVector(const BFVVectorProto& input);
+
     /*
     Decrypts and returns the plaintext representation of the encrypted vector of
     integers using the secret-key.
@@ -39,12 +44,6 @@ class BFVVector {
     Returns the size of the ciphertext.
     */
     size_t ciphertext_size();
-
-    /*
-    Returns an upper bound on the size of the BFVVector, as if it was written
-    to an output stream.
-    */
-    streamoff save_size();
 
     /*
     Encrypted evaluation function operates on two encrypted vectors and returns
@@ -72,6 +71,13 @@ class BFVVector {
     BFVVector mul_plain(const vector<int64_t>& to_mul);
     BFVVector& mul_plain_inplace(const vector<int64_t>& to_mul);
 
+    void load(std::istream& stream);
+    void load(const std::string& input);
+
+    bool save(std::ostream& stream) const;
+    std::string save() const;
+    BFVVector deepcopy() const;
+
    private:
     size_t _size;
 
@@ -88,6 +94,9 @@ class BFVVector {
 
         return ciphertext;
     }
+
+    void load_proto(const BFVVectorProto& buffer);
+    BFVVectorProto save_proto() const;
 };
 
 }  // namespace tenseal

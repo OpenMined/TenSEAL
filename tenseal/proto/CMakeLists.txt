@@ -2,7 +2,7 @@ include(FindProtobuf)
 find_package(Protobuf REQUIRED)
 set(Protobuf_USE_STATIC_LIBS YES)
 
-file(GLOB PROTOBUF_FILELIST tensealcontext.proto)
+file(GLOB PROTOBUF_FILELIST tensealcontext.proto tensors.proto)
 
 protobuf_generate_cpp(PROTO_SRC PROTO_INCL ${PROTOBUF_FILELIST})
 add_library(tenseal_proto ${PROTO_HEADER} ${PROTO_SRC})

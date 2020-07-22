@@ -1,0 +1,25 @@
+syntax = "proto3";
+import "tensealcontext.proto";
+package tenseal;
+
+//BFVVector parameters
+message BFVVectorProto {
+    // The context protobuffer
+    TenSEALContextProto context = 1;
+    // The size of the encrypted vector
+    uint32 size = 2;
+    // The serialized ciphertext
+    bytes ciphertext = 3;
+};
+
+//CKKSVector parameters
+message CKKSVectorProto {
+    // The context protobuffer
+    TenSEALContextProto context = 1;
+    // The size of the encrypted vector
+    uint32 size = 2;
+    // The serialized ciphertext
+    bytes ciphertext = 3;
+    // Scale value
+    double scale = 4;
+};
