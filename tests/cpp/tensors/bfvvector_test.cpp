@@ -7,21 +7,31 @@ namespace tenseal {
 namespace {
 using namespace ::testing;
 
-class BFVVectorTest : public Test {
+class BFVVectorTest : public TestWithParam</*serialize=*/bool>  {
    protected:
     void SetUp() {}
 };
 
-TEST_F(BFVVectorTest, TestCreateBFV) {
+TEST_P(BFVVectorTest, TestCreateBFV) {
+    bool should_serialize_first = GetParam();
+
     auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
     auto l = BFVVector(ctx, {1, 2, 3});
+
+     if (should_serialize_first) {
+         auto buff = l.save();
+         l = BFVVector(buff);
+     }
+
     ASSERT_EQ(l.size(), 3);
     ASSERT_EQ(l.ciphertext_size(), 2);
 }
 
-TEST_F(BFVVectorTest, TestBFVAdd) {
+TEST_P(BFVVectorTest, TestBFVAdd) {
+    bool should_serialize_first = GetParam();
+
     auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
@@ -39,12 +49,19 @@ TEST_F(BFVVectorTest, TestBFVAdd) {
     l.add_inplace(r);
     l.add_inplace(r);
 
+     if (should_serialize_first) {
+         auto buff = l.save();
+         l = BFVVector(buff);
+     }
+
     ASSERT_EQ(l.ciphertext_size(), 2);
     decr = l.decrypt();
     EXPECT_THAT(decr, ElementsAreArray({9, 14, 19}));
 }
 
-TEST_F(BFVVectorTest, TestBFVMul) {
+TEST_P(BFVVectorTest, TestBFVMul) {
+    bool should_serialize_first = GetParam();
+
     auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
@@ -63,11 +80,20 @@ TEST_F(BFVVectorTest, TestBFVMul) {
     l.mul_inplace(r);
     l.mul_inplace(r);
     l.mul_inplace(r);
+
+     if (should_serialize_first) {
+         auto buff = l.save();
+         l = BFVVector(buff);
+     }
+
     ASSERT_EQ(l.ciphertext_size(), 2);
 
     decr = l.decrypt();
     EXPECT_THAT(decr, ElementsAreArray({16, 32, 48}));
 }
+
+INSTANTIATE_TEST_CASE_P(TestBFVVector, BFVVectorTest,
+                         ::testing::Values(false, true));
 
 }  // namespace
 }  // namespace tenseal
