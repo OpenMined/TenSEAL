@@ -51,9 +51,9 @@ def test_util_rns():
 
     base = util.RNSBase([sealapi.Modulus(3), sealapi.Modulus(5)])
     dec = base.decompose_array([14, 0], 1)
-    assert dec == [4, 0]
+    assert dec == [2, 4]
     comp = base.compose_array(dec, 1)
-    assert comp == [10, 0]
+    assert comp == [14, 0]
 
     assert base.base_prod() == 15
 
@@ -122,58 +122,19 @@ def test_util_croots():
     assert croot.get_root(5) != 0
 
 
-def test_util_polyarith():
-    assert util.right_shift_poly_coeffs([2, 4, 8], 3, 1, 1) == [1, 2, 4]
-    assert util.negate_poly([2, 4, 8], 3, 1) == [(1 << 64) - 2, (1 << 64) - 4, (1 << 64) - 8]
-    assert util.add_poly_poly([2, 4, 8], [3, 4, 5], 3, 1) == [5, 8, 13]
-    assert util.sub_poly_poly([4, 6, 8], [3, 4, 5], 3, 1) == [1, 2, 3]
-    assert util.multiply_poly_poly([1, 2], 2, 1, [1, 2, 3], 3, 1, 4, 1) == [1, 4, 7, 6]
-    assert util.poly_infty_norm([1, 2], 2, 1) == [2, 0]
-    assert util.poly_eval_poly([1, 0], 2, 1, [2, 1], 2, 1, 4, 1) == [1, 0, 0, 0]
-    assert util.exponentiate_poly([2, 3], 2, 1, [2], 1, 4, 1) == [4, 12, 9, 0]
-
-
 def test_util_polyarithsmallmod():
     assert util.modulo_poly_coeffs([5, 6, 7, 8, 9], 5, sealapi.Modulus(2)) == [1, 0, 1, 0, 1]
-    assert util.modulo_poly_coeffs_63([66, 67, 68], 3, sealapi.Modulus(5)) == [1, 2, 3]
     assert util.negate_poly_coeffmod([1, 2], 2, sealapi.Modulus(5)) == [4, 3]
-    assert util.add_poly_poly_coeffmod([1, 2], [1, 2], 2, sealapi.Modulus(5)) == [2, 4]
-    assert util.sub_poly_poly_coeffmod([1, 2], [1, 2], 2, sealapi.Modulus(5)) == [0, 0]
+    assert util.add_poly_coeffmod([1, 2], [1, 2], 2, sealapi.Modulus(5)) == [2, 4]
+    assert util.sub_poly_coeffmod([1, 2], [1, 2], 2, sealapi.Modulus(5)) == [0, 0]
     assert util.multiply_poly_scalar_coeffmod([1, 2], 2, 3, sealapi.Modulus(5)) == [3, 1]
-    assert util.multiply_poly_poly_coeffmod([1, 2], 2, [2, 3], 2, sealapi.Modulus(5), 4) == [
-        2,
-        2,
-        1,
-        0,
-    ]
-    assert util.multiply_poly_poly_coeffmod([1, 2], [2, 3], 2, sealapi.Modulus(5), 4) == [
-        2,
-        2,
-        1,
-        0,
-    ]
-    assert util.multiply_truncate_poly_poly_coeffmod([1, 2], [2, 3], 2, sealapi.Modulus(5), 4) == [
-        2,
-        2,
-        0,
-        0,
-    ]
-    assert util.divide_poly_poly_coeffmod([4, 3], [2, 3], 2, sealapi.Modulus(5)) == [[1, 0], [2, 0]]
     assert util.dyadic_product_coeffmod([5, 7], [2, 3], 2, sealapi.Modulus(5), 4) == [0, 1, 0, 0]
     assert util.poly_infty_norm_coeffmod([5, 7], 2, sealapi.Modulus(5)) == 2
-    assert util.try_invert_poly_coeffmod([1, 0], [4, 3], 2, sealapi.Modulus(5)) == [1, 0]
     assert util.negacyclic_shift_poly_coeffmod([4, 3], 2, 1, sealapi.Modulus(5)) == [2, 4]
     assert util.negacyclic_multiply_poly_mono_coeffmod([4, 3], 2, 2, 1, sealapi.Modulus(5)) == [
         4,
         3,
     ]
-
-
-def test_util_polyarithmod():
-    assert util.negate_poly_coeffmod([1, 2], 2, [5], 1) == [4, 3]
-    assert util.add_poly_poly_coeffmod([1, 2], [2, 3], 2, [5], 1) == [3, 0]
-    assert util.add_poly_poly_coeffmod([3, 4], [2, 3], 2, [5], 1) == [0, 2]
-    assert util.poly_infty_norm_coeffmod([0, 1], 2, 1, [5]) == [1, 0]
 
 
 def test_util_polycore():
@@ -247,11 +208,8 @@ def test_util_ntt():
         coeff_count_power, sealapi.Modulus(util.get_prime(1 << coeff_count_power, 40))
     )
     assert tables.get_root() > 0
-    assert tables.get_from_root_powers(1) > 0
-    assert tables.get_from_scaled_root_powers(1) > 0
-    assert tables.get_from_inv_root_powers(1) > 0
-    assert tables.get_from_scaled_inv_root_powers(1) > 0
-    assert tables.get_inv_degree_modulo() > 0
+    assert tables.get_from_root_powers(1).operand > 0
+    assert tables.get_from_inv_root_powers(1).operand > 0
     assert tables.modulus() > 0
     assert tables.coeff_count_power() == coeff_count_power
     assert tables.coeff_count() == 1 << coeff_count_power
@@ -299,3 +257,65 @@ def test_util_rnstool_sanity():
     plain = sealapi.Modulus(0)
     coeff_base = util.RNSBase([sealapi.Modulus(3)])
     rns_tool = util.RNSTool(poly_modulus_degree, coeff_base, plain)
+
+    input = [1, 2, 1, 2]
+    dest = rns_tool.fastbconv_sk(input, poly_modulus_degree)
+    assert dest == [1, 2]
+
+    input = [
+        rns_tool.m_tilde().value(),
+        2 * rns_tool.m_tilde().value(),
+        rns_tool.m_tilde().value(),
+        2 * rns_tool.m_tilde().value(),
+        0,
+        0,
+    ]
+    dest = rns_tool.sm_mrq(input, poly_modulus_degree)
+    assert dest == [1, 2, 1, 2]
+
+    input = [15, 3, 15, 3, 15, 3]
+    dest = rns_tool.fast_floor(input, poly_modulus_degree)
+    assert dest == [5, 1, 5, 1]
+
+    input = [1, 2]
+    dest = rns_tool.fastbconv_m_tilde(input, poly_modulus_degree)
+    assert dest == [1, 2, 1, 2, 1, 2]
+
+    poly_modulus_degree = 2
+    plain = sealapi.Modulus(3)
+    coeff_base = util.RNSBase([sealapi.Modulus(5), sealapi.Modulus(7)])
+    rns_tool = util.RNSTool(poly_modulus_degree, coeff_base, plain)
+
+    input = [35, 70, 35, 70]
+    dest = rns_tool.decrypt_scale_and_round(input, poly_modulus_degree)
+    assert dest == [0, 0, 0, 0]
+    input = [29, 30 + 35, 29, 30 + 35]
+    dest = rns_tool.decrypt_scale_and_round(input, poly_modulus_degree)
+    assert dest == [2, 0, 0, 0]
+
+    poly_modulus_degree = 2
+    plain = sealapi.Modulus(0)
+    coeff_base = util.RNSBase([sealapi.Modulus(13), sealapi.Modulus(7)])
+    rns_tool = util.RNSTool(poly_modulus_degree, coeff_base, plain)
+
+    input = [12, 11, 4, 3]
+    dest = rns_tool.divide_and_round_q_last_inplace(input, poly_modulus_degree)
+    assert dest == [4, 3, 0, 6]
+
+    poly_modulus_degree = 2
+    plain = sealapi.Modulus(0)
+    coeff_base = util.RNSBase([sealapi.Modulus(53), sealapi.Modulus(13)])
+    rns_tool = util.RNSTool(poly_modulus_degree, coeff_base, plain)
+
+    input = [4, 12, 4, 12]
+    dest = rns_tool.divide_and_round_q_last_inplace(input, poly_modulus_degree)
+    assert dest == [0, 1, 10, 5]
+
+
+def test_util_multiplyuintmodoperand_sanity():
+    mod = sealapi.Modulus(2147483647)
+    op = util.MultiplyUIntModOperand()
+    op.set(2147483646, mod)
+    op.set_quotient(mod)
+    assert op.operand == 2147483646
+    assert op.quotient == 18446744065119617019
