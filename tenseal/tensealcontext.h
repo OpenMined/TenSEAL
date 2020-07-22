@@ -12,119 +12,192 @@ namespace tenseal {
 using namespace seal;
 using namespace std;
 
-/*
-A store for keeping all the keys and parameters required to run an encrypted
-computation, it wraps around SEALContext and keeps additional parameters and
-objects that are needed during encryption, evaluation and decryption of tensors.
-This should be the main object a user is required to create to use encrypted
-tenors.
-*/
+/**
+ * A store for keeping all the keys and parameters required to run an encrypted
+ * computation, it wraps around SEALContext and keeps additional parameters and
+ * objects that are needed during encryption, evaluation and decryption of
+ *tensors. This should be the main object a user is required to create to use
+ *encrypted tensors.
+ **/
 class TenSEALContext {
    public:
-    /*
-    These are the objects needed for encryption, decryption and evaluation of
-    tensors respectively. Keeping them in a single objects reduces memory and
-    time for doing operations on encrypted tensors since we only need to
-    instantiate them once.
-    */
+    /**
+     * These are the objects needed for encryption, decryption and evaluation of
+     * tensors respectively. Keeping them in a single objects reduces memory and
+     * time for doing operations on encrypted tensors since we only need to
+     * instantiate them once.
+     **/
     shared_ptr<Encryptor> encryptor;
     shared_ptr<Decryptor> decryptor;
     shared_ptr<Evaluator> evaluator;
 
-    /*
-    The way to instantiate TenSEALContext is through the Create function, it
-    makes sure to create an object and only share a pointer to it.
-    */
+    /**
+     * The way to instantiate TenSEALContext is through the Create function, it
+     * makes sure to create an object and only share a pointer to it.
+     *
+     * Create a context from the encryption parameters.
+     * @param[in] scheme: BFV or CKKS.
+     * @param[in] poly_modulus_degree: The polynomial modulus degree.
+     * @param[in] plain_modulus: The plaintext modulus.
+     * @param[in] coeff_mod_bit_sizes: The bit-lengths of the primes to be
+     *generated.
+     * @returns shared_ptr to a new TenSEALContext object.
+     **/
     static shared_ptr<TenSEALContext> Create(scheme_type scheme,
                                              size_t poly_modulus_degree,
                                              uint64_t plain_modulus,
                                              vector<int> coeff_mod_bit_sizes);
+    /**
+     * Create a context from an input stream.
+     * @param[in] stream
+     * @returns shared_ptr to a new TenSEALContext object.
+     **/
     static shared_ptr<TenSEALContext> Create(istream& stream);
+    /**
+     * Create a context from a serialized protobuffer.
+     * @param[in] input: Serialized protobuffer.
+     * @returns shared_ptr to a new TenSEALContext object.
+     **/
     static shared_ptr<TenSEALContext> Create(const std::string& input);
-
-    /*
-    Returns a pointer to the public key
-    */
+    /**
+     * @returns a pointer to the public key.
+     **/
     shared_ptr<PublicKey> public_key() const;
+    /**
+     * @returns a pointer to the secret key.
+     * @throws invalid_argument if the context is public.
+     **/
     shared_ptr<SecretKey> secret_key() const;
+    /**
+     * @returns a pointer to the relinearization keys.
+     * @throws invalid_argument if the keys are missing.
+     **/
     shared_ptr<RelinKeys> relin_keys() const;
+    /**
+     * @returns a pointer to the Galois keys.
+     * @throws invalid_argument if the keys are missing.
+     **/
     shared_ptr<GaloisKeys> galois_keys() const;
-
-    /*
-    Generate Galois keys using the secret key
-    */
+    /**
+     * Generate Galois keys using the existing secret key.
+     * @throws invalid_argument if the context is public.
+     **/
     void generate_galois_keys();
+    /**
+     * Generate Galois keys using a custom secret key.
+     * @param[in] secret_key.
+     **/
     void generate_galois_keys(const SecretKey& secret_key);
+    /**
+     * Generate Galois keys from a serialized protobuffer.
+     * @param[in] input: Serialized string.
+     **/
     void generate_galois_keys(const std::string&);
-
-    /*
-    Generate Relinearization keys using the secret key
-    */
+    /**
+     * Generate Relinearization keys using the existing secret key.
+     * @throws invalid_argument if the context is public.
+     **/
     void generate_relin_keys();
+    /**
+     * Generate Relinearization keys using a custom secret key.
+     **/
     void generate_relin_keys(const SecretKey& secret_key);
+    /**
+     * Generate Relinearization keys from a serialized protobuffer.
+     **/
     void generate_relin_keys(const std::string&);
-
-    /*
-    Generate Galois and Relinearization keys if needed, then destroy the
-    _secret_key and set it to nullptr
-    */
+    /**
+     * Generate Galois and Relinearization keys if needed, then destroy the
+     *_secret_key and set it to nullptr. The existing Galois/Relinearization
+     *keys will be kept.
+     * @param[in] generate_galois_keys: if True,the Galois keys will be
+     *generated.
+     * @param[in] generate_relin_keys: if True,the Relinearization keys will be
+     *generated.
+     **/
     void make_context_public(bool generate_galois_keys,
                              bool generate_relin_keys);
-
+    /**
+     * @returns true if the secret_key is null.
+     **/
     bool is_public() const;
+    /**
+     * @returns true if the secret_key is not null.
+     **/
     bool is_private() const;
-
-    /*
-    Returns the wrapped SEALContext object.
-    */
+    /**
+     * @returns the wrapped SEALContext object.
+     **/
     shared_ptr<SEALContext> seal_context();
-
-    /*
-    Template encoding function for the encoders.
-    */
+    /**
+     * Template encoding function for the encoders.
+     **/
     template <typename T, typename... Args>
     void encode(Args&&... args) {
         encoder_factory->encode<T>(std::forward<Args>(args)...);
     }
-
-    /*
-    Template decoder function for the encoders.
-    */
+    /**
+     * Template decoder function for the encoders.
+     **/
     template <class T, class R>
     void decode(const Plaintext& pt, R& result) {
         encoder_factory->decode<T>(pt, result);
     }
-
-    /*
-    Template slot_count function for the encoders.
-    */
+    /**
+     * Template slot_count function for the encoders.
+     **/
     template <class T>
     size_t slot_count() {
         return encoder_factory->slot_count<T>();
     }
-
-    // ciphertext scale setter(CKKS)
+    /**
+     * Set the global scale for the CKKS scheme.
+     * @param[in] scale
+     **/
     void global_scale(double scale);
-    // ciphertext scale getter(CKKS)
+    /**
+     * Get the global scale for the CKKS scheme.
+     **/
     double global_scale() const;
-
-    /*
-    Switch on/off automatic relinearization, rescaling, and mod switching.
-    */
-    // TODO: take into account possible parellel computation using this
+    /**
+     * Switch on/off automatic relinearization, rescaling, and mod switching.
+     * @param[in] status: on/off.
+     * TODO: take into account possible parallel computation using this
+     **/
     void auto_relin(bool status);
     void auto_rescale(bool status);
     void auto_mod_switch(bool status);
-
+    /**
+     * Get the state for automatic relinearization, rescaling, or mod switching.
+     **/
     bool auto_relin();
     bool auto_rescale();
     bool auto_mod_switch();
-
+    /**
+     * Read a serialized protobuffer from an input stream and populate the
+     *current context.
+     * @param[in] input stream.
+     **/
     void load(std::istream& stream);
+    /**
+     * Populate the current context from a serialized protobuffer.
+     * @param[in] input serialized protobuffer.
+     **/
     void load(const std::string& input);
-
+    /**
+     * Save the current context to a serialized protobuffer and write it to an
+     *output stream.
+     * @param[in] output stream.
+     **/
     bool save(std::ostream& stream) const;
+    /**
+     * Save the current context to a serialized protobuffer.
+     * @returns serialized protobuffer.
+     **/
     std::string save() const;
+    /**
+     * @returns a deepcopy of the current context.
+     **/
     std::shared_ptr<TenSEALContext> copy() const;
 
    private:
@@ -136,9 +209,9 @@ class TenSEALContext {
     shared_ptr<GaloisKeys> _galois_keys;
     shared_ptr<TenSEALEncoder> encoder_factory;
 
-    /*
-    Switches for automatic relinearization, rescaling, and modulus switching
-    */
+    /**
+     * Switches for automatic relinearization, rescaling, and modulus switching
+     **/
     enum {
         flag_auto_relin = 1 << 0,
         flag_auto_rescale = 1 << 1,
