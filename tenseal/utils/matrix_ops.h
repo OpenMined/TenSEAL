@@ -120,21 +120,33 @@ Ciphertext diagonal_ct_vector_matmul_parallel(
 
     // TODO:
     // - each thread sum in a local result, then add with the global result at
-    // the end
-    // - maybe use queue for i values instead of dividing the range equally
+    // the end -> didn't change much
+    // - make i a shared integer secured by a mutex
     // - limit scope of the lambda function [&]
     // - rename threads and function
+    mutex i_mutex;
+    size_t i = 0;
     auto thread_func = [&](size_t start, size_t end) {
-        for (size_t i = start; i < end; i++) {
+        while (true) {
+            // take next i
+            size_t local_i;
+            i_mutex.lock();
+            if (i == n_rows) {
+                i_mutex.unlock();
+                break;
+            }
+            local_i = i++;
+            i_mutex.unlock();
+
             Ciphertext ct;
             Plaintext pt_diag;
             vector<T> diag;
 
-            diag = get_diagonal(matrix, -i,
+            diag = get_diagonal(matrix, -local_i,
                                 tenseal_context->slot_count<Encoder>());
             replicate_vector(diag, tenseal_context->slot_count<Encoder>());
 
-            rotate(diag.begin(), diag.begin() + diag.size() - i, diag.end());
+            rotate(diag.begin(), diag.begin() + diag.size() - local_i, diag.end());
 
             tenseal_context->encode<Encoder>(diag, pt_diag);
 
@@ -144,7 +156,7 @@ Ciphertext diagonal_ct_vector_matmul_parallel(
             tenseal_context->evaluator->multiply_plain(vec, pt_diag, ct);
 
             tenseal_context->evaluator->rotate_vector_inplace(
-                ct, i, *tenseal_context->galois_keys());
+                ct, local_i, *tenseal_context->galois_keys());
 
             // accumulate results
             result_mutex.lock();
