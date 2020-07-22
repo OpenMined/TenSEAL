@@ -103,13 +103,13 @@ TEST_P(TenSEALContextTest, TestCreateBFVPublic) {
     }
 
     EXPECT_THROW(ctx->galois_keys(), std::exception);
-    EXPECT_THROW(ctx->relin_keys(), std::exception);
+    ASSERT_TRUE(ctx->relin_keys() != nullptr);
     EXPECT_THROW(ctx->secret_key(), std::exception);
 
     ctx->make_context_public(false, false);
     EXPECT_THROW(ctx->secret_key(), std::exception);
     EXPECT_THROW(ctx->generate_galois_keys(), std::exception);
-    EXPECT_THROW(ctx->generate_relin_keys(), std::exception);
+    ASSERT_TRUE(ctx->relin_keys() != nullptr);
 }
 
 TEST_P(TenSEALContextTest, TestCreateCKKS) {
@@ -147,8 +147,8 @@ TEST_P(TenSEALContextTest, TestCreateCKKSPublic) {
 
     ASSERT_TRUE(ctx != nullptr);
     ASSERT_TRUE(ctx->public_key() != nullptr);
+    ASSERT_TRUE(ctx->relin_keys() != nullptr);
     EXPECT_THROW(ctx->galois_keys(), std::exception);
-    EXPECT_THROW(ctx->relin_keys(), std::exception);
     EXPECT_THROW(ctx->secret_key(), std::exception);
     ASSERT_FALSE(ctx->is_private());
 }
