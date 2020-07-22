@@ -121,12 +121,11 @@ Ciphertext diagonal_ct_vector_matmul_parallel(
     // TODO:
     // - each thread sum in a local result, then add with the global result at
     // the end -> didn't change much
-    // - make i a shared integer secured by a mutex
     // - limit scope of the lambda function [&]
     // - rename threads and function
     mutex i_mutex;
     size_t i = 0;
-    auto thread_func = [&](size_t start, size_t end) {
+    auto thread_func = [&]() {
         while (true) {
             // take next i
             size_t local_i;
@@ -165,54 +164,14 @@ Ciphertext diagonal_ct_vector_matmul_parallel(
         }
     };
 
-    // // start threads
-    // int n_threads = 1;
-    // vector<thread> threads;
-    // threads.reserve(n_threads);
-    // int step = n_rows / n_threads;
-    // for (int i = 0; i < n_threads - 1; i++)
-    //     threads.push_back(thread(thread_func, i * step, (i + 1) * step));
-    // threads.push_back(thread(thread_func, (n_threads - 1) * step, n_rows));
-
-    // // wait for threads
-    // for (int i = 0; i < n_threads - 1; i++) threads[i].join();
-
     int n_threads = 8;
-    int step = n_rows / n_threads;
-    thread thread0(thread_func, 0 * step, 1 * step);
-    thread thread1(thread_func, 1 * step, 2 * step);
-    thread thread2(thread_func, 2 * step, 3 * step);
-    thread thread3(thread_func, 3 * step, 4 * step);
-    thread thread4(thread_func, 4 * step, 5 * step);
-    thread thread5(thread_func, 5 * step, 6 * step);
-    thread thread6(thread_func, 6 * step, 7 * step);
-    thread thread7(thread_func, 7 * step, n_rows);
-    // thread thread7(thread_func, 7 * step, 8 * step);
-    // thread thread8(thread_func, 8 * step, 9 * step);
-    // thread thread9(thread_func, 9 * step, 10 * step);
-    // thread thread10(thread_func, 10 * step, 11 * step);
-    // thread thread11(thread_func, 11 * step, 12 * step);
-    // thread thread12(thread_func, 12 * step, 13 * step);
-    // thread thread13(thread_func, 13 * step, 14 * step);
-    // thread thread14(thread_func, 14 * step, 15 * step);
-    // thread thread15(thread_func, 15 * step, n_rows);
-
-    thread0.join();
-    thread1.join();
-    thread2.join();
-    thread3.join();
-    thread4.join();
-    thread5.join();
-    thread6.join();
-    thread7.join();
-    // thread8.join();
-    // thread9.join();
-    // thread10.join();
-    // thread11.join();
-    // thread12.join();
-    // thread13.join();
-    // thread14.join();
-    // thread15.join();
+    vector<thread> threads;
+    threads.reserve(n_threads);
+    // start the threads
+    for (int i = 0; i < n_threads; i++)
+        threads.push_back(thread(thread_func));
+    // wait for the threads
+    for (int i = 0; i < n_threads; i++) threads[i].join();
 
     return result;
 }
