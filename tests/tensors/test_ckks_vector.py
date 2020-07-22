@@ -29,41 +29,11 @@ def precision():
     return 1
 
 
-def noop(vec):
-    return vec
-
-
-def deep_copy(vec):
-    return copy.deepcopy(vec)
-
-
-def simple_copy(vec):
-    return copy.copy(vec)
-
-
-def internal_copy(vec):
-    return vec.copy()
-
-
-def recreate(vec):
-    proto = vec.serialize()
-    return ts.ckks_vector_from(proto)
-
-
-def pickled(vec):
-    out = pickle.dumps(vec)
-    return pickle.loads(out)
-
-
 @pytest.mark.parametrize(
     "plain_vec", [[], [0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
 )
-@pytest.mark.parametrize(
-    "duplicate", [noop, deep_copy, simple_copy, internal_copy, recreate, pickled,]
-)
-def test_negate(context, plain_vec, precision, duplicate):
+def test_negate(context, plain_vec, precision):
     ckks_vec = ts.ckks_vector(context, plain_vec)
-    ckks_vec = duplicate(ckks_vec)
 
     expected = [-v for v in plain_vec]
     result = -ckks_vec
@@ -103,14 +73,10 @@ def test_negate_inplace(context, plain_vec, precision):
         ([1, -2, 3, -4], 8, -1),
     ],
 )
-@pytest.mark.parametrize(
-    "duplicate", [noop, deep_copy, simple_copy, internal_copy, recreate, pickled,]
-)
-def test_power(context, plain_vec, power, precision, duplicate):
+def test_power(context, plain_vec, power, precision):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 60])
     context.global_scale = pow(2, 40)
     ckks_vec = ts.ckks_vector(context, plain_vec)
-    ckks_vec = duplicate(ckks_vec)
 
     expected = [np.power(v, power) for v in plain_vec]
     new_vec = ckks_vec ** power
@@ -167,12 +133,8 @@ def test_power_inplace(context, plain_vec, power, precision):
         [1, -4, 3, 5],
     ],
 )
-@pytest.mark.parametrize(
-    "duplicate", [noop, deep_copy, simple_copy, internal_copy, recreate, pickled,]
-)
-def test_square(context, plain_vec, precision, duplicate):
+def test_square(context, plain_vec, precision):
     ckks_vec = ts.ckks_vector(context, plain_vec)
-    ckks_vec = duplicate(ckks_vec)
 
     expected = [np.power(v, 2) for v in plain_vec]
     new_vec = ckks_vec.square()
@@ -225,12 +187,8 @@ def test_square_inplace(context, plain_vec, precision):
         ([1, 0, -2, 0, -8, 4, 73], [81,]),
     ],
 )
-@pytest.mark.parametrize(
-    "duplicate", [noop, deep_copy, simple_copy, internal_copy, recreate, pickled,]
-)
-def test_add(context, vec1, vec2, precision, duplicate):
+def test_add(context, vec1, vec2, precision):
     first_vec = ts.ckks_vector(context, vec1)
-    first_vec = duplicate(first_vec)
 
     second_vec = ts.ckks_vector(context, vec2)
 
@@ -242,7 +200,6 @@ def test_add(context, vec1, vec2, precision, duplicate):
     else:
         expected = [v1 + v2 for v1, v2 in zip(vec1, vec2)]
     result = first_vec + second_vec
-    result = duplicate(result)
 
     # Decryption
     decrypted_result = result.decrypt()
@@ -405,12 +362,8 @@ def test_add_plain_inplace(context, vec1, vec2, precision):
         ([1, 0, -2, 0, -8, 4, 73], [81,]),
     ],
 )
-@pytest.mark.parametrize(
-    "duplicate", [noop, deep_copy, simple_copy, internal_copy, recreate, pickled,]
-)
-def test_sub(context, vec1, vec2, precision, duplicate):
+def test_sub(context, vec1, vec2, precision):
     first_vec = ts.ckks_vector(context, vec1)
-    first_vec = duplicate(first_vec)
     second_vec = ts.ckks_vector(context, vec2)
 
     # replicate for operation between n-sized and 1-sized vectors
@@ -421,7 +374,6 @@ def test_sub(context, vec1, vec2, precision, duplicate):
     else:
         expected = [v1 - v2 for v1, v2 in zip(vec1, vec2)]
     result = first_vec - second_vec
-    result = duplicate(result)
 
     # Decryption
     decrypted_result = result.decrypt()
@@ -594,12 +546,8 @@ def test_sub_plain_inplace(context, vec1, vec2, precision):
         ([1, 0, -2, 0, -8, 4, 73], [81,]),
     ],
 )
-@pytest.mark.parametrize(
-    "duplicate", [noop, deep_copy, simple_copy, internal_copy, recreate, pickled,]
-)
-def test_mul(context, vec1, vec2, precision, duplicate):
+def test_mul(context, vec1, vec2, precision):
     first_vec = ts.ckks_vector(context, vec1)
-    first_vec = duplicate(first_vec)
     second_vec = ts.ckks_vector(context, vec2)
 
     # replicate for operation between n-sized and 1-sized vectors
@@ -610,7 +558,6 @@ def test_mul(context, vec1, vec2, precision, duplicate):
     else:
         expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
     result = first_vec * second_vec
-    result = duplicate(result)
 
     # Decryption
     decrypted_result = result.decrypt()
@@ -783,17 +730,12 @@ def test_mul_plain_inplace(context, vec1, vec2, precision):
         ([1, 2, 3, 4, 5, 6, 7, 8], [8, 7, 6, 5, 4, 3, 2, 1]),
     ],
 )
-@pytest.mark.parametrize(
-    "duplicate", [noop, deep_copy, simple_copy, internal_copy, recreate, pickled,]
-)
-def test_dot_product(context, vec1, vec2, precision, duplicate):
+def test_dot_product(context, vec1, vec2, precision):
     context.generate_galois_keys()
     first_vec = ts.ckks_vector(context, vec1)
-    first_vec = duplicate(first_vec)
     second_vec = ts.ckks_vector(context, vec2)
 
     result = first_vec.dot(second_vec)
-    result = duplicate(result)
 
     expected = [sum([v1 * v2 for v1, v2 in zip(vec1, vec2)])]
 
@@ -976,19 +918,14 @@ def test_sum_inplace(context, vec1, precision):
         ([1, 2], [-73, -10]),
     ],
 )
-@pytest.mark.parametrize(
-    "duplicate", [noop, deep_copy, simple_copy, internal_copy, recreate, pickled,]
-)
-def test_mul_without_global_scale(vec1, vec2, precision, duplicate):
+def test_mul_without_global_scale(vec1, vec2, precision):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
     scale = 2 ** 40
 
     first_vec = ts.ckks_vector(context, vec1, scale=scale)
-    first_vec = duplicate(first_vec)
     second_vec = ts.ckks_vector(context, vec2, scale=scale)
 
     result = first_vec * second_vec
-    result = duplicate(result)
 
     expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
 
