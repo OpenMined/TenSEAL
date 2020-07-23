@@ -34,7 +34,6 @@ class BFVVector {
      **/
     vector<int64_t> decrypt();
     vector<int64_t> decrypt(const shared_ptr<SecretKey>& sk);
-
     /**
      * Returns the size of the encrypted vector.
      **/
@@ -81,9 +80,18 @@ class BFVVector {
      * **/
     BFVVector deepcopy() const;
     /**
-     * Get a pointer to the current context.
+     * Get a pointer to the current TenSEAL context.
      **/
-    shared_ptr<TenSEALContext> tenseal_context() const { return context; }
+    shared_ptr<TenSEALContext> tenseal_context() const {
+        if (context == nullptr) throw invalid_argument("missing context");
+        return context;
+    }
+    /**
+     * Link to a TenSEAL context.
+     **/
+    void link_tenseal_context(shared_ptr<TenSEALContext> ctx) {
+        this->context = ctx;
+    }
 
    private:
     size_t _size;
