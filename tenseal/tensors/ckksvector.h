@@ -16,10 +16,10 @@ namespace tenseal {
 using namespace seal;
 using namespace std;
 
-/*
-Holds a vector of real numbers in its encrypted form using the CKKS homomorphic
-encryption scheme.
-*/
+/**
+ * Holds a vector of real numbers in its encrypted form using the CKKS
+ *homomorphic encryption scheme.
+ **/
 class CKKSVector {
    public:
     CKKSVector(shared_ptr<TenSEALContext> context, vector<double> vec,
@@ -30,49 +30,50 @@ class CKKSVector {
     CKKSVector(const string& ctx, const string& vec);
     CKKSVector(const TenSEALContextProto& ctx, const CKKSVectorProto& input);
 
-    /*
-    Decrypts and returns the plaintext representation of the encrypted vector of
-    real numbers using the secret-key.
-    */
+    /**
+     * Decrypts and returns the plaintext representation of the encrypted vector
+     *of real numbers using the secret-key.
+     **/
     vector<double> decrypt();
     vector<double> decrypt(const std::shared_ptr<SecretKey>& sk);
 
-    /*
-    Returns the size of the encrypted vector.
-    */
+    /**
+     * Returns the size of the encrypted vector.
+     **/
     size_t size() const;
     size_t ciphertext_size() const;
 
-    /*
-    Replicate the first slot of a ciphertext n times. Requires a multiplication.
-    */
+    /**
+     * Replicate the first slot of a ciphertext n times. Requires a
+     *multiplication.
+     **/
     CKKSVector replicate_first_slot(size_t n);
     CKKSVector& replicate_first_slot_inplace(size_t n);
 
-    /*
-    Negates a CKKSVector.
-    */
+    /**
+     * Negates a CKKSVector.
+     **/
     CKKSVector negate();
     CKKSVector& negate_inplace();
 
-    /*
-    Compute the square of the CKKSVector.
-    */
+    /**
+     * Compute the square of the CKKSVector.
+     **/
     CKKSVector square();
     CKKSVector& square_inplace();
 
-    /*
-    Compute the power of the CKKSVector with minimal multiplication depth.
-    */
+    /**
+     * Compute the power of the CKKSVector with minimal multiplication depth.
+     **/
     CKKSVector power(unsigned int power);
     CKKSVector& power_inplace(unsigned int power);
 
-    /*
-    Encrypted evaluation function operates on two encrypted vectors and
-    returns a new CKKSVector which is the result of either addition,
-    substraction or multiplication in an element-wise fashion. in_place
-    functions return a reference to the same object.
-    */
+    /**
+     * Encrypted evaluation function operates on two encrypted vectors and
+     * returns a new CKKSVector which is the result of either addition,
+     * substraction or multiplication in an element-wise fashion. in_place
+     * functions return a reference to the same object.
+     **/
     CKKSVector add(CKKSVector to_add);
     CKKSVector& add_inplace(CKKSVector to_add);
     CKKSVector sub(CKKSVector to_sub);
@@ -82,12 +83,12 @@ class CKKSVector {
     CKKSVector dot_product(CKKSVector to_mul);
     CKKSVector& dot_product_inplace(CKKSVector to_mul);
 
-    /*
-    Plain evaluation function operates on an encrypted vector and plaintext
-    vector of integers and returns a new CKKSVector which is the result of
-    either addition, substraction or multiplication in an element-wise fashion.
-    in_place functions return a reference to the same object.
-    */
+    /**
+     * Plain evaluation function operates on an encrypted vector and plaintext
+     * vector of integers and returns a new CKKSVector which is the result of
+     * either addition, substraction or multiplication in an element-wise
+     *fashion. in_place functions return a reference to the same object.
+     **/
     CKKSVector add_plain(double to_add);
     CKKSVector add_plain(const vector<double>& to_add);
     CKKSVector& add_plain_inplace(double to_add);
@@ -105,25 +106,37 @@ class CKKSVector {
     CKKSVector sum();
     CKKSVector& sum_inplace();
 
-    /*
-    Matrix multiplication operations.
-    */
+    /**
+     * Matrix multiplication operations.
+     **/
     CKKSVector matmul_plain(const vector<vector<double>>& matrix);
     CKKSVector& matmul_plain_inplace(const vector<vector<double>>& matrix);
 
-    /*
-    Polynomial evaluation with `this` as variable.
-    p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] * x^i
-    */
+    /**
+     * Polynomial evaluation with `this` as variable.
+     * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
+     *x^i
+     **/
     CKKSVector polyval(const vector<double>& coefficients);
     CKKSVector& polyval_inplace(const vector<double>& coefficients);
 
+    /**
+     * Load/Save the vector from/to a serialized protobuffer.
+     **/
     void load(const std::string& vec);
-    void load_context(const std::string& ctx);
-
     std::string save() const;
-    std::string save_context() const;
 
+    /**
+     * Load/Save the context from/to a serialized protobuffer.
+     * This separate step allows us to reuse existing contexts, instead of
+     *sending them with every tensor.
+     **/
+    void load_context(const std::string& ctx);
+    std::string save_context() const;
+    /**
+     *Recreates a new CKKSVector from the current one, without any
+     *pointer/reference to this one.
+     **/
     CKKSVector deepcopy() const;
 
    private:
