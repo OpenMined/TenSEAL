@@ -22,10 +22,10 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: ubuntu-build
-      run: .github/workflows/scripts/run_build_ubuntu.sh
+      run: chmod +x .github/workflows/scripts/run_build_ubuntu.sh
       if: ${{ matrix.os == 'ubuntu-latest' }}
     - name: OSX-build
-      run: .github/workflows/scripts/run_build_osx.sh
+      run: chmod +x .github/workflows/scripts/run_build_osx.sh
       if: ${{ matrix.os == 'macos-latest' }}
     - name: Lint with flake8
       run: |
