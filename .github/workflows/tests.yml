@@ -38,13 +38,6 @@ jobs:
     - name: Test with pytest
       run: |
         pytest -v --ignore=tests/sealapi ./tests
-    - name: Test with gtest
-      if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: |
-        cd tenseal/proto && cmake . && make && cd ../../
-        cmake . -D BUILD_TEST=TRUE
-        make && CTEST_OUTPUT_ON_FAILURE=1 make test
-
 
   SEAL_API:
 
