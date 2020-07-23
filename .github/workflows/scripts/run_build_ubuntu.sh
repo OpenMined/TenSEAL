@@ -1,3 +1,6 @@
+#!/bin/sh
+set -e
+
 sudo apt update
 sudo apt install cmake clang libprotobuf-dev protobuf-compiler
 python -m pip install --upgrade pip
