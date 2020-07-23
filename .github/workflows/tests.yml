@@ -23,6 +23,8 @@ jobs:
     - name: Install dependencies
       run: .github/workflows/scripts/depends_ubuntu.sh
       if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: .github/workflows/scripts/depends_macos.sh
+      if: ${{ matrix.os == 'macos-latest' }}
     - name: Lint
       run: .github/workflows/scripts/lint.sh
       if: ${{ matrix.os == 'ubuntu-latest' }}
