@@ -9,7 +9,6 @@ ls
 
 sudo rm -r /usr/local/include/google/protobuf/
 sudo cp -r include/google/protobuf/ /usr/local/include/google/protobuf/
-sudo cp -r lib /usr/local/
 
 python -m pip install --upgrade pip
 pip install -r requirements_dev.txt
