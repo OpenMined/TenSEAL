@@ -28,7 +28,7 @@ jobs:
       run: chmod +x .github/workflows/scripts/run_build_osx.sh
       if: ${{ matrix.os == 'macos-latest' }}
     - name: Linters
-      run: .github/workflows/scripts/linters.sh      
+      run: chmod +x .github/workflows/scripts/linters.sh      
     - name: Build the library
       run: |
         # fetch third_party libraries
