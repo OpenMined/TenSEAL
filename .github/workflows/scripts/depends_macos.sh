@@ -1,9 +1,9 @@
 #!/bin/sh
 set -e
 
-brew install protobuf@3.1
+brew install protobuf@3.12
 
-cd /usr/local/Cellar/protobuf@3.1/3.1.0
+cd /usr/local/Cellar/protobuf@3.12/3.12.0
 sudo cp bin/protoc /usr/local/bin/
 sudo rm -r /usr/local/include/google/protobuf/
 sudo cp -r include/google/protobuf/ /usr/local/include/google/protobuf/
