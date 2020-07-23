@@ -232,7 +232,6 @@ class TenSEALContext {
     shared_ptr<RelinKeys> _relin_keys;
     shared_ptr<GaloisKeys> _galois_keys;
     shared_ptr<TenSEALEncoder> encoder_factory;
-
     /**
      * Switches for automatic relinearization, rescaling, and modulus switching
      **/
