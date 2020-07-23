@@ -24,9 +24,8 @@ class BFVVector {
 
     BFVVector(const BFVVector& vec);
 
-    BFVVector(const string& input);
-    BFVVector(istream& input);
-    BFVVector(const BFVVectorProto& input);
+    BFVVector(const string& ctx, const string& vec);
+    BFVVector(const TenSEALContextProto& ctx, const BFVVectorProto& vec);
 
     /*
     Decrypts and returns the plaintext representation of the encrypted vector of
@@ -71,11 +70,12 @@ class BFVVector {
     BFVVector mul_plain(const vector<int64_t>& to_mul);
     BFVVector& mul_plain_inplace(const vector<int64_t>& to_mul);
 
-    void load(std::istream& stream);
-    void load(const std::string& input);
+    void load(const std::string& vec);
+    void load_context(const std::string& ctx);
 
-    bool save(std::ostream& stream) const;
     std::string save() const;
+    std::string save_context() const;
+
     BFVVector deepcopy() const;
 
    private:
@@ -97,6 +97,9 @@ class BFVVector {
 
     void load_proto(const BFVVectorProto& buffer);
     BFVVectorProto save_proto() const;
+
+    void load_context_proto(const TenSEALContextProto& buffer);
+    TenSEALContextProto save_context_proto() const;
 };
 
 }  // namespace tenseal

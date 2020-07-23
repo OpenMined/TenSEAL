@@ -39,12 +39,15 @@ CKKSVector::CKKSVector(const CKKSVector& vec) {
     this->ciphertext = vec.ciphertext;
 }
 
-CKKSVector::CKKSVector(const string& input) { this->load(input); }
+CKKSVector::CKKSVector(const string& ctx, const string& vec) {
+    this->load_context(ctx);
+    this->load(vec);
+}
 
-CKKSVector::CKKSVector(istream& input) { this->load(input); }
-
-CKKSVector::CKKSVector(const CKKSVectorProto& input) {
-    this->load_proto(input);
+CKKSVector::CKKSVector(const TenSEALContextProto& ctx,
+                       const CKKSVectorProto& vec) {
+    this->load_context_proto(ctx);
+    this->load_proto(vec);
 }
 
 size_t CKKSVector::size() const { return this->_size; }
@@ -533,18 +536,23 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     return *this;
 }
 
-void CKKSVector::load_proto(const CKKSVectorProto& buffer) {
-    this->context = TenSEALContext::Create(buffer.context());
-    this->_size = buffer.size();
+void CKKSVector::load_proto(const CKKSVectorProto& vec) {
+    if (this->context == nullptr) {
+        throw invalid_argument("context missing for deserialization");
+    }
+    this->_size = vec.size();
     this->ciphertext = SEALDeserialize<Ciphertext>(
-        this->context->seal_context(), buffer.ciphertext());
-    this->init_scale = buffer.scale();
+        this->context->seal_context(), vec.ciphertext());
+    this->init_scale = vec.scale();
+}
+
+void CKKSVector::load_context_proto(const TenSEALContextProto& ctx) {
+    this->context = TenSEALContext::Create(ctx);
 }
 
 CKKSVectorProto CKKSVector::save_proto() const {
     CKKSVectorProto buffer;
 
-    *buffer.mutable_context() = this->context->save_proto();
     *buffer.mutable_ciphertext() = SEALSerialize<Ciphertext>(this->ciphertext);
     buffer.set_size(this->_size);
     buffer.set_scale(this->init_scale);
@@ -552,26 +560,20 @@ CKKSVectorProto CKKSVector::save_proto() const {
     return buffer;
 }
 
-void CKKSVector::load(std::istream& stream) {
-    CKKSVectorProto buffer;
-    if (!buffer.ParseFromIstream(&stream)) {
-        throw invalid_argument("failed to parse CKKS stream");
-    }
-
-    this->load_proto(buffer);
+TenSEALContextProto CKKSVector::save_context_proto() const {
+    return this->context->save_proto();
 }
 
-void CKKSVector::load(const std::string& input) {
+void CKKSVector::load(const std::string& vec) {
     CKKSVectorProto buffer;
-    if (!buffer.ParseFromArray(input.c_str(), input.size())) {
+    if (!buffer.ParseFromArray(vec.c_str(), vec.size())) {
         throw invalid_argument("failed to parse CKKS stream");
     }
     this->load_proto(buffer);
 }
 
-bool CKKSVector::save(std::ostream& stream) const {
-    CKKSVectorProto buffer = this->save_proto();
-    return buffer.SerializeToOstream(&stream);
+void CKKSVector::load_context(const std::string& ctx) {
+    this->context = TenSEALContext::Create(ctx);
 }
 
 std::string CKKSVector::save() const {
@@ -587,9 +589,12 @@ std::string CKKSVector::save() const {
     return output;
 }
 
+std::string CKKSVector::save_context() const { return this->context->save(); }
+
 CKKSVector CKKSVector::deepcopy() const {
-    CKKSVectorProto buffer = this->save_proto();
-    return CKKSVectorProto(buffer);
+    TenSEALContextProto ctx = this->save_context_proto();
+    CKKSVectorProto vec = this->save_proto();
+    return CKKSVector(ctx, vec);
 }
 
 }  // namespace tenseal

@@ -27,9 +27,8 @@ class CKKSVector {
 
     CKKSVector(const CKKSVector& vec);
 
-    CKKSVector(const string& input);
-    CKKSVector(istream& input);
-    CKKSVector(const CKKSVectorProto& input);
+    CKKSVector(const string& ctx, const string& vec);
+    CKKSVector(const TenSEALContextProto& ctx, const CKKSVectorProto& input);
 
     /*
     Decrypts and returns the plaintext representation of the encrypted vector of
@@ -119,11 +118,12 @@ class CKKSVector {
     CKKSVector polyval(const vector<double>& coefficients);
     CKKSVector& polyval_inplace(const vector<double>& coefficients);
 
-    void load(std::istream& stream);
-    void load(const std::string& input);
+    void load(const std::string& vec);
+    void load_context(const std::string& ctx);
 
-    bool save(std::ostream& stream) const;
     std::string save() const;
+    std::string save_context() const;
+
     CKKSVector deepcopy() const;
 
    private:
@@ -163,6 +163,9 @@ class CKKSVector {
 
     void load_proto(const CKKSVectorProto& buffer);
     CKKSVectorProto save_proto() const;
+
+    void load_context_proto(const TenSEALContextProto& buffer);
+    TenSEALContextProto save_context_proto() const;
 };
 
 }  // namespace tenseal

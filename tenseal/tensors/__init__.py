@@ -22,16 +22,17 @@ def bfv_vector(context, plaintext_vector):
     return _ts_cpp.BFVVector(context, plaintext_vector)
 
 
-def bfv_vector_from(buff):
+def bfv_vector_from(ctx_buff, vec_buff):
     """Constructor method for the BFVVector object from a serialized protobuffer.
     Args:
-        buff: The serialized protobuffer.
+        ctx_buff: The serialized context protobufer.
+        vec_buff: The serialized vector protobufer.
 
     Returns:
         BFVVector object.
     """
 
-    return _ts_cpp.BFVVector(buff)
+    return _ts_cpp.BFVVector(ctx_buff, vec_buff)
 
 
 def ckks_vector(context, plaintext_vector, scale=None):
@@ -53,16 +54,17 @@ def ckks_vector(context, plaintext_vector, scale=None):
     return _ts_cpp.CKKSVector(context, plaintext_vector, scale)
 
 
-def ckks_vector_from(buff):
+def ckks_vector_from(ctx_buff, vec_buff):
     """Constructor method for the CKKSVector object from a serialized protobuffer.
 
     Args:
-        buff: The serialized protobuffer.
+        ctx_buff: The serialized context protobufer.
+        vec_buff: The serialized vector protobufer.
 
     Returns:
         CKKSVector object.
     """
-    return _ts_cpp.CKKSVector(buff)
+    return _ts_cpp.CKKSVector(ctx_buff, vec_buff)
 
 
 __all__ = ["bfv_vector", "bfv_vector_from", "ckks_vector", "ckks_vector_from"]

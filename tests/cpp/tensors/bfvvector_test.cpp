@@ -7,6 +7,13 @@ namespace tenseal {
 namespace {
 using namespace ::testing;
 
+BFVVector duplicate(const BFVVector& in) {
+    auto vec = in.save();
+    auto ctx = in.save_context();
+    
+    return BFVVector(ctx, vec);
+}
+
 class BFVVectorTest : public TestWithParam</*serialize=*/bool>  {
    protected:
     void SetUp() {}
@@ -21,8 +28,7 @@ TEST_P(BFVVectorTest, TestCreateBFV) {
     auto l = BFVVector(ctx, {1, 2, 3});
 
      if (should_serialize_first) {
-         auto buff = l.save();
-         l = BFVVector(buff);
+         l = duplicate(l);
      }
 
     ASSERT_EQ(l.size(), 3);
@@ -50,8 +56,7 @@ TEST_P(BFVVectorTest, TestBFVAdd) {
     l.add_inplace(r);
 
      if (should_serialize_first) {
-         auto buff = l.save();
-         l = BFVVector(buff);
+         l = duplicate(l);
      }
 
     ASSERT_EQ(l.ciphertext_size(), 2);
@@ -82,8 +87,7 @@ TEST_P(BFVVectorTest, TestBFVMul) {
     l.mul_inplace(r);
 
      if (should_serialize_first) {
-         auto buff = l.save();
-         l = BFVVector(buff);
+         l = duplicate(l);
      }
 
     ASSERT_EQ(l.ciphertext_size(), 2);

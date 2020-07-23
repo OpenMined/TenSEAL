@@ -7,10 +7,6 @@ namespace tenseal {
 namespace {
 
 using namespace ::testing;
-class CKKSVectorTest : public TestWithParam</*serialize=*/bool> {
-   protected:
-    void SetUp() {}
-};
 
 bool are_close(const std::vector<double>& l, const std::vector<int64_t>& r) {
     if (l.size() != r.size()) {
@@ -21,6 +17,18 @@ bool are_close(const std::vector<double>& l, const std::vector<int64_t>& r) {
     }
     return true;
 }
+
+CKKSVector duplicate(const CKKSVector& in) {
+    auto vec = in.save();
+    auto ctx = in.save_context();
+    
+    return CKKSVector(ctx, vec);
+}
+
+class CKKSVectorTest : public TestWithParam</*serialize=*/bool> {
+   protected:
+    void SetUp() {}
+};
 TEST_P(CKKSVectorTest, TestCreateCKKS) {
     bool should_serialize_first = GetParam();
 
@@ -31,8 +39,7 @@ TEST_P(CKKSVectorTest, TestCreateCKKS) {
     auto l = CKKSVector(ctx, {1, 2, 3}, 1);
 
      if (should_serialize_first) {
-         auto buff = l.save();
-         l = CKKSVector(buff);
+         l = duplicate(l);
      }
 
     ASSERT_EQ(l.ciphertext_size(), 2);
@@ -65,8 +72,7 @@ TEST_P(CKKSVectorTest, TestCKKSAdd) {
     auto add = l.add(r);
 
      if (should_serialize_first) {
-         auto buff = add.save();
-         add = CKKSVector(buff);
+         l = duplicate(l);
      }
 
 
@@ -79,8 +85,7 @@ TEST_P(CKKSVectorTest, TestCKKSAdd) {
     l.add_inplace(r);
 
      if (should_serialize_first) {
-         auto buff = l.save();
-         l = CKKSVector(buff);
+         l = duplicate(l);
      }
 
     ASSERT_EQ(l.ciphertext_size(), 2);
@@ -115,8 +120,7 @@ TEST_P(CKKSVectorTest, TestCKKSMul) {
     l.mul_inplace(r);
 
      if (should_serialize_first) {
-         auto buff = l.save();
-         l = CKKSVector(buff);
+         l = duplicate(l);
      }
 
     ASSERT_EQ(l.ciphertext_size(), 2);
@@ -144,8 +148,7 @@ TEST_P(CKKSVectorTest, TestCKKSMulMany) {
     l.mul_inplace(r);
 
      if (should_serialize_first) {
-         auto buff = l.save();
-         l = CKKSVector(buff);
+         l = duplicate(l);
      }
 
     ASSERT_EQ(l.ciphertext_size(), 2);
@@ -173,8 +176,7 @@ TEST_P(CKKSVectorTest, TestCKKSMulNoRelin) {
     l.mul_inplace(r);
 
      if (should_serialize_first) {
-         auto buff = l.save();
-         l = CKKSVector(buff);
+         l = duplicate(l);
      }
 
     ASSERT_EQ(l.ciphertext_size(), 4);
@@ -196,8 +198,7 @@ TEST_P(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
     auto replicated_vec = vec.replicate_first_slot(4);
 
      if (should_serialize_first) {
-         auto buff = replicated_vec.save();
-         replicated_vec = CKKSVector(buff);
+         replicated_vec = duplicate(replicated_vec);
      }
 
     auto result = replicated_vec.decrypt();

@@ -45,13 +45,15 @@ def internal_copy(vec):
 
 
 def recreate_ckks(vec):
-    proto = vec.serialize()
-    return ts.ckks_vector_from(proto)
+    ctx_proto = vec.serialize_context()
+    vec_proto = vec.serialize()
+    return ts.ckks_vector_from(ctx_proto, vec_proto)
 
 
 def recreate_bfv(vec):
-    proto = vec.serialize()
-    return ts.bfv_vector_from(proto)
+    ctx_proto = vec.serialize_context()
+    vec_proto = vec.serialize()
+    return ts.bfv_vector_from(ctx_proto, vec_proto)
 
 
 def pickled(vec):
