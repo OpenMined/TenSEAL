@@ -1,5 +1,7 @@
 import tenseal as ts
 import pytest
+import copy
+import pickle
 
 
 @pytest.fixture(scope="module")
@@ -25,7 +27,9 @@ def context():
 def test_add(context, vec1, vec2):
     first_vec = ts.bfv_vector(context, vec1)
     second_vec = ts.bfv_vector(context, vec2)
+
     result = first_vec + second_vec
+
     expected = [v1 + v2 for v1, v2 in zip(vec1, vec2)]
 
     # Decryption
@@ -53,7 +57,9 @@ def test_add(context, vec1, vec2):
 def test_add_inplace(context, vec1, vec2):
     first_vec = ts.bfv_vector(context, vec1)
     second_vec = ts.bfv_vector(context, vec2)
+
     first_vec += second_vec
+
     expected = [v1 + v2 for v1, v2 in zip(vec1, vec2)]
 
     # Decryption
@@ -79,8 +85,10 @@ def test_add_inplace(context, vec1, vec2):
 )
 def test_add_plain(context, vec1, vec2):
     first_vec = ts.bfv_vector(context, vec1)
+
     second_vec = vec2
     result = first_vec + second_vec
+
     expected = [v1 + v2 for v1, v2 in zip(vec1, vec2)]
 
     # Decryption
@@ -107,7 +115,9 @@ def test_add_plain(context, vec1, vec2):
 def test_add_plain_inplace(context, vec1, vec2):
     first_vec = ts.bfv_vector(context, vec1)
     second_vec = vec2
+
     first_vec += second_vec
+
     expected = [v1 + v2 for v1, v2 in zip(vec1, vec2)]
 
     # Decryption
@@ -132,6 +142,7 @@ def test_add_plain_inplace(context, vec1, vec2):
 )
 def test_sub(context, vec1, vec2):
     first_vec = ts.bfv_vector(context, vec1)
+
     second_vec = ts.bfv_vector(context, vec2)
     result = first_vec - second_vec
     expected = [v1 - v2 for v1, v2 in zip(vec1, vec2)]
@@ -161,7 +172,9 @@ def test_sub(context, vec1, vec2):
 def test_sub_inplace(context, vec1, vec2):
     first_vec = ts.bfv_vector(context, vec1)
     second_vec = ts.bfv_vector(context, vec2)
+
     first_vec -= second_vec
+
     expected = [v1 - v2 for v1, v2 in zip(vec1, vec2)]
 
     # Decryption
@@ -187,8 +200,10 @@ def test_sub_inplace(context, vec1, vec2):
 )
 def test_sub_plain(context, vec1, vec2):
     first_vec = ts.bfv_vector(context, vec1)
+
     second_vec = vec2
     result = first_vec - second_vec
+
     expected = [v1 - v2 for v1, v2 in zip(vec1, vec2)]
 
     # Decryption
@@ -216,6 +231,7 @@ def test_sub_plain_inplace(context, vec1, vec2):
     first_vec = ts.bfv_vector(context, vec1)
     second_vec = vec2
     first_vec -= second_vec
+
     expected = [v1 - v2 for v1, v2 in zip(vec1, vec2)]
 
     # Decryption
@@ -240,8 +256,10 @@ def test_sub_plain_inplace(context, vec1, vec2):
 )
 def test_mul(context, vec1, vec2):
     first_vec = ts.bfv_vector(context, vec1)
+
     second_vec = ts.bfv_vector(context, vec2)
     result = first_vec * second_vec
+
     expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
 
     # Decryption
@@ -268,8 +286,10 @@ def test_mul(context, vec1, vec2):
 )
 def test_mul_inplace(context, vec1, vec2):
     first_vec = ts.bfv_vector(context, vec1)
+
     second_vec = ts.bfv_vector(context, vec2)
     first_vec *= second_vec
+
     expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
 
     # Decryption
@@ -295,8 +315,10 @@ def test_mul_inplace(context, vec1, vec2):
 )
 def test_mul_plain(context, vec1, vec2):
     first_vec = ts.bfv_vector(context, vec1)
+
     second_vec = vec2
     result = first_vec * second_vec
+
     expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
 
     # Decryption
@@ -322,8 +344,10 @@ def test_mul_plain(context, vec1, vec2):
 )
 def test_mul_plain_inplace(context, vec1, vec2):
     first_vec = ts.bfv_vector(context, vec1)
+
     second_vec = vec2
     first_vec *= second_vec
+
     expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
 
     # Decryption

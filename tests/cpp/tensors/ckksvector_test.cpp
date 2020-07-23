@@ -5,11 +5,8 @@
 
 namespace tenseal {
 namespace {
+
 using namespace ::testing;
-class CKKSVectorTest : public ::testing::Test {
-   protected:
-    void SetUp() {}
-};
 
 bool are_close(const std::vector<double>& l, const std::vector<int64_t>& r) {
     if (l.size() != r.size()) {
@@ -20,12 +17,30 @@ bool are_close(const std::vector<double>& l, const std::vector<int64_t>& r) {
     }
     return true;
 }
-TEST_F(CKKSVectorTest, TestCreateCKKS) {
+
+CKKSVector duplicate(const CKKSVector& in) {
+    auto vec = in.save();
+    
+    return CKKSVector(in.tenseal_context(), vec);
+}
+
+class CKKSVectorTest : public TestWithParam</*serialize=*/bool> {
+   protected:
+    void SetUp() {}
+};
+TEST_P(CKKSVectorTest, TestCreateCKKS) {
+    bool should_serialize_first = GetParam();
+
     auto ctx =
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
     auto l = CKKSVector(ctx, {1, 2, 3}, 1);
+
+     if (should_serialize_first) {
+         l = duplicate(l);
+     }
+
     ASSERT_EQ(l.ciphertext_size(), 2);
 }
 
@@ -34,10 +49,12 @@ TEST_F(CKKSVectorTest, TestCreateCKKSFail) {
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
-    EXPECT_THROW(auto l = CKKSVector(ctx, {1, 2, 3}), std::exception);
+    EXPECT_THROW(auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3})), std::exception);
 }
 
-TEST_F(CKKSVectorTest, TestCKKSAdd) {
+TEST_P(CKKSVectorTest, TestCKKSAdd) {
+    bool should_serialize_first = GetParam();
+
     auto ctx =
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
@@ -48,10 +65,16 @@ TEST_F(CKKSVectorTest, TestCKKSAdd) {
     ctx->auto_rescale(false);
     ctx->auto_mod_switch(false);
 
-    auto l = CKKSVector(ctx, {1, 2, 3});
-    auto r = CKKSVector(ctx, {3, 4, 4});
+    auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3}));
+    auto r = CKKSVector(ctx, std::vector<double>({3, 4, 4}));
 
     auto add = l.add(r);
+
+     if (should_serialize_first) {
+         l = duplicate(l);
+     }
+
+
     ASSERT_EQ(add.ciphertext_size(), 2);
 
     auto decr = add.decrypt();
@@ -59,12 +82,19 @@ TEST_F(CKKSVectorTest, TestCKKSAdd) {
 
     l.add_inplace(r);
     l.add_inplace(r);
+
+     if (should_serialize_first) {
+         l = duplicate(l);
+     }
+
     ASSERT_EQ(l.ciphertext_size(), 2);
     decr = l.decrypt();
     ASSERT_TRUE(are_close(decr, {7, 10, 11}));
 }
 
-TEST_F(CKKSVectorTest, TestCKKSMul) {
+TEST_P(CKKSVectorTest, TestCKKSMul) {
+    bool should_serialize_first = GetParam();
+
     auto ctx =
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
@@ -75,8 +105,8 @@ TEST_F(CKKSVectorTest, TestCKKSMul) {
     ctx->auto_rescale(true);
     ctx->auto_mod_switch(true);
 
-    auto l = CKKSVector(ctx, {1, 2, 3});
-    auto r = CKKSVector(ctx, {2, 2, 2});
+    auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3}));
+    auto r = CKKSVector(ctx, std::vector<double>({2, 2, 2}));
 
     auto mul = l.mul(r);
     ASSERT_EQ(mul.ciphertext_size(), 2);
@@ -88,12 +118,18 @@ TEST_F(CKKSVectorTest, TestCKKSMul) {
     l.mul_inplace(r);
     l.mul_inplace(r);
 
+     if (should_serialize_first) {
+         l = duplicate(l);
+     }
+
     ASSERT_EQ(l.ciphertext_size(), 2);
     decr = l.decrypt();
     ASSERT_TRUE(are_close(decr, {4, 8, 12}));
 }
 
-TEST_F(CKKSVectorTest, TestCKKSMulMany) {
+TEST_P(CKKSVectorTest, TestCKKSMulMany) {
+    bool should_serialize_first = GetParam();
+
     auto ctx =
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
@@ -104,18 +140,24 @@ TEST_F(CKKSVectorTest, TestCKKSMulMany) {
     ctx->auto_rescale(true);
     ctx->auto_mod_switch(true);
 
-    auto l = CKKSVector(ctx, {1, 2, 3});
-    auto r = CKKSVector(ctx, {2, 2, 2});
+    auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3}));
+    auto r = CKKSVector(ctx, std::vector<double>({2, 2, 2}));
 
     l.mul_inplace(r);
     l.mul_inplace(r);
+
+     if (should_serialize_first) {
+         l = duplicate(l);
+     }
 
     ASSERT_EQ(l.ciphertext_size(), 2);
     auto decr = l.decrypt();
     ASSERT_TRUE(are_close(decr, {4, 8, 12}));
 }
 
-TEST_F(CKKSVectorTest, TestCKKSMulNoRelin) {
+TEST_P(CKKSVectorTest, TestCKKSMulNoRelin) {
+    bool should_serialize_first = GetParam();
+
     auto ctx =
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
@@ -126,18 +168,24 @@ TEST_F(CKKSVectorTest, TestCKKSMulNoRelin) {
     ctx->auto_rescale(true);
     ctx->auto_mod_switch(true);
 
-    auto l = CKKSVector(ctx, {1, 2, 3});
-    auto r = CKKSVector(ctx, {2, 2, 2});
+    auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3}));
+    auto r = CKKSVector(ctx, std::vector<double>({2, 2, 2}));
 
     l.mul_inplace(r);
     l.mul_inplace(r);
+
+     if (should_serialize_first) {
+         l = duplicate(l);
+     }
 
     ASSERT_EQ(l.ciphertext_size(), 4);
     auto decr = l.decrypt();
     ASSERT_TRUE(are_close(decr, {4, 8, 12}));
 }
 
-TEST_F(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
+TEST_P(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
+    bool should_serialize_first = GetParam();
+
     auto ctx =
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
@@ -145,8 +193,12 @@ TEST_F(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
     ctx->generate_galois_keys();
     ctx->global_scale(std::pow(2, 40));
 
-    auto vec = CKKSVector(ctx, {1});
+    auto vec = CKKSVector(ctx, std::vector<double>({1}));
     auto replicated_vec = vec.replicate_first_slot(4);
+
+     if (should_serialize_first) {
+         replicated_vec = duplicate(replicated_vec);
+     }
 
     auto result = replicated_vec.decrypt();
     ASSERT_EQ(result.size(), 4);
@@ -158,6 +210,11 @@ TEST_F(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
     ASSERT_EQ(result.size(), 6);
     ASSERT_TRUE(are_close(result, {2, 2, 2, 2, 2, 2}));
 }
+
+INSTANTIATE_TEST_CASE_P(TestCKKSVector, CKKSVectorTest,
+                         ::testing::Values(false, true));
+
+
 
 }  // namespace
 }  // namespace tenseal

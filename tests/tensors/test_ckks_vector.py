@@ -1,6 +1,8 @@
 import tenseal as ts
 import pytest
 import numpy as np
+import copy
+import pickle
 
 
 def _almost_equal(vec1, vec2, m_pow_ten):
@@ -32,6 +34,7 @@ def precision():
 )
 def test_negate(context, plain_vec, precision):
     ckks_vec = ts.ckks_vector(context, plain_vec)
+
     expected = [-v for v in plain_vec]
     result = -ckks_vec
     decrypted_result = result.decrypt()
@@ -43,6 +46,7 @@ def test_negate(context, plain_vec, precision):
 )
 def test_negate_inplace(context, plain_vec, precision):
     ckks_vec = ts.ckks_vector(context, plain_vec)
+
     expected = [-v for v in plain_vec]
     ckks_vec.neg_()
     decrypted_result = ckks_vec.decrypt()
@@ -73,6 +77,7 @@ def test_power(context, plain_vec, power, precision):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 60])
     context.global_scale = pow(2, 40)
     ckks_vec = ts.ckks_vector(context, plain_vec)
+
     expected = [np.power(v, power) for v in plain_vec]
     new_vec = ckks_vec ** power
     decrypted_result = new_vec.decrypt()
@@ -106,6 +111,7 @@ def test_power_inplace(context, plain_vec, power, precision):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 60])
     context.global_scale = pow(2, 40)
     ckks_vec = ts.ckks_vector(context, plain_vec)
+
     expected = [np.power(v, power) for v in plain_vec]
     ckks_vec **= power
     decrypted_result = ckks_vec.decrypt()
@@ -129,6 +135,7 @@ def test_power_inplace(context, plain_vec, power, precision):
 )
 def test_square(context, plain_vec, precision):
     ckks_vec = ts.ckks_vector(context, plain_vec)
+
     expected = [np.power(v, 2) for v in plain_vec]
     new_vec = ckks_vec.square()
     decrypted_result = new_vec.decrypt()
@@ -182,6 +189,7 @@ def test_square_inplace(context, plain_vec, precision):
 )
 def test_add(context, vec1, vec2, precision):
     first_vec = ts.ckks_vector(context, vec1)
+
     second_vec = ts.ckks_vector(context, vec2)
 
     # replicate for operation between n-sized and 1-sized vectors
@@ -726,7 +734,9 @@ def test_dot_product(context, vec1, vec2, precision):
     context.generate_galois_keys()
     first_vec = ts.ckks_vector(context, vec1)
     second_vec = ts.ckks_vector(context, vec2)
+
     result = first_vec.dot(second_vec)
+
     expected = [sum([v1 * v2 for v1, v2 in zip(vec1, vec2)])]
 
     # Decryption
@@ -914,7 +924,9 @@ def test_mul_without_global_scale(vec1, vec2, precision):
 
     first_vec = ts.ckks_vector(context, vec1, scale=scale)
     second_vec = ts.ckks_vector(context, vec2, scale=scale)
+
     result = first_vec * second_vec
+
     expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
 
     # Decryption

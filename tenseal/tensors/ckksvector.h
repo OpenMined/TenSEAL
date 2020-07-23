@@ -7,6 +7,7 @@
 #include <optional>
 #include <vector>
 
+#include "tenseal/proto/tensors.pb.h"
 #include "tenseal/tensealcontext.h"
 #include "tenseal/utils/utils.h"
 
@@ -15,66 +16,65 @@ namespace tenseal {
 using namespace seal;
 using namespace std;
 
-/*
-Holds a vector of real numbers in its encrypted form using the CKKS homomorphic
-encryption scheme.
-*/
+/**
+ * Holds a vector of real numbers in its encrypted form using the CKKS
+ *homomorphic encryption scheme.
+ **/
 class CKKSVector {
    public:
-    CKKSVector(shared_ptr<TenSEALContext> context, vector<double> vec,
+    CKKSVector(shared_ptr<TenSEALContext> ctx, vector<double> vec,
                std::optional<double> scale = {});
 
     CKKSVector(const CKKSVector& vec);
 
-    /*
-    Decrypts and returns the plaintext representation of the encrypted vector of
-    real numbers using the secret-key.
-    */
+    CKKSVector(shared_ptr<TenSEALContext> ctx, const string& vec);
+    CKKSVector(const TenSEALContextProto& ctx, const CKKSVectorProto& vec);
+    CKKSVector(shared_ptr<TenSEALContext> ctx, const CKKSVectorProto& vec);
+
+    /**
+     * Decrypts and returns the plaintext representation of the encrypted vector
+     *of real numbers using the secret-key.
+     **/
     vector<double> decrypt();
     vector<double> decrypt(const std::shared_ptr<SecretKey>& sk);
 
-    /*
-    Returns the size of the encrypted vector.
-    */
-    size_t size();
-    size_t ciphertext_size();
+    /**
+     * Returns the size of the encrypted vector.
+     **/
+    size_t size() const;
+    size_t ciphertext_size() const;
 
-    /*
-    Returns an upper bound on the size of the CKKSVector, as if it was written
-    to an output stream.
-    */
-    streamoff save_size();
-
-    /*
-    Replicate the first slot of a ciphertext n times. Requires a multiplication.
-    */
+    /**
+     * Replicate the first slot of a ciphertext n times. Requires a
+     *multiplication.
+     **/
     CKKSVector replicate_first_slot(size_t n);
     CKKSVector& replicate_first_slot_inplace(size_t n);
 
-    /*
-    Negates a CKKSVector.
-    */
+    /**
+     * Negates a CKKSVector.
+     **/
     CKKSVector negate();
     CKKSVector& negate_inplace();
 
-    /*
-    Compute the square of the CKKSVector.
-    */
+    /**
+     * Compute the square of the CKKSVector.
+     **/
     CKKSVector square();
     CKKSVector& square_inplace();
 
-    /*
-    Compute the power of the CKKSVector with minimal multiplication depth.
-    */
+    /**
+     * Compute the power of the CKKSVector with minimal multiplication depth.
+     **/
     CKKSVector power(unsigned int power);
     CKKSVector& power_inplace(unsigned int power);
 
-    /*
-    Encrypted evaluation function operates on two encrypted vectors and
-    returns a new CKKSVector which is the result of either addition,
-    substraction or multiplication in an element-wise fashion. in_place
-    functions return a reference to the same object.
-    */
+    /**
+     * Encrypted evaluation function operates on two encrypted vectors and
+     * returns a new CKKSVector which is the result of either addition,
+     * substraction or multiplication in an element-wise fashion. in_place
+     * functions return a reference to the same object.
+     **/
     CKKSVector add(CKKSVector to_add);
     CKKSVector& add_inplace(CKKSVector to_add);
     CKKSVector sub(CKKSVector to_sub);
@@ -84,12 +84,12 @@ class CKKSVector {
     CKKSVector dot_product(CKKSVector to_mul);
     CKKSVector& dot_product_inplace(CKKSVector to_mul);
 
-    /*
-    Plain evaluation function operates on an encrypted vector and plaintext
-    vector of integers and returns a new CKKSVector which is the result of
-    either addition, substraction or multiplication in an element-wise fashion.
-    in_place functions return a reference to the same object.
-    */
+    /**
+     * Plain evaluation function operates on an encrypted vector and plaintext
+     * vector of integers and returns a new CKKSVector which is the result of
+     * either addition, substraction or multiplication in an element-wise
+     *fashion. in_place functions return a reference to the same object.
+     **/
     CKKSVector add_plain(double to_add);
     CKKSVector add_plain(const vector<double>& to_add);
     CKKSVector& add_plain_inplace(double to_add);
@@ -107,18 +107,44 @@ class CKKSVector {
     CKKSVector sum();
     CKKSVector& sum_inplace();
 
-    /*
-    Matrix multiplication operations.
-    */
+    /**
+     * Matrix multiplication operations.
+     **/
     CKKSVector matmul_plain(const vector<vector<double>>& matrix);
     CKKSVector& matmul_plain_inplace(const vector<vector<double>>& matrix);
 
-    /*
-    Polynomial evaluation with `this` as variable.
-    p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] * x^i
-    */
+    /**
+     * Polynomial evaluation with `this` as variable.
+     * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
+     *x^i
+     **/
     CKKSVector polyval(const vector<double>& coefficients);
     CKKSVector& polyval_inplace(const vector<double>& coefficients);
+
+    /**
+     * Load/Save the vector from/to a serialized protobuffer.
+     **/
+    void load(const std::string& vec);
+    std::string save() const;
+
+    /**
+     *Recreates a new CKKSVector from the current one, without any
+     *pointer/reference to this one.
+     **/
+    CKKSVector deepcopy() const;
+    /**
+     * Get a pointer to the current TenSEAL context.
+     **/
+    shared_ptr<TenSEALContext> tenseal_context() const {
+        if (context == nullptr) throw invalid_argument("missing context");
+        return context;
+    }
+    /**
+     * Link to a TenSEAL context.
+     **/
+    void link_tenseal_context(shared_ptr<TenSEALContext> ctx) {
+        this->context = ctx;
+    }
 
    private:
     /*
@@ -132,11 +158,8 @@ class CKKSVector {
     CKKSVector& _mul_plain_inplace(const T& to_mul);
 
     size_t _size;
-
     double init_scale;
-
     shared_ptr<TenSEALContext> context;
-
     Ciphertext ciphertext;
 
     static Ciphertext encrypt(shared_ptr<TenSEALContext> context, double scale,
@@ -157,6 +180,11 @@ class CKKSVector {
 
         return ciphertext;
     }
+
+    void load_proto(const CKKSVectorProto& buffer);
+    CKKSVectorProto save_proto() const;
+
+    void load_context_proto(const TenSEALContextProto& buffer);
 };
 
 }  // namespace tenseal
