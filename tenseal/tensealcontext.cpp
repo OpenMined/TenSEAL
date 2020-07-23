@@ -255,7 +255,7 @@ bool TenSEALContext::auto_mod_switch() {
 }
 
 bool TenSEALContext::equals(const std::shared_ptr<TenSEALContext>& other) {
-    //TODO: improve checks
+    // TODO: improve checks
     if (this->safe_global_scale() != other->safe_global_scale()) return false;
 
     return true;
