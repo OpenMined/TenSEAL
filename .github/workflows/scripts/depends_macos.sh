@@ -5,7 +5,7 @@ brew install protobuf@3.12
 
 cd /usr/local/Cellar/protobuf/3.12.3
 
-ls
+sudo mkdir -p /usr/local/include/google/protobuf/
 
 sudo rm -r /usr/local/include/google/protobuf/
 sudo cp -r include/google/protobuf/ /usr/local/include/google/protobuf/
