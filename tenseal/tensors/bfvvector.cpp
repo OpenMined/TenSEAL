@@ -14,8 +14,8 @@ using namespace std;
 
 namespace tenseal {
 
-BFVVector::BFVVector(shared_ptr<TenSEALContext> context, vector<int64_t> vec) {
-    this->context = context;
+BFVVector::BFVVector(shared_ptr<TenSEALContext> ctx, vector<int64_t> vec) {
+    this->context = ctx;
 
     // Encrypts the whole vector into a single ciphertext using BFV batching
     this->ciphertext = BFVVector::encrypt(context, vec);
@@ -31,6 +31,17 @@ BFVVector::BFVVector(const BFVVector& vec) {
 BFVVector::BFVVector(const string& ctx, const string& vec) {
     this->load_context(ctx);
     this->load(vec);
+}
+
+BFVVector::BFVVector(shared_ptr<TenSEALContext> ctx, const string& vec) {
+    this->context = ctx;
+    this->load(vec);
+}
+
+BFVVector::BFVVector(shared_ptr<TenSEALContext> ctx,
+                     const BFVVectorProto& vec) {
+    this->context = ctx;
+    this->load_proto(vec);
 }
 
 BFVVector::BFVVector(const TenSEALContextProto& ctx,

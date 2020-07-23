@@ -2,7 +2,7 @@
 """
 
 import _tenseal_cpp as _ts_cpp
-from tenseal.tensors import bfv_vector, bfv_vector_from, ckks_vector, ckks_vector_from
+from tenseal.tensors import bfv_vector, ckks_vector
 from tenseal.version import __version__
 
 
@@ -62,9 +62,7 @@ def context_from(buff):
 
 __all__ = [
     "bfv_vector",
-    "bfv_vector_from",
     "ckks_vector",
-    "ckks_vector_from",
     "context",
     "context_from",
     "__version__",

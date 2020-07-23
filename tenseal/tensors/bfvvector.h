@@ -20,12 +20,14 @@ using namespace std;
  **/
 class BFVVector {
    public:
-    BFVVector(shared_ptr<TenSEALContext> context, vector<int64_t> vec);
+    BFVVector(shared_ptr<TenSEALContext> ctx, vector<int64_t> vec);
 
     BFVVector(const BFVVector& vec);
 
     BFVVector(const string& ctx, const string& vec);
+    BFVVector(shared_ptr<TenSEALContext> ctx, const string& vec);
     BFVVector(const TenSEALContextProto& ctx, const BFVVectorProto& vec);
+    BFVVector(shared_ptr<TenSEALContext> ctx, const BFVVectorProto& vec);
 
     /**
      * Decrypts and returns the plaintext representation of the encrypted vector
@@ -86,6 +88,10 @@ class BFVVector {
      *pointer/reference to this one.
      * **/
     BFVVector deepcopy() const;
+    /**
+     * Get a pointer to the current context.
+     **/
+    shared_ptr<TenSEALContext> tenseal_context() const { return context; }
 
    private:
     size_t _size;

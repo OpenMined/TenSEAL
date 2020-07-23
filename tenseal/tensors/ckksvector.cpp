@@ -18,9 +18,9 @@ using namespace std;
 
 namespace tenseal {
 
-CKKSVector::CKKSVector(shared_ptr<TenSEALContext> context, vector<double> vec,
+CKKSVector::CKKSVector(shared_ptr<TenSEALContext> ctx, vector<double> vec,
                        std::optional<double> scale) {
-    this->context = context;
+    this->context = ctx;
     if (scale.has_value()) {
         this->init_scale = scale.value();
     } else {
@@ -44,9 +44,20 @@ CKKSVector::CKKSVector(const string& ctx, const string& vec) {
     this->load(vec);
 }
 
+CKKSVector::CKKSVector(shared_ptr<TenSEALContext> ctx, const string& vec) {
+    this->context = ctx;
+    this->load(vec);
+}
+
 CKKSVector::CKKSVector(const TenSEALContextProto& ctx,
                        const CKKSVectorProto& vec) {
     this->load_context_proto(ctx);
+    this->load_proto(vec);
+}
+
+CKKSVector::CKKSVector(shared_ptr<TenSEALContext> ctx,
+                       const CKKSVectorProto& vec) {
+    this->context = ctx;
     this->load_proto(vec);
 }
 

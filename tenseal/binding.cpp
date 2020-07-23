@@ -57,6 +57,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
     py::class_<BFVVector>(m, "BFVVector")
         .def(py::init<shared_ptr<TenSEALContext> &, vector<int64_t>>())
         .def(py::init<const std::string &, const std::string &>())
+        .def(py::init<shared_ptr<TenSEALContext> &, const std::string &>())
         .def("size", &BFVVector::size)
         .def("decrypt", py::overload_cast<>(&BFVVector::decrypt))
         .def("decrypt", py::overload_cast<const std::shared_ptr<SecretKey> &>(
@@ -86,6 +87,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__mul__", &BFVVector::mul_plain)
         .def("__imul__", &BFVVector::mul_inplace)
         .def("__imul__", &BFVVector::mul_plain_inplace)
+        .def("context",
+             [](const BFVVector &obj) { return obj.tenseal_context(); })
         .def("serialize",
              [](const BFVVector &obj) { return py::bytes(obj.save()); })
         .def("serialize_context",
@@ -102,6 +105,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         // using global_scale if set
         .def(py::init<shared_ptr<TenSEALContext> &, vector<double>>())
         .def(py::init<const std::string &, const std::string &>())
+        .def(py::init<shared_ptr<TenSEALContext> &, const std::string &>())
         .def("size", &CKKSVector::size)
         .def("decrypt", py::overload_cast<>(&CKKSVector::decrypt))
         .def("decrypt", py::overload_cast<const shared_ptr<SecretKey> &>(
@@ -211,6 +215,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                              &CKKSVector::mul_plain_inplace))
         .def("__matmul__", &CKKSVector::matmul_plain)
         .def("__imatmul__", &CKKSVector::matmul_plain_inplace)
+        .def("context",
+             [](const CKKSVector &obj) { return obj.tenseal_context(); })
         .def("serialize",
              [](const CKKSVector &obj) { return py::bytes(obj.save()); })
         .def(

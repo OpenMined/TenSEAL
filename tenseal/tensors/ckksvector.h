@@ -22,13 +22,15 @@ using namespace std;
  **/
 class CKKSVector {
    public:
-    CKKSVector(shared_ptr<TenSEALContext> context, vector<double> vec,
+    CKKSVector(shared_ptr<TenSEALContext> ctx, vector<double> vec,
                std::optional<double> scale = {});
 
     CKKSVector(const CKKSVector& vec);
 
     CKKSVector(const string& ctx, const string& vec);
-    CKKSVector(const TenSEALContextProto& ctx, const CKKSVectorProto& input);
+    CKKSVector(shared_ptr<TenSEALContext> ctx, const string& vec);
+    CKKSVector(const TenSEALContextProto& ctx, const CKKSVectorProto& vec);
+    CKKSVector(shared_ptr<TenSEALContext> ctx, const CKKSVectorProto& vec);
 
     /**
      * Decrypts and returns the plaintext representation of the encrypted vector
@@ -138,6 +140,10 @@ class CKKSVector {
      *pointer/reference to this one.
      **/
     CKKSVector deepcopy() const;
+    /**
+     * Get a pointer to the current context.
+     **/
+    shared_ptr<TenSEALContext> tenseal_context() const { return context; }
 
    private:
     /*
