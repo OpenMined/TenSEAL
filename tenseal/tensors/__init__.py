@@ -20,7 +20,13 @@ def bfv_vector(context, data):
     """
     if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, list):
         return _ts_cpp.BFVVector(context, data)
-    """
+
+    raise "Invalid BFV input types context: {} and vector: {}".format(type(context), type(data))
+
+
+def bfv_vector_from(context, data):
+    """Constructor method for the BFVVector object, from a serialized protobuffer.
+
     Args:
         context: a TenSEALContext object, holding the encryption parameters and keys.
         data: serialized protobuffer.
@@ -49,15 +55,6 @@ def ckks_vector(context, data, scale=None):
         """
         if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, list):
             return _ts_cpp.CKKSVector(context, data)
-        """
-        Args:
-            context: a TenSEALContext object, holding the encryption parameters and keys.
-            data: the serialized protobuffer.
-        Returns:
-            CKKSVector object.
-        """
-        if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, bytes):
-            return _ts_cpp.CKKSVector(context, data)
 
         raise "Invalid CKKS input types context: {} and vector: {}".format(
             type(context), type(data)
@@ -81,4 +78,19 @@ def ckks_vector(context, data, scale=None):
         )
 
 
-__all__ = ["bfv_vector", "ckks_vector"]
+def ckks_vector_from(context, data):
+    """
+    Constructor method for the CKKSVector object from a serialized protobuffer.
+    Args:
+        context: a TenSEALContext object, holding the encryption parameters and keys.
+        data: the serialized protobuffer.
+    Returns:
+        CKKSVector object.
+    """
+    if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, bytes):
+        return _ts_cpp.CKKSVector(context, data)
+
+    raise "Invalid CKKS input types context: {} and vector: {}".format(type(context), type(data))
+
+
+__all__ = ["bfv_vector", "bfv_vector_from", "ckks_vector", "ckks_vector_from"]
