@@ -56,9 +56,9 @@ def ckks_vector(context, data, scale=None):
         if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, list):
             return _ts_cpp.CKKSVector(context, data)
 
-        raise "Invalid CKKS input types context: {} and vector: {}".format(
+        raise TypeError("Invalid CKKS input types context: {} and vector: {}".format(
             type(context), type(data)
-        )
+        ))
     else:
         """
         Args:
