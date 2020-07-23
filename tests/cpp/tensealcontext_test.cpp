@@ -7,13 +7,12 @@ namespace tenseal {
 
 using namespace ::testing;
 
-class TenSEALContextSanityTest : public ::testing::Test {
+class TenSEALContextTest : public ::testing::TestWithParam</*serialize=*/bool> {
    protected:
     void SetUp() {}
     void TearDown() {}
 };
-
-TEST_F(TenSEALContextSanityTest, TestCreateFail) {
+TEST_F(TenSEALContextTest, TestCreateFail) {
     EXPECT_THROW(
         auto ctx = TenSEALContext::Create(scheme_type::none, 8192, 1032193, {}),
         std::exception);
@@ -33,7 +32,7 @@ TEST_F(TenSEALContextSanityTest, TestCreateFail) {
     EXPECT_THROW(auto ctx = TenSEALContext::Create(ss), std::exception);
 }
 
-TEST_F(TenSEALContextSanityTest, TestSerialization) {
+TEST_F(TenSEALContextTest, TestSerialization) {
     auto ctx =
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ctx->generate_galois_keys();
@@ -64,11 +63,6 @@ TEST_F(TenSEALContextSanityTest, TestSerialization) {
     ASSERT_EQ(orig_galoiskeys.size(), serial_galoiskeys.size());
 }
 
-class TenSEALContextTest : public ::testing::TestWithParam</*serialize=*/bool> {
-   protected:
-    void SetUp() {}
-    void TearDown() {}
-};
 
 TEST_P(TenSEALContextTest, TestCreateBFV) {
     bool should_serialize_first = GetParam();
@@ -103,13 +97,13 @@ TEST_P(TenSEALContextTest, TestCreateBFVPublic) {
     }
 
     EXPECT_THROW(ctx->galois_keys(), std::exception);
-    EXPECT_THROW(ctx->relin_keys(), std::exception);
+    ASSERT_TRUE(ctx->relin_keys() != nullptr);
     EXPECT_THROW(ctx->secret_key(), std::exception);
 
     ctx->make_context_public(false, false);
     EXPECT_THROW(ctx->secret_key(), std::exception);
     EXPECT_THROW(ctx->generate_galois_keys(), std::exception);
-    EXPECT_THROW(ctx->generate_relin_keys(), std::exception);
+    ASSERT_TRUE(ctx->relin_keys() != nullptr);
 }
 
 TEST_P(TenSEALContextTest, TestCreateCKKS) {
@@ -147,8 +141,8 @@ TEST_P(TenSEALContextTest, TestCreateCKKSPublic) {
 
     ASSERT_TRUE(ctx != nullptr);
     ASSERT_TRUE(ctx->public_key() != nullptr);
+    ASSERT_TRUE(ctx->relin_keys() != nullptr);
     EXPECT_THROW(ctx->galois_keys(), std::exception);
-    EXPECT_THROW(ctx->relin_keys(), std::exception);
     EXPECT_THROW(ctx->secret_key(), std::exception);
     ASSERT_FALSE(ctx->is_private());
 }
