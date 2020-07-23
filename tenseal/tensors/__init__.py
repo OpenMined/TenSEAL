@@ -21,7 +21,9 @@ def bfv_vector(context, data):
     if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, list):
         return _ts_cpp.BFVVector(context, data)
 
-    raise TypeError("Invalid BFV input types context: {} and vector: {}".format(type(context), type(data)))
+    raise TypeError(
+        "Invalid BFV input types context: {} and vector: {}".format(type(context), type(data))
+    )
 
 
 def bfv_vector_from(context, data):
@@ -37,7 +39,9 @@ def bfv_vector_from(context, data):
     if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, bytes):
         return _ts_cpp.BFVVector(context, data)
 
-    raise TypeError("Invalid BFV input types context: {} and vector: {}".format(type(context), type(data)))
+    raise TypeError(
+        "Invalid BFV input types context: {} and vector: {}".format(type(context), type(data))
+    )
 
 
 def ckks_vector(context, data, scale=None):
@@ -56,9 +60,9 @@ def ckks_vector(context, data, scale=None):
         if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, list):
             return _ts_cpp.CKKSVector(context, data)
 
-        raise TypeError("Invalid CKKS input types context: {} and vector: {}".format(
-            type(context), type(data)
-        ))
+        raise TypeError(
+            "Invalid CKKS input types context: {} and vector: {}".format(type(context), type(data))
+        )
     else:
         """
         Args:
@@ -73,9 +77,11 @@ def ckks_vector(context, data, scale=None):
         if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, list):
             return _ts_cpp.CKKSVector(context, data, scale)
 
-        raise TypeError("Invalid CKKS(scale) input types context: {} and vector: {}".format(
-            type(context), type(data)
-        ))
+        raise TypeError(
+            "Invalid CKKS(scale) input types context: {} and vector: {}".format(
+                type(context), type(data)
+            )
+        )
 
 
 def ckks_vector_from(context, data):
@@ -90,7 +96,9 @@ def ckks_vector_from(context, data):
     if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, bytes):
         return _ts_cpp.CKKSVector(context, data)
 
-    raise TypeError("Invalid CKKS input types context: {} and vector: {}".format(type(context), type(data)))
+    raise TypeError(
+        "Invalid CKKS input types context: {} and vector: {}".format(type(context), type(data))
+    )
 
 
 __all__ = ["bfv_vector", "bfv_vector_from", "ckks_vector", "ckks_vector_from"]
