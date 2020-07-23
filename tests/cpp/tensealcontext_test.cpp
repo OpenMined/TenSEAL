@@ -7,13 +7,12 @@ namespace tenseal {
 
 using namespace ::testing;
 
-class TenSEALContextSanityTest : public ::testing::Test {
+class TenSEALContextTest : public ::testing::TestWithParam</*serialize=*/bool> {
    protected:
     void SetUp() {}
     void TearDown() {}
 };
-
-TEST_F(TenSEALContextSanityTest, TestCreateFail) {
+TEST_F(TenSEALContextTest, TestCreateFail) {
     EXPECT_THROW(
         auto ctx = TenSEALContext::Create(scheme_type::none, 8192, 1032193, {}),
         std::exception);
@@ -33,7 +32,7 @@ TEST_F(TenSEALContextSanityTest, TestCreateFail) {
     EXPECT_THROW(auto ctx = TenSEALContext::Create(ss), std::exception);
 }
 
-TEST_F(TenSEALContextSanityTest, TestSerialization) {
+TEST_F(TenSEALContextTest, TestSerialization) {
     auto ctx =
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ctx->generate_galois_keys();
@@ -64,11 +63,6 @@ TEST_F(TenSEALContextSanityTest, TestSerialization) {
     ASSERT_EQ(orig_galoiskeys.size(), serial_galoiskeys.size());
 }
 
-class TenSEALContextTest : public ::testing::TestWithParam</*serialize=*/bool> {
-   protected:
-    void SetUp() {}
-    void TearDown() {}
-};
 
 TEST_P(TenSEALContextTest, TestCreateBFV) {
     bool should_serialize_first = GetParam();
