@@ -41,7 +41,7 @@ def bfv_vector(context, data):
     if isinstance(context, bytes) and isinstance(data, bytes):
         return _ts_cpp.BFVVector(context, data)
 
-    raise "Invalid BFV input types context: {} and vector: {}".format(type(context), type(vector))
+    raise "Invalid BFV input types context: {} and vector: {}".format(type(context), type(data))
 
 
 def ckks_vector(context, data, scale=None):
@@ -79,7 +79,7 @@ def ckks_vector(context, data, scale=None):
             return _ts_cpp.CKKSVector(context, data)
 
         raise "Invalid CKKS input types context: {} and vector: {}".format(
-            type(context), type(vector)
+            type(context), type(data)
         )
     else:
         """
@@ -96,7 +96,7 @@ def ckks_vector(context, data, scale=None):
             return _ts_cpp.CKKSVector(context, data, scale)
 
         raise "Invalid CKKS(scale) input types context: {} and vector: {}".format(
-            type(context), type(vector)
+            type(context), type(data)
         )
 
 
