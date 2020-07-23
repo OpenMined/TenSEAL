@@ -24,9 +24,6 @@ jobs:
     - name: Install dependencies Ubuntu
       run: chmod +x .github/workflows/scripts/depends_ubuntu.sh
       if: ${{ matrix.os == 'ubuntu-latest' }}
-    - name: Install dependencies OSX
-      run: chmod +x .github/workflows/scripts/depends_macos.sh
-      if: ${{ matrix.os == 'macos-latest' }}
     - name: Lint
       run: chmod +x .github/workflows/scripts/lint.sh
       if: ${{ matrix.os == 'ubuntu-latest' }}     
