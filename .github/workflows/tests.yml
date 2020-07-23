@@ -20,7 +20,7 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Linters
+    - name: Install dependencies
       run: .github/workflows/scripts/depends_ubuntu.sh
       if: ${{ matrix.os == 'ubuntu-latest' }}
     - name: Lint
