@@ -7,7 +7,6 @@ cd /usr/local/Cellar/protobuf/3.12.3
 
 ls
 
-sudo cp bin/protoc /usr/local/bin/
 sudo rm -r /usr/local/include/google/protobuf/
 sudo cp -r include/google/protobuf/ /usr/local/include/google/protobuf/
 sudo cp -r lib /usr/local/
