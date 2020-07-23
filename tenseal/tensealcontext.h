@@ -163,8 +163,13 @@ class TenSEALContext {
     void global_scale(double scale);
     /**
      * Get the global scale for the CKKS scheme.
+     * throws invalid_argument if the scale is not set.
      **/
     double global_scale() const;
+    /**
+     * Get the global scale for the CKKS scheme.
+     **/
+    double safe_global_scale() const;
     /**
      * Switch on/off automatic relinearization, rescaling, and mod switching.
      * @param[in] status: on/off.
@@ -205,12 +210,18 @@ class TenSEALContext {
      * @returns a deepcopy of the current context.
      **/
     std::shared_ptr<TenSEALContext> copy() const;
-
+    /**
+     * Load/Save a protobuffer for the current context.
+     **/
     void load_proto(const TenSEALContextProto& buffer);
     TenSEALContextProto save_proto() const;
-
-    // helpers
+    /**
+     * @returns the encryption params of the current context.
+     **/
     const EncryptionParameters& parms() { return _parms; }
+    /**
+     * @returns true if the contexts are identical.
+     **/
     bool equals(const std::shared_ptr<TenSEALContext>& other);
 
    private:
