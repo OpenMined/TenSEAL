@@ -21,7 +21,7 @@ def bfv_vector(context, data):
     if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, list):
         return _ts_cpp.BFVVector(context, data)
 
-    raise "Invalid BFV input types context: {} and vector: {}".format(type(context), type(data))
+    raise TypeError("Invalid BFV input types context: {} and vector: {}".format(type(context), type(data)))
 
 
 def bfv_vector_from(context, data):
