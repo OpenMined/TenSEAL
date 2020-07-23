@@ -8,11 +8,11 @@ on:
 
 jobs:
   TenSEAL:
-
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
+        os: [macos-latest, ubuntu-latest]
 
     steps:
     - uses: actions/checkout@v2
@@ -20,27 +20,15 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install cmake clang libprotobuf-dev protobuf-compiler
-        python -m pip install --upgrade pip
-        pip install -r requirements_dev.txt
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 --config=.flake8 --exclude=tenseal/sealapi,tests/sealapi .
-        black --check --exclude "sealapi" tenseal/ tests/
-        # exit-zero treats all errors as warnings.
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
-    - name: Lint with clang-format
-      run: |
-        # lint files (all .cpp and .h files) inplace
-        find ./tenseal/  \( -iname *.h -o -iname *.cpp \) -a -not -path "*sealapi*" | xargs clang-format -i -style='file'
-        # print changes
-        git diff
-        # already well formated if 'git diff' doesn't output
-        ! ( git diff |  grep -q ^ ) || return 1
+    - name: Install Ubuntu dependencies
+        run: .github/workflows/scripts/depends_ubuntu.sh
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+    - name: Install OSX dependencies
+        run: .github/workflows/scripts/depends_macos.sh
+        if: ${{ matrix.os == 'macos-latest' }}
+    - name: Lint
+        run: .github/workflows/scripts/lint.sh
+        if: ${{ matrix.os == 'ubuntu-latest' }}
     - name: Build the library
       run: |
         # fetch third_party libraries
@@ -51,6 +39,7 @@ jobs:
       run: |
         pytest -v --ignore=tests/sealapi ./tests
     - name: Test with gtest
+      if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
         cd tenseal/proto && cmake . && make && cd ../../
         cmake . -D BUILD_TEST=TRUE
