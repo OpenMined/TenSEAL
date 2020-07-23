@@ -21,14 +21,15 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: ubuntu-build
-      run: chmod +x .github/workflows/scripts/run_build_ubuntu.sh
+    - name: Install dependencies Ubuntu
+      run: chmod +x .github/workflows/scripts/depends_ubuntu.sh
       if: ${{ matrix.os == 'ubuntu-latest' }}
-    - name: OSX-build
-      run: chmod +x .github/workflows/scripts/run_build_osx.sh
+    - name: Install dependencies OSX
+      run: chmod +x .github/workflows/scripts/depends_macos.sh
       if: ${{ matrix.os == 'macos-latest' }}
-    - name: Linters
-      run: chmod +x .github/workflows/scripts/linters.sh      
+    - name: Lint
+      run: chmod +x .github/workflows/scripts/lint.sh
+      if: ${{ matrix.os == 'ubuntu-latest' }}     
     - name: Build the library
       run: |
         # fetch third_party libraries
