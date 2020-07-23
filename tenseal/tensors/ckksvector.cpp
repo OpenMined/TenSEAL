@@ -39,11 +39,6 @@ CKKSVector::CKKSVector(const CKKSVector& vec) {
     this->ciphertext = vec.ciphertext;
 }
 
-CKKSVector::CKKSVector(const string& ctx, const string& vec) {
-    this->load_context(ctx);
-    this->load(vec);
-}
-
 CKKSVector::CKKSVector(shared_ptr<TenSEALContext> ctx, const string& vec) {
     this->context = ctx;
     this->load(vec);
@@ -571,20 +566,12 @@ CKKSVectorProto CKKSVector::save_proto() const {
     return buffer;
 }
 
-TenSEALContextProto CKKSVector::save_context_proto() const {
-    return this->context->save_proto();
-}
-
 void CKKSVector::load(const std::string& vec) {
     CKKSVectorProto buffer;
     if (!buffer.ParseFromArray(vec.c_str(), vec.size())) {
         throw invalid_argument("failed to parse CKKS stream");
     }
     this->load_proto(buffer);
-}
-
-void CKKSVector::load_context(const std::string& ctx) {
-    this->context = TenSEALContext::Create(ctx);
 }
 
 std::string CKKSVector::save() const {
@@ -600,10 +587,8 @@ std::string CKKSVector::save() const {
     return output;
 }
 
-std::string CKKSVector::save_context() const { return this->context->save(); }
-
 CKKSVector CKKSVector::deepcopy() const {
-    TenSEALContextProto ctx = this->save_context_proto();
+    TenSEALContextProto ctx = this->context->save_proto();
     CKKSVectorProto vec = this->save_proto();
     return CKKSVector(ctx, vec);
 }

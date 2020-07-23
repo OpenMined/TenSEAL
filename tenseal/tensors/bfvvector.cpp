@@ -28,11 +28,6 @@ BFVVector::BFVVector(const BFVVector& vec) {
     this->ciphertext = vec.ciphertext;
 }
 
-BFVVector::BFVVector(const string& ctx, const string& vec) {
-    this->load_context(ctx);
-    this->load(vec);
-}
-
 BFVVector::BFVVector(shared_ptr<TenSEALContext> ctx, const string& vec) {
     this->context = ctx;
     this->load(vec);
@@ -243,10 +238,6 @@ BFVVectorProto BFVVector::save_proto() const {
     return buffer;
 }
 
-TenSEALContextProto BFVVector::save_context_proto() const {
-    return this->context->save_proto();
-}
-
 void BFVVector::load(const std::string& vec) {
     if (this->context == nullptr) {
         throw invalid_argument("context missing for deserialization");
@@ -256,10 +247,6 @@ void BFVVector::load(const std::string& vec) {
         throw invalid_argument("failed to parse BFV stream");
     }
     this->load_proto(buffer);
-}
-
-void BFVVector::load_context(const std::string& ctx) {
-    this->context = TenSEALContext::Create(ctx);
 }
 
 std::string BFVVector::save() const {
@@ -275,10 +262,8 @@ std::string BFVVector::save() const {
     return output;
 }
 
-std::string BFVVector::save_context() const { return this->context->save(); }
-
 BFVVector BFVVector::deepcopy() const {
-    TenSEALContextProto ctx = this->save_context_proto();
+    TenSEALContextProto ctx = this->context->save_proto();
     BFVVectorProto vec = this->save_proto();
     return BFVVector(ctx, vec);
 }

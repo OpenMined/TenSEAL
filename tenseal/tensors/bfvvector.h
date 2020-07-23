@@ -24,7 +24,6 @@ class BFVVector {
 
     BFVVector(const BFVVector& vec);
 
-    BFVVector(const string& ctx, const string& vec);
     BFVVector(shared_ptr<TenSEALContext> ctx, const string& vec);
     BFVVector(const TenSEALContextProto& ctx, const BFVVectorProto& vec);
     BFVVector(shared_ptr<TenSEALContext> ctx, const BFVVectorProto& vec);
@@ -77,13 +76,6 @@ class BFVVector {
     void load(const std::string& vec);
     std::string save() const;
     /**
-     * Load/Save the context from/to a serialized protobuffer.
-     * This separate step allows us to reuse existing contexts, instead of
-     *sending them with every tensor.
-     **/
-    void load_context(const std::string& ctx);
-    std::string save_context() const;
-    /**
      *Recreates a new BFVVector from the current one, without any
      *pointer/reference to this one.
      * **/
@@ -114,7 +106,6 @@ class BFVVector {
     BFVVectorProto save_proto() const;
 
     void load_context_proto(const TenSEALContextProto& buffer);
-    TenSEALContextProto save_context_proto() const;
 };
 
 }  // namespace tenseal

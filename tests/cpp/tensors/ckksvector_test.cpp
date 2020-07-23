@@ -20,9 +20,8 @@ bool are_close(const std::vector<double>& l, const std::vector<int64_t>& r) {
 
 CKKSVector duplicate(const CKKSVector& in) {
     auto vec = in.save();
-    auto ctx = in.save_context();
     
-    return CKKSVector(ctx, vec);
+    return CKKSVector(in.tenseal_context(), vec);
 }
 
 class CKKSVectorTest : public TestWithParam</*serialize=*/bool> {
@@ -50,7 +49,7 @@ TEST_F(CKKSVectorTest, TestCreateCKKSFail) {
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
-    EXPECT_THROW(auto l = CKKSVector(ctx, {1, 2, 3}), std::exception);
+    EXPECT_THROW(auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3})), std::exception);
 }
 
 TEST_P(CKKSVectorTest, TestCKKSAdd) {
@@ -66,8 +65,8 @@ TEST_P(CKKSVectorTest, TestCKKSAdd) {
     ctx->auto_rescale(false);
     ctx->auto_mod_switch(false);
 
-    auto l = CKKSVector(ctx, {1, 2, 3});
-    auto r = CKKSVector(ctx, {3, 4, 4});
+    auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3}));
+    auto r = CKKSVector(ctx, std::vector<double>({3, 4, 4}));
 
     auto add = l.add(r);
 
@@ -106,8 +105,8 @@ TEST_P(CKKSVectorTest, TestCKKSMul) {
     ctx->auto_rescale(true);
     ctx->auto_mod_switch(true);
 
-    auto l = CKKSVector(ctx, {1, 2, 3});
-    auto r = CKKSVector(ctx, {2, 2, 2});
+    auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3}));
+    auto r = CKKSVector(ctx, std::vector<double>({2, 2, 2}));
 
     auto mul = l.mul(r);
     ASSERT_EQ(mul.ciphertext_size(), 2);
@@ -141,8 +140,8 @@ TEST_P(CKKSVectorTest, TestCKKSMulMany) {
     ctx->auto_rescale(true);
     ctx->auto_mod_switch(true);
 
-    auto l = CKKSVector(ctx, {1, 2, 3});
-    auto r = CKKSVector(ctx, {2, 2, 2});
+    auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3}));
+    auto r = CKKSVector(ctx, std::vector<double>({2, 2, 2}));
 
     l.mul_inplace(r);
     l.mul_inplace(r);
@@ -169,8 +168,8 @@ TEST_P(CKKSVectorTest, TestCKKSMulNoRelin) {
     ctx->auto_rescale(true);
     ctx->auto_mod_switch(true);
 
-    auto l = CKKSVector(ctx, {1, 2, 3});
-    auto r = CKKSVector(ctx, {2, 2, 2});
+    auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3}));
+    auto r = CKKSVector(ctx, std::vector<double>({2, 2, 2}));
 
     l.mul_inplace(r);
     l.mul_inplace(r);
@@ -194,7 +193,7 @@ TEST_P(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
     ctx->generate_galois_keys();
     ctx->global_scale(std::pow(2, 40));
 
-    auto vec = CKKSVector(ctx, {1});
+    auto vec = CKKSVector(ctx, std::vector<double>({1}));
     auto replicated_vec = vec.replicate_first_slot(4);
 
      if (should_serialize_first) {

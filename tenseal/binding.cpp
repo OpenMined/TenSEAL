@@ -19,12 +19,13 @@ template <typename T>
 auto bind_tensor_pickle() {
     return py::pickle(
         [&](const T &p) {
-            return py::make_tuple(py::bytes(p.save_context()),
+            return py::make_tuple(py::bytes(p.tenseal_context()->save()),
                                   py::bytes(p.save()));
         },
         [&](py::tuple t) {
             if (t.size() != 2) throw std::runtime_error("Invalid state!");
-            return T(t[0].cast<std::string>(), t[1].cast<std::string>());
+            auto ctx = TenSEALContext::Create(t[0].cast<std::string>());
+            return T(ctx, t[1].cast<std::string>());
         });
 }
 
@@ -56,7 +57,6 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     py::class_<BFVVector>(m, "BFVVector")
         .def(py::init<shared_ptr<TenSEALContext> &, vector<int64_t>>())
-        .def(py::init<const std::string &, const std::string &>())
         .def(py::init<shared_ptr<TenSEALContext> &, const std::string &>())
         .def("size", &BFVVector::size)
         .def("decrypt", py::overload_cast<>(&BFVVector::decrypt))
@@ -91,8 +91,6 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              [](const BFVVector &obj) { return obj.tenseal_context(); })
         .def("serialize",
              [](const BFVVector &obj) { return py::bytes(obj.save()); })
-        .def("serialize_context",
-             [](const BFVVector &obj) { return py::bytes(obj.save_context()); })
         .def("copy", &BFVVector::deepcopy)
         .def("__copy__", [](const BFVVector &self) { return self.deepcopy(); })
         .def("__deepcopy__",
@@ -104,7 +102,6 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def(py::init<shared_ptr<TenSEALContext> &, vector<double>, double>())
         // using global_scale if set
         .def(py::init<shared_ptr<TenSEALContext> &, vector<double>>())
-        .def(py::init<const std::string &, const std::string &>())
         .def(py::init<shared_ptr<TenSEALContext> &, const std::string &>())
         .def("size", &CKKSVector::size)
         .def("decrypt", py::overload_cast<>(&CKKSVector::decrypt))
@@ -219,9 +216,6 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              [](const CKKSVector &obj) { return obj.tenseal_context(); })
         .def("serialize",
              [](const CKKSVector &obj) { return py::bytes(obj.save()); })
-        .def(
-            "serialize_context",
-            [](const CKKSVector &obj) { return py::bytes(obj.save_context()); })
         .def("copy", &CKKSVector::deepcopy)
         .def("__copy__", [](const CKKSVector &self) { return self.deepcopy(); })
         .def("__deepcopy__",

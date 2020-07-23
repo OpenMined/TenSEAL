@@ -30,16 +30,6 @@ def bfv_vector(context, data):
     """
     if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, bytes):
         return _ts_cpp.BFVVector(context, data)
-    """
-    Args:
-        context: a TenSEALContext serialized protobuffer.
-        data: serialized protobuffer.
-
-    Returns:
-        BFVVector object.
-    """
-    if isinstance(context, bytes) and isinstance(data, bytes):
-        return _ts_cpp.BFVVector(context, data)
 
     raise "Invalid BFV input types context: {} and vector: {}".format(type(context), type(data))
 
@@ -67,15 +57,6 @@ def ckks_vector(context, data, scale=None):
             CKKSVector object.
         """
         if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, bytes):
-            return _ts_cpp.CKKSVector(context, data)
-        """
-        Args:
-            context: a serialized TenSEALContext object.
-            data: the serialized protobuffer.
-        Returns:
-            CKKSVector object.
-        """
-        if isinstance(context, bytes) and isinstance(data, bytes):
             return _ts_cpp.CKKSVector(context, data)
 
         raise "Invalid CKKS input types context: {} and vector: {}".format(

@@ -27,7 +27,6 @@ class CKKSVector {
 
     CKKSVector(const CKKSVector& vec);
 
-    CKKSVector(const string& ctx, const string& vec);
     CKKSVector(shared_ptr<TenSEALContext> ctx, const string& vec);
     CKKSVector(const TenSEALContextProto& ctx, const CKKSVectorProto& vec);
     CKKSVector(shared_ptr<TenSEALContext> ctx, const CKKSVectorProto& vec);
@@ -129,13 +128,6 @@ class CKKSVector {
     std::string save() const;
 
     /**
-     * Load/Save the context from/to a serialized protobuffer.
-     * This separate step allows us to reuse existing contexts, instead of
-     *sending them with every tensor.
-     **/
-    void load_context(const std::string& ctx);
-    std::string save_context() const;
-    /**
      *Recreates a new CKKSVector from the current one, without any
      *pointer/reference to this one.
      **/
@@ -184,7 +176,6 @@ class CKKSVector {
     CKKSVectorProto save_proto() const;
 
     void load_context_proto(const TenSEALContextProto& buffer);
-    TenSEALContextProto save_context_proto() const;
 };
 
 }  // namespace tenseal
