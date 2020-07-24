@@ -29,11 +29,17 @@ jobs:
       - name: docker login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
 
-      - name: tag and push latest nightly images
+      - name: tag and push latest dev images
         if: github.event_name == 'push'
         run: |
-          docker tag $IMAGE $IMAGE:latest-py${{ matrix.python-version }}
-          docker push $IMAGE:latest-py${{ matrix.python-version }}
+          docker tag $IMAGE $IMAGE:dev-py${{ matrix.python-version }}
+          docker push $IMAGE:dev-py${{ matrix.python-version }}
+          
+      - name: push latest dev for python 3.8
+        if: github.event_name == 'push' && matrix.python-version == '38'
+        run: |
+          docker tag $IMAGE $IMAGE:dev
+          docker push $IMAGE:dev
 
       - name: tag and push release image
         if: github.event_name == 'release'
