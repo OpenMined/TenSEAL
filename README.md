@@ -69,7 +69,7 @@ This installs the last packaged version on [pypi](https://pypi.org/project/tense
 
 Supported platforms and their requirements are listed below: (this are only required for building TenSEAL from source)
 - **Linux:** A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0).
-- **macOS:** Xcode toolchain (>= 9.3)
+- **MacOS:** Xcode toolchain (>= 9.3)
 - **Windows:** Microsoft Visual Studio (>= 10.0.40219.1, Visual Studio 2010 SP1 or later).
 
 If you want to install tenseal from the repository, you should first make sure to have the requirements for your platform (listed above) and [CMake (3.12 or higher)](https://cmake.org/install/) installed, then get the third party libraries (if you didn't already) by running the following command from the root directory of the project
@@ -98,6 +98,9 @@ You can use our [Docker image](https://hub.docker.com/r/openmined/tenseal) for a
 $ docker container run --interactive --tty openmined/tenseal
 ```
 
+**Note:** `openmined/tenseal` points to the image from the last release, use `openmined/tenseal:dev` for the image built from the master branch.
+
+
 You can also build your custom image, this might be handy for developers working on the project
 
 ```bash
@@ -107,7 +110,7 @@ $ docker build -t tenseal -f docker-images/Dockerfile-py38 .
 To interactively run this docker image as a container after it has been built you can run
 
 ```bash
-$ docker run -it tenseal
+$ docker container run -it tenseal
 ```
 
 ## Support
