@@ -17,7 +17,7 @@
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/rlwe.h"
 #include "seal/util/scalingvariant.h"
-#include "tenseal/interface/sealapi/bindings.h"
+#include "tenseal/sealapi/bindings.h"
 
 using namespace seal;
 using namespace seal::util;

@@ -27,7 +27,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # Core
 ################################
 set(TENSEAL_BASEDIR tenseal)
-set(SEALAPI_BASEDIR tenseal/interface/sealapi)
+set(SEALAPI_BASEDIR tenseal/sealapi)
 
 set(SOURCES
     ${TENSEAL_BASEDIR}/context/tensealcontext.cpp
@@ -37,7 +37,7 @@ set(SOURCES
     ${TENSEAL_BASEDIR}/tensors/utils/utils.cpp
 )
 add_library(tenseal SHARED ${SOURCES})
-pybind11_add_module(_tenseal_cpp ${SOURCES} ${TENSEAL_BASEDIR}/interface/binding.cpp)
+pybind11_add_module(_tenseal_cpp ${SOURCES} ${TENSEAL_BASEDIR}/binding.cpp)
 
 set(SEALAPI_SOURCES
     ${SEALAPI_BASEDIR}/sealapi.cpp
