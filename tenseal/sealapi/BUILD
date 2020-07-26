@@ -7,9 +7,17 @@ TENSEAL_DEFAULT_INCLUDES = ["."]
 TENSEAL_DEFAULT_COPTS = ["-std=c++17"]
 
 pybind_extension(
-    name = "_tenseal_cpp",
+    name = "_sealapi_cpp",
     srcs = [
-        "binding.cpp",
+        "bindings.h",
+        "sealapi.cpp",
+        "sealapi_context.cpp",
+        "sealapi_encode.cpp",
+        "sealapi_encrypt.cpp",
+        "sealapi_evaluator.cpp",
+        "sealapi_helpers.cpp",
+        "sealapi_modulus.cpp",
+        "sealapi_util_namespace.cpp",
     ],
     copts = TENSEAL_DEFAULT_COPTS,
     features = ["-use_header_modules"],
@@ -17,27 +25,23 @@ pybind_extension(
     linkstatic = True,
     visibility = ["//visibility:public"],
     deps = [
-        "//tenseal/context:tenseal_context",
-        "//tenseal/tensors:tenseal_tensors",
         "@com_microsoft_seal//:seal",
     ],
 )
 
 py_library(
-    name = "tenseal_cpp",
-    data = ["//tenseal:_tenseal_cpp.so"],
-    srcs_version = "PY3",
+    name = "sealapi_cpp",
+    data = ["//tenseal/sealapi:_sealapi_cpp.so"],
     visibility = ["//visibility:public"],
 )
 
 py_library(
-    name = "tenseal",
+    name = "sealapi",
     srcs = [
         "__init__.py",
-        "version.py",
+        "util/__init__.py",
     ],
-    data = ["//tenseal:_tenseal_cpp.so"],
+    data = ["//tenseal/sealapi:_sealapi_cpp.so"],
     srcs_version = "PY3",
     visibility = ["//visibility:public"],
-    deps = ["//tenseal/tensors:tenseal_tensors_py"],
 )

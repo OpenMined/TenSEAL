@@ -1,4 +1,4 @@
-import _sealapi_cpp.util as _sealapi_util_cpp
+import tenseal.sealapi._sealapi_cpp.util as _sealapi_util_cpp
 
 ## util/rns.h ##
 RNSBase = _sealapi_util_cpp.RNSBase
