@@ -144,7 +144,11 @@ def context_asserts(sealctx, sec_level, scheme):
         assert ctx_data.total_coeff_modulus_bit_count() == ctx_alias.total_coeff_modulus_bit_count()
 
         assert ctx_data.plain_upper_half_threshold() == ctx_alias.plain_upper_half_threshold()
-        assert ctx_data.coeff_div_plain_modulus() == ctx_alias.coeff_div_plain_modulus()
+        if scheme == sealapi.SCHEME_TYPE.BFV:
+            assert (
+                ctx_data.coeff_div_plain_modulus().operand
+                == ctx_alias.coeff_div_plain_modulus().operand
+            )
         assert ctx_data.upper_half_increment() == ctx_alias.upper_half_increment()
         assert ctx_data.upper_half_threshold() == ctx_alias.upper_half_threshold()
 
