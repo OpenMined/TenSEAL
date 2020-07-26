@@ -1,9 +1,9 @@
 #include "tenseal/tensealcontext.h"
 
 #include "seal/seal.h"
-#include "tenseal/serialization.h"
 #include "tenseal/utils/proto.h"
 #include "tenseal/utils/scope.h"
+#include "tenseal/utils/serialization.h"
 
 namespace tenseal {
 
@@ -90,6 +90,11 @@ shared_ptr<TenSEALContext> TenSEALContext::Create(istream& stream) {
 }
 
 shared_ptr<TenSEALContext> TenSEALContext::Create(const std::string& input) {
+    return shared_ptr<TenSEALContext>(new TenSEALContext(input));
+}
+
+shared_ptr<TenSEALContext> TenSEALContext::Create(
+    const TenSEALContextProto& input) {
     return shared_ptr<TenSEALContext>(new TenSEALContext(input));
 }
 
@@ -203,6 +208,15 @@ void TenSEALContext::global_scale(double scale) {
 double TenSEALContext::global_scale() const {
     return encoder_factory->global_scale();
 }
+double TenSEALContext::safe_global_scale() const {
+    double scale = -1;
+    try {
+        scale = this->global_scale();
+    } catch (std::exception&) {
+    }
+
+    return scale;
+}
 
 void TenSEALContext::auto_relin(bool status) {
     if (is_public()) return;
@@ -238,6 +252,13 @@ bool TenSEALContext::auto_rescale() {
 }
 bool TenSEALContext::auto_mod_switch() {
     return this->_auto_flags & flag_auto_mod_switch;
+}
+
+bool TenSEALContext::equals(const std::shared_ptr<TenSEALContext>& other) {
+    // TODO: improve checks
+    if (this->safe_global_scale() != other->safe_global_scale()) return false;
+
+    return true;
 }
 
 void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
@@ -279,12 +300,7 @@ TenSEALContextProto TenSEALContext::save_proto() const {
     *public_buffer.mutable_public_key() =
         SEALSerialize<PublicKey>(*this->public_key());
 
-    try {
-        auto scale = this->global_scale();
-        public_buffer.set_scale(scale);
-    } catch (std::exception&) {
-        public_buffer.set_scale(-1);
-    }
+    public_buffer.set_scale(this->safe_global_scale());
 
     if (this->is_public()) {
         if (this->_galois_keys)

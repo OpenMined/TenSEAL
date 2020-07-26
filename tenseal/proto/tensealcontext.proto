@@ -24,7 +24,7 @@ message TenSEALPublicProto {
     // Generated relin keys
     bytes relin_keys = 4;
     // Generated Galois keys
-   bytes galois_keys = 5;
+    bytes galois_keys = 5;
 }
 
 //TenSEAL Context parameters

@@ -60,6 +60,12 @@ class TenSEALContext {
      **/
     static shared_ptr<TenSEALContext> Create(const std::string& input);
     /**
+     * Create a context from a protobuffer.
+     * @param[in] input: The protobuffer.
+     * @returns shared_ptr to a new TenSEALContext object.
+     **/
+    static shared_ptr<TenSEALContext> Create(const TenSEALContextProto& input);
+    /**
      * @returns a pointer to the public key.
      **/
     shared_ptr<PublicKey> public_key() const;
@@ -157,8 +163,13 @@ class TenSEALContext {
     void global_scale(double scale);
     /**
      * Get the global scale for the CKKS scheme.
+     * throws invalid_argument if the scale is not set.
      **/
     double global_scale() const;
+    /**
+     * Get the global scale for the CKKS scheme.
+     **/
+    double safe_global_scale() const;
     /**
      * Switch on/off automatic relinearization, rescaling, and mod switching.
      * @param[in] status: on/off.
@@ -199,6 +210,19 @@ class TenSEALContext {
      * @returns a deepcopy of the current context.
      **/
     std::shared_ptr<TenSEALContext> copy() const;
+    /**
+     * Load/Save a protobuffer for the current context.
+     **/
+    void load_proto(const TenSEALContextProto& buffer);
+    TenSEALContextProto save_proto() const;
+    /**
+     * @returns the encryption params of the current context.
+     **/
+    const EncryptionParameters& parms() { return _parms; }
+    /**
+     * @returns true if the contexts are identical.
+     **/
+    bool equals(const std::shared_ptr<TenSEALContext>& other);
 
    private:
     EncryptionParameters _parms;
@@ -208,7 +232,6 @@ class TenSEALContext {
     shared_ptr<RelinKeys> _relin_keys;
     shared_ptr<GaloisKeys> _galois_keys;
     shared_ptr<TenSEALEncoder> encoder_factory;
-
     /**
      * Switches for automatic relinearization, rescaling, and modulus switching
      **/
@@ -230,9 +253,6 @@ class TenSEALContext {
                     optional<SecretKey> secret_key = {},
                     bool generate_relin_keys = true,
                     bool generate_galois_keys = false);
-
-    void load_proto(const TenSEALContextProto& buffer);
-    TenSEALContextProto save_proto() const;
 };
 }  // namespace tenseal
 #endif
