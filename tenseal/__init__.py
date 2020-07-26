@@ -3,7 +3,7 @@
 
 try:
     import _tenseal_cpp as _ts_cpp
-except BaseException:
+except ImportError:
     import tenseal._tenseal_cpp as _ts_cpp
 
 from tenseal.tensors import bfv_vector, bfv_vector_from, ckks_vector, ckks_vector_from

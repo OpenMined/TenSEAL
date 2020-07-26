@@ -3,7 +3,7 @@
 
 try:
     import _sealapi_cpp
-except BaseException:
+except ImportError:
     import tenseal.sealapi._sealapi_cpp
 
 ## seal/biguint.h ##

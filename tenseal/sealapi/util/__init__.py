@@ -1,6 +1,6 @@
 try:
     import _sealapi_cpp.util as _sealapi_util_cpp
-except BaseException:
+except ImportError:
     import tenseal.sealapi._sealapi_cpp.util as _sealapi_util_cpp
 
 ## util/rns.h ##

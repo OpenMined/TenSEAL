@@ -23,5 +23,6 @@ py_test(
         "//tenseal/sealapi:sealapi",
         "//tenseal:tenseal",
         requirement("pytest"),
+        requirement("numpy"),
     ],
 )

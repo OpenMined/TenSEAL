@@ -19,5 +19,6 @@ py_test(
     deps = [
         "//tenseal:tenseal",
         requirement("pytest"),
+        requirement("numpy"),
     ],
 )
