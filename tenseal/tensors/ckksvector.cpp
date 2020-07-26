@@ -560,6 +560,47 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     return *this;
 }
 
+CKKSVector CKKSVector::mat_plain_vec_mult(const vector<double>& plain_vec,
+                                          size_t row_size) {
+    CKKSVector new_vec = *this;
+    new_vec.mat_plain_vec_mult_inplace(plain_vec, row_size);
+    return new_vec;
+}
+
+CKKSVector& CKKSVector::mat_plain_vec_mult_inplace(
+    const vector<double>& plain_vec, size_t row_size) {
+    vector<double> new_plain_vec;
+    size_t chunck_size = row_size;
+    size_t num_of_chuncks = plain_vec.size();
+
+    size_t vec_len = chunck_size * num_of_chuncks;
+    new_plain_vec.reserve(vec_len);
+
+    for (size_t i = 0; i < num_of_chuncks; i++) {
+        vector<double> tmp(chunck_size, plain_vec[i]);
+        new_plain_vec.insert(new_plain_vec.end(), tmp.begin(), tmp.end());
+    }
+
+    this->mul_plain_inplace(new_plain_vec);
+
+    auto galois_keys = this->context->galois_keys();
+
+    CKKSVector tmp = *this;
+
+    while (num_of_chuncks > 1) {
+        tmp = *this;
+        num_of_chuncks =
+            1 << (static_cast<size_t>(ceil(log2(num_of_chuncks))) - 1);
+        this->context->evaluator->rotate_vector_inplace(
+            tmp.ciphertext, chunck_size * num_of_chuncks, *galois_keys);
+        this->add_inplace(tmp);
+    }
+
+    this->_size = row_size;
+
+    return *this;
+}
+
 void CKKSVector::load_proto(const CKKSVectorProto& vec) {
     if (this->tenseal_context() == nullptr) {
         throw invalid_argument("context missing for deserialization");

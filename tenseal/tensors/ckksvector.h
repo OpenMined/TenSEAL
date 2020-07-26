@@ -121,6 +121,14 @@ class CKKSVector {
     CKKSVector polyval(const vector<double>& coefficients);
     CKKSVector& polyval_inplace(const vector<double>& coefficients);
 
+    /*
+    Ecnrypted Matrix multiplication with plain vector.
+    */
+    CKKSVector mat_plain_vec_mult(const vector<double>& plain_vec,
+                                  size_t row_size);
+    CKKSVector& mat_plain_vec_mult_inplace(const vector<double>& plain_vec,
+                                           size_t row_size);
+
     /**
      * Load/Save the vector from/to a serialized protobuffer.
      **/

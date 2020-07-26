@@ -152,6 +152,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("sum_", &CKKSVector::sum_inplace)
         .def("matmul", &CKKSVector::matmul_plain)
         .def("matmul_", &CKKSVector::matmul_plain_inplace)
+        .def("mat_plain_vec_mult", &CKKSVector::mat_plain_vec_mult)
+        .def("mat_plain_vec_mult_inplace",
+             &CKKSVector::mat_plain_vec_mult_inplace)
         .def("mm", &CKKSVector::matmul_plain)
         .def("mm_", &CKKSVector::matmul_plain_inplace)
         // python arithmetic
