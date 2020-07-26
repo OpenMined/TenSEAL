@@ -460,15 +460,23 @@ CKKSVector& CKKSVector::sum_inplace() {
     return *this;
 }
 
-CKKSVector CKKSVector::matmul_plain(const vector<vector<double>>& matrix) {
+CKKSVector CKKSVector::matmul_plain(const vector<vector<double>>& matrix,
+                                    bool parallel, uint n_threads) {
     CKKSVector new_vector = *this;
-    return new_vector.matmul_plain_inplace(matrix);
+    return new_vector.matmul_plain_inplace(matrix, parallel, n_threads);
 }
 
 CKKSVector& CKKSVector::matmul_plain_inplace(
-    const vector<vector<double>>& matrix) {
-    this->ciphertext = diagonal_ct_vector_matmul_parallel<double, CKKSEncoder>(
-        this->tenseal_context(), this->ciphertext, this->size(), matrix);
+    const vector<vector<double>>& matrix, bool parallel, uint n_threads) {
+    if (parallel) {
+        this->ciphertext =
+            diagonal_ct_vector_matmul_parallel<double, CKKSEncoder>(
+                this->tenseal_context(), this->ciphertext, this->size(), matrix,
+                n_threads);
+    } else {
+        this->ciphertext = diagonal_ct_vector_matmul<double, CKKSEncoder>(
+            this->tenseal_context(), this->ciphertext, this->size(), matrix);
+    }
 
     this->_size = matrix[0].size();
 

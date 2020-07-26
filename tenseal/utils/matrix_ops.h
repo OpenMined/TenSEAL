@@ -102,7 +102,7 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
 template <typename T, class Encoder>
 Ciphertext diagonal_ct_vector_matmul_parallel(
     shared_ptr<TenSEALContext> tenseal_context, Ciphertext& vec,
-    size_t vector_size, const vector<vector<T>>& matrix) {
+    size_t vector_size, const vector<vector<T>>& matrix, uint n_threads = 0) {
     // matrix is organized by rows
     // _check_matrix(matrix, this->size())
     size_t n_rows = matrix.size();
@@ -165,7 +165,8 @@ Ciphertext diagonal_ct_vector_matmul_parallel(
         }
     };
 
-    int n_threads = 8;
+    // if not specified (n_threads set to 0), detect automatically
+    if (n_threads == 0) n_threads = get_concurrency();
     vector<thread> threads;
     threads.reserve(n_threads);
     // start the threads
