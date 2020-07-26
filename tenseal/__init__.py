@@ -1,7 +1,11 @@
 """TenSEAL is a library for doing homomorphic encryption operation on tensors.
 """
 
-import tenseal._tenseal_cpp as _ts_cpp
+try:
+    import _tenseal_cpp as _ts_cpp
+except BaseException:
+    import tenseal._tenseal_cpp as _ts_cpp
+
 from tenseal.tensors import bfv_vector, bfv_vector_from, ckks_vector, ckks_vector_from
 from tenseal.version import __version__
 
