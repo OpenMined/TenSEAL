@@ -1,8 +1,7 @@
-#include <seal/seal.h>
-
 #include <memory>
 
-#include "tenseal/tensealcontext.h"
+#include "seal/seal.h"
+#include "tenseal/context/tensealcontext.h"
 
 using namespace seal;
 using namespace std;

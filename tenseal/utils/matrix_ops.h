@@ -1,11 +1,10 @@
 #ifndef TENSEAL_UTILS_MATRIX_OPS_H
 #define TENSEAL_UTILS_MATRIX_OPS_H
 
-#include <seal/seal.h>
-
 #include <memory>
 
-#include "tenseal/tensealcontext.h"
+#include "seal/seal.h"
+#include "tenseal/context/tensealcontext.h"
 #include "tenseal/utils/utils.h"
 
 namespace tenseal {

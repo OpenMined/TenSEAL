@@ -1,11 +1,11 @@
-#include "tenseal/tensors/bfvvector.h"
-
-#include <seal/seal.h>
+#include "seal/seal.h"
 
 #include <memory>
 #include <vector>
 
-#include "tenseal/tensealcontext.h"
+#include "tenseal/tensors/bfvvector.h"
+
+#include "tenseal/context/tensealcontext.h"
 #include "tenseal/utils/proto.h"
 #include "tenseal/utils/serialization.h"
 

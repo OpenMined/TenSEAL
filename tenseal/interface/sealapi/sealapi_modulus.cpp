@@ -3,11 +3,11 @@
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <seal/seal.h>
 
 #include <fstream>
 
-#include "tenseal/sealapi/bindings.h"
+#include "seal/seal.h"
+#include "tenseal/interface/sealapi/bindings.h"
 
 using namespace seal;
 using namespace std;
