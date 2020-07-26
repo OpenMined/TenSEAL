@@ -9,7 +9,7 @@
 
 #include "tenseal/proto/tensors.pb.h"
 #include "tenseal/context/tensealcontext.h"
-#include "tenseal/utils/utils.h"
+#include "tenseal/tensors/utils/utils.h"
 
 namespace tenseal {
 

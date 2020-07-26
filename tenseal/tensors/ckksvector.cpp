@@ -9,10 +9,10 @@
 #include "tenseal/tensors/ckksvector.h"
 
 #include "tenseal/context/tensealcontext.h"
-#include "tenseal/utils/matrix_ops.h"
+#include "tenseal/tensors/utils/matrix_ops.h"
+#include "tenseal/tensors/utils/utils.h"
 #include "tenseal/utils/proto.h"
 #include "tenseal/utils/serialization.h"
-#include "tenseal/utils/utils.h"
 
 using namespace seal;
 using namespace std;
