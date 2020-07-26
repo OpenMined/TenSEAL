@@ -169,9 +169,7 @@ def test_biguint_operators():
     assert left == 2
 
 
-@pytest.mark.parametrize(
-    "compr_type", [sealapi.COMPR_MODE_TYPE.NONE]
-)
+@pytest.mark.parametrize("compr_type", [sealapi.COMPR_MODE_TYPE.NONE])
 def test_serialization_compression(compr_type):
     assert sealapi.Serialization.IsSupportedComprMode(compr_type) is True
     assert sealapi.Serialization.ComprSizeEstimate(8, compr_type) > 0
@@ -193,6 +191,7 @@ def test_serialization_sanity():
 
     header = sealapi.Serialization.SEALHeader()
     assert sealapi.Serialization.IsValidHeader(header) is True
+
 
 @pytest.mark.parametrize(
     "factory",
