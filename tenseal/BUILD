@@ -2,7 +2,10 @@ load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
 
 py_library(
     name = "sealapi",
-    srcs = ["sealapi/__init__.py"],
+    srcs = [
+        "sealapi/__init__.py",
+        "sealapi/util/__init__.py",
+    ],
     data = ["//tenseal/interface:_sealapi_cpp.so"],
     srcs_version = "PY3",
     visibility = ["//visibility:public"],
@@ -10,8 +13,12 @@ py_library(
 
 py_library(
     name = "tenseal",
-    srcs = ["__init__.py"],
+    srcs = [
+        "__init__.py",
+        "version.py",
+    ],
     data = ["//tenseal/interface:_tenseal_cpp.so"],
     srcs_version = "PY3",
     visibility = ["//visibility:public"],
+    deps = ["//tenseal/tensors:tenseal_tensors_py"],
 )

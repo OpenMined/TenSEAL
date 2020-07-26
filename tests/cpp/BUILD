@@ -16,36 +16,24 @@
 
 package(default_visibility = ["//visibility:public"])
 
-TENSEAL_DEFAULT_INCLUDES = ["."]
+PIR_DEFAULT_INCLUDES = ["."]
 
-TENSEAL_DEFAULT_COPTS = ["-std=c++17"]
+PIR_DEFAULT_COPTS = ["-std=c++17"]
 
-cc_library(
-    name = "tenseal_tensors",
+cc_test(
+    name = "tenseal_cpp_test",
     srcs = [
-        "bfvvector.cpp",
-        "ckksvector.cpp",
-        "utils/matrix_ops.h",
-        "utils/utils.cpp",
-        "utils/utils.h",
+        "tensealcontext_test.cpp",
+        "tensors/bfvvector_test.cpp",
+        "tensors/ckksvector_test.cpp",
     ],
-    hdrs = [
-        "bfvvector.h",
-        "ckksvector.h",
-    ],
-    copts = TENSEAL_DEFAULT_COPTS,
-    includes = TENSEAL_DEFAULT_INCLUDES,
+    copts = PIR_DEFAULT_COPTS,
+    includes = PIR_DEFAULT_INCLUDES,
+    linkstatic = True,
     deps = [
         "//tenseal/context:tenseal_context",
-        "//tenseal/proto:tenseal_cc_proto",
-        "@com_microsoft_seal//:seal",
+        "//tenseal/tensors:tenseal_tensors",
+        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
-)
-
-py_library(
-    name = "tenseal_tensors_py",
-    srcs = ["__init__.py"],
-    data = ["//tenseal/interface:_tenseal_cpp.so"],
-    srcs_version = "PY3",
-    visibility = ["//visibility:public"],
 )
