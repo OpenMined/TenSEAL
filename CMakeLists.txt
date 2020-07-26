@@ -31,9 +31,10 @@ set(SEALAPI_BASEDIR tenseal/interface/sealapi)
 
 set(SOURCES
     ${TENSEAL_BASEDIR}/context/tensealcontext.cpp
+    ${TENSEAL_BASEDIR}/context/sealcontext.cpp
     ${TENSEAL_BASEDIR}/tensors/bfvvector.cpp
     ${TENSEAL_BASEDIR}/tensors/ckksvector.cpp
-    ${TENSEAL_BASEDIR}/utils/utils.cpp
+    ${TENSEAL_BASEDIR}/tensors/utils/utils.cpp
 )
 add_library(tenseal SHARED ${SOURCES})
 pybind11_add_module(_tenseal_cpp ${SOURCES} ${TENSEAL_BASEDIR}/interface/binding.cpp)
