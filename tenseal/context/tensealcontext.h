@@ -2,10 +2,9 @@
 #define TENSEAL_TENSEALCONTEXT_H
 
 #include "seal/seal.h"
-
-#include "tenseal/proto/tensealcontext.pb.h"
-#include "tenseal/context/tensealencoder.h"
 #include "tenseal/context/sealcontext.h"
+#include "tenseal/context/tensealencoder.h"
+#include "tenseal/proto/tensealcontext.pb.h"
 
 namespace tenseal {
 

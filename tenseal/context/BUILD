@@ -23,9 +23,9 @@ TENSEAL_DEFAULT_COPTS = ["-std=c++17"]
 cc_library(
     name = "tenseal_context",
     srcs = [
-        "tensealcontext.cpp",
         "sealcontext.cpp",
         "sealcontext.h",
+        "tensealcontext.cpp",
     ],
     hdrs = [
         "tensealcontext.h",

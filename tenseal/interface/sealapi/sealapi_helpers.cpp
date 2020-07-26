@@ -121,7 +121,6 @@ void bind_helpers(pybind11::module &m) {
      * "seal/serialization.h" {
      ***/
     py::enum_<compr_mode_type>(m, "COMPR_MODE_TYPE", py::module_local())
-        .value("DEFLATE", compr_mode_type::deflate)
         .value("NONE", compr_mode_type::none);
 
     py::class_<Serialization> serialization(m, "Serialization",

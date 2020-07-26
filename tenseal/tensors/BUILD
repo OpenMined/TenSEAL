@@ -36,8 +36,8 @@ cc_library(
     copts = TENSEAL_DEFAULT_COPTS,
     includes = TENSEAL_DEFAULT_INCLUDES,
     deps = [
-        "//tenseal/proto:tenseal_cc_proto",
         "//tenseal/context:tenseal_context",
+        "//tenseal/proto:tenseal_cc_proto",
         "@com_microsoft_seal//:seal",
     ],
 )

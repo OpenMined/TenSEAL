@@ -4,6 +4,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <fstream>
+
 #include "seal/seal.h"
 #include "seal/util/clipnormal.h"
 #include "seal/util/croots.h"
@@ -15,9 +17,6 @@
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/rlwe.h"
 #include "seal/util/scalingvariant.h"
-
-#include <fstream>
-
 #include "tenseal/interface/sealapi/bindings.h"
 
 using namespace seal;

@@ -23,8 +23,8 @@ TENSEAL_DEFAULT_COPTS = ["-std=c++17"]
 cc_library(
     name = "tenseal_utils",
     hdrs = [
-        "scope.h",
         "proto.h",
+        "scope.h",
         "serialization.h",
     ],
     copts = TENSEAL_DEFAULT_COPTS,

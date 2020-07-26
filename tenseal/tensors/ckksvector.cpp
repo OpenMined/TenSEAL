@@ -1,13 +1,12 @@
 
+#include "tenseal/tensors/ckksvector.h"
+
 #include <cmath>
 #include <memory>
 #include <optional>
 #include <vector>
 
 #include "seal/seal.h"
-
-#include "tenseal/tensors/ckksvector.h"
-
 #include "tenseal/context/tensealcontext.h"
 #include "tenseal/tensors/utils/matrix_ops.h"
 #include "tenseal/tensors/utils/utils.h"
