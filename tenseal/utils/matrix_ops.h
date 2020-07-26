@@ -121,7 +121,8 @@ Ciphertext diagonal_ct_vector_matmul_parallel(
     result.scale() = vec.scale() * tenseal_context->global_scale();
 
     atomic<size_t> i = 0;
-    auto thread_func = [&]() {
+    auto thread_func = [&tenseal_context, &vec, &matrix, &result, &result_mutex,
+                        &i, n_rows]() {
         while (true) {
             // take next i
             size_t local_i;
