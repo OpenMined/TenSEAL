@@ -1,7 +1,7 @@
-#ifndef TENSEAL_UTILS_CONTEXT_H
-#define TENSEAL_UTILS_CONTEXT_H
+#ifndef TENSEAL_CONTEXT_SEALCONTEXT_H
+#define TENSEAL_CONTEXT_SEALCONTEXT_H
 
-#include <seal/seal.h>
+#include "seal/seal.h"
 
 #include <vector>
 

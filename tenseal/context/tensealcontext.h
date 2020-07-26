@@ -5,7 +5,7 @@
 
 #include "tenseal/proto/tensealcontext.pb.h"
 #include "tenseal/context/tensealencoder.h"
-#include "tenseal/utils/context.h"
+#include "tenseal/context/sealcontext.h"
 
 namespace tenseal {
 
