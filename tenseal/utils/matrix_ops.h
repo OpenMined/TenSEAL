@@ -118,11 +118,6 @@ Ciphertext diagonal_ct_vector_matmul_parallel(
     tenseal_context->encryptor->encrypt_zero(vec.parms_id(), result);
     result.scale() = vec.scale() * tenseal_context->global_scale();
 
-    // TODO:
-    // - each thread sum in a local result, then add with the global result at
-    // the end -> didn't change much
-    // - limit scope of the lambda function [&]
-    // - rename threads and function
     mutex i_mutex;
     size_t i = 0;
     auto thread_func = [&]() {
