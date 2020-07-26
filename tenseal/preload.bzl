@@ -40,9 +40,9 @@ def tenseal_preload():
     if "pybind11_bazel" not in native.existing_rules():
         http_archive(
             name = "pybind11_bazel",
-            strip_prefix = "pybind11_bazel-py3",
-            urls = ["https://github.com/kerrick-lyft/pybind11_bazel/archive/py3.zip"],
-            sha256 = "7b45a217ad57a50698ff83ca36fce37ebbd17502d429bd1e78bfacb66bab17dc",
+            strip_prefix = "pybind11_bazel-203508e14aab7309892a1c5f7dd05debda22d9a5",
+            urls = ["https://github.com/pybind/pybind11_bazel/archive/203508e14aab7309892a1c5f7dd05debda22d9a5.zip"],
+            sha256 = "75922da3a1bdb417d820398eb03d4e9bd067c4905a4246d35a44c01d62154d91",
         )
 
     if "pybind11" not in native.existing_rules():

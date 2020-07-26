@@ -51,7 +51,7 @@ def tenseal_deps():
     py_repositories()
 
     # Configure python3 for pybind11.
-    python_configure(name = "local_config_python", python3 = True)
+    python_configure(name = "local_config_python", python_version = "3")
 
     # Install pip requirements for Python tests.
     rules_python_external_dependencies()
