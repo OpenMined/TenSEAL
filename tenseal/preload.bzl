@@ -61,12 +61,12 @@ def tenseal_preload():
             strip_prefix = "rules_python-a0fbf98d4e3a232144df4d0d80b577c7a693b570",
             sha256 = "98c9b903f6e8fe20b7e56d19c4822c8c49a11b475bd4ec0ca6a564e8bc5d5fa2",
         )
- 
+
     RULES_PYTHON_EXTERNAL_VERSION = "3aacabb928a710b10bff13d0bde49ceaade58f15"
     if "rules_python_external" not in native.existing_rules():
         http_archive(
             name = "rules_python_external",
             sha256 = "5a1d7e6e4bab49dcdd787694f0f5d52ac5debdfc1852981a89cc414e338d60dc",
             strip_prefix = "rules_python_external-{version}".format(version = RULES_PYTHON_EXTERNAL_VERSION),
-            url = "https://github.com/dillon-giacoppo/rules_python_external/archive/{version}.zip".format(version =   RULES_PYTHON_EXTERNAL_VERSION),
+            url = "https://github.com/dillon-giacoppo/rules_python_external/archive/{version}.zip".format(version = RULES_PYTHON_EXTERNAL_VERSION),
         )
