@@ -86,7 +86,8 @@ uint get_concurrency() {
     uint concurrency = thread::hardware_concurrency();
     if (concurrency != 0) return concurrency;
     // TODO: need to find it another way
-    else return 4;
+    else
+        return 4;
 }
 
 }  // namespace tenseal
