@@ -3,6 +3,7 @@
 
 #include <seal/seal.h>
 
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -119,19 +120,15 @@ Ciphertext diagonal_ct_vector_matmul_parallel(
     tenseal_context->encryptor->encrypt_zero(vec.parms_id(), result);
     result.scale() = vec.scale() * tenseal_context->global_scale();
 
-    mutex i_mutex;
-    size_t i = 0;
+    atomic<size_t> i = 0;
     auto thread_func = [&]() {
         while (true) {
             // take next i
             size_t local_i;
-            i_mutex.lock();
-            if (i == n_rows) {
-                i_mutex.unlock();
+            local_i = i.fetch_add(1);
+            if (local_i >= n_rows) {
                 break;
             }
-            local_i = i++;
-            i_mutex.unlock();
 
             Ciphertext ct;
             Plaintext pt_diag;
