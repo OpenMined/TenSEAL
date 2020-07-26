@@ -102,11 +102,11 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
 template <typename T, class Encoder>
 Ciphertext diagonal_ct_vector_matmul_parallel(
     shared_ptr<TenSEALContext> tenseal_context, Ciphertext& vec,
-    size_t vector_size, const vector<vector<T>>& matrix, uint n_threads = 0) {
+    const size_t vector_size, const vector<vector<T>>& matrix, uint n_threads = 0) {
     // matrix is organized by rows
     // _check_matrix(matrix, this->size())
-    size_t n_rows = matrix.size();
-    size_t n_cols = matrix[0].size();
+    const size_t n_rows = matrix.size();
+    const size_t n_cols = matrix[0].size();
 
     if (vector_size != matrix.size()) {
         throw invalid_argument("matrix shape doesn't match with vector size");
