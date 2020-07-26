@@ -113,4 +113,4 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Run tests
         timeout-minutes: 400
-        run: .github/workflows/scripts/run_bazel_tests.sh
+        run: bazel test --test_output=all //tests/...
