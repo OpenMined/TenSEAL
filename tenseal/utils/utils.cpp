@@ -87,7 +87,7 @@ uint get_concurrency() {
     if (concurrency != 0) return concurrency;
     // TODO: need to find it another way
     else
-        return 4;
+        return 1;
 }
 
 }  // namespace tenseal
