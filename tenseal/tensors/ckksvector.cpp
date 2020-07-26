@@ -461,14 +461,14 @@ CKKSVector& CKKSVector::sum_inplace() {
 }
 
 CKKSVector CKKSVector::matmul_plain(const vector<vector<double>>& matrix,
-                                    bool parallel, uint n_threads) {
+                                    uint n_threads) {
     CKKSVector new_vector = *this;
-    return new_vector.matmul_plain_inplace(matrix, parallel, n_threads);
+    return new_vector.matmul_plain_inplace(matrix, n_threads);
 }
 
 CKKSVector& CKKSVector::matmul_plain_inplace(
-    const vector<vector<double>>& matrix, bool parallel, uint n_threads) {
-    if (parallel) {
+    const vector<vector<double>>& matrix, uint n_threads) {
+    if (n_threads != 1) {
         this->ciphertext =
             diagonal_ct_vector_matmul_parallel<double, CKKSEncoder>(
                 this->tenseal_context(), this->ciphertext, this->size(), matrix,
