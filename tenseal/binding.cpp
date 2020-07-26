@@ -214,8 +214,11 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              py::overload_cast<double>(&CKKSVector::mul_plain_inplace))
         .def("__imul__", py::overload_cast<const vector<double> &>(
                              &CKKSVector::mul_plain_inplace))
-        .def("__matmul__", &CKKSVector::matmul_plain)
-        .def("__imatmul__", &CKKSVector::matmul_plain_inplace)
+        .def("__matmul__", &CKKSVector::matmul_plain, py::arg("matrix"),
+             py::arg("parallel") = true, py::arg("n_threads") = 0)
+        .def("__imatmul__", &CKKSVector::matmul_plain_inplace,
+             py::arg("matrix"), py::arg("parallel") = true,
+             py::arg("n_threads") = 0)
         .def("context",
              [](const CKKSVector &obj) { return obj.tenseal_context(); })
         .def("serialize",
