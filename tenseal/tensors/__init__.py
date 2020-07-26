@@ -3,7 +3,7 @@ different homomorphic encryption schemes, allowing someone to use the right
 one for their specific use case.
 """
 
-import _tenseal_cpp as _ts_cpp
+import tenseal._tenseal_cpp as _ts_cpp
 
 
 def bfv_vector(context, data):

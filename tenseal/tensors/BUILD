@@ -45,7 +45,7 @@ cc_library(
 py_library(
     name = "tenseal_tensors_py",
     srcs = ["__init__.py"],
-    data = ["//tenseal/interface:_tenseal_cpp.so"],
+    data = ["//tenseal:_tenseal_cpp.so"],
     srcs_version = "PY3",
     visibility = ["//visibility:public"],
 )
