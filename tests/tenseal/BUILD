@@ -20,5 +20,6 @@ py_test(
         "//tenseal:tenseal",
         requirement("pytest"),
         requirement("numpy"),
+        requirement("pytest-benchmark"),
     ],
 )
