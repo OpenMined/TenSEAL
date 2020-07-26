@@ -66,6 +66,10 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+CMakeFiles
+CMakeCache.txt
+Makefile
+cmake_install.cmake
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -167,3 +171,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+#Protobuf
+*.pb.*
+
+# Bazel
+bazel-*
