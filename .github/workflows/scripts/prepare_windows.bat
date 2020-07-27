@@ -4,7 +4,7 @@ echo on
 @REM Set Environment Variables
 @REM
 IF NOT DEFINED PYTHON_DIRECTORY (
-  SET PYTHON_DIRECTORY=C:\hostedtoolcache\windows\Python\3.8.3\x64
+  SET PYTHON_DIRECTORY='C:\hostedtoolcache\windows\Python\3.8.3\x64'
 )
 SET PY_EXE=%PYTHON_DIRECTORY%\python.exe
 SET PIP_EXE=%PYTHON_DIRECTORY%\Scripts\pip.exe
