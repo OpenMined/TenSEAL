@@ -158,9 +158,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              py::arg("n_threads") = 0)
         .def("mm_", &CKKSVector::matmul_plain_inplace, py::arg("matrix"),
              py::arg("n_threads") = 0)
-        .def("mat_plain_vec_mult", &CKKSVector::mat_plain_vec_mult)
-        .def("mat_plain_vec_mult_inplace",
-             &CKKSVector::mat_plain_vec_mult_inplace)
+        .def("conv2d_im2col", &CKKSVector::conv2d_im2col)
+        .def("conv2d_im2col_inplace", &CKKSVector::conv2d_im2col_inplace)
         // python arithmetic
         .def("__neg__", &CKKSVector::negate)
         .def("__pow__", &CKKSVector::power)

@@ -124,12 +124,11 @@ class CKKSVector {
     CKKSVector& polyval_inplace(const vector<double>& coefficients);
 
     /*
-    Ecnrypted Matrix multiplication with plain vector.
+    Image Block to Columns .
     */
-    CKKSVector mat_plain_vec_mult(const vector<double>& plain_vec,
-                                  size_t row_size);
-    CKKSVector& mat_plain_vec_mult_inplace(const vector<double>& plain_vec,
-                                           size_t row_size);
+    CKKSVector conv2d_im2col(const vector<double>& kernel, size_t windows_nb);
+    CKKSVector& conv2d_im2col_inplace(const vector<double>& kernel,
+                                      size_t windows_nb);
 
     /**
      * Load/Save the vector from/to a serialized protobuffer.

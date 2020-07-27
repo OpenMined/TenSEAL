@@ -569,38 +569,38 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     return *this;
 }
 
-CKKSVector CKKSVector::mat_plain_vec_mult(const vector<double>& plain_vec,
-                                          size_t windows_nb) {
+CKKSVector CKKSVector::conv2d_im2col(const vector<double>& kernel,
+                                     size_t windows_nb) {
     CKKSVector new_vec = *this;
-    new_vec.mat_plain_vec_mult_inplace(plain_vec, windows_nb);
+    new_vec.conv2d_im2col_inplace(kernel, windows_nb);
     return new_vec;
 }
 
-CKKSVector& CKKSVector::mat_plain_vec_mult_inplace(
-    const vector<double>& plain_vec, size_t windows_nb) {
-    vector<double> new_plain_vec;
+CKKSVector& CKKSVector::conv2d_im2col_inplace(const vector<double>& kernel,
+                                              size_t windows_nb) {
+    vector<double> plain_vec;
     size_t chunck_size = windows_nb;
-    size_t chuncks_nb = plain_vec.size();
+    size_t chuncks_nb = kernel.size();
 
     if (this->_size / windows_nb != chuncks_nb) {
         throw invalid_argument("matrix shape doesn't match with vector size");
     }
 
     size_t vec_len = chunck_size * chuncks_nb;
-    new_plain_vec.reserve(vec_len);
+    plain_vec.reserve(vec_len);
 
     for (size_t i = 0; i < chuncks_nb; i++) {
-        vector<double> tmp(chunck_size, plain_vec[i]);
-        new_plain_vec.insert(new_plain_vec.end(), tmp.begin(), tmp.end());
+        vector<double> tmp(chunck_size, kernel[i]);
+        plain_vec.insert(plain_vec.end(), tmp.begin(), tmp.end());
     }
 
     // replicate the vector in order to be able to do multiple matrix
     // multiplications
     size_t slot_count = this->context->slot_count<CKKSEncoder>();
-    replicate_vector(new_plain_vec, slot_count);
+    replicate_vector(plain_vec, slot_count);
     this->_size = slot_count;
 
-    this->mul_plain_inplace(new_plain_vec);
+    this->mul_plain_inplace(plain_vec);
 
     auto galois_keys = this->context->galois_keys();
 
