@@ -12,7 +12,7 @@ cmake_external(
         "-DSEAL_USE_CXX17=17",
         "-DSEAL_USE_INTRIN=ON",
         "-DSEAL_USE_MSGSL=OFF",
-        "-DSEAL_USE_ZLIB=OFF",
+        "-DSEAL_USE_ZLIB=ON",
         "-DSEAL_BUILD_TESTS=OFF",
         "-DBUILD_SHARED_LIBS=OFF",
         "-DCMAKE_BUILD_TYPE=Release",
