@@ -62,7 +62,6 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
     // matrix is organized by rows
     // _check_matrix(matrix, this->size())
     size_t n_rows = matrix.size();
-    size_t n_cols = matrix[0].size();
 
     if (vector_size != matrix.size()) {
         throw invalid_argument("matrix shape doesn't match with vector size");
@@ -108,7 +107,6 @@ Ciphertext diagonal_ct_vector_matmul_parallel(
     // matrix is organized by rows
     // _check_matrix(matrix, this->size())
     const size_t n_rows = matrix.size();
-    const size_t n_cols = matrix[0].size();
 
     if (vector_size != matrix.size()) {
         throw invalid_argument("matrix shape doesn't match with vector size");
