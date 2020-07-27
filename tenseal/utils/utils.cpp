@@ -1,6 +1,7 @@
 #include <seal/seal.h>
 
 #include <memory>
+#include <thread>
 
 #include "tenseal/tensealcontext.h"
 
@@ -79,6 +80,14 @@ Ciphertext& sum_vector(shared_ptr<TenSEALContext> tenseal_context,
     }
 
     return vector;
+}
+
+uint get_concurrency() {
+    uint concurrency = thread::hardware_concurrency();
+    if (concurrency != 0) return concurrency;
+    // TODO: need to find it another way
+    else
+        return 1;
 }
 
 }  // namespace tenseal
