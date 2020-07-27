@@ -1,1 +1,1 @@
-c:\tools\msys64\usr\bin\bash -l %cd%/tenseal/.github/workflows/scripts/env_windows.sh %*
+c:\tools\msys64\usr\bin\bash -l %cd%\.github\workflows\scripts\env_windows.sh %*
