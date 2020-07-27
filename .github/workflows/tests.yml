@@ -81,6 +81,7 @@ jobs:
       run: |
         msbuild .\third_party\SEAL\native\src\SEAL.vcxproj /p:configuration=Release /p:platform=x64 /p:SolutionDir=..\..\
     - name: Build
+      run: |
         pip install .
     - name: Test with pytest
       run: |
