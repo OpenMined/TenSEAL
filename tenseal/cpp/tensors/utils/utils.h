@@ -1,9 +1,9 @@
 #ifndef TENSEAL_UTILS_UTILS_H
 #define TENSEAL_UTILS_UTILS_H
 
-#include "seal/seal.h"
-
 #include <memory>
+
+#include "seal/seal.h"
 
 namespace tenseal {
 
@@ -91,6 +91,9 @@ T compute_polynomial_term(int degree, double coeff,
 
     return x;
 }
+
+/* Compute how many threads can run in parallel */
+uint get_concurrency();
 
 }  // namespace tenseal
 

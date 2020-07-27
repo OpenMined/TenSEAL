@@ -1,6 +1,7 @@
 #include "tenseal/cpp/context/sealcontext.h"
 
 #include <memory>
+#include <thread>
 
 #include "seal/seal.h"
 
@@ -40,5 +41,4 @@ shared_ptr<seal::SEALContext> create_context(EncryptionParameters parms) {
     auto context = SEALContext::Create(parms);
     return context;
 }
-
 }  // namespace tenseal

@@ -18,8 +18,8 @@ cc_library(
     copts = TENSEAL_DEFAULT_COPTS,
     includes = TENSEAL_DEFAULT_INCLUDES,
     deps = [
-        "//tenseal/proto:tenseal_proto_cc",
         "//tenseal/cpp/utils:tenseal_utils_cc",
+        "//tenseal/proto:tenseal_proto_cc",
         "@com_microsoft_seal//:seal",
     ],
 )
