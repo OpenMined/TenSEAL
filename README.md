@@ -113,6 +113,27 @@ To interactively run this docker image as a container after it has been built yo
 $ docker container run -it tenseal
 ```
 
+#### Using Bazel
+To use this library in another Bazel project, add the following in your WORKSPACE file:
+
+```load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+git_repository(
+   name = "org_openmined_tenseal",
+   remote = "https://github.com/OpenMined/TenSEAL",
+   branch = "master",
+   init_submodules = True,
+)
+
+load("@org_openmined_tenseal//tenseal:preload.bzl", "tenseal_preload")
+
+tenseal_preload()
+
+load("@org_openmined_tenseal//tenseal:deps.bzl", "tenseal_deps")
+
+tenseal_deps()
+```
+
 ## Support
 
 For support in using this library, please join the **#lib_tenseal** Slack channel. If you’d like to follow along with any code changes to the library, please join the **#code_tenseal** Slack channel. [Click here to join our Slack community!](https://slack.openmined.org)
