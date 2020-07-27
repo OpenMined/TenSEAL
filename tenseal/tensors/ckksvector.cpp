@@ -7,6 +7,7 @@
 #include <optional>
 #include <vector>
 
+#include "iostream"
 #include "tenseal/tensealcontext.h"
 #include "tenseal/utils/matrix_ops.h"
 #include "tenseal/utils/proto.h"
@@ -569,25 +570,35 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
 }
 
 CKKSVector CKKSVector::mat_plain_vec_mult(const vector<double>& plain_vec,
-                                          size_t row_size) {
+                                          size_t windows_nb) {
     CKKSVector new_vec = *this;
-    new_vec.mat_plain_vec_mult_inplace(plain_vec, row_size);
+    new_vec.mat_plain_vec_mult_inplace(plain_vec, windows_nb);
     return new_vec;
 }
 
 CKKSVector& CKKSVector::mat_plain_vec_mult_inplace(
-    const vector<double>& plain_vec, size_t row_size) {
+    const vector<double>& plain_vec, size_t windows_nb) {
     vector<double> new_plain_vec;
-    size_t chunck_size = row_size;
-    size_t num_of_chuncks = plain_vec.size();
+    size_t chunck_size = windows_nb;
+    size_t chuncks_nb = plain_vec.size();
 
-    size_t vec_len = chunck_size * num_of_chuncks;
+    if (this->_size / windows_nb != chuncks_nb) {
+        throw invalid_argument("matrix shape doesn't match with vector size");
+    }
+
+    size_t vec_len = chunck_size * chuncks_nb;
     new_plain_vec.reserve(vec_len);
 
-    for (size_t i = 0; i < num_of_chuncks; i++) {
+    for (size_t i = 0; i < chuncks_nb; i++) {
         vector<double> tmp(chunck_size, plain_vec[i]);
         new_plain_vec.insert(new_plain_vec.end(), tmp.begin(), tmp.end());
     }
+
+    // replicate the vector in order to be able to do multiple matrix
+    // multiplications
+    size_t slot_count = this->context->slot_count<CKKSEncoder>();
+    replicate_vector(new_plain_vec, slot_count);
+    this->_size = slot_count;
 
     this->mul_plain_inplace(new_plain_vec);
 
@@ -595,16 +606,15 @@ CKKSVector& CKKSVector::mat_plain_vec_mult_inplace(
 
     CKKSVector tmp = *this;
 
-    while (num_of_chuncks > 1) {
+    while (chuncks_nb > 1) {
         tmp = *this;
-        num_of_chuncks =
-            1 << (static_cast<size_t>(ceil(log2(num_of_chuncks))) - 1);
+        chuncks_nb = 1 << (static_cast<size_t>(ceil(log2(chuncks_nb))) - 1);
         this->context->evaluator->rotate_vector_inplace(
-            tmp.ciphertext, chunck_size * num_of_chuncks, *galois_keys);
+            tmp.ciphertext, chunck_size * chuncks_nb, *galois_keys);
         this->add_inplace(tmp);
     }
 
-    this->_size = row_size;
+    this->_size = windows_nb;
 
     return *this;
 }
