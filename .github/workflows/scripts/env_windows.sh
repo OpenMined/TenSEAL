@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Use a temporary directory with a short name.
 export TMPDIR="C:/tmp"
