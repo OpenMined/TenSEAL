@@ -29,8 +29,8 @@ jobs:
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 --config=.flake8 --exclude=tenseal/sealapi,tests/sealapi .
-        black --check --exclude "sealapi" tenseal/ tests/
+        flake8 --config=.flake8 --exclude=tenseal/sealapi,tests/python/sealapi .
+        black --check --exclude "sealapi" tenseal/ tests/python/tenseal
         # exit-zero treats all errors as warnings.
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
     - name: Lint with clang-format
@@ -79,8 +79,8 @@ jobs:
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 --config=.flake8 ./tenseal/sealapi ./tests/sealapi
-        black --check tenseal/sealapi tests/sealapi
+        flake8 --config=.flake8 ./tenseal/sealapi ./tests/python/sealapi
+        black --check tenseal/sealapi tests/python/sealapi
     - name: Lint with clang-format
       run: |
         # lint files (all .cpp and .h files) inplace
