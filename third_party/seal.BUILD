@@ -18,7 +18,7 @@ cmake_external(
         "-DCMAKE_BUILD_TYPE=Release",
    ],
    make_commands = [
-        "make -j",
+        "make",
         "make install"
    ],
    lib_source = ":src",
