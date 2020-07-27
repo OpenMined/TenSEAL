@@ -42,7 +42,7 @@ cmake_external(
     generate_crosstool_file = True,
     install_prefix = "native/src",
     lib_source = ":src",
-    make_commands = ["msbuild .\native\\src\\SEAL.vcxproj /p:configuration=Release /p:platform=x64 /p:SolutionDir=..\\..\\ "],
+    make_commands = ["msbuild SEAL.vcxproj /p:configuration=Release /p:platform=x64"],
     out_include_dir = "include/SEAL-3.5",
     static_libraries = ["libseal-3.5.a"],
     visibility = ["//visibility:public"],
