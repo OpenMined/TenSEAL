@@ -21,7 +21,7 @@ TENSEAL_DEFAULT_INCLUDES = ["."]
 TENSEAL_DEFAULT_COPTS = ["-std=c++17"]
 
 cc_library(
-    name = "tenseal_tensors_cc",
+    name = "tenseal_tensors",
     srcs = [
         "bfvvector.cpp",
         "ckksvector.cpp",
@@ -36,8 +36,16 @@ cc_library(
     copts = TENSEAL_DEFAULT_COPTS,
     includes = TENSEAL_DEFAULT_INCLUDES,
     deps = [
-        "//tenseal/cpp/context:tenseal_context_cc",
-        "//tenseal/proto:tenseal_proto_cc",
+        "//tenseal/context:tenseal_context",
+        "//tenseal/proto:tenseal_cc_proto",
         "@com_microsoft_seal//:seal",
     ],
+)
+
+py_library(
+    name = "tenseal_tensors_py",
+    srcs = ["__init__.py"],
+    data = ["//tenseal:_tenseal_cpp.so"],
+    srcs_version = "PY3",
+    visibility = ["//visibility:public"],
 )

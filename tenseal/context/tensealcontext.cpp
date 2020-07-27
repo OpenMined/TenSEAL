@@ -1,9 +1,9 @@
-#include "tenseal/cpp/context/tensealcontext.h"
+#include "tenseal/context/tensealcontext.h"
 
 #include "seal/seal.h"
-#include "tenseal/cpp/utils/proto.h"
-#include "tenseal/cpp/utils/scope.h"
-#include "tenseal/cpp/utils/serialization.h"
+#include "tenseal/utils/proto.h"
+#include "tenseal/utils/scope.h"
+#include "tenseal/utils/serialization.h"
 
 namespace tenseal {
 

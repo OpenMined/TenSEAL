@@ -1,4 +1,4 @@
-#include "tenseal/cpp/context/sealcontext.h"
+#include "tenseal/context/sealcontext.h"
 
 #include <memory>
 

@@ -16,10 +16,21 @@
 
 package(default_visibility = ["//visibility:public"])
 
-py_library(
-    name = "tenseal_tensors",
-    srcs = ["__init__.py"],
-    data = ["//tenseal/cpp:_tenseal_cpp.so"],
-    srcs_version = "PY3",
-    visibility = ["//visibility:public"],
+TENSEAL_DEFAULT_INCLUDES = ["."]
+
+TENSEAL_DEFAULT_COPTS = ["-std=c++17"]
+
+cc_library(
+    name = "tenseal_utils",
+    hdrs = [
+        "proto.h",
+        "scope.h",
+        "serialization.h",
+    ],
+    copts = TENSEAL_DEFAULT_COPTS,
+    includes = TENSEAL_DEFAULT_INCLUDES,
+    deps = [
+        "//tenseal/proto:tenseal_cc_proto",
+        "@com_microsoft_seal//:seal",
+    ],
 )

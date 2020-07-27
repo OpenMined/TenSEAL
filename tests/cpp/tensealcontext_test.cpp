@@ -1,4 +1,4 @@
-#include "tenseal/cpp/context/tensealcontext.h"
+#include "tenseal/context/tensealcontext.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

@@ -1,4 +1,4 @@
-#include "tenseal/cpp/tensors/bfvvector.h"
+#include "tenseal/tensors/bfvvector.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

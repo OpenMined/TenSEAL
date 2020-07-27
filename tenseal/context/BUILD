@@ -21,16 +21,21 @@ TENSEAL_DEFAULT_INCLUDES = ["."]
 TENSEAL_DEFAULT_COPTS = ["-std=c++17"]
 
 cc_library(
-    name = "tenseal_utils",
+    name = "tenseal_context",
+    srcs = [
+        "sealcontext.cpp",
+        "sealcontext.h",
+        "tensealcontext.cpp",
+    ],
     hdrs = [
-        "proto.h",
-        "scope.h",
-        "serialization.h",
+        "tensealcontext.h",
+        "tensealencoder.h",
     ],
     copts = TENSEAL_DEFAULT_COPTS,
     includes = TENSEAL_DEFAULT_INCLUDES,
     deps = [
-        "//tenseal/proto:tenseal_proto_cc",
+        "//tenseal/proto:tenseal_cc_proto",
+        "//tenseal/utils:tenseal_utils",
         "@com_microsoft_seal//:seal",
     ],
 )

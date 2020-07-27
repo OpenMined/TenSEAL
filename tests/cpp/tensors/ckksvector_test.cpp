@@ -1,4 +1,4 @@
-#include "tenseal/cpp/tensors/ckksvector.h"
+#include "tenseal/tensors/ckksvector.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

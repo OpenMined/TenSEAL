@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "seal/seal.h"
-#include "tenseal/cpp/context/tensealcontext.h"
+#include "tenseal/context/tensealcontext.h"
 #include "tenseal/proto/tensors.pb.h"
 
 namespace tenseal {

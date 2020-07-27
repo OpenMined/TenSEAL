@@ -4,7 +4,7 @@
 try:
     import _sealapi_cpp
 except ImportError:
-    import tenseal.cpp.sealapi._sealapi_cpp
+    import tenseal.sealapi._sealapi_cpp
 
 ## seal/biguint.h ##
 BigUInt = _sealapi_cpp.BigUInt

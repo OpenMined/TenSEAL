@@ -4,10 +4,10 @@
 try:
     import _tenseal_cpp as _ts_cpp
 except ImportError:
-    import tenseal.cpp._tenseal_cpp as _ts_cpp
+    import tenseal._tenseal_cpp as _ts_cpp
 
-from tenseal.python.tensors import bfv_vector, bfv_vector_from, ckks_vector, ckks_vector_from
-from tenseal.python.version import __version__
+from tenseal.tensors import bfv_vector, bfv_vector_from, ckks_vector, ckks_vector_from
+from tenseal.version import __version__
 
 
 SCHEME_TYPE = _ts_cpp.SCHEME_TYPE
