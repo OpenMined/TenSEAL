@@ -103,7 +103,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.8]
     steps:
       - uses: actions/checkout@v2
@@ -111,6 +111,10 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Env
+        timeout-minutes: 30
+        run: .github/workflows/scripts/env_windows.bat
+        if: ${{ matrix.os == 'windows-latest' }}
       - name: Run gtest
         timeout-minutes: 30
         run: bazel test --test_output=all --test_timeout=900 //tests/cpp/...
