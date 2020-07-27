@@ -49,7 +49,7 @@ jobs:
         pip install .
     - name: Test with pytest
       run: |
-        pytest -v ./tests/tenseal
+        pytest -v ./tests/python/tenseal
     - name: Test with gtest
       run: |
         cd tenseal/proto && cmake . && make && cd ../../
@@ -97,7 +97,7 @@ jobs:
         pip install .
     - name: Test with pytest
       run: |
-        pytest -v ./tests/sealapi
+        pytest -v ./tests/python/sealapi
 
   BAZEL:
     runs-on: ${{ matrix.os }}
@@ -116,7 +116,7 @@ jobs:
         run: bazel test --test_output=all --test_timeout=900 //tests/cpp/...
       - name: Run SEALAPI tests
         timeout-minutes: 30
-        run: bazel test --test_output=all --test_timeout=900 //tests/sealapi/...
+        run: bazel test --test_output=all --test_timeout=900 //tests/python/sealapi/...
       - name: Run TenSEAL tests
         timeout-minutes: 30
-        run: bazel test --test_output=all --test_timeout=900 //tests/tenseal/...
+        run: bazel test --test_output=all --test_timeout=900 //tests/python/tenseal/...

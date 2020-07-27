@@ -161,9 +161,9 @@ Ciphertext diagonal_ct_vector_matmul_parallel(
     vector<thread> threads;
     threads.reserve(n_threads);
     // start the threads
-    for (int i = 0; i < n_threads; i++) threads.push_back(thread(thread_func));
+    for (uint i = 0; i < n_threads; i++) threads.push_back(thread(thread_func));
     // wait for the threads
-    for (int i = 0; i < n_threads; i++) threads[i].join();
+    for (uint i = 0; i < n_threads; i++) threads[i].join();
 
     return result;
 }
