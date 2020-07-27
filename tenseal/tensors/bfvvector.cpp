@@ -212,9 +212,13 @@ BFVVector& BFVVector::mul_plain_inplace(const vector<int64_t>& to_mul) {
     try {
         this->tenseal_context()->evaluator->multiply_plain_inplace(
             this->ciphertext, plaintext);
-    } catch (const std::logic_error& e) {  // result ciphertext is transparent
-        // replace by encryption of zero
-        this->tenseal_context()->encryptor->encrypt_zero(this->ciphertext);
+    } catch (const std::logic_error& e) {
+        if (strcmp(e.what(), "result ciphertext is transparent") == 0) {
+            // replace by encryption of zero
+            this->tenseal_context()->encryptor->encrypt_zero(this->ciphertext);
+        } else {  // Something else, need to be forwarded
+            throw;
+        }
     }
 
     return *this;
