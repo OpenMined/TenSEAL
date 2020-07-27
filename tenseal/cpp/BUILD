@@ -14,15 +14,27 @@
 # limitations under the License.
 #
 
+load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
+
 package(default_visibility = ["//visibility:public"])
 
-py_library(
-    name = "sealapi",
+TENSEAL_DEFAULT_INCLUDES = ["."]
+
+TENSEAL_DEFAULT_COPTS = ["-std=c++17"]
+
+pybind_extension(
+    name = "_tenseal_cpp",
     srcs = [
-        "__init__.py",
-        "util/__init__.py",
+        "binding.cpp",
     ],
-    data = ["//tenseal/cpp/sealapi:_sealapi_cpp.so"],
-    srcs_version = "PY3",
+    copts = TENSEAL_DEFAULT_COPTS,
+    features = ["-use_header_modules"],
+    includes = TENSEAL_DEFAULT_INCLUDES,
+    linkstatic = True,
     visibility = ["//visibility:public"],
+    deps = [
+        "//tenseal/cpp/context:tenseal_context_cc",
+        "//tenseal/cpp/tensors:tenseal_tensors_cc",
+        "@com_microsoft_seal//:seal",
+    ],
 )

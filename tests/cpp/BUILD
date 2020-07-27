@@ -31,8 +31,8 @@ cc_test(
     includes = PIR_DEFAULT_INCLUDES,
     linkstatic = True,
     deps = [
-        "//tenseal/context:tenseal_context",
-        "//tenseal/tensors:tenseal_tensors",
+        "//tenseal/cpp/context:tenseal_context_cc",
+        "//tenseal/cpp/tensors:tenseal_tensors_cc",
         "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
     ],

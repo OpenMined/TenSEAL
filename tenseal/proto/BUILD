@@ -27,6 +27,6 @@ proto_library(
 )
 
 cc_proto_library(
-    name = "tenseal_cc_proto",
+    name = "tenseal_proto_cc",
     deps = [":tenseal_proto"],
 )

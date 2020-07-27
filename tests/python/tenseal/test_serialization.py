@@ -3,7 +3,7 @@ import copy
 import pickle
 import tenseal as ts
 
-from tests.tenseal.utils import *
+from tests.python.tenseal.utils import *
 
 
 def ctx():

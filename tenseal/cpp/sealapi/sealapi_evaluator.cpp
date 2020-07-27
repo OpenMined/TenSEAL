@@ -7,7 +7,7 @@
 
 #include <fstream>
 
-#include "tenseal/sealapi/bindings.h"
+#include "tenseal/cpp/sealapi/bindings.h"
 
 using namespace seal;
 using namespace std;

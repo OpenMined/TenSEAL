@@ -16,13 +16,26 @@
 
 package(default_visibility = ["//visibility:public"])
 
-py_library(
-    name = "sealapi",
+TENSEAL_DEFAULT_INCLUDES = ["."]
+
+TENSEAL_DEFAULT_COPTS = ["-std=c++17"]
+
+cc_library(
+    name = "tenseal_context_cc",
     srcs = [
-        "__init__.py",
-        "util/__init__.py",
+        "sealcontext.cpp",
+        "sealcontext.h",
+        "tensealcontext.cpp",
     ],
-    data = ["//tenseal/cpp/sealapi:_sealapi_cpp.so"],
-    srcs_version = "PY3",
-    visibility = ["//visibility:public"],
+    hdrs = [
+        "tensealcontext.h",
+        "tensealencoder.h",
+    ],
+    copts = TENSEAL_DEFAULT_COPTS,
+    includes = TENSEAL_DEFAULT_INCLUDES,
+    deps = [
+        "//tenseal/proto:tenseal_proto_cc",
+        "//tenseal/cpp/utils:tenseal_utils",
+        "@com_microsoft_seal//:seal",
+    ],
 )
