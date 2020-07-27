@@ -1,3 +1,5 @@
+"""Test runner required by Bazel py_test rule.
+"""
 import sys
 import os
 import pytest
