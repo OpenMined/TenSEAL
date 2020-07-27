@@ -21,7 +21,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Env
         timeout-minutes: 30
-        run: .github/workflows/scripts/env_windows.bat
+        run: .github/workflows/scripts/env_windows.sh
         if: ${{ matrix.os == 'windows-latest' }}
       - name: Run gtest
         timeout-minutes: 30
