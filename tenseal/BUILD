@@ -17,17 +17,8 @@ pybind_extension(
     linkstatic = True,
     visibility = ["//visibility:public"],
     deps = [
-        "//tenseal/context:tenseal_context",
-        "//tenseal/tensors:tenseal_tensors",
-        "@com_microsoft_seal//:seal",
+        "//tenseal/cpp:tenseal_cc",
     ],
-)
-
-py_library(
-    name = "tenseal_cpp",
-    data = ["//tenseal:_tenseal_cpp.so"],
-    srcs_version = "PY3",
-    visibility = ["//visibility:public"],
 )
 
 py_library(
@@ -39,5 +30,5 @@ py_library(
     data = ["//tenseal:_tenseal_cpp.so"],
     srcs_version = "PY3",
     visibility = ["//visibility:public"],
-    deps = ["//tenseal/tensors:tenseal_tensors_py"],
+    deps = ["//tenseal/tensors:tenseal_tensors"],
 )

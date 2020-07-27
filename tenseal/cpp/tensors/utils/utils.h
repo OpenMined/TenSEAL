@@ -1,7 +1,7 @@
 #ifndef TENSEAL_UTILS_UTILS_H
 #define TENSEAL_UTILS_UTILS_H
 
-#include <seal/seal.h>
+#include "seal/seal.h"
 
 #include <memory>
 
