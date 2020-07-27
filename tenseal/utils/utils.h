@@ -92,6 +92,9 @@ T compute_polynomial_term(int degree, double coeff,
     return x;
 }
 
+/* Compute how many threads can run in parallel */
+uint get_concurrency();
+
 }  // namespace tenseal
 
 #endif
