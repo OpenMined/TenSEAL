@@ -24,3 +24,6 @@ export PATH="/c/Program Files/Git/cmd:$PATH"
 
 # Make sure we have pip in PATH
 export PATH="/c/${PYTHON_BASE_PATH}/Scripts:$PATH"
+
+#VS env
+export VS160COMNTOOLS="/c/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7/Tools"
