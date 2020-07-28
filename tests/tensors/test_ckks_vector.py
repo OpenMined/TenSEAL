@@ -903,6 +903,57 @@ def test_sum_inplace(context, vec1, precision):
     decrypted_result = result.decrypt()
     assert _almost_equal(decrypted_result, expected, precision), "Sum of vector is incorrect."
 
+@pytest.mark.parametrize(
+    "vec1",
+    [
+        ([0]),
+        ([1, 2]),
+        ([1, 2, 3]),
+        ([1, 2, 3, 4]),
+        ([1, 2, 3, 4, 5]),
+        ([1, 2, 3, 4, 5, 6]),
+        ([1, 2, 3, 4, 5, 6, 7]),
+        ([1, 2, 3, 4, 5, 6, 7, 8]),
+    ],
+)
+def test_rotate(context, vec1, precision):
+    context.generate_galois_keys()
+    first_vec = ts.ckks_vector(context, vec1)
+    #Check rotations of step 0 to size + 1
+    for i in range(len(vec1) + 2):
+        result = first_vec.rotate(i)
+        expected = vec1[i % len(vec1):] + vec1[:i % len(vec1)]
+
+        # Decryption
+        decrypted_result = result.decrypt()
+        assert _almost_equal(decrypted_result, expected, precision), "Rotation of vector is incorrect."
+        assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "vec1",
+    [
+        ([0]),
+        ([1, 2]),
+        ([1, 2, 3]),
+        ([1, 2, 3, 4]),
+        ([1, 2, 3, 4, 5]),
+        ([1, 2, 3, 4, 5, 6]),
+        ([1, 2, 3, 4, 5, 6, 7]),
+        ([1, 2, 3, 4, 5, 6, 7, 8]),
+    ],
+)
+def test_rotate_inplace(context, vec1, precision):
+    context.generate_galois_keys()
+    first_vec = ts.ckks_vector(context, vec1)
+    #Check rotations of step 0 to size + 1
+    for i in range(len(vec1) + 2):
+        result = first_vec.rotate(i)
+        expected = vec1[i % len(vec1):] + vec1[:i % len(vec1)]
+
+        # Decryption
+        decrypted_result = result.decrypt()
+        assert _almost_equal(decrypted_result, expected, precision), "Rotation of vector is incorrect."
 
 @pytest.mark.parametrize(
     "vec1, vec2",
