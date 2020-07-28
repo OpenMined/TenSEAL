@@ -919,7 +919,7 @@ def test_sum_inplace(context, vec1, precision):
 def test_rotate(context, vec1, precision):
     context.generate_galois_keys()
     first_vec = ts.ckks_vector(context, vec1)
-    #Check rotations of step 0 to size + 1
+    # Check rotations of step 0 to size + 1
     for i in range(len(vec1) + 2):
         result = first_vec.rotate(i)
         expected = vec1[i % len(vec1):] + vec1[:i % len(vec1)]
@@ -946,7 +946,7 @@ def test_rotate(context, vec1, precision):
 def test_rotate_inplace(context, vec1, precision):
     context.generate_galois_keys()
     first_vec = ts.ckks_vector(context, vec1)
-    #Check rotations of step 0 to size + 1
+    # Check rotations of step 0 to size + 1
     for i in range(len(vec1) + 2):
         result = first_vec.rotate(i)
         expected = vec1[i % len(vec1):] + vec1[:i % len(vec1)]
