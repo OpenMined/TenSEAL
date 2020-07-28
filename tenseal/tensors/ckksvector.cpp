@@ -7,7 +7,6 @@
 #include <optional>
 #include <vector>
 
-#include "iostream"
 #include "tenseal/tensealcontext.h"
 #include "tenseal/utils/matrix_ops.h"
 #include "tenseal/utils/proto.h"
