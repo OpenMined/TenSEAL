@@ -926,8 +926,10 @@ def test_rotate(context, vec1, precision):
 
         # Decryption
         decrypted_result = result.decrypt()
-        assert _almost_equal(decrypted_result, expected, precision), "Rotation of vector is incorrect."
-        assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
+        assert _almost_equal(decrypted_result, expected, precision), \
+            "Rotation of vector is incorrect."
+        assert _almost_equal(first_vec.decrypt(), vec1, precision), \
+            "Something went wrong in memory."
 
 
 @pytest.mark.parametrize(
@@ -953,7 +955,8 @@ def test_rotate_inplace(context, vec1, precision):
 
         # Decryption
         decrypted_result = result.decrypt()
-        assert _almost_equal(decrypted_result, expected, precision), "Rotation of vector is incorrect."
+        assert _almost_equal(decrypted_result, expected, precision), \
+            "Rotation of vector is incorrect."
 
 @pytest.mark.parametrize(
     "vec1, vec2",
