@@ -1,11 +1,10 @@
-#ifndef TENSEAL_TENSEALCONTEXT_H
-#define TENSEAL_TENSEALCONTEXT_H
+#ifndef TENSEAL_CONTEXT_TENSEALCONTEXT_H
+#define TENSEAL_CONTEXT_TENSEALCONTEXT_H
 
-#include <seal/seal.h>
-
+#include "seal/seal.h"
+#include "tenseal/cpp/context/sealcontext.h"
+#include "tenseal/cpp/context/tensealencoder.h"
 #include "tenseal/proto/tensealcontext.pb.h"
-#include "tenseal/tensealencoder.h"
-#include "tenseal/utils/context.h"
 
 namespace tenseal {
 

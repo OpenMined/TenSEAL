@@ -29,8 +29,8 @@ jobs:
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 --config=.flake8 --exclude=tenseal/sealapi,tests/sealapi .
-        black --check --exclude "sealapi" tenseal/ tests/
+        flake8 --config=.flake8 --exclude=tenseal/sealapi,tests/python/sealapi .
+        black --check --exclude "sealapi" tenseal/ tests/python/tenseal
         # exit-zero treats all errors as warnings.
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
     - name: Lint with clang-format
@@ -49,16 +49,14 @@ jobs:
         pip install .
     - name: Test with pytest
       run: |
-        pytest -v --ignore=tests/sealapi ./tests
+        pytest -v ./tests/python/tenseal
     - name: Test with gtest
       run: |
         cd tenseal/proto && cmake . && make && cd ../../
         cmake . -D BUILD_TEST=TRUE
         make && CTEST_OUTPUT_ON_FAILURE=1 make test
 
-
   SEAL_API:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -79,8 +77,8 @@ jobs:
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 --config=.flake8 ./tenseal/sealapi ./tests/sealapi
-        black --check tenseal/sealapi tests/sealapi
+        flake8 --config=.flake8 ./tenseal/sealapi ./tests/python/sealapi
+        black --check tenseal/sealapi tests/python/sealapi
     - name: Lint with clang-format
       run: |
         # lint files (all .cpp and .h files) inplace
@@ -97,4 +95,27 @@ jobs:
         pip install .
     - name: Test with pytest
       run: |
-        pytest -v ./tests/sealapi
+        pytest -v ./tests/python/sealapi
+
+
+  BAZEL:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: [3.8]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run gtest
+        timeout-minutes: 30
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/cpp/...
+      - name: Run SEALAPI tests
+        timeout-minutes: 30
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/python/sealapi/...
+      - name: Run TenSEAL tests
+        timeout-minutes: 30
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/python/tenseal/...

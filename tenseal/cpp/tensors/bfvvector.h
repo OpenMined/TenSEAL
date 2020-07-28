@@ -1,13 +1,12 @@
 #ifndef TENSEAL_TENSOR_BFVVECTOR_H
 #define TENSEAL_TENSOR_BFVVECTOR_H
 
-#include <seal/seal.h>
-
 #include <memory>
 #include <vector>
 
+#include "seal/seal.h"
+#include "tenseal/cpp/context/tensealcontext.h"
 #include "tenseal/proto/tensors.pb.h"
-#include "tenseal/tensealcontext.h"
 
 namespace tenseal {
 

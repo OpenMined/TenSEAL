@@ -1,9 +1,9 @@
 #ifndef TENSEAL_UTILS_UTILS_H
 #define TENSEAL_UTILS_UTILS_H
 
-#include <seal/seal.h>
-
 #include <memory>
+
+#include "seal/seal.h"
 
 namespace tenseal {
 

@@ -1,4 +1,7 @@
-import _sealapi_cpp.util as _sealapi_util_cpp
+try:
+    import _sealapi_cpp.util as _sealapi_util_cpp
+except ImportError:
+    import tenseal.sealapi._sealapi_cpp.util as _sealapi_util_cpp
 
 ## util/rns.h ##
 RNSBase = _sealapi_util_cpp.RNSBase
