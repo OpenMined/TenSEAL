@@ -14,20 +14,6 @@ using namespace seal;
 using namespace std;
 namespace py = pybind11;
 
-template <typename T>
-auto bind_tensor_pickle() {
-    return py::pickle(
-        [&](const T &p) {
-            return py::make_tuple(py::bytes(p.tenseal_context()->save()),
-                                  py::bytes(p.save()));
-        },
-        [&](py::tuple t) {
-            if (t.size() != 2) throw std::runtime_error("Invalid state!");
-            auto ctx = TenSEALContext::Create(t[0].cast<std::string>());
-            return T(ctx, t[1].cast<std::string>());
-        });
-}
-
 PYBIND11_MODULE(_tenseal_cpp, m) {
     m.doc() = "Library for doing homomorphic encryption operations on tensors";
 
@@ -93,8 +79,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("copy", &BFVVector::deepcopy)
         .def("__copy__", [](const BFVVector &self) { return self.deepcopy(); })
         .def("__deepcopy__",
-             [](const BFVVector &self, py::dict) { return self.deepcopy(); })
-        .def(bind_tensor_pickle<BFVVector>());
+             [](const BFVVector &self, py::dict) { return self.deepcopy(); });
 
     py::class_<CKKSVector>(m, "CKKSVector")
         // specifying scale
@@ -224,8 +209,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("copy", &CKKSVector::deepcopy)
         .def("__copy__", [](const CKKSVector &self) { return self.deepcopy(); })
         .def("__deepcopy__",
-             [](const CKKSVector &self, py::dict) { return self.deepcopy(); })
-        .def(bind_tensor_pickle<CKKSVector>());
+             [](const CKKSVector &self, py::dict) { return self.deepcopy(); });
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")
@@ -290,16 +274,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                  return self->copy();
              })
         .def("__deepcopy__", [](const std::shared_ptr<TenSEALContext> &self,
-                                py::dict) { return self->copy(); })
-        .def(py::pickle(
-            [](const std::shared_ptr<TenSEALContext> &p) {
-                return py::make_tuple(py::bytes(p->save()));
-            },
-            [](py::tuple t) {
-                if (t.size() != 1) throw std::runtime_error("Invalid state!");
-                return TenSEALContext::Create(t[0].cast<std::string>());
-            }));
-
+                                py::dict) { return self->copy(); });
     // SEAL objects
 
     py::class_<KeyGenerator>(m, "KeyGenerator")
