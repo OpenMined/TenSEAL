@@ -2,7 +2,6 @@ import tenseal as ts
 import pytest
 import numpy as np
 import copy
-import pickle
 
 
 def _almost_equal(vec1, vec2, m_pow_ten):
@@ -54,16 +53,11 @@ def recreate_bfv(vec):
     return ts.bfv_vector_from(vec.context(), vec_proto)
 
 
-def pickled(vec):
-    out = pickle.dumps(vec)
-    return pickle.loads(out)
-
-
 @pytest.mark.parametrize(
     "plain_vec", [[], [0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
 )
 def test_negate(plain_vec, precision, duplicate):
     context = ckks_context()
@@ -80,7 +74,7 @@ def test_negate(plain_vec, precision, duplicate):
     "plain_vec, power, precision", [([0], 3, 1), ([1, -2, 3, -4], 8, -1),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
 )
 def test_power(plain_vec, power, precision, duplicate):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 60])
@@ -101,7 +95,7 @@ def test_power(plain_vec, power, precision, duplicate):
     "plain_vec", [[], [0], [1, -4, 3, 5],],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
 )
 def test_square(plain_vec, precision, duplicate):
     context = ckks_context()
@@ -121,7 +115,7 @@ def test_square(plain_vec, precision, duplicate):
     "vec1, vec2", [([], []), ([0], [0]), ([1, 2], [-73, -10]), ([1, 0, -2, 0, -8, 4, 73], [81,]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
 )
 def test_add(vec1, vec2, precision, duplicate):
     context = ckks_context()
@@ -152,7 +146,7 @@ def test_add(vec1, vec2, precision, duplicate):
     [([], []), ([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]), ([1, 0, -2, 0, -8, 4, 73], [81,]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
 )
 def test_sub(vec1, vec2, precision, duplicate):
     context = ckks_context()
@@ -183,7 +177,7 @@ def test_sub(vec1, vec2, precision, duplicate):
     "vec1, vec2", [([], []), ([0], [0]), ([1, 0, -2, 0, -8, 4, 73], [81,]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
 )
 def test_mul(vec1, vec2, precision, duplicate):
     context = ckks_context()
@@ -214,7 +208,7 @@ def test_mul(vec1, vec2, precision, duplicate):
     "vec1, vec2", [([0], [0]), ([1, 2, 3, 4, 5], [5, 4, 3, 2, 1]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
 )
 def test_dot_product(vec1, vec2, precision, duplicate):
     context = ckks_context()
@@ -241,7 +235,7 @@ def test_dot_product(vec1, vec2, precision, duplicate):
     "vec1, vec2", [([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
 )
 def test_mul_without_global_scale(vec1, vec2, precision, duplicate):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
@@ -268,7 +262,7 @@ def test_mul_without_global_scale(vec1, vec2, precision, duplicate):
     "vec1, vec2", [([], []), ([1], [1]), ([-1], [1]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
 )
 def test_add(vec1, vec2, duplicate):
     context = bfv_context()
@@ -293,7 +287,7 @@ def test_add(vec1, vec2, duplicate):
     "vec1, vec2", [([], []), ([1], [0]), ([-1], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
 )
 def test_add_inplace(vec1, vec2, duplicate):
     context = bfv_context()
@@ -315,7 +309,7 @@ def test_add_inplace(vec1, vec2, duplicate):
     "vec1, vec2", [([], []), ([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
 )
 def test_add_plain(vec1, vec2, duplicate):
     context = bfv_context()
@@ -338,7 +332,7 @@ def test_add_plain(vec1, vec2, duplicate):
     "vec1, vec2", [([], []), ([1], [0]), ([-1], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
 )
 def test_add_plain_inplace(vec1, vec2, duplicate):
     context = bfv_context()
@@ -359,7 +353,7 @@ def test_add_plain_inplace(vec1, vec2, duplicate):
     "vec1, vec2", [([], []), ([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
 )
 def test_sub(vec1, vec2, duplicate):
     context = bfv_context()
@@ -381,7 +375,7 @@ def test_sub(vec1, vec2, duplicate):
     "vec1, vec2", [([], []), ([-1], [-1]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
 )
 def test_sub_inplace(vec1, vec2, duplicate):
     context = bfv_context()
@@ -403,7 +397,7 @@ def test_sub_inplace(vec1, vec2, duplicate):
     "vec1, vec2", [([], []), ([-1], [1]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
 )
 def test_sub_plain(vec1, vec2, duplicate):
     context = bfv_context()
@@ -426,7 +420,7 @@ def test_sub_plain(vec1, vec2, duplicate):
     "vec1, vec2", [([], []), ([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
 )
 def test_sub_plain_inplace(vec1, vec2, duplicate):
     context = bfv_context()
@@ -446,7 +440,7 @@ def test_sub_plain_inplace(vec1, vec2, duplicate):
     "vec1, vec2", [([], []), ([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
 )
 def test_mul(vec1, vec2, duplicate):
     context = bfv_context()
@@ -470,7 +464,7 @@ def test_mul(vec1, vec2, duplicate):
     "vec1, vec2", [([], []), ([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
 )
 def test_mul_inplace(vec1, vec2, duplicate):
     context = bfv_context()
@@ -492,7 +486,7 @@ def test_mul_inplace(vec1, vec2, duplicate):
     "vec1, vec2", [([], []), ([-1], [1]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
 )
 def test_mul_plain(vec1, vec2, duplicate):
     context = bfv_context()
@@ -515,7 +509,7 @@ def test_mul_plain(vec1, vec2, duplicate):
     "vec1, vec2", [([], []), ([-1], [1]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv, pickled,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
 )
 def test_mul_plain_inplace(vec1, vec2, duplicate):
     context = bfv_context()
