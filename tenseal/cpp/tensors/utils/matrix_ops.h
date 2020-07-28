@@ -1,15 +1,14 @@
 #ifndef TENSEAL_UTILS_MATRIX_OPS_H
 #define TENSEAL_UTILS_MATRIX_OPS_H
 
-#include <seal/seal.h>
-
 #include <atomic>
 #include <memory>
 #include <mutex>
 #include <thread>
 
-#include "tenseal/tensealcontext.h"
-#include "tenseal/utils/utils.h"
+#include "seal/seal.h"
+#include "tenseal/cpp/context/tensealcontext.h"
+#include "tenseal/cpp/tensors/utils/utils.h"
 
 namespace tenseal {
 
@@ -162,9 +161,9 @@ Ciphertext diagonal_ct_vector_matmul_parallel(
     vector<thread> threads;
     threads.reserve(n_threads);
     // start the threads
-    for (int i = 0; i < n_threads; i++) threads.push_back(thread(thread_func));
+    for (uint i = 0; i < n_threads; i++) threads.push_back(thread(thread_func));
     // wait for the threads
-    for (int i = 0; i < n_threads; i++) threads[i].join();
+    for (uint i = 0; i < n_threads; i++) threads[i].join();
 
     return result;
 }

@@ -3,10 +3,10 @@
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <seal/seal.h>
 
 #include <fstream>
 
+#include "seal/seal.h"
 #include "tenseal/sealapi/bindings.h"
 
 using namespace seal;
@@ -121,8 +121,8 @@ void bind_helpers(pybind11::module &m) {
      * "seal/serialization.h" {
      ***/
     py::enum_<compr_mode_type>(m, "COMPR_MODE_TYPE", py::module_local())
-        .value("DEFLATE", compr_mode_type::deflate)
-        .value("NONE", compr_mode_type::none);
+        .value("NONE", compr_mode_type::none)
+        .value("DEFLATE", compr_mode_type::deflate);
 
     py::class_<Serialization> serialization(m, "Serialization",
                                             py::module_local());

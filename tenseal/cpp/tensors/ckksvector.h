@@ -1,15 +1,14 @@
 #ifndef TENSEAL_TENSOR_CKKSVECTOR_H
 #define TENSEAL_TENSOR_CKKSVECTOR_H
 
-#include <seal/seal.h>
-
 #include <memory>
 #include <optional>
 #include <vector>
 
+#include "seal/seal.h"
+#include "tenseal/cpp/context/tensealcontext.h"
+#include "tenseal/cpp/tensors/utils/utils.h"
 #include "tenseal/proto/tensors.pb.h"
-#include "tenseal/tensealcontext.h"
-#include "tenseal/utils/utils.h"
 
 namespace tenseal {
 

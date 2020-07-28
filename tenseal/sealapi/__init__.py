@@ -1,7 +1,10 @@
 """SEAL API bindings.
 """
 
-import _sealapi_cpp
+try:
+    import _sealapi_cpp
+except ImportError:
+    import tenseal.sealapi._sealapi_cpp
 
 ## seal/biguint.h ##
 BigUInt = _sealapi_cpp.BigUInt

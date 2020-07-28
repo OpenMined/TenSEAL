@@ -27,24 +27,27 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # Core
 ################################
 set(TENSEAL_BASEDIR tenseal)
+set(SEALAPI_BASEDIR tenseal/sealapi)
+
 set(SOURCES
-    ${TENSEAL_BASEDIR}/tensealcontext.cpp
-    ${TENSEAL_BASEDIR}/tensors/bfvvector.cpp
-    ${TENSEAL_BASEDIR}/tensors/ckksvector.cpp
-    ${TENSEAL_BASEDIR}/utils/utils.cpp
+    ${TENSEAL_BASEDIR}/cpp/context/tensealcontext.cpp
+    ${TENSEAL_BASEDIR}/cpp/context/sealcontext.cpp
+    ${TENSEAL_BASEDIR}/cpp/tensors/bfvvector.cpp
+    ${TENSEAL_BASEDIR}/cpp/tensors/ckksvector.cpp
+    ${TENSEAL_BASEDIR}/cpp/tensors/utils/utils.cpp
 )
 add_library(tenseal SHARED ${SOURCES})
 pybind11_add_module(_tenseal_cpp ${SOURCES} ${TENSEAL_BASEDIR}/binding.cpp)
 
 set(SEALAPI_SOURCES
-    ${TENSEAL_BASEDIR}/sealapi/sealapi.cpp
-    ${TENSEAL_BASEDIR}/sealapi/sealapi_evaluator.cpp
-    ${TENSEAL_BASEDIR}/sealapi/sealapi_encrypt.cpp
-    ${TENSEAL_BASEDIR}/sealapi/sealapi_helpers.cpp
-    ${TENSEAL_BASEDIR}/sealapi/sealapi_modulus.cpp
-    ${TENSEAL_BASEDIR}/sealapi/sealapi_encode.cpp
-    ${TENSEAL_BASEDIR}/sealapi/sealapi_context.cpp
-    ${TENSEAL_BASEDIR}/sealapi/sealapi_util_namespace.cpp
+    ${SEALAPI_BASEDIR}/sealapi.cpp
+    ${SEALAPI_BASEDIR}/sealapi_evaluator.cpp
+    ${SEALAPI_BASEDIR}/sealapi_encrypt.cpp
+    ${SEALAPI_BASEDIR}/sealapi_helpers.cpp
+    ${SEALAPI_BASEDIR}/sealapi_modulus.cpp
+    ${SEALAPI_BASEDIR}/sealapi_encode.cpp
+    ${SEALAPI_BASEDIR}/sealapi_context.cpp
+    ${SEALAPI_BASEDIR}/sealapi_util_namespace.cpp
 )
 pybind11_add_module(_sealapi_cpp ${SEALAPI_SOURCES})
 

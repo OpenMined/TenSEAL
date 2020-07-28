@@ -3,20 +3,20 @@
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <seal/seal.h>
-#include <seal/util/clipnormal.h>
-#include <seal/util/croots.h>
-#include <seal/util/hash.h>
-#include <seal/util/hestdparms.h>
-#include <seal/util/iterator.h>
-#include <seal/util/numth.h>
-#include <seal/util/pointer.h>
-#include <seal/util/polyarithsmallmod.h>
-#include <seal/util/rlwe.h>
-#include <seal/util/scalingvariant.h>
 
 #include <fstream>
 
+#include "seal/seal.h"
+#include "seal/util/clipnormal.h"
+#include "seal/util/croots.h"
+#include "seal/util/hash.h"
+#include "seal/util/hestdparms.h"
+#include "seal/util/iterator.h"
+#include "seal/util/numth.h"
+#include "seal/util/pointer.h"
+#include "seal/util/polyarithsmallmod.h"
+#include "seal/util/rlwe.h"
+#include "seal/util/scalingvariant.h"
 #include "tenseal/sealapi/bindings.h"
 
 using namespace seal;

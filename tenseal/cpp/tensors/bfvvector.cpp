@@ -1,13 +1,12 @@
-#include "tenseal/tensors/bfvvector.h"
-
-#include <seal/seal.h>
+#include "tenseal/cpp/tensors/bfvvector.h"
 
 #include <memory>
 #include <vector>
 
-#include "tenseal/tensealcontext.h"
-#include "tenseal/utils/proto.h"
-#include "tenseal/utils/serialization.h"
+#include "seal/seal.h"
+#include "tenseal/cpp/context/tensealcontext.h"
+#include "tenseal/cpp/utils/proto.h"
+#include "tenseal/cpp/utils/serialization.h"
 
 using namespace seal;
 using namespace std;
