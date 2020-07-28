@@ -1,17 +1,16 @@
-#include "tenseal/tensors/ckksvector.h"
-
-#include <seal/seal.h>
+#include "tenseal/cpp/tensors/ckksvector.h"
 
 #include <cmath>
 #include <memory>
 #include <optional>
 #include <vector>
 
-#include "tenseal/tensealcontext.h"
-#include "tenseal/utils/matrix_ops.h"
-#include "tenseal/utils/proto.h"
-#include "tenseal/utils/serialization.h"
-#include "tenseal/utils/utils.h"
+#include "seal/seal.h"
+#include "tenseal/cpp/context/tensealcontext.h"
+#include "tenseal/cpp/tensors/utils/matrix_ops.h"
+#include "tenseal/cpp/tensors/utils/utils.h"
+#include "tenseal/cpp/utils/proto.h"
+#include "tenseal/cpp/utils/serialization.h"
 
 using namespace seal;
 using namespace std;
@@ -404,12 +403,15 @@ CKKSVector& CKKSVector::_mul_plain_inplace(const T& to_mul) {
     try {
         this->tenseal_context()->evaluator->multiply_plain_inplace(
             this->ciphertext, plaintext);
-    } catch (const std::logic_error& e) {  // result ciphertext is transparent
-        // TODO: chech if error e is exactly a "ciphertext is transparent" error
-        // replace by encryption of zero
-        this->tenseal_context()->encryptor->encrypt_zero(this->ciphertext);
-        this->ciphertext.scale() = this->init_scale;
-        return *this;
+    } catch (const std::logic_error& e) {
+        if (strcmp(e.what(), "result ciphertext is transparent") == 0) {
+            // replace by encryption of zero
+            this->tenseal_context()->encryptor->encrypt_zero(this->ciphertext);
+            this->ciphertext.scale() = this->init_scale;
+            return *this;
+        } else {  // Something else, need to be forwarded
+            throw;
+        }
     }
 
     if (this->tenseal_context()->auto_rescale()) {
@@ -471,15 +473,23 @@ CKKSVector& CKKSVector::rotate_inplace(int steps) {
     return *this;
 }
 
-CKKSVector CKKSVector::matmul_plain(const vector<vector<double>>& matrix) {
+CKKSVector CKKSVector::matmul_plain(const vector<vector<double>>& matrix,
+                                    uint n_threads) {
     CKKSVector new_vector = *this;
-    return new_vector.matmul_plain_inplace(matrix);
+    return new_vector.matmul_plain_inplace(matrix, n_threads);
 }
 
 CKKSVector& CKKSVector::matmul_plain_inplace(
-    const vector<vector<double>>& matrix) {
-    this->ciphertext = diagonal_ct_vector_matmul<double, CKKSEncoder>(
-        this->tenseal_context(), this->ciphertext, this->size(), matrix);
+    const vector<vector<double>>& matrix, uint n_threads) {
+    if (n_threads != 1) {
+        this->ciphertext =
+            diagonal_ct_vector_matmul_parallel<double, CKKSEncoder>(
+                this->tenseal_context(), this->ciphertext, this->size(), matrix,
+                n_threads);
+    } else {
+        this->ciphertext = diagonal_ct_vector_matmul<double, CKKSEncoder>(
+            this->tenseal_context(), this->ciphertext, this->size(), matrix);
+    }
 
     this->_size = matrix[0].size();
 

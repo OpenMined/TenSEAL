@@ -1,13 +1,13 @@
-#ifndef TENSEAL_TENSEALENCODER_H
-#define TENSEAL_TENSEALENCODER_H
-
-#include <seal/seal.h>
+#ifndef TENSEAL_CONTEXT_TENSEALENCODER_H
+#define TENSEAL_CONTEXT_TENSEALENCODER_H
 
 #include <any>
 #include <map>
 #include <optional>
 #include <typeindex>
 #include <vector>
+
+#include "seal/seal.h"
 
 namespace tenseal {
 

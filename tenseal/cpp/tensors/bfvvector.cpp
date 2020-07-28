@@ -1,13 +1,12 @@
-#include "tenseal/tensors/bfvvector.h"
-
-#include <seal/seal.h>
+#include "tenseal/cpp/tensors/bfvvector.h"
 
 #include <memory>
 #include <vector>
 
-#include "tenseal/tensealcontext.h"
-#include "tenseal/utils/proto.h"
-#include "tenseal/utils/serialization.h"
+#include "seal/seal.h"
+#include "tenseal/cpp/context/tensealcontext.h"
+#include "tenseal/cpp/utils/proto.h"
+#include "tenseal/cpp/utils/serialization.h"
 
 using namespace seal;
 using namespace std;
@@ -212,9 +211,13 @@ BFVVector& BFVVector::mul_plain_inplace(const vector<int64_t>& to_mul) {
     try {
         this->tenseal_context()->evaluator->multiply_plain_inplace(
             this->ciphertext, plaintext);
-    } catch (const std::logic_error& e) {  // result ciphertext is transparent
-        // replace by encryption of zero
-        this->tenseal_context()->encryptor->encrypt_zero(this->ciphertext);
+    } catch (const std::logic_error& e) {
+        if (strcmp(e.what(), "result ciphertext is transparent") == 0) {
+            // replace by encryption of zero
+            this->tenseal_context()->encryptor->encrypt_zero(this->ciphertext);
+        } else {  // Something else, need to be forwarded
+            throw;
+        }
     }
 
     return *this;

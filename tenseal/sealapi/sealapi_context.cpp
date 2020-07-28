@@ -3,9 +3,10 @@
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <seal/seal.h>
 
 #include <fstream>
+
+#include "seal/seal.h"
 
 using namespace seal;
 using namespace std;

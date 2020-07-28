@@ -1,14 +1,13 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <seal/seal.h>
 
 #include <memory>
 #include <vector>
 
-#include "tenseal/tensealcontext.h"
-#include "tenseal/tensors/bfvvector.h"
-#include "tenseal/tensors/ckksvector.h"
-#include "tenseal/utils/utils.h"
+#include "seal/seal.h"
+#include "tenseal/cpp/context/tensealcontext.h"
+#include "tenseal/cpp/tensors/bfvvector.h"
+#include "tenseal/cpp/tensors/ckksvector.h"
 
 using namespace tenseal;
 using namespace seal;
@@ -152,10 +151,14 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("sum_", &CKKSVector::sum_inplace)
         .def("rotate", &CKKSVector::rotate)
         .def("rotate_", &CKKSVector::rotate_inplace)
-        .def("matmul", &CKKSVector::matmul_plain)
-        .def("matmul_", &CKKSVector::matmul_plain_inplace)
-        .def("mm", &CKKSVector::matmul_plain)
-        .def("mm_", &CKKSVector::matmul_plain_inplace)
+        .def("matmul", &CKKSVector::matmul_plain, py::arg("matrix"),
+             py::arg("n_threads") = 0)
+        .def("matmul_", &CKKSVector::matmul_plain_inplace, py::arg("matrix"),
+             py::arg("n_threads") = 0)
+        .def("mm", &CKKSVector::matmul_plain, py::arg("matrix"),
+             py::arg("n_threads") = 0)
+        .def("mm_", &CKKSVector::matmul_plain_inplace, py::arg("matrix"),
+             py::arg("n_threads") = 0)
         // python arithmetic
         .def("__neg__", &CKKSVector::negate)
         .def("__pow__", &CKKSVector::power)
@@ -212,8 +215,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              py::overload_cast<double>(&CKKSVector::mul_plain_inplace))
         .def("__imul__", py::overload_cast<const vector<double> &>(
                              &CKKSVector::mul_plain_inplace))
-        .def("__matmul__", &CKKSVector::matmul_plain)
-        .def("__imatmul__", &CKKSVector::matmul_plain_inplace)
+        .def("__matmul__", &CKKSVector::matmul_plain, py::arg("matrix"),
+             py::arg("n_threads") = 0)
+        .def("__imatmul__", &CKKSVector::matmul_plain_inplace,
+             py::arg("matrix"), py::arg("n_threads") = 0)
         .def("context",
              [](const CKKSVector &obj) { return obj.tenseal_context(); })
         .def("serialize",

@@ -1,9 +1,9 @@
-#ifndef TENSEAL_UTILS_CONTEXT_H
-#define TENSEAL_UTILS_CONTEXT_H
-
-#include <seal/seal.h>
+#ifndef TENSEAL_CONTEXT_SEALCONTEXT_H
+#define TENSEAL_CONTEXT_SEALCONTEXT_H
 
 #include <vector>
+
+#include "seal/seal.h"
 
 namespace tenseal {
 
