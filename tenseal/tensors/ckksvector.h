@@ -106,6 +106,8 @@ class CKKSVector {
     CKKSVector& dot_product_plain_inplace(const vector<double>& to_mul);
     CKKSVector sum();
     CKKSVector& sum_inplace();
+    CKKSVector rotate(int steps);
+    CKKSVector& rotate_inplace(int steps);
 
     /**
      * Matrix multiplication operations.

@@ -460,6 +460,17 @@ CKKSVector& CKKSVector::sum_inplace() {
     return *this;
 }
 
+CKKSVector CKKSVector::rotate(int steps) {
+    CKKSVector new_vector = *this;
+    return new_vector.rotate_inplace(steps);
+}
+
+CKKSVector& CKKSVector::rotate_inplace(int steps) {
+    auto galois_keys = this->tenseal_context()->galois_keys();
+    this->tenseal_context()->evaluator->rotate_vector_inplace(this->ciphertext, steps, *galois_keys);
+    return *this;
+}
+
 CKKSVector CKKSVector::matmul_plain(const vector<vector<double>>& matrix) {
     CKKSVector new_vector = *this;
     return new_vector.matmul_plain_inplace(matrix);
