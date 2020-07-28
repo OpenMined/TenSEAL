@@ -31,6 +31,7 @@ cmake_external(
 cmake_external(
     name = "seal_win",
     cmake_options = [
+        "-G \"Visual Studio 15 2017\" -A x64",
         "-DSEAL_USE_CXX17=17",
         "-DSEAL_USE_INTRIN=ON",
         "-DSEAL_USE_MSGSL=OFF",
@@ -42,7 +43,7 @@ cmake_external(
     generate_crosstool_file = True,
     install_prefix = "native/src",
     lib_source = ":src",
-    make_commands = ["msbuild SEAL.vcxproj /p:configuration=Release /p:platform=x64"],
+    make_commands = ["make"],
     out_include_dir = "include/SEAL-3.5",
     static_libraries = ["libseal-3.5.a"],
     visibility = ["//visibility:public"],
