@@ -583,17 +583,27 @@ CKKSVector& CKKSVector::conv2d_im2col_inplace(const vector<double>& kernel,
     size_t chunck_size = windows_nb;
     size_t chuncks_nb = kernel.size();
 
-    if (this->_size / windows_nb != chuncks_nb) {
-        throw invalid_argument("matrix shape doesn't match with vector size");
+    // check if vector size is not a power of 2
+    if (!(this->_size && (!(this->_size & (this->_size - 1))))) {
+        throw invalid_argument("vector size should be a power of 2");
     }
 
+    // TODO: check matrix shape
+    // if (this->_size / windows_nb != chuncks_nb) {
+    //     throw invalid_argument("matrix shape doesn't match with vector
+    //     size");
+    // }
+
     size_t vec_len = chunck_size * chuncks_nb;
-    plain_vec.reserve(vec_len);
+    plain_vec.reserve(this->_size);
 
     for (size_t i = 0; i < chuncks_nb; i++) {
         vector<double> tmp(chunck_size, kernel[i]);
         plain_vec.insert(plain_vec.end(), tmp.begin(), tmp.end());
     }
+
+    // pad the plain_vec
+    plain_vec.resize(this->_size, 0);
 
     // replicate the vector in order to be able to do multiple matrix
     // multiplications
