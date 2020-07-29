@@ -134,6 +134,11 @@ load("@org_openmined_tenseal//tenseal:deps.bzl", "tenseal_deps")
 tenseal_deps()
 ```
 
+Run the benchmarks using
+```
+bazel run -c opt  //tests/cpp/benchmarks:benchmark
+```
+
 ## Support
 
 For support in using this library, please join the **#lib_tenseal** Slack channel. If you’d like to follow along with any code changes to the library, please join the **#code_tenseal** Slack channel. [Click here to join our Slack community!](https://slack.openmined.org)
