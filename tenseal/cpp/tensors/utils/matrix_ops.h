@@ -101,8 +101,7 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
 template <typename T, class Encoder>
 Ciphertext diagonal_ct_vector_matmul_parallel(
     shared_ptr<TenSEALContext> tenseal_context, Ciphertext& vec,
-    const size_t vector_size, const vector<vector<T>>& matrix,
-    uint n_threads = 0) {
+    const size_t vector_size, const vector<vector<T>>& matrix) {
     // matrix is organized by rows
     // _check_matrix(matrix, this->size())
     const size_t n_rows = matrix.size();
@@ -111,59 +110,56 @@ Ciphertext diagonal_ct_vector_matmul_parallel(
         throw invalid_argument("matrix shape doesn't match with vector size");
     }
 
+    if (tenseal_context->dispatcher() == nullptr) {
+        throw invalid_argument("invalid dispatcher");
+    }
+
     mutex result_mutex;
     Ciphertext result;
     // result should have the same scale and modulus as vec * pt_diag (ct)
     tenseal_context->encryptor->encrypt_zero(vec.parms_id(), result);
     result.scale() = vec.scale() * tenseal_context->global_scale();
 
-    atomic<size_t> i = 0;
-    auto thread_func = [&tenseal_context, &vec, &matrix, &result, &result_mutex,
-                        &i, n_rows]() {
-        while (true) {
-            // take next i
-            size_t local_i;
-            local_i = i.fetch_add(1);
-            if (local_i >= n_rows) {
-                break;
-            }
-
-            Ciphertext ct;
-            Plaintext pt_diag;
-            vector<T> diag;
-
-            diag = get_diagonal(matrix, -local_i,
-                                tenseal_context->slot_count<Encoder>());
-            replicate_vector(diag, tenseal_context->slot_count<Encoder>());
-
-            rotate(diag.begin(), diag.begin() + diag.size() - local_i,
-                   diag.end());
-
-            tenseal_context->encode<Encoder>(diag, pt_diag);
-
-            if (vec.parms_id() != pt_diag.parms_id()) {
-                set_to_same_mod(tenseal_context, vec, pt_diag);
-            }
-            tenseal_context->evaluator->multiply_plain(vec, pt_diag, ct);
-
-            tenseal_context->evaluator->rotate_vector_inplace(
-                ct, local_i, *tenseal_context->galois_keys());
-
-            // accumulate results
-            result_mutex.lock();
-            tenseal_context->evaluator->add_inplace(result, ct);
-            result_mutex.unlock();
+    auto worker_func = [&tenseal_context, &vec, &matrix,
+                        n_rows](size_t local_idx) -> Ciphertext {
+        if (local_idx >= n_rows) {
+            throw invalid_argument("invalid worker input");
         }
+
+        Ciphertext ct;
+        Plaintext pt_diag;
+        vector<T> diag;
+
+        diag = get_diagonal(matrix, -local_idx,
+                            tenseal_context->slot_count<Encoder>());
+        replicate_vector(diag, tenseal_context->slot_count<Encoder>());
+
+        rotate(diag.begin(), diag.begin() + diag.size() - local_idx,
+               diag.end());
+
+        tenseal_context->encode<Encoder>(diag, pt_diag);
+
+        if (vec.parms_id() != pt_diag.parms_id()) {
+            set_to_same_mod(tenseal_context, vec, pt_diag);
+        }
+        tenseal_context->evaluator->multiply_plain(vec, pt_diag, ct);
+
+        tenseal_context->evaluator->rotate_vector_inplace(
+            ct, local_idx, *tenseal_context->galois_keys());
+
+        return ct;
     };
 
-    // if not specified (n_threads set to 0), detect automatically
-    if (n_threads == 0) n_threads = get_concurrency();
-    vector<thread> threads;
-    threads.reserve(n_threads);
-    // start the threads
-    for (uint i = 0; i < n_threads; i++) threads.push_back(thread(thread_func));
-    // wait for the threads
-    for (uint i = 0; i < n_threads; i++) threads[i].join();
+    std::vector<std::future<Ciphertext>> future_results;
+    for (size_t i = 0; i < n_rows; i++) {
+        future_results.push_back(
+            tenseal_context->dispatcher()->enqueue_task(worker_func, i));
+    }
+
+    for (size_t i = 0; i < n_rows; i++) {
+        tenseal_context->evaluator->add_inplace(result,
+                                                future_results[i].get());
+    }
 
     return result;
 }

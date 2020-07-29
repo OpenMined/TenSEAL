@@ -7,16 +7,25 @@ namespace {
 void BM_matmul_plain(benchmark::State& state) {
   int threads = state.range(0);
 
-  auto ctx = TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
+  auto ctx = TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60}, threads);
     ctx->generate_galois_keys();
     ctx->global_scale(std::pow(2, 40));
 
-  auto vec = CKKSVector(ctx, std::vector<double>({1, 2, 3}));
-  auto matrix = vector<vector<double>>{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}};
+  std::vector<double> data;
+  size_t N = 100;
 
+  for(size_t idx = 0; idx < N; ++idx) {
+    data.push_back(idx + 1);
+  }
+  vector<vector<double>> matrix;
+  for(size_t idx = 0; idx < N; ++idx) {
+    matrix.push_back(data);
+  }
+
+  auto vec = CKKSVector(ctx, data);
 
   for (auto _ : state) {
-      auto res = vec.matmul_plain(matrix, threads);
+      auto res = vec.matmul_plain(matrix);
      ::benchmark::DoNotOptimize(res);
   }
 }
