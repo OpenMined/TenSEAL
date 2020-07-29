@@ -136,7 +136,7 @@ tenseal_deps()
 
 Run the benchmarks using
 ```
-bazel run -c opt  //tests/cpp/benchmarks:benchmark
+bazel run -c opt --spawn_strategy=standalone //tests/cpp/benchmarks:benchmark
 ```
 
 ## Support
