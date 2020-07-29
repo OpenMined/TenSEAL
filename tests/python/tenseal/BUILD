@@ -21,5 +21,6 @@ py_test(
         requirement("pytest"),
         requirement("numpy"),
         requirement("pytest-benchmark"),
+        requirement("scikit-image"),
     ],
 )
