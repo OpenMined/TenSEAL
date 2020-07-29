@@ -49,15 +49,6 @@ class ThreadPool {
     }
 
     template <typename F, typename... Args>
-    void enqueue_work(F&& f, Args&&... args) {
-        auto work = [f, args...]() { f(args...); };
-        unsigned int i = m_index++;
-        for (unsigned int n = 0; n < m_count * K; ++n)
-            if (m_queues[(i + n) % m_count].try_push(work)) return;
-        m_queues[i % m_count].push(work);
-    }
-
-    template <typename F, typename... Args>
     auto enqueue_task(F&& f, Args&&... args)
         -> std::future<typename std::result_of<F(Args...)>::type> {
         using return_type = typename std::result_of<F(Args...)>::type;

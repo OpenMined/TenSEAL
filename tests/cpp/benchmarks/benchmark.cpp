@@ -12,7 +12,7 @@ void BM_matmul_plain(benchmark::State& state) {
     ctx->global_scale(std::pow(2, 40));
 
   std::vector<double> data;
-  size_t N = 128;
+  size_t N = 1024;
 
   for(size_t idx = 0; idx < N; ++idx) {
     data.push_back(idx + 1);
@@ -33,7 +33,7 @@ void BM_matmul_plain(benchmark::State& state) {
 // positive rate for 10k client queries.
 BENCHMARK(BM_matmul_plain)
     ->RangeMultiplier(2)
-    ->Iterations(50)
+    ->Iterations(3)
     ->Range(2, 8);
 
 }  // namespace

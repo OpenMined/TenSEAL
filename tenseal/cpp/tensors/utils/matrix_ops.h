@@ -60,7 +60,6 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
                                      const vector<vector<T>>& matrix) {
     // matrix is organized by rows
     // _check_matrix(matrix, this->size())
-    const size_t n_rows = matrix.size();
 
     if (vector_size != matrix.size()) {
         throw invalid_argument("matrix shape doesn't match with vector size");
@@ -75,21 +74,13 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
     tenseal_context->encryptor->encrypt_zero(vec.parms_id(), result);
     result.scale() = vec.scale() * tenseal_context->global_scale();
 
-    atomic<size_t> i = 0;
-    auto worker_func = [&tenseal_context, &vec, &matrix, &i,
-                        n_rows]() -> Ciphertext {
+    auto worker_func = [&tenseal_context, &vec, &matrix](
+                           size_t start, size_t end) -> Ciphertext {
         Ciphertext thread_result;
         tenseal_context->encryptor->encrypt_zero(vec.parms_id(), thread_result);
         thread_result.scale() = vec.scale() * tenseal_context->global_scale();
 
-        while (true) {
-            // take next i
-            size_t local_i;
-            local_i = i.fetch_add(1);
-            if (local_i >= n_rows) {
-                break;
-            }
-
+        for (size_t local_i = start; local_i < end; ++local_i) {
             Ciphertext ct;
             Plaintext pt_diag;
             vector<T> diag;
@@ -117,12 +108,16 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
         return thread_result;
     };
 
-    if (tenseal_context->get_concurrency() == 1) return worker_func();
+    if (tenseal_context->get_concurrency() == 1)
+        return worker_func(0, vector_size);
 
     std::vector<std::future<Ciphertext>> future_results;
+    size_t bucket_size = vector_size / tenseal_context->get_concurrency();
+
     for (size_t i = 0; i < tenseal_context->get_concurrency(); i++) {
-        future_results.push_back(
-            tenseal_context->dispatcher()->enqueue_task(worker_func));
+        future_results.push_back(tenseal_context->dispatcher()->enqueue_task(
+            worker_func, i * bucket_size,
+            std::min((i + 1) * bucket_size, vector_size)));
     }
 
     for (size_t i = 0; i < tenseal_context->get_concurrency(); i++) {
