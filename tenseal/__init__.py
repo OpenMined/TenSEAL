@@ -49,7 +49,7 @@ def context(
         raise ValueError("Invalid scheme type, use either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS")
 
     # We can't pass None here, everything should be set prior to this call
-    if n_threads:
+    if isinstance(n_threads, int) and n_threads > 0:
         return _ts_cpp.TenSEALContext.new(
             scheme, poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes, n_threads
         )

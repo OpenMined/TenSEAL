@@ -111,15 +111,14 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
     if (tenseal_context->get_concurrency() == 1)
         return worker_func(0, vector_size);
 
+    size_t thread_cnt = tenseal_context->get_concurrency();
     std::vector<std::future<Ciphertext>> future_results;
-    size_t bucket_size = vector_size / tenseal_context->get_concurrency();
+    size_t batch_size = (vector_size + thread_cnt - 1) / thread_cnt;
 
-    fprintf(stderr, "wait results");
-
-    for (size_t i = 0; i < tenseal_context->get_concurrency(); i++) {
+    for (size_t i = 0; i < thread_cnt; i++) {
         future_results.push_back(tenseal_context->dispatcher()->enqueue_task(
-            worker_func, i * bucket_size,
-            std::min((i + 1) * bucket_size, vector_size)));
+            worker_func, i * batch_size,
+            std::min((i + 1) * batch_size, vector_size)));
     }
 
     for (size_t i = 0; i < tenseal_context->get_concurrency(); i++) {
