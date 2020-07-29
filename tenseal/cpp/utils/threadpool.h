@@ -32,10 +32,7 @@ class ThreadPool {
         auto worker = [&](unsigned int i) {
             while (true) {
                 Proc f;
-                for (unsigned int n = 0; n < m_count; ++n) {
-                    if (m_queues[(i + n) % m_count].try_pop(f)) break;
-                }
-                if (!f && !m_queues[i].pop(f)) break;
+                if (!m_queues[i].pop(f)) break;
                 f();
             }
         };
@@ -52,14 +49,13 @@ class ThreadPool {
     auto enqueue_task(F&& f, Args&&... args)
         -> std::future<typename std::result_of<F(Args...)>::type> {
         using return_type = typename std::result_of<F(Args...)>::type;
+
         auto task = std::make_shared<std::packaged_task<return_type()>>(
             std::bind(std::forward<F>(f), std::forward<Args>(args)...));
         std::future<return_type> res = task->get_future();
-
         auto work = [task]() { (*task)(); };
+
         unsigned int i = m_index++;
-        for (unsigned int n = 0; n < m_count * K; ++n)
-            if (m_queues[(i + n) % m_count].try_push(work)) return res;
         m_queues[i % m_count].push(work);
 
         return res;
@@ -75,8 +71,6 @@ class ThreadPool {
 
     const unsigned int m_count;
     std::atomic_uint m_index = 0;
-
-    inline static const unsigned int K = 3;
 };
 
 }  // namespace sync
