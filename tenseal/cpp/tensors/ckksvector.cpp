@@ -592,7 +592,6 @@ CKKSVector& CKKSVector::conv2d_im2col_inplace(const vector<double>& kernel,
         throw invalid_argument("Matrix shape doesn't match with vector size");
     }
 
-    size_t vec_len = chunck_size * chuncks_nb;
     plain_vec.reserve(this->_size);
 
     for (size_t i = 0; i < chuncks_nb; i++) {
