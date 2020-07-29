@@ -114,7 +114,6 @@ Ciphertext diagonal_ct_vector_matmul_parallel(
         throw invalid_argument("invalid dispatcher");
     }
 
-    mutex result_mutex;
     Ciphertext result;
     // result should have the same scale and modulus as vec * pt_diag (ct)
     tenseal_context->encryptor->encrypt_zero(vec.parms_id(), result);
