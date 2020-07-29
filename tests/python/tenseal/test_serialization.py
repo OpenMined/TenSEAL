@@ -1,6 +1,5 @@
 import pytest
 import copy
-import pickle
 import tenseal as ts
 
 from tests.python.tenseal.utils import *
@@ -27,12 +26,7 @@ def recreate(ctx):
     return ts.context_from(proto)
 
 
-def pickled(ctx):
-    out = pickle.dumps(ctx)
-    return pickle.loads(out)
-
-
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
 def test_context_recreation(duplicate):
     orig_context = ctx()
     context = duplicate(orig_context)
@@ -50,7 +44,7 @@ def test_context_recreation(duplicate):
     assert orig_context.is_private() is True, "original TenSEALContext should stay private"
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
 def test_generate_galois_keys(duplicate):
     orig_context = ctx()
     orig_context.generate_galois_keys()
@@ -72,7 +66,7 @@ def test_generate_galois_keys(duplicate):
     assert exc_info.type is ValueError, "orginal context shouldn't have Galois keys"
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
 def test_generate_relin_keys(duplicate):
     # by default, Relin keys will be generated on context creation
     orig_context = ctx()
@@ -90,7 +84,7 @@ def test_generate_relin_keys(duplicate):
     assert isinstance(context.relin_keys(), ts.RelinKeys), "Relin keys should be set"
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
 def test_generate_galois_relin_keys(duplicate):
     orig_public_context = ctx()
     orig_public_context.make_context_public(generate_galois_keys=True, generate_relin_keys=True)
@@ -106,7 +100,7 @@ def test_generate_galois_relin_keys(duplicate):
     assert exc_info.type is ValueError, "orginal context shouldn't have Galois keys"
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
 @pytest.mark.parametrize("scale", [0, 1, 2, 2 ** 40])
 def test_global_scale(duplicate, scale):
     orig_context = ctx()
@@ -120,7 +114,7 @@ def test_global_scale(duplicate, scale):
     assert context.global_scale == scale
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
 def test_auto_flags(duplicate):
     orig_context = ctx()
     context = duplicate(orig_context)
@@ -174,7 +168,7 @@ def test_auto_flags(duplicate):
     assert context.auto_mod_switch == True
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate, pickled,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
