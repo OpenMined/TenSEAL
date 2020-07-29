@@ -238,6 +238,7 @@ class TenSEALContext {
      * @returns a pointer to the threadpool dispatcher
      **/
     shared_ptr<sync::ThreadPool> dispatcher() { return _dispatcher; }
+    size_t get_concurrency() { return _threads.value_or(1); }
 
    private:
     EncryptionParameters _parms;
