@@ -33,7 +33,7 @@ void BM_matmul_plain(benchmark::State& state) {
 // positive rate for 10k client queries.
 BENCHMARK(BM_matmul_plain)
     ->RangeMultiplier(2)
-    ->Range(1, 8);
+    ->Range(1, 8)->MinTime(5.);;
 
 }  // namespace
 }  // namespace tenseal
