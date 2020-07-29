@@ -12,7 +12,7 @@ void BM_matmul_plain(benchmark::State& state) {
     ctx->global_scale(std::pow(2, 40));
 
   std::vector<double> data;
-  size_t N = 50;
+  size_t N = 64;
 
   for(size_t idx = 0; idx < N; ++idx) {
     data.push_back(idx + 1);
