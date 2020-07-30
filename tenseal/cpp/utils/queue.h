@@ -13,9 +13,16 @@
 namespace tenseal {
 namespace sync {
 
+/**
+ * Thread-safe queue.
+ **/
 template <class T>
 class blocking_queue {
    public:
+    /**
+     * push() appends a new item to the queue and notifies the "pop" listener
+     *about the event.
+     **/
     template <class... Args>
     void push(Args&&... args) {
         {
@@ -24,7 +31,10 @@ class blocking_queue {
         }
         ready_.notify_one();
     }
-
+    /**
+     * pop() waits until an item is available in the queue, pops it out and
+     *assigns it to the "out" parameter.
+     **/
     [[nodiscard]] bool pop(T& out) {
         std::unique_lock lock{mutex_};
         ready_.wait(lock, [this] { return !queue_.empty() || done_; });
@@ -35,7 +45,9 @@ class blocking_queue {
 
         return true;
     }
-
+    /**
+     * done() notifies all listeners to shutdown.
+     **/
     void done() noexcept {
         {
             std::scoped_lock lock{mutex_};
@@ -43,12 +55,16 @@ class blocking_queue {
         }
         ready_.notify_all();
     }
-
+    /**
+     * empty() returns if the queue is empty or not.
+     **/
     [[nodiscard]] bool empty() const noexcept {
         std::scoped_lock lock{mutex_};
         return queue_.empty();
     }
-
+    /**
+     * size() returns the size of the queue.
+     **/
     [[nodiscard]] unsigned int size() const noexcept {
         std::scoped_lock lock{mutex_};
         return queue_.size();

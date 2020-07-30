@@ -24,11 +24,18 @@ inline uint get_concurrency() {
 
 namespace sync {
 
+/**
+ * A ThreadPool class for managing and dispatching tasks to a number of threads.
+ **/
 class ThreadPool {
    public:
-    ThreadPool(unsigned int threads = get_concurrency())
-        : m_queues(threads), m_count(threads) {
-        assert(threads != 0);
+    /**
+     * Create "n_threads" workers, each with a dedicated task queue, and execute
+     * the task as they arrive in the queues.
+     **/
+    ThreadPool(unsigned int n_threads = get_concurrency())
+        : m_queues(n_threads), m_count(n_threads) {
+        assert(n_threads != 0);
         auto worker = [&](unsigned int i) {
             while (true) {
                 Proc f;
@@ -36,15 +43,20 @@ class ThreadPool {
                 f();
             }
         };
-        for (unsigned int i = 0; i < threads; ++i)
-            m_threads.emplace_back(worker, i);
+        for (unsigned int i = 0; i < n_threads; ++i)
+            m_workers.emplace_back(worker, i);
     }
 
     ~ThreadPool() noexcept {
         for (auto& queue : m_queues) queue.done();
-        for (auto& thread : m_threads) thread.join();
+        for (auto& worker : m_workers) worker.join();
     }
 
+    /**
+     * enqueue_task() assigns tasks to worker queues using round robin
+     *scheduling.
+     * @returns a std::future object with the result of the task.
+     **/
     template <typename F, typename... Args>
     auto enqueue_task(F&& f, Args&&... args)
         -> std::future<typename std::result_of<F(Args...)>::type> {
@@ -63,11 +75,12 @@ class ThreadPool {
 
    private:
     using Proc = std::function<void(void)>;
+
     using Queues = std::vector<blocking_queue<Proc>>;
     Queues m_queues;
 
     using Threads = std::vector<std::thread>;
-    Threads m_threads;
+    Threads m_workers;
 
     const unsigned int m_count;
     std::atomic_uint m_index = 0;
