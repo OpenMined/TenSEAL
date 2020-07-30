@@ -1,4 +1,5 @@
 #include "tenseal/cpp/context/tensealcontext.h"
+#include "tenseal/cpp/utils/threadpool.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -61,6 +62,16 @@ TEST_F(TenSEALContextTest, TestSerialization) {
     auto &orig_galoiskeys = ctx->galois_keys()->data();
     auto &serial_galoiskeys = recreated_ctx->galois_keys()->data();
     ASSERT_EQ(orig_galoiskeys.size(), serial_galoiskeys.size());
+}
+
+TEST_F(TenSEALContextTest, TestDispatcher) {
+    auto ctx =
+        TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
+    ASSERT_EQ(ctx->dispatcher_size(), get_concurrency());
+
+    ctx =
+        TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60}, 8);
+    ASSERT_EQ(ctx->dispatcher_size(), 8);
 }
 
 

@@ -211,6 +211,32 @@ TEST_P(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
     ASSERT_TRUE(are_close(result, {2, 2, 2, 2, 2, 2}));
 }
 
+TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
+    bool should_serialize_first = GetParam();
+
+    auto ctx =
+        TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
+    ASSERT_TRUE(ctx != nullptr);
+
+    ctx->generate_galois_keys();
+    ctx->global_scale(std::pow(2, 40));
+
+    auto vec = CKKSVector(ctx, std::vector<double>({1, 2, 3}));
+    auto matrix = vector<vector<double>>{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}};
+    auto expected_result = vector<int64_t>{6, 12, 18};
+    
+    auto result = vec.matmul_plain(matrix, 2);
+
+     if (should_serialize_first) {
+         result = duplicate(result);
+     }
+
+    auto decrypted_result = result.decrypt();
+
+    ASSERT_EQ(decrypted_result.size(), 3);
+    ASSERT_TRUE(are_close(decrypted_result, expected_result));
+}
+
 INSTANTIATE_TEST_CASE_P(TestCKKSVector, CKKSVectorTest,
                          ::testing::Values(false, true));
 

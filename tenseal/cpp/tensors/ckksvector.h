@@ -110,9 +110,9 @@ class CKKSVector {
      * Matrix multiplication operations.
      **/
     CKKSVector matmul_plain(const vector<vector<double>>& matrix,
-                            uint n_threads = 0);
+                            size_t n_jobs = 0);
     CKKSVector& matmul_plain_inplace(const vector<vector<double>>& matrix,
-                                     uint n_threads = 0);
+                                     size_t n_jobs = 0);
 
     /**
      * Polynomial evaluation with `this` as variable.

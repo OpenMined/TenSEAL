@@ -1,7 +1,6 @@
 #include "tenseal/cpp/context/sealcontext.h"
 
 #include <memory>
-#include <thread>
 
 #include "seal/seal.h"
 

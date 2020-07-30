@@ -135,13 +135,13 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("sum", &CKKSVector::sum)
         .def("sum_", &CKKSVector::sum_inplace)
         .def("matmul", &CKKSVector::matmul_plain, py::arg("matrix"),
-             py::arg("n_threads") = 0)
+             py::arg("n_jobs") = 0)
         .def("matmul_", &CKKSVector::matmul_plain_inplace, py::arg("matrix"),
-             py::arg("n_threads") = 0)
+             py::arg("n_jobs") = 0)
         .def("mm", &CKKSVector::matmul_plain, py::arg("matrix"),
-             py::arg("n_threads") = 0)
+             py::arg("n_jobs") = 0)
         .def("mm_", &CKKSVector::matmul_plain_inplace, py::arg("matrix"),
-             py::arg("n_threads") = 0)
+             py::arg("n_jobs") = 0)
         // python arithmetic
         .def("__neg__", &CKKSVector::negate)
         .def("__pow__", &CKKSVector::power)
@@ -199,9 +199,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__imul__", py::overload_cast<const vector<double> &>(
                              &CKKSVector::mul_plain_inplace))
         .def("__matmul__", &CKKSVector::matmul_plain, py::arg("matrix"),
-             py::arg("n_threads") = 0)
+             py::arg("n_jobs") = 0)
         .def("__imatmul__", &CKKSVector::matmul_plain_inplace,
-             py::arg("matrix"), py::arg("n_threads") = 0)
+             py::arg("matrix"), py::arg("n_jobs") = 0)
         .def("context",
              [](const CKKSVector &obj) { return obj.tenseal_context(); })
         .def("serialize",
@@ -227,18 +227,20 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                       py::overload_cast<>(&TenSEALContext::auto_mod_switch),
                       py::overload_cast<bool>(&TenSEALContext::auto_mod_switch))
         .def("new",
-             py::overload_cast<scheme_type, size_t, uint64_t, vector<int>>(
-                 &TenSEALContext::Create),
+             py::overload_cast<scheme_type, size_t, uint64_t, vector<int>,
+                               optional<uint>>(&TenSEALContext::Create),
              R"(Create a new TenSEALContext object to hold keys and parameters.
     Args:
         scheme : define the scheme to be used, either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS.
         poly_modulus_degree : The degree of the polynomial modulus, must be a power of two.
         plain_modulus : The plaintext modulus. Is not used if scheme is CKKS.
         coeff_mod_bit_sizes : List of bit size for each coeffecient modulus.
+        n_threads : Optional: number of threads to use for multiplications.
             Can be an empty list for BFV, a default value will be given.
         )",
              py::arg("poly_modulus_degree"), py::arg("plain_modulus"),
-             py::arg("coeff_mod_bit_sizes") = vector<int>())
+             py::arg("coeff_mod_bit_sizes") = vector<int>(),
+             py::arg("n_threads") = get_concurrency())
         .def("public_key", &TenSEALContext::public_key)
         .def("secret_key", &TenSEALContext::secret_key)
         .def("relin_keys", &TenSEALContext::relin_keys)
@@ -266,8 +268,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              "Generate Relinearization keys using the secret key")
         .def("serialize",
              [](const TenSEALContext &obj) { return py::bytes(obj.save()); })
-        .def_static("deserialize", py::overload_cast<const std::string &>(
-                                       &TenSEALContext::Create))
+        .def_static("deserialize",
+                    py::overload_cast<const std::string &, optional<uint>>(
+                        &TenSEALContext::Create),
+                    py::arg("buffer"), py::arg("n_threads") = get_concurrency())
         .def("copy", &TenSEALContext::copy)
         .def("__copy__",
              [](const std::shared_ptr<TenSEALContext> &self) {

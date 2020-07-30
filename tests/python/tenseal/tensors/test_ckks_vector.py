@@ -23,6 +23,14 @@ def context():
     return context
 
 
+def parallel_context(n_threads):
+    context = ts.context(
+        ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60], n_threads=n_threads
+    )
+    context.global_scale = pow(2, 40)
+    return context
+
+
 # default precision is 1, otherwise it can be specified in the test-case
 @pytest.fixture(scope="function")
 def precision():
@@ -949,10 +957,12 @@ def test_mul_without_global_scale(vec1, vec2, precision):
     ],
 )
 @pytest.mark.parametrize("n_threads", [0, 1, 2, 4])
-def test_vec_plain_matrix_mul(context, vec, matrix, n_threads, precision):
+@pytest.mark.parametrize("n_jobs", [0, 1, 2, 4])
+def test_vec_plain_matrix_mul(vec, matrix, n_threads, n_jobs, precision):
+    context = parallel_context(n_threads)
     context.generate_galois_keys()
     ct = ts.ckks_vector(context, vec)
-    result = ct.mm(matrix, n_threads=n_threads)
+    result = ct.mm(matrix, n_jobs)
     expected = (np.array(vec) @ np.array(matrix)).tolist()
     assert _almost_equal(
         result.decrypt(), expected, precision
@@ -972,10 +982,12 @@ def test_vec_plain_matrix_mul(context, vec, matrix, n_threads, precision):
     ],
 )
 @pytest.mark.parametrize("n_threads", [0, 1, 2, 4])
-def test_vec_plain_matrix_mul_inplace(context, vec, matrix, n_threads, precision):
+@pytest.mark.parametrize("n_jobs", [0, 1, 2, 4])
+def test_vec_plain_matrix_mul_inplace(vec, matrix, n_threads, n_jobs, precision):
+    context = parallel_context(n_threads)
     context.generate_galois_keys()
     ct = ts.ckks_vector(context, vec)
-    ct.mm_(matrix, n_threads=n_threads)
+    ct.mm_(matrix, n_jobs)
     expected = (np.array(vec) @ np.array(matrix)).tolist()
     assert _almost_equal(ct.decrypt(), expected, precision), "Matrix multiplciation is incorrect."
 

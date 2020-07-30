@@ -8,8 +8,10 @@ cc_library(
     name = "tenseal_utils_cc",
     hdrs = [
         "proto.h",
+        "queue.h",
         "scope.h",
         "serialization.h",
+        "threadpool.h",
     ],
     copts = TENSEAL_DEFAULT_COPTS,
     includes = TENSEAL_DEFAULT_INCLUDES,

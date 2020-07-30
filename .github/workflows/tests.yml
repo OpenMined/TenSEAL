@@ -111,11 +111,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Run gtest
-        timeout-minutes: 30
+        timeout-minutes: 15
         run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/cpp/...
       - name: Run SEALAPI tests
-        timeout-minutes: 30
+        timeout-minutes: 15
         run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/python/sealapi/...
       - name: Run TenSEAL tests
-        timeout-minutes: 30
-        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/python/tenseal/...
+        timeout-minutes: 15
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_output=streamed --local_sigkill_grace_seconds=30 --test_timeout=900 //tests/python/tenseal/...
