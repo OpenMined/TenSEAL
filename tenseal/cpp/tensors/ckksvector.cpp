@@ -463,16 +463,16 @@ CKKSVector& CKKSVector::sum_inplace() {
 }
 
 CKKSVector CKKSVector::matmul_plain(const vector<vector<double>>& matrix,
-                                    size_t batch_count) {
+                                    size_t n_batches) {
     CKKSVector new_vector = *this;
-    return new_vector.matmul_plain_inplace(matrix, batch_count);
+    return new_vector.matmul_plain_inplace(matrix, n_batches);
 }
 
 CKKSVector& CKKSVector::matmul_plain_inplace(
-    const vector<vector<double>>& matrix, size_t batch_count) {
+    const vector<vector<double>>& matrix, size_t n_batches) {
     this->ciphertext = diagonal_ct_vector_matmul<double, CKKSEncoder>(
         this->tenseal_context(), this->ciphertext, this->size(), matrix,
-        batch_count);
+        n_batches);
 
     this->_size = matrix[0].size();
 

@@ -135,13 +135,13 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("sum", &CKKSVector::sum)
         .def("sum_", &CKKSVector::sum_inplace)
         .def("matmul", &CKKSVector::matmul_plain, py::arg("matrix"),
-             py::arg("batch_count") = 0)
+             py::arg("n_batches") = 0)
         .def("matmul_", &CKKSVector::matmul_plain_inplace, py::arg("matrix"),
-             py::arg("batch_count") = 0)
+             py::arg("n_batches") = 0)
         .def("mm", &CKKSVector::matmul_plain, py::arg("matrix"),
-             py::arg("batch_count") = 0)
+             py::arg("n_batches") = 0)
         .def("mm_", &CKKSVector::matmul_plain_inplace, py::arg("matrix"),
-             py::arg("batch_count") = 0)
+             py::arg("n_batches") = 0)
         // python arithmetic
         .def("__neg__", &CKKSVector::negate)
         .def("__pow__", &CKKSVector::power)
@@ -199,9 +199,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__imul__", py::overload_cast<const vector<double> &>(
                              &CKKSVector::mul_plain_inplace))
         .def("__matmul__", &CKKSVector::matmul_plain, py::arg("matrix"),
-             py::arg("batch_count") = 0)
+             py::arg("n_batches") = 0)
         .def("__imatmul__", &CKKSVector::matmul_plain_inplace,
-             py::arg("matrix"), py::arg("batch_count") = 0)
+             py::arg("matrix"), py::arg("n_batches") = 0)
         .def("context",
              [](const CKKSVector &obj) { return obj.tenseal_context(); })
         .def("serialize",

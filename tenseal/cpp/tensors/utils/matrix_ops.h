@@ -58,7 +58,7 @@ template <typename T, class Encoder>
 Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
                                      Ciphertext& vec, const size_t vector_size,
                                      const vector<vector<T>>& matrix,
-                                     size_t batch_count) {
+                                     size_t n_batches) {
     // matrix is organized by rows
     // _check_matrix(matrix, this->size())
 
@@ -109,20 +109,20 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
         return thread_result;
     };
 
-    if (batch_count == 0) batch_count = tenseal_context->dispatcher_size();
+    if (n_batches == 0) n_batches = tenseal_context->dispatcher_size();
 
-    if (batch_count == 1) return worker_func(0, vector_size);
+    if (n_batches == 1) return worker_func(0, vector_size);
 
     std::vector<std::future<Ciphertext>> future_results;
-    size_t batch_size = (vector_size + batch_count - 1) / batch_count;
+    size_t batch_size = (vector_size + n_batches - 1) / n_batches;
 
-    for (size_t i = 0; i < batch_count; i++) {
+    for (size_t i = 0; i < n_batches; i++) {
         future_results.push_back(tenseal_context->dispatcher()->enqueue_task(
             worker_func, i * batch_size,
             std::min((i + 1) * batch_size, vector_size)));
     }
 
-    for (size_t i = 0; i < batch_count; i++) {
+    for (size_t i = 0; i < n_batches; i++) {
         tenseal_context->evaluator->add_inplace(result,
                                                 future_results[i].get());
     }
