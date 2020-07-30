@@ -11,31 +11,35 @@ using namespace seal;
 using namespace std;
 
 TenSEALContext::TenSEALContext(EncryptionParameters parms,
-                               optional<uint> n_threads)
-    : _threads(n_threads) {
+                               optional<uint> n_threads) {
+    this->dispatcher_setup(n_threads);
     this->base_setup(parms);
     this->keys_setup();
 }
 
-TenSEALContext::TenSEALContext(istream& stream, optional<uint> n_threads)
-    : _threads(n_threads) {
+TenSEALContext::TenSEALContext(istream& stream, optional<uint> n_threads) {
+    this->dispatcher_setup(n_threads);
     this->load(stream);
 }
 TenSEALContext::TenSEALContext(const std::string& input,
-                               optional<uint> n_threads)
-    : _threads(n_threads) {
+                               optional<uint> n_threads) {
+    this->dispatcher_setup(n_threads);
     this->load(input);
 }
 TenSEALContext::TenSEALContext(const TenSEALContextProto& input,
-                               optional<uint> n_threads)
-    : _threads(n_threads) {
+                               optional<uint> n_threads) {
+    this->dispatcher_setup(n_threads);
     this->load_proto(input);
 }
 
-void TenSEALContext::base_setup(EncryptionParameters parms) {
-    this->_dispatcher = make_shared<sync::ThreadPool>(
-        this->_threads.value_or(get_concurrency()));
+void TenSEALContext::dispatcher_setup(optional<uint> n_threads) {
+    this->_threads = n_threads.value_or(get_concurrency());
+    if (this->_threads == 0) this->_threads = get_concurrency();
 
+    this->_dispatcher = make_shared<sync::ThreadPool>(this->_threads);
+}
+
+void TenSEALContext::base_setup(EncryptionParameters parms) {
     this->_parms = parms;
     this->_context = SEALContext::Create(this->_parms);
 

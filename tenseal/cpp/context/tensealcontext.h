@@ -238,7 +238,7 @@ class TenSEALContext {
      * @returns a pointer to the threadpool dispatcher
      **/
     shared_ptr<sync::ThreadPool> dispatcher() { return _dispatcher; }
-    size_t get_concurrency() { return _threads.value_or(1); }
+    size_t dispatcher_size() { return _threads; }
 
    private:
     EncryptionParameters _parms;
@@ -250,7 +250,7 @@ class TenSEALContext {
     shared_ptr<TenSEALEncoder> encoder_factory;
 
     shared_ptr<sync::ThreadPool> _dispatcher;
-    optional<uint> _threads;
+    uint _threads;
 
     /**
      * Switches for automatic relinearization, rescaling, and modulus switching
@@ -269,6 +269,7 @@ class TenSEALContext {
     TenSEALContext(const TenSEALContextProto& proto, optional<uint> n_threads);
 
     void base_setup(EncryptionParameters parms);
+    void dispatcher_setup(optional<uint> n_threads);
     void keys_setup(optional<PublicKey> public_key = {},
                     optional<SecretKey> secret_key = {},
                     bool generate_relin_keys = true,

@@ -65,7 +65,7 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
         throw invalid_argument("matrix shape doesn't match with vector size");
     }
 
-    if (tenseal_context->dispatcher() == nullptr) {
+    if (!tenseal_context->dispatcher() || !tenseal_context->dispatcher_size()) {
         throw invalid_argument("invalid dispatcher");
     }
 
@@ -108,20 +108,20 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
         return thread_result;
     };
 
-    if (tenseal_context->get_concurrency() == 1)
-        return worker_func(0, vector_size);
+    size_t worker_cnt = tenseal_context->dispatcher_size();
 
-    size_t thread_cnt = tenseal_context->get_concurrency();
+    if (worker_cnt == 1) return worker_func(0, vector_size);
+
     std::vector<std::future<Ciphertext>> future_results;
-    size_t batch_size = (vector_size + thread_cnt - 1) / thread_cnt;
+    size_t batch_size = (vector_size + worker_cnt - 1) / worker_cnt;
 
-    for (size_t i = 0; i < thread_cnt; i++) {
+    for (size_t i = 0; i < worker_cnt; i++) {
         future_results.push_back(tenseal_context->dispatcher()->enqueue_task(
             worker_func, i * batch_size,
             std::min((i + 1) * batch_size, vector_size)));
     }
 
-    for (size_t i = 0; i < tenseal_context->get_concurrency(); i++) {
+    for (size_t i = 0; i < worker_cnt; i++) {
         tenseal_context->evaluator->add_inplace(result,
                                                 future_results[i].get());
     }
