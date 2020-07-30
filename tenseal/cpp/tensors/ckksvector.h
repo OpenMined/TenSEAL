@@ -109,8 +109,10 @@ class CKKSVector {
     /**
      * Matrix multiplication operations.
      **/
-    CKKSVector matmul_plain(const vector<vector<double>>& matrix);
-    CKKSVector& matmul_plain_inplace(const vector<vector<double>>& matrix);
+    CKKSVector matmul_plain(const vector<vector<double>>& matrix,
+                            size_t batch_count = 0);
+    CKKSVector& matmul_plain_inplace(const vector<vector<double>>& matrix,
+                                     size_t batch_count = 0);
 
     /**
      * Polynomial evaluation with `this` as variable.
