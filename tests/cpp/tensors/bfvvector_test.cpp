@@ -99,7 +99,7 @@ TEST_P(BFVVectorTest, TestEmptyPlaintext) {
     auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
-    ASSERT_THROW(BFVVector(ctx, vector<int64_t>({})), std::runtime_error);
+    EXPECT_THROW(BFVVector(ctx, std::vector<int64_t>({})), std::exception);
 }
 
 

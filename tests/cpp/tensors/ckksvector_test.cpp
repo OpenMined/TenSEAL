@@ -239,12 +239,10 @@ TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
 
 
 TEST_P(CKKSVectorTest, TestEmptyPlaintext) {
-    bool should_serialize_first = GetParam();
-
     auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
-    ASSERT_THROW(CKKSVector(ctx, vector<double>({})), std::runtime_error);
+    EXPECT_THROW(CKKSVector(ctx, std::vector<double>({})), std::exception);
 }
 
 INSTANTIATE_TEST_CASE_P(TestCKKSVector, CKKSVectorTest,
