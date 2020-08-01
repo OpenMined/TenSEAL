@@ -94,6 +94,15 @@ TEST_P(BFVVectorTest, TestBFVMul) {
     EXPECT_THAT(decr, ElementsAreArray({16, 32, 48}));
 }
 
+TEST_P(BFVVectorTest, TestEmptyPlaintext) {
+
+    auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
+    ASSERT_TRUE(ctx != nullptr);
+
+    ASSERT_THROW(BFVVector(ctx, vector<int64_t>({})), std::runtime_error);
+}
+
+
 INSTANTIATE_TEST_CASE_P(TestBFVVector, BFVVectorTest,
                          ::testing::Values(false, true));
 
