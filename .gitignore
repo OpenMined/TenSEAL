@@ -36,6 +36,9 @@
 # VSCODE
 .vscode/
 
+# Jetbrains tools
+.idea/
+
 ## Python
 
 # Byte-compiled / optimized / DLL files
