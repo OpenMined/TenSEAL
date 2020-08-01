@@ -166,7 +166,7 @@ class CKKSVector {
     static Ciphertext encrypt(shared_ptr<TenSEALContext> context, double scale,
                               vector<double> pt) {
         if (pt.empty()){
-            throw std::runtime_error("Attempting to encrypt an empty vector")
+            throw std::runtime_error("Attempting to encrypt an empty vector");
         }
         auto slot_count = context->slot_count<CKKSEncoder>();
         if (pt.size() > slot_count)
