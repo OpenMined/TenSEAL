@@ -170,86 +170,17 @@ $ pytest -v tests/
 
 ### C++ Styleguide
 
-All JavaScript must adhere to [JavaScript Standard Style](https://standardjs.com/).
-
-* Prefer the object spread operator (`{...anotherObj}`) to `Object.assign()`
-* Inline `export`s with expressions whenever possible
-  ```js
-  // Use this:
-  export default class ClassName {
-
-  }
-
-  // Instead of:
-  class ClassName {
-
-  }
-  export default ClassName
-  ```
-* Place requires in the following order:
-    * Built in Node Modules (such as `path`)
-    * Built in Atom and Electron Modules (such as `atom`, `remote`)
-    * Local Modules (using relative paths)
-* Place class properties in the following order:
-    * Class methods and properties (methods starting with `static`)
-    * Instance methods and properties
-* [Avoid platform-dependent code](https://flight-manual.atom.io/hacking-atom/sections/cross-platform-compatibility/)
+All C++ code must be formatted based on our [clang-format config file](https://github.com/OpenMined/TenSEAL/blob/master/.clang-format). You can easily setup that into your prefered IDE, so that formatting is applied as you code.
 
 ### Python Styleguide
 
-* Set parameter defaults without spaces around the equal sign
-    * `clear = (count=1) ->` instead of `clear = (count = 1) ->`
-* Use spaces around operators
-    * `count + 1` instead of `count+1`
-* Use spaces after commas (unless separated by newlines)
-* Use parentheses if it improves code clarity.
-* Prefer alphabetic keywords to symbolic keywords:
-    * `a is b` instead of `a == b`
-* Avoid spaces inside the curly-braces of hash literals:
-    * `{a: 1, b: 2}` instead of `{ a: 1, b: 2 }`
-* Include a single line of whitespace between methods.
-* Capitalize initialisms and acronyms in names, except for the first word, which
-  should be lower-case:
-  * `getURI` instead of `getUri`
-  * `uriToOpen` instead of `URIToOpen`
-* Use `slice()` to copy an array
-* Add an explicit `return` when your function ends with a `for`/`while` loop and
-  you don't want it to return a collected array.
-* Use `this` instead of a standalone `@`
-  * `return this` instead of `return @`
-* Place requires in the following order:
-    * Built in Node Modules (such as `path`)
-    * Built in Atom and Electron Modules (such as `atom`, `remote`)
-    * Local Modules (using relative paths)
-* Place class properties in the following order:
-    * Class methods and properties (methods starting with a `@`)
-    * Instance methods and properties
-* [Avoid platform-dependent code](https://flight-manual.atom.io/hacking-atom/sections/cross-platform-compatibility/)
+All Python code must be formatted using [black](https://github.com/psf/black). You can easily setup that into your prefered IDE, so that formatting is applied as you code.
 
 
 ### Documentation Styleguide
 
-* Use [AtomDoc](https://github.com/atom/atomdoc).
-* Use [Markdown](https://daringfireball.net/projects/markdown).
-* Reference methods and classes in markdown with the custom `{}` notation:
-    * Reference classes with `{ClassName}`
-    * Reference instance methods with `{ClassName::methodName}`
-    * Reference class methods with `{ClassName.methodName}`
+TBD
 
-#### Example
-
-```coffee
-# Public: Disable the package with the given name.
-#
-# * `name`    The {String} name of the package to disable.
-# * `options` (optional) The {Object} with disable options (default: {}):
-#   * `trackTime`     A {Boolean}, `true` to track the amount of time taken.
-#   * `ignoreErrors`  A {Boolean}, `true` to catch and ignore errors thrown.
-# * `callback` The {Function} to call after the package has been disabled.
-#
-# Returns `undefined`.
-disablePackage: (name, options, callback) ->
-```
 
 ## Additional Notes
 
