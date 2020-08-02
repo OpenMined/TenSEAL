@@ -1,9 +1,18 @@
 import pytest
 import tenseal as ts
 
-PLAIN_VEC = [[0], [-1], [1], [73, 81, 90], [-73, -81, -90],]
-PLAIN_EMPTY_VEC = [[], ]
-COEFF_MOD_BIT_SIZES = coeff_mod_bit_sizes=[60, 40, 40, 60]
+PLAIN_VEC = [
+    [0],
+    [-1],
+    [1],
+    [73, 81, 90],
+    [-73, -81, -90],
+]
+PLAIN_EMPTY_VEC = [
+    [],
+]
+COEFF_MOD_BIT_SIZES = coeff_mod_bit_sizes = [60, 40, 40, 60]
+
 
 def _almost_equal(vec1, vec2, m_pow_ten):
     if len(vec1) != len(vec2):
@@ -14,6 +23,7 @@ def _almost_equal(vec1, vec2, m_pow_ten):
         if abs(v1 - v2) > upper_bound:
             return False
     return True
+
 
 @pytest.mark.parametrize("plain_vec", PLAIN_VEC)
 def test_bfv_encryption_decryption(plain_vec):
@@ -36,12 +46,14 @@ def test_bfv_secretkey_decryption(plain_vec):
 
     assert decrypted_vec == plain_vec, "Decryption of vector is incorrect."
 
+
 @pytest.mark.parametrize("plain_vec", PLAIN_EMPTY_VEC)
 def test_bfv_empty_encryption(plain_vec):
     context = ts.context(ts.SCHEME_TYPE.BFV, 8192, 1032193)
     with pytest.raises(ValueError) as e:
         bfv_vec = ts.bfv_vector(context, plain_vec)
     assert str(e.value) == "Attempting to encrypt an empty vector"
+
 
 @pytest.mark.parametrize("plain_vec", PLAIN_VEC)
 def test_ckks_encryption_decryption(plain_vec):
