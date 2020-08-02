@@ -572,9 +572,8 @@ CKKSVector CKKSVector::conv2d_im2col(const vector<double>& kernel,
 }
 
 CKKSVector& CKKSVector::conv2d_im2col_inplace(const vector<double>& kernel,
-                                              size_t windows_nb) {
+                                              const size_t windows_nb) {
     vector<double> plain_vec;
-    size_t chunk_size = windows_nb;
     size_t chunks_nb = kernel.size();
 
     // check if vector size is not a power of 2
@@ -589,7 +588,7 @@ CKKSVector& CKKSVector::conv2d_im2col_inplace(const vector<double>& kernel,
     plain_vec.reserve(this->_size);
 
     for (size_t i = 0; i < chunks_nb; i++) {
-        vector<double> tmp(chunk_size, kernel[i]);
+        vector<double> tmp(windows_nb, kernel[i]);
         plain_vec.insert(plain_vec.end(), tmp.begin(), tmp.end());
     }
 
@@ -609,7 +608,7 @@ CKKSVector& CKKSVector::conv2d_im2col_inplace(const vector<double>& kernel,
         tmp = *this;
         chunks_nb = 1 << (static_cast<size_t>(ceil(log2(chunks_nb))) - 1);
         this->context->evaluator->rotate_vector_inplace(
-            tmp.ciphertext, chunk_size * chunks_nb, *galois_keys);
+            tmp.ciphertext, windows_nb * chunks_nb, *galois_keys);
         this->add_inplace(tmp);
     }
 
