@@ -10,15 +10,33 @@ namespace tenseal {
 using namespace seal;
 using namespace std;
 
-TenSEALContext::TenSEALContext(EncryptionParameters parms) {
+TenSEALContext::TenSEALContext(EncryptionParameters parms,
+                               optional<uint> n_threads) {
+    this->dispatcher_setup(n_threads);
     this->base_setup(parms);
     this->keys_setup();
 }
 
-TenSEALContext::TenSEALContext(istream& stream) { this->load(stream); }
-TenSEALContext::TenSEALContext(const std::string& input) { this->load(input); }
-TenSEALContext::TenSEALContext(const TenSEALContextProto& input) {
+TenSEALContext::TenSEALContext(istream& stream, optional<uint> n_threads) {
+    this->dispatcher_setup(n_threads);
+    this->load(stream);
+}
+TenSEALContext::TenSEALContext(const std::string& input,
+                               optional<uint> n_threads) {
+    this->dispatcher_setup(n_threads);
+    this->load(input);
+}
+TenSEALContext::TenSEALContext(const TenSEALContextProto& input,
+                               optional<uint> n_threads) {
+    this->dispatcher_setup(n_threads);
     this->load_proto(input);
+}
+
+void TenSEALContext::dispatcher_setup(optional<uint> n_threads) {
+    this->_threads = n_threads.value_or(get_concurrency());
+    if (this->_threads == 0) this->_threads = get_concurrency();
+
+    this->_dispatcher = make_shared<sync::ThreadPool>(this->_threads);
 }
 
 void TenSEALContext::base_setup(EncryptionParameters parms) {
@@ -65,7 +83,7 @@ void TenSEALContext::keys_setup(optional<PublicKey> public_key,
 
 shared_ptr<TenSEALContext> TenSEALContext::Create(
     scheme_type scheme, size_t poly_modulus_degree, uint64_t plain_modulus,
-    vector<int> coeff_mod_bit_sizes) {
+    vector<int> coeff_mod_bit_sizes, optional<uint> n_threads) {
     EncryptionParameters parms;
     switch (scheme) {
         case scheme_type::BFV:
@@ -82,20 +100,22 @@ shared_ptr<TenSEALContext> TenSEALContext::Create(
             throw invalid_argument("invalid scheme_type");
     }
 
-    return shared_ptr<TenSEALContext>(new TenSEALContext(parms));
+    return shared_ptr<TenSEALContext>(new TenSEALContext(parms, n_threads));
 }
 
-shared_ptr<TenSEALContext> TenSEALContext::Create(istream& stream) {
-    return shared_ptr<TenSEALContext>(new TenSEALContext(stream));
+shared_ptr<TenSEALContext> TenSEALContext::Create(istream& stream,
+                                                  optional<uint> n_threads) {
+    return shared_ptr<TenSEALContext>(new TenSEALContext(stream, n_threads));
 }
 
-shared_ptr<TenSEALContext> TenSEALContext::Create(const std::string& input) {
-    return shared_ptr<TenSEALContext>(new TenSEALContext(input));
+shared_ptr<TenSEALContext> TenSEALContext::Create(const std::string& input,
+                                                  optional<uint> n_threads) {
+    return shared_ptr<TenSEALContext>(new TenSEALContext(input, n_threads));
 }
 
 shared_ptr<TenSEALContext> TenSEALContext::Create(
-    const TenSEALContextProto& input) {
-    return shared_ptr<TenSEALContext>(new TenSEALContext(input));
+    const TenSEALContextProto& input, optional<uint> n_threads) {
+    return shared_ptr<TenSEALContext>(new TenSEALContext(input, n_threads));
 }
 
 shared_ptr<PublicKey> TenSEALContext::public_key() const {
@@ -329,7 +349,8 @@ TenSEALContextProto TenSEALContext::save_proto() const {
 
 std::shared_ptr<TenSEALContext> TenSEALContext::copy() const {
     TenSEALContextProto buffer = this->save_proto();
-    return shared_ptr<TenSEALContext>(new TenSEALContext(buffer));
+    return shared_ptr<TenSEALContext>(
+        new TenSEALContext(buffer, this->_threads));
 }
 
 void TenSEALContext::load(std::istream& stream) {

@@ -15,6 +15,13 @@ def tenseal_deps():
             strip_prefix = "googletest-release-1.10.0",
             url = "https://github.com/google/googletest/archive/release-1.10.0.zip",
         )
+    if "com_google_benchmark" not in native.existing_rules():
+        http_archive(
+            name = "com_google_benchmark",
+            sha256 = "a9d41abe1bd45a707d39fdfd46c01b92e340923bc5972c0b54a48002a9a7cfa3",
+            strip_prefix = "benchmark-8cead007830bdbe94b7cc259e873179d0ef84da6",
+            url = "https://github.com/google/benchmark/archive/8cead007830bdbe94b7cc259e873179d0ef84da6.zip",
+        )
 
     if "com_microsoft_seal" not in native.existing_rules():
         http_archive(

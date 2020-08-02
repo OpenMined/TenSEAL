@@ -17,7 +17,9 @@ RelinKeys = _ts_cpp.RelinKeys
 GaloisKeys = _ts_cpp.GaloisKeys
 
 
-def context(scheme, poly_modulus_degree, plain_modulus=None, coeff_mod_bit_sizes=None):
+def context(
+    scheme, poly_modulus_degree, plain_modulus=None, coeff_mod_bit_sizes=None, n_threads=None
+):
     """Construct a context that holds keys and parameters needed for operating
     encrypted tensors using either BFV or CKKS scheme.
 
@@ -47,12 +49,17 @@ def context(scheme, poly_modulus_degree, plain_modulus=None, coeff_mod_bit_sizes
         raise ValueError("Invalid scheme type, use either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS")
 
     # We can't pass None here, everything should be set prior to this call
+    if isinstance(n_threads, int) and n_threads > 0:
+        return _ts_cpp.TenSEALContext.new(
+            scheme, poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes, n_threads
+        )
+
     return _ts_cpp.TenSEALContext.new(
         scheme, poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes
     )
 
 
-def context_from(buff):
+def context_from(buff, n_threads=None):
     """Construct a context from a serialized buffer.
 
     Args:
@@ -61,6 +68,8 @@ def context_from(buff):
     Returns:
         A TenSEALContext object.
     """
+    if n_threads:
+        return _ts_cpp.TenSEALContext.deserialize(buff, n_threads)
     return _ts_cpp.TenSEALContext.deserialize(buff)
 
 
