@@ -576,6 +576,14 @@ CKKSVector& CKKSVector::conv2d_im2col_inplace(const vector<double>& kernel,
     vector<double> plain_vec;
     size_t chunks_nb = kernel.size();
 
+    if (windows_nb == 0) {
+        throw invalid_argument("Windows number can't be zero");
+    }
+
+    if (kernel.empty()) {
+        throw invalid_argument("Kernel vector can't be empty");
+    }
+
     // check if vector size is not a power of 2
     if (!(chunks_nb && (!(chunks_nb & (chunks_nb - 1))))) {
         throw invalid_argument("Kernel size should be a power of 2");
