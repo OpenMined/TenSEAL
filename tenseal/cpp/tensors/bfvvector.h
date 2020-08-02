@@ -102,7 +102,7 @@ class BFVVector {
 
     static Ciphertext encrypt(shared_ptr<TenSEALContext> context,
                               vector<int64_t> pt) {
-        if (pt.empty()){
+        if (pt.empty()) {
             throw invalid_argument("Attempting to encrypt an empty vector");
         }
         Ciphertext ciphertext(context->seal_context());
