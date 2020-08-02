@@ -12,7 +12,6 @@ def context():
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -42,7 +41,6 @@ def test_add(context, vec1, vec2):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -71,7 +69,6 @@ def test_add_inplace(context, vec1, vec2):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -100,7 +97,6 @@ def test_add_plain(context, vec1, vec2):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -128,7 +124,6 @@ def test_add_plain_inplace(context, vec1, vec2):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -157,7 +152,6 @@ def test_sub(context, vec1, vec2):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -186,7 +180,6 @@ def test_sub_inplace(context, vec1, vec2):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -215,7 +208,6 @@ def test_sub_plain(context, vec1, vec2):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -242,7 +234,6 @@ def test_sub_plain_inplace(context, vec1, vec2):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -272,7 +263,6 @@ def test_mul(context, vec1, vec2):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -301,7 +291,6 @@ def test_mul_inplace(context, vec1, vec2):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -330,7 +319,6 @@ def test_mul_plain(context, vec1, vec2):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -356,6 +344,6 @@ def test_mul_plain_inplace(context, vec1, vec2):
 
 
 def test_size(context):
-    for size in range(10):
+    for size in range(1, 10):
         vec = ts.bfv_vector(context, [1] * size)
         assert vec.size() == size, "Size of encrypted vector is incorrect."

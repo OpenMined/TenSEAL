@@ -11,7 +11,7 @@ PLAIN_VEC = [
 PLAIN_EMPTY_VEC = [
     [],
 ]
-COEFF_MOD_BIT_SIZES = coeff_mod_bit_sizes = [60, 40, 40, 60]
+COEFF_MOD_BIT_SIZES = [60, 40, 40, 60]
 
 
 def _almost_equal(vec1, vec2, m_pow_ten):
@@ -57,7 +57,7 @@ def test_bfv_empty_encryption(plain_vec):
 
 @pytest.mark.parametrize("plain_vec", PLAIN_VEC)
 def test_ckks_encryption_decryption(plain_vec):
-    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, COEFF_MOD_BIT_SIZES)
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=COEFF_MOD_BIT_SIZES)
     scale = pow(2, 40)
 
     ckks_vec = ts.ckks_vector(context, plain_vec, scale)
@@ -67,7 +67,7 @@ def test_ckks_encryption_decryption(plain_vec):
 
 @pytest.mark.parametrize("plain_vec", PLAIN_VEC)
 def test_ckks_encryption_decryption_with_global_scale(plain_vec):
-    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, COEFF_MOD_BIT_SIZES)
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=COEFF_MOD_BIT_SIZES)
     context.global_scale = pow(2, 40)
 
     ckks_vec = ts.ckks_vector(context, plain_vec)
@@ -77,7 +77,7 @@ def test_ckks_encryption_decryption_with_global_scale(plain_vec):
 
 @pytest.mark.parametrize("plain_vec", PLAIN_VEC)
 def test_ckks_secretkey_decryption(plain_vec):
-    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, COEFF_MOD_BIT_SIZES)
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=COEFF_MOD_BIT_SIZES)
     scale = pow(2, 40)
 
     ckks_vec = ts.ckks_vector(context, plain_vec, scale)
@@ -89,7 +89,8 @@ def test_ckks_secretkey_decryption(plain_vec):
 
 @pytest.mark.parametrize("plain_vec", PLAIN_EMPTY_VEC)
 def test_ckks_empty_encryption(plain_vec):
-    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, COEFF_MOD_BIT_SIZES)
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=COEFF_MOD_BIT_SIZES)
+    scale = pow(2, 40)
     with pytest.raises(ValueError) as e:
-        ckks_vec = ts.ckks_vector(context, plain_vec)
+        ckks_vec = ts.ckks_vector(context, plain_vec, scale)
     assert str(e.value) == "Attempting to encrypt an empty vector"

@@ -38,7 +38,7 @@ def precision():
 
 
 @pytest.mark.parametrize(
-    "plain_vec", [[], [0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
+    "plain_vec", [[0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
 )
 def test_negate(context, plain_vec, precision):
     ckks_vec = ts.ckks_vector(context, plain_vec)
@@ -50,7 +50,7 @@ def test_negate(context, plain_vec, precision):
 
 
 @pytest.mark.parametrize(
-    "plain_vec", [[], [0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
+    "plain_vec", [[0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
 )
 def test_negate_inplace(context, plain_vec, precision):
     ckks_vec = ts.ckks_vector(context, plain_vec)
@@ -64,7 +64,6 @@ def test_negate_inplace(context, plain_vec, precision):
 @pytest.mark.parametrize(
     "plain_vec, power, precision",
     [
-        ([], 2, 1),
         ([0], 3, 1),
         ([0, 1, -1, 2, -2], 0, 1),
         ([1, -1, 2, -2], 1, 1),
@@ -98,7 +97,6 @@ def test_power(context, plain_vec, power, precision):
 @pytest.mark.parametrize(
     "plain_vec, power, precision",
     [
-        ([], 2, 1),
         ([0], 3, 1),
         ([0, 1, -1, 2, -2], 0, 1),
         ([1, -1, 2, -2], 1, 1),
@@ -129,7 +127,6 @@ def test_power_inplace(context, plain_vec, power, precision):
 @pytest.mark.parametrize(
     "plain_vec",
     [
-        [],
         [0],
         [1],
         [2],
@@ -156,7 +153,6 @@ def test_square(context, plain_vec, precision):
 @pytest.mark.parametrize(
     "plain_vec",
     [
-        [],
         [0],
         [1],
         [2],
@@ -179,7 +175,6 @@ def test_square_inplace(context, plain_vec, precision):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -219,7 +214,6 @@ def test_add(context, vec1, vec2, precision):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -257,7 +251,6 @@ def test_add_inplace(context, vec1, vec2, precision):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -290,7 +283,6 @@ def test_add_plain(context, vec1, vec2, precision):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -322,7 +314,6 @@ def test_radd_plain(context, vec1, vec2, precision):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -354,7 +345,6 @@ def test_add_plain_inplace(context, vec1, vec2, precision):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -395,7 +385,6 @@ def test_sub(context, vec1, vec2, precision):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -435,7 +424,6 @@ def test_sub_inplace(context, vec1, vec2, precision):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -470,7 +458,6 @@ def test_sub_plain(context, vec1, vec2, precision):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -504,7 +491,6 @@ def test_rsub_plain(context, vec1, vec2, precision):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -538,7 +524,6 @@ def test_sub_plain_inplace(context, vec1, vec2, precision):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -579,7 +564,6 @@ def test_mul(context, vec1, vec2, precision):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -619,7 +603,6 @@ def test_mul_inplace(context, vec1, vec2, precision):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -654,7 +637,6 @@ def test_mul_plain(context, vec1, vec2, precision):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -688,7 +670,6 @@ def test_rmul_plain(context, vec1, vec2, precision):
 @pytest.mark.parametrize(
     "vec1, vec2",
     [
-        ([], []),
         ([0], [0]),
         ([1], [0]),
         ([-1], [0]),
@@ -1155,6 +1136,6 @@ def test_depth_max(poly_mod_degree, coeff_mod_bit_sizes, max_depth):
 
 
 def test_size(context):
-    for size in range(10):
+    for size in range(1, 10):
         vec = ts.ckks_vector(context, [1] * size)
         assert vec.size() == size, "Size of encrypted vector is incorrect."

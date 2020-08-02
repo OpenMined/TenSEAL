@@ -2,8 +2,8 @@
 #define TENSEAL_TENSOR_BFVVECTOR_H
 
 #include <memory>
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 #include "seal/seal.h"
 #include "tenseal/cpp/context/tensealcontext.h"
