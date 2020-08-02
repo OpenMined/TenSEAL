@@ -574,22 +574,22 @@ CKKSVector CKKSVector::conv2d_im2col(const vector<double>& kernel,
 CKKSVector& CKKSVector::conv2d_im2col_inplace(const vector<double>& kernel,
                                               size_t windows_nb) {
     vector<double> plain_vec;
-    size_t chunck_size = windows_nb;
-    size_t chuncks_nb = kernel.size();
+    size_t chunk_size = windows_nb;
+    size_t chunks_nb = kernel.size();
 
     // check if vector size is not a power of 2
-    if (!(chuncks_nb && (!(chuncks_nb & (chuncks_nb - 1))))) {
+    if (!(chunks_nb && (!(chunks_nb & (chunks_nb - 1))))) {
         throw invalid_argument("Kernel size should be a power of 2");
     }
 
-    if (this->_size / windows_nb != chuncks_nb) {
+    if (this->_size / windows_nb != chunks_nb) {
         throw invalid_argument("Matrix shape doesn't match with vector size");
     }
 
     plain_vec.reserve(this->_size);
 
-    for (size_t i = 0; i < chuncks_nb; i++) {
-        vector<double> tmp(chunck_size, kernel[i]);
+    for (size_t i = 0; i < chunks_nb; i++) {
+        vector<double> tmp(chunk_size, kernel[i]);
         plain_vec.insert(plain_vec.end(), tmp.begin(), tmp.end());
     }
 
@@ -605,11 +605,11 @@ CKKSVector& CKKSVector::conv2d_im2col_inplace(const vector<double>& kernel,
 
     CKKSVector tmp = *this;
 
-    while (chuncks_nb > 1) {
+    while (chunks_nb > 1) {
         tmp = *this;
-        chuncks_nb = 1 << (static_cast<size_t>(ceil(log2(chuncks_nb))) - 1);
+        chunks_nb = 1 << (static_cast<size_t>(ceil(log2(chunks_nb))) - 1);
         this->context->evaluator->rotate_vector_inplace(
-            tmp.ciphertext, chunck_size * chuncks_nb, *galois_keys);
+            tmp.ciphertext, chunk_size * chunks_nb, *galois_keys);
         this->add_inplace(tmp);
     }
 
