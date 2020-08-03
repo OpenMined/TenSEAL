@@ -564,6 +564,67 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     return *this;
 }
 
+CKKSVector CKKSVector::conv2d_im2col(const vector<double>& kernel,
+                                     size_t windows_nb) {
+    CKKSVector new_vec = *this;
+    new_vec.conv2d_im2col_inplace(kernel, windows_nb);
+    return new_vec;
+}
+
+CKKSVector& CKKSVector::conv2d_im2col_inplace(const vector<double>& kernel,
+                                              const size_t windows_nb) {
+    vector<double> plain_vec;
+    size_t chunks_nb = kernel.size();
+
+    if (windows_nb == 0) {
+        throw invalid_argument("Windows number can't be zero");
+    }
+
+    if (kernel.empty()) {
+        throw invalid_argument("Kernel vector can't be empty");
+    }
+
+    // check if vector size is not a power of 2
+    if (!(chunks_nb && (!(chunks_nb & (chunks_nb - 1))))) {
+        throw invalid_argument("Kernel size should be a power of 2");
+    }
+
+    if (this->_size / windows_nb != chunks_nb) {
+        throw invalid_argument("Matrix shape doesn't match with vector size");
+    }
+
+    plain_vec.reserve(this->_size);
+
+    for (size_t i = 0; i < chunks_nb; i++) {
+        vector<double> tmp(windows_nb, kernel[i]);
+        plain_vec.insert(plain_vec.end(), tmp.begin(), tmp.end());
+    }
+
+    // replicate the vector in order to be able to do multiple matrix
+    // multiplications
+    size_t slot_count = this->context->slot_count<CKKSEncoder>();
+    replicate_vector(plain_vec, slot_count);
+    this->_size = slot_count;
+
+    this->mul_plain_inplace(plain_vec);
+
+    auto galois_keys = this->context->galois_keys();
+
+    CKKSVector tmp = *this;
+
+    while (chunks_nb > 1) {
+        tmp = *this;
+        chunks_nb = 1 << (static_cast<size_t>(ceil(log2(chunks_nb))) - 1);
+        this->context->evaluator->rotate_vector_inplace(
+            tmp.ciphertext, windows_nb * chunks_nb, *galois_keys);
+        this->add_inplace(tmp);
+    }
+
+    this->_size = windows_nb;
+
+    return *this;
+}
+
 void CKKSVector::load_proto(const CKKSVectorProto& vec) {
     if (this->tenseal_context() == nullptr) {
         throw invalid_argument("context missing for deserialization");
