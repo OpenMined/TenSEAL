@@ -1,8 +1,12 @@
-import tenseal as ts
-import pytest
-import numpy as np
 import copy
 import pickle
+import math
+import pytest
+
+import numpy as np
+from skimage.util.shape import view_as_windows
+
+import tenseal as ts
 
 
 def _almost_equal(vec1, vec2, m_pow_ten):
@@ -1135,6 +1139,44 @@ def test_polynomial_rescale_off(context, data, polynom):
     with pytest.raises(ValueError) as e:
         result = ct.polyval(polynom)
     assert str(e.value) == "scale mismatch"
+
+
+@pytest.mark.parametrize(
+    "input_size, kernel_size", [(2, 2), (3, 2), (4, 2), (4, 3), (7, 3), (12, 5)]
+)
+def test_conv2d_im2col(context, input_size, kernel_size):
+    def generate_input(input_size, kernel_size, stride=1):
+        # generated random values and prepare the inputs
+        x = np.random.randn(input_size, input_size)
+        kernel = np.random.randn(kernel_size, kernel_size)
+
+        out_h, out_w = (
+            (x.shape[0] - kernel.shape[0]) // stride + 1,
+            (x.shape[1] - kernel.shape[1]) // stride + 1,
+        )
+
+        new_x = view_as_windows(x, kernel.shape, step=stride)
+        new_x = new_x.reshape(out_h * out_w, kernel.shape[0] * kernel.shape[1])
+
+        next_power2 = pow(2, math.ceil(math.log2(kernel.size)))
+        pad_width = next_power2 - kernel.size
+        new_x = np.pad(new_x, ((0, 0), (0, pad_width)))
+
+        kernel = np.pad(kernel.flatten(), (0, pad_width))
+        return new_x, kernel
+
+    # generated galois keys in order to do rotation on ciphertext vectors
+    context.generate_galois_keys()
+
+    x, kernel = generate_input(input_size, kernel_size)
+    windows_nb = x.shape[0]
+
+    x_enc = ts.ckks_vector(context, x.flatten(order="F").tolist())
+    y_enc = x_enc.conv2d_im2col(kernel.tolist(), windows_nb)
+    decrypted_result = y_enc.decrypt()
+
+    expected = (x @ kernel).tolist()
+    assert _almost_equal(decrypted_result, expected, 0)
 
 
 @pytest.mark.parametrize(
