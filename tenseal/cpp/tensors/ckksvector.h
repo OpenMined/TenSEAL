@@ -123,8 +123,10 @@ class CKKSVector {
     CKKSVector& polyval_inplace(const vector<double>& coefficients);
 
     /*
-    Image Block to Columns .
-    */
+     * Image Block to Columns.
+     * The input matrix should be encoded in a vertical scan (column-major).
+     * The kernel vector should be padded with zeros to the next power of 2
+     */
     CKKSVector conv2d_im2col(const vector<double>& kernel, size_t windows_nb);
     CKKSVector& conv2d_im2col_inplace(const vector<double>& kernel,
                                       size_t windows_nb);
