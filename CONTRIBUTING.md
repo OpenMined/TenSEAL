@@ -73,7 +73,6 @@ Explain the problem and include additional details to help maintainers reproduce
 
 Provide more context by answering these questions:
 
-* **Can you reproduce the problem in [safe mode](https://flight-manual.atom.io/hacking-atom/sections/debugging/#diagnose-runtime-performance-problems-with-the-dev-tools-cpu-profiler)?**
 * **Did the problem start happening recently** (e.g. after updating to a new version of TenSEAL) or was this always a problem?
 * If the problem started happening recently, **can you reproduce the problem in an older version of TenSEAL?** What's the most recent version in which the problem doesn't happen? You can download older versions of TenSEAL from [the releases page](https://github.com/OpenMined/TenSEAL/releases).
 * **Can you reliably reproduce the issue?** If not, provide details about how often the problem happens and under which conditions it normally happens.
@@ -85,7 +84,7 @@ Include details about your configuration and environment:
 
 ### Suggesting Enhancements
 
-This section guides you through submitting an enhancement suggestion for TenSEAL, including completely new features and minor improvements to existing functionality. Following these guidelines helps maintainers and the community understand your suggestion :pencil: and find related suggestions :mag_right:.
+This section guides you through submitting an enhancement suggestion for TenSEAL, including completely new features and minor improvements to existing functionalities. Following these guidelines helps maintainers and the community understand your suggestion :pencil: and find related suggestions :mag_right:.
 
 Before creating enhancement suggestions, please do a quick search on [the existing issues](https://github.com/OpenMined/TenSEAL/issues/) to make sure no one has already suggested it, as you might find out that you don't need to create one. When you are creating an enhancement suggestion, please [include as many details as possible](#how-do-i-submit-a-good-enhancement-suggestion) by filling out the required template, and including the steps that you imagine you would take if the feature you're requesting existed.
 
@@ -98,7 +97,7 @@ Enhancement suggestions are tracked as [GitHub issues](https://guides.github.com
 * **Provide specific examples to demonstrate the steps**. Include copy/pasteable snippets which you use in those examples, as [Markdown code blocks](https://help.github.com/articles/markdown-basics/#multiple-lines).
 * **Describe the current behavior** and **explain which behavior you expected to see instead** and why.
 * **Explain why this enhancement would be useful** to most TenSEAL users.
-* **Specify which version of TenSEAL you're using.** You can get the exact version by running.
+* **Specify which version of TenSEAL you're using.**
 * **Specify the name and version of the OS you're using.**
 
 ### Your First Code Contribution
@@ -118,14 +117,14 @@ TenSEAL can be developed locally. Check [this section](#your-local-development-e
 
 The process described here has several goals:
 
-- Maintain Atom's quality
+- Maintain TenSEAL's quality
 - Fix problems that are important to users
-- Engage the community in working toward the best possible Atom
-- Enable a sustainable system for Atom's maintainers to review contributions
+- Engage the community in working toward the best possible TenSEAL
+- Enable a sustainable system for TenSEAL's maintainers to review contributions
 
 Please follow these steps to have your contribution considered by the maintainers:
 
-1. Follow all instructions in [the template](PULL_REQUEST_TEMPLATE.md)
+1. Follow all instructions in the pull request template
 2. Follow the [styleguides](#styleguides)
 3. After you submit your pull request, verify that all [status checks](https://help.github.com/articles/about-status-checks/) are passing <details><summary>What if the status checks are failing?</summary>If a status check is failing, and you believe that the failure is unrelated to your change, please leave a comment on the pull request explaining why you believe the failure is unrelated. A maintainer will re-run the status check for you. If we conclude that the failure was a false positive, then we will open an issue to track that problem with our status check suite.</details>
 
@@ -200,12 +199,9 @@ The labels are loosely grouped by their purpose, but it's not required that ever
 | `Build` | Related to the build of the package |
 | `duplicate` | This issue or pull request already exists |
 | `Good first issue` | Perfect for beginners, welcome to OpenMined!  |
-| `help wanted` | 
-Extra attention is needed  |
-| `invalid` | 
-This doesn't seem right  |
-| `Priority: 1 - Immediate` | 
-Must be fixed immediately and cannot wait  |
+| `help wanted` | Extra attention is needed  |
+| `invalid` | This doesn't seem right  |
+| `Priority: 1 - Immediate` | Must be fixed immediately and cannot wait  |
 | `` |  |
 | `` |  |
 | `` |  |
