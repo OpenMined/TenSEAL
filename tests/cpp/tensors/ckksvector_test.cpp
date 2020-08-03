@@ -237,6 +237,14 @@ TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
     ASSERT_TRUE(are_close(decrypted_result, expected_result));
 }
 
+
+TEST_P(CKKSVectorTest, TestEmptyPlaintext) {
+    auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
+    ASSERT_TRUE(ctx != nullptr);
+
+    EXPECT_THROW(CKKSVector(ctx, std::vector<double>({})), std::exception);
+}
+
 INSTANTIATE_TEST_CASE_P(TestCKKSVector, CKKSVectorTest,
                          ::testing::Values(false, true));
 
