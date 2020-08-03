@@ -8,3 +8,4 @@ pytest-benchmark[histogram]
 setuptools>=41.0.0
 pygal
 pygaljs
+scikit-image
