@@ -191,39 +191,37 @@ This section lists the labels we use to help us track and manage issues and pull
 
 The labels are loosely grouped by their purpose, but it's not required that every issue have a label from every group or that an issue can't have more than one label from the same group.
 
-#### Type of Issue and Issue State
 
 | Label name | Description |
 | --- | --- |
-| `API` | Related to the API |
-| `Build` | Related to the build of the package |
-| `duplicate` | This issue or pull request already exists |
-| `Good first issue` | Perfect for beginners, welcome to OpenMined!  |
-| `help wanted` | Extra attention is needed  |
-| `invalid` | This doesn't seem right  |
-| `Priority: 1 - Immediate` | Must be fixed immediately and cannot wait  |
-| `` |  |
-| `` |  |
-| `` |  |
-| `` |  |
-| `` |  |
-| `` |  |
-| `` |  |
-| `` |  |
-| `` |  |
-| `` |  |
-| `` |  |
-| `` |  |
-| `` |  |
-| `` |  |
-| `` |  |
-| `` |  |
+| API | Related to the API |
+| Build | Related to the build of the package |
+| Good first issue :mortar_board: | Perfect for beginners, welcome to OpenMined! |
+| Priority: 1 - Immediate :fire: | Must be fixed immediately and cannot wait |
+| Priority: 2 - High :cold_sweat: | Should be fixed as quickly as possible, ideally within the current or following sprint |
+| Priority: 3 - Medium :unamused: | Should be fixed soon, but there may be other pressing matters that come first |
+| Priority: 4 - Low :sunglasses: | Should only be scheduled if it's important relative to other issues |
+| Severity: 1 - Critical :fire: | Causes a failure of the complete software system, subsystem or a program within the system |
+| Severity: 2 - High :cold_sweat: | Does not cause a failure, but causes the system to be incorrect, incomplete, or inconsistent |
+| Severity: 3 - Medium :unamused: | Does not cause a failure, impair usability, or interfere with the system |
+| Severity: 4 - Low :sunglasses: | An aesthetic issue or is the result of non-conformance to a standard |
+| Status: Abandoned :sob: | This was assigned to someone but is not in active development |
+| Status: Available :wave: | Available for assignment, who wants it? |
+| Status: Blocked :heavy_multiplication_x: | Cannot work on this because of some other incomplete work |
+| Status: Completed :heavy_check_mark: | Finished with all expected deliverables |
+| Status: In Progress :star2: | This is actively being worked on |
+| Status: Investigating :mag: | Something we are looking in to, but not currently in active development |
+| Status: Review Needed :raising_hand: | This needs someone to approve, deny, comment, or request changes |
+| Status: Stale :bread: | Been open for a while with no activity |
+| Type: Bug :bug: | Some functionality not working in the codebase as intended |
+| Type: Discussion :speaker: | When further discussion and debate is required |
+| Type: Documentation :books: | Improvements or additions in documentation for some file, feature, or codebase |
+| Type: Epic :call_me_hand: | Describes a large amount of functionality that will likely be broken down into smaller issues |
+| Type: Improvement :chart_with_upwards_trend: | Performance improvement not introducing a new feature or requiring a major refactor |
+| Type: New Feature :heavy_plus_sign: | Introduction of a completely new addition to the codebase |
+| Type: Question :grey_question: | Question about implementation or some technical aspect |
+| Type: Refactor :hammer: | A complete overhaul of a file, feature, or codebase |
+| Type: Research :microscope: | When further investigation into a subject is required |
+| Type: Testing :test_tube: | Add testing or improving existing testing of a file, feature, or codebase |
+| duplicate | This issue or pull request already exists |
 
-
-#### Pull Request Labels
-
-| Label name | Description
-| --- | --- | --- | --- |
-| `work-in-progress` | Pull requests which are still being worked on, more changes will follow. |
-
-[search-atom-repo-label-enhancement]: https://github.com/search?q=is%3Aopen+is%3Aissue+repo%3Aatom%2Fatom+label%3Aenhancement
