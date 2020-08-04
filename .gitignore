@@ -36,6 +36,9 @@
 # VSCODE
 .vscode/
 
+# Jetbrains tools
+.idea/
+
 ## Python
 
 # Byte-compiled / optimized / DLL files
@@ -49,6 +52,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+cmake-build-debug
 develop-eggs/
 dist/
 downloads/
