@@ -3,8 +3,13 @@ cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+if (WIN32)
+    set(_VCPKG_ROOT_DIR "vcpkg")
+    set(VCPKG_TARGET_TRIPLET "x64-windows-static")
+endif()
+
 include(FindProtobuf)
-find_package(Protobuf 1.3 REQUIRED)
+find_package(Protobuf REQUIRED)
 
 set(Protobuf_USE_STATIC_LIBS YES)
 include_directories(${Protobuf_INCLUDE_DIRS})

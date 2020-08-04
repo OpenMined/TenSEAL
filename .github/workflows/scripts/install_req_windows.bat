@@ -8,5 +8,4 @@ cd vcpkg
 ./bootstrap-vcpkg.sh
 ./vcpkg integrate install
 
-vcpkg install protobuf
-vcpkg install protobuf:x64-windows-static
+vcpkg install protobuf protobuf:x64-windows protobuf:x64-windows-static
