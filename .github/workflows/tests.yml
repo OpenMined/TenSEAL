@@ -45,7 +45,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8]
-        os: [macos-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -58,6 +58,9 @@ jobs:
     - name: Install dependencies MacOS
       run: .github/workflows/scripts/install_req_macos.sh 
       if: ${{ matrix.os == 'macos-latest' }}
+    - name: Install dependencies Windows
+      run: .github/workflows/scripts/install_req_windows.bat 
+      if: ${{ matrix.os == 'windows-latest' }}
     - name: Build the library
       run: |
         # fetch third_party libraries
