@@ -45,16 +45,19 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
-        os: [ubuntu-latest]
+        os: [macos-latest, ubuntu-latest]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - name: Install dependencies Ubuntu
       run: .github/workflows/scripts/install_req_ubuntu.sh 
       if: ${{ matrix.os == 'ubuntu-latest' }}
+    - name: Install dependencies MacOS
+      run: .github/workflows/scripts/install_req_macos.sh 
+      if: ${{ matrix.os == 'macos-latest' }}
     - name: Build the library
       run: |
         # fetch third_party libraries
@@ -75,7 +78,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
-        os: [ubuntu-latest]
+        os: [macos-latest, ubuntu-latest]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -85,6 +88,8 @@ jobs:
     - name: Install dependencies
       run: .github/workflows/scripts/install_req_ubuntu.sh 
       if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: .github/workflows/scripts/install_req_macos.sh 
+      if: ${{ matrix.os == 'macos-latest' }}
     - name: Build the library
       run: |
         # fetch third_party libraries
