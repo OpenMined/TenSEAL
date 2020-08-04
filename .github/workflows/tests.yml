@@ -61,7 +61,7 @@ jobs:
     - name: Install dependencies Windows
       run: .github/workflows/scripts/install_req_windows.bat 
       if: ${{ matrix.os == 'windows-latest' }}
-    - name: Setup msbuild
+    - name: Install dependencies Windows - msbuild
       uses: microsoft/setup-msbuild@v1.0.0
       if: ${{ matrix.os == 'windows-latest' }}
     - name: Build the library for Ubuntu/MacOS
