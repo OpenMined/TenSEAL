@@ -7,12 +7,12 @@ on:
     types: [ opened, synchronize, reopened ]
 
 jobs:
-  TenSEAL:
+  Linter:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
-        os: [macos-latest, ubuntu-latest]
+        python-version: [3.8]
+        os: [ubuntu-latest]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -25,18 +25,35 @@ jobs:
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 --config=.flake8 --exclude=tenseal/sealapi,tests/python/sealapi .
-        black --check --exclude "sealapi" tenseal/ tests/python/tenseal
+        flake8 --config=.flake8 .
+        black --check tenseal/ tests/python/
         # exit-zero treats all errors as warnings.
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
     - name: Lint with clang-format
       run: |
         # lint files (all .cpp and .h files) inplace
-        find ./tenseal/  \( -iname *.h -o -iname *.cpp \) -a -not -path "*sealapi*" | xargs clang-format -i -style='file'
+        find ./tenseal/  \( -iname *.h -o -iname *.cpp \) | xargs clang-format -i -style='file'
         # print changes
         git diff
         # already well formated if 'git diff' doesn't output
         ! ( git diff |  grep -q ^ ) || return 1
+
+
+  TenSEAL:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+        os: [ubuntu-latest]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: .github/workflows/scripts/install_req_ubuntu.sh 
+      if: ${{ matrix.os == 'ubuntu-latest' }}
     - name: Build the library
       run: |
         # fetch third_party libraries
@@ -57,8 +74,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
-        os: [macos-latest, ubuntu-latest]
-
+        os: [ubuntu-latest]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -68,19 +84,6 @@ jobs:
     - name: Install dependencies
       run: .github/workflows/scripts/install_req_ubuntu.sh 
       if: ${{ matrix.os == 'ubuntu-latest' }}
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 --config=.flake8 ./tenseal/sealapi ./tests/python/sealapi
-        black --check tenseal/sealapi tests/python/sealapi
-    - name: Lint with clang-format
-      run: |
-        # lint files (all .cpp and .h files) inplace
-        find ./tenseal/sealapi -iname *.h -o -iname *.cpp | xargs clang-format -i -style='file'
-        # print changes
-        git diff
-        # already well formated if 'git diff' doesn't output
-        ! ( git diff |  grep -q ^ ) || return 1
     - name: Build the library
       run: |
         # fetch third_party libraries
