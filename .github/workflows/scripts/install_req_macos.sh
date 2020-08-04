@@ -2,7 +2,7 @@
 
 set -e
 
-brew install protobuf-compiler
+brew install protobuf
 
 python -m pip install --upgrade pip
 pip install -r requirements_dev.txt
