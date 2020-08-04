@@ -5,14 +5,12 @@ project(tenseal)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-include(FindProtobuf)
-
 if (WIN32)
-    find_package(Protobuf REQUIRED
-    HINTS
-       "vcpkg/packages/protobuf_x86-windows"
-        "vcpkg/packages/protobuf_x64-windows-static")
+    set(_VCPKG_ROOT_DIR "vcpkg")
+    set(VCPKG_TARGET_TRIPLET "x64-windows-static")
 endif()
+
+include(FindProtobuf)
 
 include_directories(${Protobuf_INCLUDE_DIRS})
 

@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 include(FindProtobuf)
-find_package(Protobuf REQUIRED)
+find_package(Protobuf 1.3 REQUIRED)
 
 set(Protobuf_USE_STATIC_LIBS YES)
 include_directories(${Protobuf_INCLUDE_DIRS})
