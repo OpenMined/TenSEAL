@@ -133,6 +133,11 @@ While the prerequisites above must be satisfied prior to having your pull reques
 
 ## Your Local Development Environment
 
+Before being able to make any code contribution, you need to be able to setup your local environment to make changes, build the new library, as well as running the tests to make sure previous functionalities are still working, and to tests new ones.
+
+> **Note:** You can always use our [Docker images](https://hub.docker.com/r/openmined/tenseal) for a ready to use environment. We provide images for different Python versions on every release or code change in the master branch, so it's also easy to try older non-released versions.
+
+
 ### Fetching Third Party Libraries
 
 After cloning TenSEAL into your machine, or cloning one of your forks, you must make sure to fetch thrid party libraries that TenSEAL depends on, you can do that by running:
@@ -144,7 +149,14 @@ $ git submodule update
 
 
 ### Building TenSEAL
-TODO
+
+You can build and install the library (with Python bindings) locally by running:
+
+```bash
+$ pip install .
+```
+
+This will trigger the build of the C++ library as well as the Python bindings. Please refer to [this section](https://github.com/OpenMined/TenSEAL#build-from-source) for more information about the dependencies required to build TenSEAL.
 
 ### Testing Your Changes
 
@@ -152,16 +164,28 @@ TODO
 
 If you use Bazel, you can do that pretty easily by running:
 
-TODO
+```bash
+$ 
+```
 
 Otherwise, you can always build the tests using CMake for the C++ test, and run them as follows:
 
+```bash
+$ 
+```
+
 #### Python
 
-The Python tests can be ran as follows:
+The Python tests can be ran using pytest:
 
 ```bash
 $ pytest -v tests/
+```
+
+You can also start the tests with Bazel:
+
+```bash
+$ 
 ```
 
 
