@@ -8,12 +8,11 @@ on:
 
 jobs:
   TenSEAL:
-
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
-
+        os: [macos-latest, ubuntu-latest]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -21,11 +20,8 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install cmake clang libprotobuf-dev protobuf-compiler
-        python -m pip install --upgrade pip
-        pip install -r requirements_dev.txt
+      run: .github/workflows/scripts/install_req_ubuntu.sh 
+      if: ${{ matrix.os == 'ubuntu-latest' }}
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -57,10 +53,11 @@ jobs:
         make && CTEST_OUTPUT_ON_FAILURE=1 make test
 
   SEAL_API:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
+        os: [macos-latest, ubuntu-latest]
 
     steps:
     - uses: actions/checkout@v2
@@ -69,11 +66,8 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install cmake clang libprotobuf-dev protobuf-compiler
-        python -m pip install --upgrade pip
-        pip install -r requirements_dev.txt
+      run: .github/workflows/scripts/install_req_ubuntu.sh 
+      if: ${{ matrix.os == 'ubuntu-latest' }}
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
