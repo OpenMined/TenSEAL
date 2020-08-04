@@ -6,12 +6,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 if (WIN32)
     set(_VCPKG_ROOT_DIR "vcpkg")
     set(VCPKG_TARGET_TRIPLET "x64-windows-static")
+    set(PROTOBUF_USE_DLLS ON)
+else
+    set(Protobuf_USE_STATIC_LIBS YES)
 endif()
 
 include(FindProtobuf)
 find_package(Protobuf REQUIRED)
 
-set(Protobuf_USE_STATIC_LIBS YES)
 include_directories(${Protobuf_INCLUDE_DIRS})
 
 file(GLOB PROTOBUF_FILELIST tensealcontext.proto tensors.proto)

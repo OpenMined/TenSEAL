@@ -9,3 +9,5 @@ cd vcpkg
 ./vcpkg integrate install
 
 vcpkg install protobuf protobuf:x64-windows protobuf:x64-windows-static
+
+vcpkg list
