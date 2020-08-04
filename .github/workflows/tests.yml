@@ -72,54 +72,54 @@ jobs:
         cd tenseal/proto && cmake . && make && cd ../../
         cmake . -D BUILD_TEST=TRUE
         make && CTEST_OUTPUT_ON_FAILURE=1 make test
-
-  SEAL_API:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        python-version: [3.8]
-        os: [macos-latest, ubuntu-latest]
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies Ubuntu
-      run: .github/workflows/scripts/install_req_ubuntu.sh 
-      if: ${{ matrix.os == 'ubuntu-latest' }}
-    - name: Install dependencies MacOS
-      run: .github/workflows/scripts/install_req_macos.sh 
-      if: ${{ matrix.os == 'macos-latest' }}
-    - name: Build the library
-      run: |
-        # fetch third_party libraries
-        git submodule init && git submodule update
-        # we need to install tenseal in order to build the cpp library
-        pip install .
-    - name: Test with pytest
-      run: |
-        pytest -v ./tests/python/sealapi
-
-
-  BAZEL:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        python-version: [3.8]
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Run gtest
-        timeout-minutes: 15
-        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/cpp/...
-      - name: Run SEALAPI tests
-        timeout-minutes: 15
-        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/python/sealapi/...
-      - name: Run TenSEAL tests
-        timeout-minutes: 15
-        run: bazel test --test_output=all --spawn_strategy=standalone --test_output=streamed --local_sigkill_grace_seconds=30 --test_timeout=900 //tests/python/tenseal/...
+# 
+#   SEAL_API:
+#     runs-on: ${{ matrix.os }}
+#     strategy:
+#       matrix:
+#         python-version: [3.8]
+#         os: [macos-latest, ubuntu-latest]
+#     steps:
+#     - uses: actions/checkout@v2
+#     - name: Set up Python ${{ matrix.python-version }}
+#       uses: actions/setup-python@v1
+#       with:
+#         python-version: ${{ matrix.python-version }}
+#     - name: Install dependencies Ubuntu
+#       run: .github/workflows/scripts/install_req_ubuntu.sh 
+#       if: ${{ matrix.os == 'ubuntu-latest' }}
+#     - name: Install dependencies MacOS
+#       run: .github/workflows/scripts/install_req_macos.sh 
+#       if: ${{ matrix.os == 'macos-latest' }}
+#     - name: Build the library
+#       run: |
+#         # fetch third_party libraries
+#         git submodule init && git submodule update
+#         # we need to install tenseal in order to build the cpp library
+#         pip install .
+#     - name: Test with pytest
+#       run: |
+#         pytest -v ./tests/python/sealapi
+# 
+# 
+#   BAZEL:
+#     runs-on: ${{ matrix.os }}
+#     strategy:
+#       matrix:
+#         os: [ubuntu-latest, macos-latest]
+#         python-version: [3.8]
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: Set up Python ${{ matrix.python-version }}
+#         uses: actions/setup-python@v1
+#         with:
+#           python-version: ${{ matrix.python-version }}
+#       - name: Run gtest
+#         timeout-minutes: 15
+#         run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/cpp/...
+#       - name: Run SEALAPI tests
+#         timeout-minutes: 15
+#         run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/python/sealapi/...
+#       - name: Run TenSEAL tests
+#         timeout-minutes: 15
+#         run: bazel test --test_output=all --spawn_strategy=standalone --test_output=streamed --local_sigkill_grace_seconds=30 --test_timeout=900 //tests/python/tenseal/...
