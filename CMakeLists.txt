@@ -56,7 +56,7 @@ set(SEALAPI_SOURCES
 pybind11_add_module(_sealapi_cpp ${SEALAPI_SOURCES})
 
 if(NOT WIN32)
-    target_link_libraries(tenseal PRIVATE seal)
+    target_link_libraries(tenseal PRIVATE seal ${Protobuf_LIBRARIES})
     target_link_libraries(_tenseal_cpp PRIVATE seal tenseal_proto ${Protobuf_LIBRARIES})
     target_link_libraries(_sealapi_cpp PRIVATE seal)
 endif()
