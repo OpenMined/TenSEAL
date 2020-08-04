@@ -12,7 +12,7 @@ BFVVector duplicate(const BFVVector& in) {
     return BFVVector(in.tenseal_context(), vec);
 }
 
-class BFVVectorTest : public TestWithParam</*serialize=*/bool>  {
+class BFVVectorTest : public TestWithParam</*serialize=*/bool> {
    protected:
     void SetUp() {}
 };
@@ -25,9 +25,9 @@ TEST_P(BFVVectorTest, TestCreateBFV) {
 
     auto l = BFVVector(ctx, vector<int64_t>({1, 2, 3}));
 
-     if (should_serialize_first) {
-         l = duplicate(l);
-     }
+    if (should_serialize_first) {
+        l = duplicate(l);
+    }
 
     ASSERT_EQ(l.size(), 3);
     ASSERT_EQ(l.ciphertext_size(), 2);
@@ -53,9 +53,9 @@ TEST_P(BFVVectorTest, TestBFVAdd) {
     l.add_inplace(r);
     l.add_inplace(r);
 
-     if (should_serialize_first) {
-         l = duplicate(l);
-     }
+    if (should_serialize_first) {
+        l = duplicate(l);
+    }
 
     ASSERT_EQ(l.ciphertext_size(), 2);
     decr = l.decrypt();
@@ -84,9 +84,9 @@ TEST_P(BFVVectorTest, TestBFVMul) {
     l.mul_inplace(r);
     l.mul_inplace(r);
 
-     if (should_serialize_first) {
-         l = duplicate(l);
-     }
+    if (should_serialize_first) {
+        l = duplicate(l);
+    }
 
     ASSERT_EQ(l.ciphertext_size(), 2);
 
@@ -95,16 +95,14 @@ TEST_P(BFVVectorTest, TestBFVMul) {
 }
 
 TEST_P(BFVVectorTest, TestEmptyPlaintext) {
-
     auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
     EXPECT_THROW(BFVVector(ctx, std::vector<int64_t>({})), std::exception);
 }
 
-
 INSTANTIATE_TEST_CASE_P(TestBFVVector, BFVVectorTest,
-                         ::testing::Values(false, true));
+                        ::testing::Values(false, true));
 
 }  // namespace
 }  // namespace tenseal
