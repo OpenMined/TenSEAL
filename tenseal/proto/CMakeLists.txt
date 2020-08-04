@@ -1,6 +1,8 @@
 include(FindProtobuf)
 find_package(Protobuf REQUIRED)
+
 set(Protobuf_USE_STATIC_LIBS YES)
+include_directories(${Protobuf_INCLUDE_DIRS})
 
 file(GLOB PROTOBUF_FILELIST tensealcontext.proto tensors.proto)
 
