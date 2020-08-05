@@ -244,9 +244,13 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              py::arg("coeff_mod_bit_sizes") = vector<int>(),
              py::arg("n_threads") = get_concurrency())
         .def("public_key", &TenSEALContext::public_key)
+        .def("has_public_key", &TenSEALContext::has_public_key)
         .def("secret_key", &TenSEALContext::secret_key)
+        .def("has_secret_key", &TenSEALContext::has_secret_key)
         .def("relin_keys", &TenSEALContext::relin_keys)
+        .def("has_relin_keys", &TenSEALContext::has_relin_keys)
         .def("galois_keys", &TenSEALContext::galois_keys)
+        .def("has_galois_keys", &TenSEALContext::has_galois_key)
         .def("is_public", &TenSEALContext::is_public)
         .def("is_private", &TenSEALContext::is_private)
         .def("make_context_public", &TenSEALContext::make_context_public,
