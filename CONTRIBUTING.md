@@ -159,6 +159,9 @@ $ pip install .
 
 This will trigger the build of the C++ library as well as the Python bindings. Please refer to [this section](https://github.com/OpenMined/TenSEAL#build-from-source) for more information about the dependencies required to build TenSEAL.
 
+> **Note:** You can skip the building step if you are testing the library using Bazel, as it make sure the library is built before running the tests.
+
+
 ### Testing Your Changes
 
 #### C++
