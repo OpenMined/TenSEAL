@@ -26,15 +26,18 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 if (WIN32)
     # including SEAL headers only
     include_directories(third_party/SEAL/native/src)
+
+    include_directories(proto_out)
     # linking with the already build seal.lib via MSVC
     LINK_LIBRARIES(${PROJECT_SOURCE_DIR}/third_party/SEAL/lib/x64/Release/seal.lib)
 else()
     # building SEAL using cmake
     add_subdirectory(third_party/SEAL)
+    # building protobuf using cmake
+    add_subdirectory(tenseal/proto)
 endif()
 
 add_subdirectory(third_party/pybind11)
-add_subdirectory(tenseal/proto)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 ################################
