@@ -87,7 +87,7 @@ def test_encryptionparams_scheme_settings(scheme):
     testcase.set_poly_modulus_degree(32768)
     testcase.set_coeff_modulus([sealapi.Modulus(1023), sealapi.Modulus(234)])
 
-    tmp = NamedTemporaryFile()
+    tmp = NamedTemporaryFile(mode="w")
     testcase.save(tmp.name)
 
     saved = sealapi.EncryptionParameters(scheme)

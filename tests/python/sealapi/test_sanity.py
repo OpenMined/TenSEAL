@@ -51,7 +51,7 @@ def test_biguint_sanity():
     testcase.resize(16)
     assert testcase.bit_count() == 16
 
-    tmp = NamedTemporaryFile()
+    tmp = NamedTemporaryFile(mode="w")
 
     testcase = sealapi.BigUInt(16, "123B")
     testcase.save(tmp.name)
@@ -198,7 +198,7 @@ def test_serialization_sanity():
     header = sealapi.Serialization.SEALHeader()
     header.compr_mode = sealapi.COMPR_MODE_TYPE.DEFLATE
 
-    tmp = NamedTemporaryFile()
+    tmp = NamedTemporaryFile(mode="w")
     sealapi.Serialization.SaveHeader(header, tmp.name)
     save_test = sealapi.Serialization.SEALHeader()
     sealapi.Serialization.LoadHeader(tmp.name, save_test, True)
@@ -243,7 +243,7 @@ def test_intarray():
     assert int_arr.size() == 4
     assert int_arr.capacity() == 4
 
-    tmp = NamedTemporaryFile()
+    tmp = NamedTemporaryFile(mode="w")
     int_arr.save(tmp.name)
     save_test = sealapi.IntArray()
     save_test.load(tmp.name)
@@ -323,7 +323,7 @@ def test_plaintext():
     testcase = sealapi.Plaintext("7FFx^3 + 2x^1 + 3")
     assert testcase.is_ntt_form() is False
 
-    tmp = NamedTemporaryFile()
+    tmp = NamedTemporaryFile(mode="w")
     testcase = sealapi.Plaintext("7FFx^3 + 2x^1 + 3")
     testcase.save(tmp.name)
 
@@ -371,7 +371,7 @@ def test_ciphertext(testcase, scheme, ctx):
     assert ciphertext.is_transparent() is False
     assert ciphertext.is_ntt_form() is (scheme == sealapi.SCHEME_TYPE.CKKS)
 
-    tmp = NamedTemporaryFile()
+    tmp = NamedTemporaryFile(mode="w")
     ciphertext.save(tmp.name)
     save_test = sealapi.Ciphertext(ctx)
     save_test.load(ctx, tmp.name)

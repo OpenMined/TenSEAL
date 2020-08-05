@@ -32,7 +32,7 @@ def test_encryptor_bfv():
         decryptor.decrypt(ciphertext, plaintext_out)
         assert intenc.decode_int64(plaintext_out) == expected_value
 
-        tmp = NamedTemporaryFile()
+        tmp = NamedTemporaryFile(mode="w")
         serial = encryptor.encrypt_symmetric(plaintext)
         serial.save(tmp.name)
         assert Path(tmp.name).stat().st_size > 0
@@ -46,7 +46,7 @@ def test_encryptor_bfv():
         decryptor.decrypt(ciphertext, plaintext_out)
         assert intenc.decode_int64(plaintext_out) == 0
 
-        tmp = NamedTemporaryFile()
+        tmp = NamedTemporaryFile(mode="w")
         serial = encryptor.encrypt_zero_symmetric()
         serial.save(tmp.name)
         assert Path(tmp.name).stat().st_size > 0
@@ -59,7 +59,7 @@ def test_encryptor_bfv():
         decryptor.decrypt(ciphertext, plaintext_out)
         assert intenc.decode_int64(plaintext_out) == 0
 
-        tmp = NamedTemporaryFile()
+        tmp = NamedTemporaryFile(mode="w")
         serial = encryptor.encrypt_zero_symmetric(ctx.last_parms_id())
         serial.save(tmp.name)
         assert Path(tmp.name).stat().st_size > 0

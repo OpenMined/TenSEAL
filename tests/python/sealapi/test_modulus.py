@@ -17,7 +17,7 @@ def test_modulus():
     assert not testcase.is_zero()
     assert not testcase.is_prime()
 
-    tmp = NamedTemporaryFile()
+    tmp = NamedTemporaryFile(mode="w")
     testcase.save(tmp.name)
     save_test = sealapi.Modulus(0)
     save_test.load(tmp.name)

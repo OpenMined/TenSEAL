@@ -18,7 +18,7 @@ def test_keygenerator_publickey(ctx):
     assert public_key.data().parms_id() == public_key.parms_id()
     assert public_key.data().poly_modulus_degree() == helper_poly_modulus_degree(ctx)
 
-    tmp = NamedTemporaryFile()
+    tmp = NamedTemporaryFile(mode="w")
     public_key.save(tmp.name)
     save_test = sealapi.PublicKey()
     save_test.load(ctx, tmp.name)
@@ -41,7 +41,7 @@ def test_keygenerator_secretkey(ctx):
 
     assert secret_key.data().coeff_count() == coeff_mod_count * poly_modulus_degree
 
-    tmp = NamedTemporaryFile()
+    tmp = NamedTemporaryFile(mode="w")
     secret_key.save(tmp.name)
     save_test = sealapi.SecretKey()
     save_test.load(ctx, tmp.name)
@@ -70,12 +70,12 @@ def test_keygenerator_relinkeys(ctx):
     assert relin_keys.data(0)[0].data().poly_modulus_degree() == helper_poly_modulus_degree(ctx)
     assert len(relin_keys.parms_id()) == 4
 
-    tmp = NamedTemporaryFile()
+    tmp = NamedTemporaryFile(mode="w")
     serial = keygen.relin_keys()
     serial.save(tmp.name)
     assert Path(tmp.name).stat().st_size > 0
 
-    tmp = NamedTemporaryFile()
+    tmp = NamedTemporaryFile(mode="w")
     keygen.relin_keys_local().save(tmp.name)
     save_test = sealapi.RelinKeys()
     assert save_test.has_key(2) is False
@@ -110,12 +110,12 @@ def test_keygenerator_galoiskeys(ctx):
     )
     assert len(galois_keys.parms_id()) == 4
 
-    tmp = NamedTemporaryFile()
+    tmp = NamedTemporaryFile(mode="w")
     serial = keygen.galois_keys()
     serial.save(tmp.name)
     assert Path(tmp.name).stat().st_size > 0
 
-    tmp = NamedTemporaryFile()
+    tmp = NamedTemporaryFile(mode="w")
     keygen.galois_keys_local().save(tmp.name)
     save_test = sealapi.GaloisKeys()
     assert save_test.size() == 0
@@ -151,7 +151,7 @@ def test_keygenerator_galoiskeys_with_steps(ctx):
     )
     assert len(galois_keys.parms_id()) == 4
 
-    tmp = NamedTemporaryFile()
+    tmp = NamedTemporaryFile(mode="w")
     serial = keygen.galois_keys([idx])
     serial.save(tmp.name)
     assert Path(tmp.name).stat().st_size > 0
