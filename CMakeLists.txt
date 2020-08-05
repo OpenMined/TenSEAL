@@ -10,6 +10,8 @@ if (WIN32)
     HINTS
        "C:/Program Files/protobuf"
         "C:/Program Files (x86)/protobuf")
+    include_directories(protobuf/src)
+    set(Protobuf_INCLUDE_DIR protobuf/src)
 else()
     find_package(Protobuf REQUIRED)
 endif()
