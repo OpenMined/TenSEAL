@@ -14,8 +14,8 @@
 namespace tenseal {
 
 /* Compute how many threads can run in parallel */
-inline uint get_concurrency() {
-    uint concurrency = thread::hardware_concurrency();
+inline size_t get_concurrency() {
+    size_t concurrency = thread::hardware_concurrency();
 
     if (concurrency != 0) return concurrency;
 
