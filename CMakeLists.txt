@@ -26,10 +26,12 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 if (WIN32)
     # including SEAL headers only
     include_directories(third_party/SEAL/native/src)
-
-    include_directories(proto_out)
     # linking with the already build seal.lib via MSVC
     LINK_LIBRARIES(${PROJECT_SOURCE_DIR}/third_party/SEAL/lib/x64/Release/seal.lib)
+
+    LINK_LIBRARIES(C:/Program Files (x86)/protobuf/lib/libprotobuf-lited.lib)
+    LINK_LIBRARIES(C:/Program Files (x86)/protobuf/lib/libprotobufd.lib)
+    LINK_LIBRARIES(C:/Program Files (x86)/protobuf/lib/libprotocd.lib)
 else()
     # building SEAL using cmake
     add_subdirectory(third_party/SEAL)
@@ -53,6 +55,15 @@ set(SOURCES
     ${TENSEAL_BASEDIR}/cpp/tensors/ckksvector.cpp
     ${TENSEAL_BASEDIR}/cpp/tensors/utils/utils.cpp
 )
+if(WIN32)
+
+set(SOURCES
+    ${SOURCES}
+    ${TENSEAL_BASEDIR}/proto/tensealcontext.pb.cc
+    ${TENSEAL_BASEDIR}/proto/tensors.pb.cc
+)
+
+endif()
 add_library(tenseal SHARED ${SOURCES})
 pybind11_add_module(_tenseal_cpp ${SOURCES} ${TENSEAL_BASEDIR}/binding.cpp)
 
