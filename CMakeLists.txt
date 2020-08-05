@@ -19,6 +19,7 @@ if (WIN32)
     # linking with the already build seal.lib via MSVC
     LINK_LIBRARIES(${PROJECT_SOURCE_DIR}/third_party/SEAL/lib/x64/Release/seal.lib)
 
+    include_directories(protobuf/src)
     LINK_LIBRARIES("$ENV{PROGRAMFILES\(x86\)}/protobuf/lib/libprotobuf-lite.lib")
     LINK_LIBRARIES("$ENV{PROGRAMFILES\(x86\)}/protobuf/lib/libprotobuf.lib")
     LINK_LIBRARIES("$ENV{PROGRAMFILES\(x86\)}/protobuf/lib/libprotoc.lib")
