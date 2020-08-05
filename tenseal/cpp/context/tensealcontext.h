@@ -248,6 +248,7 @@ class TenSEALContext {
     bool has_public_key() const;
     bool has_secret_key() const;
     bool has_relin_keys() const;
+
    private:
     EncryptionParameters _parms;
     shared_ptr<SEALContext> _context;
@@ -282,7 +283,6 @@ class TenSEALContext {
                     optional<SecretKey> secret_key = {},
                     bool generate_relin_keys = true,
                     bool generate_galois_keys = false);
-
 };
 }  // namespace tenseal
 #endif
