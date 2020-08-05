@@ -122,9 +122,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-            python-version: ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+          python-version: ${{ matrix.python-version }}
     - name: Run gtest
         timeout-minutes: 15
         run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/cpp/...
