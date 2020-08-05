@@ -185,7 +185,7 @@ $ pytest -v tests/
 You can also start the tests with Bazel:
 
 ```bash
-$ 
+$ bazel test --test_output=all --spawn_strategy=standalone //tests/python/...
 ```
 
 
@@ -248,4 +248,3 @@ The labels are loosely grouped by their purpose, but it's not required that ever
 | Type: Research :microscope: | When further investigation into a subject is required |
 | Type: Testing :test_tube: | Add testing or improving existing testing of a file, feature, or codebase |
 | duplicate | This issue or pull request already exists |
-
