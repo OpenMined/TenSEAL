@@ -24,6 +24,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 # For windows we should build SEAL using Microsoft Visual Studio
 # then link the library
 if (WIN32)
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
+
     # including SEAL headers only
     include_directories(third_party/SEAL/native/src)
     # linking with the already build seal.lib via MSVC
