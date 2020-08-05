@@ -171,7 +171,8 @@ $
 Otherwise, you can always build the tests using CMake for the C++ test, and run them as follows:
 
 ```bash
-$ 
+$ cmake . -D BUILD_TEST=TRUE
+$ make && make test
 ```
 
 #### Python
