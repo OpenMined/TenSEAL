@@ -113,25 +113,25 @@ jobs:
     - name: Test with pytest
       run: pytest -v ./tests/python/sealapi
  
-# 
-#   BAZEL:
-#     runs-on: ${{ matrix.os }}
-#     strategy:
-#       matrix:
-#         os: [ubuntu-latest, macos-latest]
-#         python-version: [3.8]
-#     steps:
-#       - uses: actions/checkout@v2
-#       - name: Set up Python ${{ matrix.python-version }}
-#         uses: actions/setup-python@v1
-#         with:
-#           python-version: ${{ matrix.python-version }}
-#       - name: Run gtest
-#         timeout-minutes: 15
-#         run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/cpp/...
-#       - name: Run SEALAPI tests
-#         timeout-minutes: 15
-#         run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/python/sealapi/...
-#       - name: Run TenSEAL tests
-#         timeout-minutes: 15
-#         run: bazel test --test_output=all --spawn_strategy=standalone --test_output=streamed --local_sigkill_grace_seconds=30 --test_timeout=900 //tests/python/tenseal/...
+ 
+  BAZEL:
+    runs-on: ${{ matrix.os }}
+    strategy:
+        matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: [3.8]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+            python-version: ${{ matrix.python-version }}
+    - name: Run gtest
+        timeout-minutes: 15
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/cpp/...
+    - name: Run SEALAPI tests
+        timeout-minutes: 15
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/python/sealapi/...
+    - name: Run TenSEAL tests
+        timeout-minutes: 15
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_output=streamed --local_sigkill_grace_seconds=30 --test_timeout=900 //tests/python/tenseal/...
