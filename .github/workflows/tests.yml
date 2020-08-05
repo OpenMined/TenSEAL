@@ -73,12 +73,14 @@ jobs:
     - name: Test with pytest
       run: |
         pytest -v ./tests/python/tenseal
-    - name: Test with gtest
-      run: |
-        cd tenseal/proto && cmake . && make && cd ../../
-        cmake . -D BUILD_TEST=TRUE
-        make && CTEST_OUTPUT_ON_FAILURE=1 make test
-# 
+    - name: Test with gtest for Ubuntu/MacOS
+      run: .github/workflows/scripts/run_gtest_nix.sh
+      if: ${{ matrix.os != 'windows-latest' }}
+    - name: Test with gtest for Windows
+      run: .github/workflows/scripts/run_gtest_windows.bat
+      if: ${{ matrix.os == 'windows-latest' }}
+
+#
 #   SEAL_API:
 #     runs-on: ${{ matrix.os }}
 #     strategy:
