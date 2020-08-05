@@ -11,8 +11,8 @@ git submodule init && git submodule update
 mkdir tmp && cd tmp
 
 cmake -DCMAKE_BUILD_TYPE=Release ..\cmake || goto :error
-cmake --build . || goto :error
-cmake --build . --target install || goto :error
+cmake -DCMAKE_BUILD_TYPE=Release --build . || goto :error
+cmake -DCMAKE_BUILD_TYPE=Release --build . --target install || goto :error
 
 goto :EOF
 
