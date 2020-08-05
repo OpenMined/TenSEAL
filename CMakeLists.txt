@@ -29,9 +29,9 @@ if (WIN32)
     # linking with the already build seal.lib via MSVC
     LINK_LIBRARIES(${PROJECT_SOURCE_DIR}/third_party/SEAL/lib/x64/Release/seal.lib)
 
-    LINK_LIBRARIES("$ENV{PROGRAMFILES}/protobuf/lib/libprotobuf-lited.lib")
-    LINK_LIBRARIES("$ENV{PROGRAMFILES}/protobuf/lib/libprotobufd.lib")
-    LINK_LIBRARIES("$ENV{PROGRAMFILES}/protobuf/lib/libprotocd.lib")
+    LINK_LIBRARIES("$ENV{PROGRAMFILES\(x86\)}/protobuf/lib/libprotobuf-lited.lib")
+    LINK_LIBRARIES("$ENV{PROGRAMFILES\(x86\)}/protobuf/lib/libprotobufd.lib")
+    LINK_LIBRARIES("$ENV{PROGRAMFILES\(x86\)}/protobuf/lib/libprotocd.lib")
 else()
     # building SEAL using cmake
     add_subdirectory(third_party/SEAL)
