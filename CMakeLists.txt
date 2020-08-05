@@ -6,10 +6,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if (WIN32)
-    set(_VCPKG_ROOT_DIR "vcpkg")
-    set(VCPKG_TARGET_TRIPLET "x64-windows-static")
+    find_package(protobuf REQUIRED
+    HINTS
+       "C:/Program Files/protobuf"
+        "C:/Program Files (x86)/protobuf")
+else()
+    find_package(Protobuf REQUIRED)
 endif()
-
 include(FindProtobuf)
 
 include_directories(${Protobuf_INCLUDE_DIRS})
