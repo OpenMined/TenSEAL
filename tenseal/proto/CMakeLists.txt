@@ -1,21 +1,8 @@
-cmake_minimum_required(VERSION 3.12)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-if (WIN32)
-    find_package(protobuf REQUIRED
-    HINTS
-       "C:/Program Files/protobuf"
-        "C:/Program Files (x86)/protobuf")
-else()
-    find_package(Protobuf REQUIRED)
-endif()
+find_package(Protobuf REQUIRED)
 
 include(FindProtobuf)
-set(Protobuf_USE_STATIC_LIBS YES)
-
 include_directories(${Protobuf_INCLUDE_DIRS})
+set(Protobuf_USE_STATIC_LIBS YES)
 
 file(GLOB PROTOBUF_FILELIST tensealcontext.proto tensors.proto)
 
