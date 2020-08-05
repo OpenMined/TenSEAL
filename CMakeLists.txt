@@ -5,27 +5,14 @@ project(tenseal)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-if (WIN32)
-    find_package(protobuf REQUIRED
-    HINTS
-       "C:/Program Files/protobuf"
-        "C:/Program Files (x86)/protobuf")
-    include_directories(protobuf/src)
-    set(Protobuf_INCLUDE_DIR protobuf/src)
-else()
-    find_package(Protobuf REQUIRED)
-endif()
-include(FindProtobuf)
-
-include_directories(${Protobuf_INCLUDE_DIRS})
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # For windows we should build SEAL using Microsoft Visual Studio
 # then link the library
 if (WIN32)
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+    message( ${CMAKE_CXX_FLAGS_RELEASE} )
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 
     # including SEAL headers only
     include_directories(third_party/SEAL/native/src)
@@ -40,6 +27,10 @@ else()
     add_subdirectory(third_party/SEAL)
     # building protobuf using cmake
     add_subdirectory(tenseal/proto)
+
+    find_package(Protobuf REQUIRED)
+    include(FindProtobuf)
+    include_directories(${Protobuf_INCLUDE_DIRS})
 endif()
 
 add_subdirectory(third_party/pybind11)
