@@ -150,7 +150,8 @@ shared_ptr<RelinKeys> TenSEALContext::relin_keys() const {
 }
 
 bool TenSEALContext::has_galois_key() const {
-    return !(this->_galois_keys == nullptr)}
+    return !(this->_galois_keys == nullptr);
+}
 
 shared_ptr<GaloisKeys> TenSEALContext::galois_keys() const {
     if (this->_galois_keys == nullptr) {
