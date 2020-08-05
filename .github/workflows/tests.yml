@@ -70,9 +70,9 @@ jobs:
     - name: Build the library for Windows
       run: .github/workflows/scripts/build_windows.bat
       if: ${{ matrix.os == 'windows-latest' }}
-    - name: Test with pytest
-      run: |
-        pytest -v ./tests/python/tenseal
+      #- name: Test with pytest
+      #run: |
+      #  pytest -v ./tests/python/tenseal
     - name: Test with gtest for Ubuntu/MacOS
       run: .github/workflows/scripts/run_gtest_nix.sh
       if: ${{ matrix.os != 'windows-latest' }}
