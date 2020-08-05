@@ -119,20 +119,14 @@ shared_ptr<TenSEALContext> TenSEALContext::Create(
 }
 
 bool TenSEALContext::has_public_key() const {
-    if (this->_public_key == nullptr){
-        return false;
-    }
-    return true;
+    return !(this->_public_key == nullptr);
 }
 
 shared_ptr<PublicKey> TenSEALContext::public_key() const {
     return this->_public_key;
 }
 bool TenSEALContext::has_secret_key() const {
-    if (this->_secret_key == nullptr){
-        return false;
-    }
-    return true;
+    return !(this->_secret_key == nullptr);
 }
 shared_ptr<SecretKey> TenSEALContext::secret_key() const {
     if (is_public()) {
@@ -144,10 +138,7 @@ shared_ptr<SecretKey> TenSEALContext::secret_key() const {
 }
 
 bool TenSEALContext::has_relin_keys() const {
-    if (this->_relin_keys == nullptr){
-        return false;
-    }
-    return true;
+    return !(this->_relin_keys == nullptr);
 }
 shared_ptr<RelinKeys> TenSEALContext::relin_keys() const {
     if (this->_relin_keys == nullptr) {
@@ -159,11 +150,7 @@ shared_ptr<RelinKeys> TenSEALContext::relin_keys() const {
 }
 
 bool TenSEALContext::has_galois_key() const {
-    if (this->_galois_keys == nullptr){
-        return false;
-    }
-    return true;
-}
+    return !(this->_galois_keys == nullptr)}
 
 shared_ptr<GaloisKeys> TenSEALContext::galois_keys() const {
     if (this->_galois_keys == nullptr) {
