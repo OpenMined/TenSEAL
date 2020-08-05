@@ -165,7 +165,7 @@ This will trigger the build of the C++ library as well as the Python bindings. P
 If you use Bazel, you can do that pretty easily by running:
 
 ```bash
-$ 
+$ bazel test --test_output=all --spawn_strategy=standalone //tests/cpp/...
 ```
 
 Otherwise, you can always build the tests using CMake for the C++ test, and run them as follows:
