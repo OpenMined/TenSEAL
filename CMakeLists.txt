@@ -11,8 +11,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 # then link the library
 if (WIN32)
     message( ${CMAKE_CXX_FLAGS_RELEASE} )
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 
     # including SEAL headers only
     include_directories(third_party/SEAL/native/src)
