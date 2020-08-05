@@ -138,7 +138,7 @@ shared_ptr<SecretKey> TenSEALContext::secret_key() const {
 }
 
 bool TenSEALContext::has_relin_keys() const {
-    return !(this->_relin_keys != nullptr);
+    return this->_relin_keys != nullptr;
 }
 
 shared_ptr<RelinKeys> TenSEALContext::relin_keys() const {
