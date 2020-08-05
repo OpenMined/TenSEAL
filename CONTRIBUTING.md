@@ -153,6 +153,7 @@ $ git submodule update
 You can build and install the library (with Python bindings) locally by running:
 
 ```bash
+$ pip install -r requirements_dev.txt
 $ pip install .
 ```
 
