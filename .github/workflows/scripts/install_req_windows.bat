@@ -11,5 +11,5 @@ git submodule init && git submodule update
 mkdir tmp && cd tmp
 
 cmake ..\cmake
-cmake --build build64 --config Release .
+cmake --build .
 cmake --build . --target install

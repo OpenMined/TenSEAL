@@ -1,5 +1,7 @@
 echo on
 
+set PATH=%PATH%;C:/Program Files (x86)/protobuf/bin/;C:/Program Files/protobuf/bin/
+
 git submodule init && git submodule update
  
 msbuild .\third_party\SEAL\native\src\SEAL.vcxproj /p:configuration=Release /p:platform=x64 /p:SolutionDir=..\..\
