@@ -8,7 +8,7 @@ cd protobuf
 git checkout -b 3.12.x
 git submodule init && git submodule update
 
-mkdir build && cd build
+mkdir tmp && cd tmp
 
 cmake ..\cmake
 cmake --build .
