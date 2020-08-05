@@ -1,6 +1,7 @@
 @echo off
 
 set PATH=%PATH%;C:/Program Files (x86)/protobuf/bin/;C:/Program Files/protobuf/bin/
+set _CL_=/MT
 
 git submodule init && git submodule update
  

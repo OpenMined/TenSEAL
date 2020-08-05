@@ -3,6 +3,8 @@ echo on
 python -m pip install --upgrade pip
 pip install -r ./requirements_dev.txt || goto :error
 
+set _CL_=/MT
+
 git clone https://github.com/google/protobuf.git
 cd protobuf
 git checkout -b 3.12.x
