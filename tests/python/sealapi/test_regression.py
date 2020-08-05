@@ -2,8 +2,6 @@ import sys, os
 import pytest
 import tenseal.sealapi as sealapi
 
-from tempfile import NamedTemporaryFile
-
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils import *
 
