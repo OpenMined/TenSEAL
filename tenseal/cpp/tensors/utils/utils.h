@@ -1,6 +1,8 @@
 #ifndef TENSEAL_UTILS_UTILS_H
 #define TENSEAL_UTILS_UTILS_H
 
+#include <algorithm>
+#include <iterator>
 #include <memory>
 
 #include "seal/seal.h"
@@ -9,6 +11,54 @@ namespace tenseal {
 
 using namespace seal;
 using namespace std;
+
+/**
+ * horizontally scan matrix (vector of vectors)
+ **/
+template <typename T>
+void horizontal_scan(const vector<vector<T>>& src, vector<T>& dst) {
+    size_t in_height = src.size();
+    size_t in_width = src[0].size();
+
+    dst.resize(in_height * in_width);
+
+    // check if each row size is equals to in_width
+    if (any_of(src.begin(), src.end(),
+               [in_width](vector<T> i) { return i.size() != in_width; })) {
+        throw invalid_argument("rows sizes are different");
+    }
+
+    auto start = src.begin();
+    auto end = src.end();
+    auto iter = dst.begin();
+    while (start != end) {
+        iter = copy(start->begin(), start->end(), iter);
+        start++;
+    }
+}
+
+/**
+ * vertically scan matrix (vector of vectors)
+ **/
+template <typename T>
+void vertical_scan(const vector<vector<T>>& src, vector<T>& dst) {
+    size_t in_height = src.size();
+    size_t in_width = src[0].size();
+
+    dst.resize(in_height * in_width);
+
+    // check if each row size is equals to in_width
+    if (any_of(src.begin(), src.end(),
+               [in_width](vector<T> i) { return i.size() != in_width; })) {
+        throw invalid_argument("rows sizes are different");
+    }
+
+    for (size_t i = 0; i < in_height; i++) {
+        for (size_t j = 0; j < in_width; j++) {
+            dst[i + j * in_height] = src[i][j];
+        }
+    }
+}
 
 /*
 Replicate the current vector as many times to fill `final_size` elements.
