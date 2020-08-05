@@ -11,7 +11,7 @@ using namespace seal;
 using namespace std;
 
 TenSEALContext::TenSEALContext(EncryptionParameters parms,
-                               optional<size - t> n_threads) {
+                               optional<size_t> n_threads) {
     this->dispatcher_setup(n_threads);
     this->base_setup(parms);
     this->keys_setup();
