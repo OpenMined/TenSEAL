@@ -18,9 +18,9 @@ def test_keygenerator_publickey(ctx):
     assert public_key.data().poly_modulus_degree() == helper_poly_modulus_degree(ctx)
 
     def save_load(path):
-        public_key.save(tmp.name)
+        public_key.save(path)
         save_test = sealapi.PublicKey()
-        save_test.load(ctx, tmp.name)
+        save_test.load(ctx, path)
         assert save_test.parms_id() == public_key.parms_id()
 
     tmp_file(save_load)

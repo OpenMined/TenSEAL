@@ -1,3 +1,5 @@
+import os
+import time
 import tenseal.sealapi as sealapi
 from pathlib import Path
 
@@ -98,7 +100,10 @@ def tmp_file(cbk):
     except BaseException as fail:
         e = fail
 
-    os.remove(path)
+    try:
+        os.remove(path)
+    except BaseException:
+        pass
 
     if e:
         raise e
