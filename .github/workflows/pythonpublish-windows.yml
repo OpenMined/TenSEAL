@@ -28,4 +28,6 @@ jobs:
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      run: .github/workflows/scripts/release_windows.bat
+      run: |
+          .github/workflows/scripts/build_windows.bat
+          .github/workflows/scripts/release_windows.bat
