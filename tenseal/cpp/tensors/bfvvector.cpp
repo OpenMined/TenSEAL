@@ -240,7 +240,7 @@ BFVVectorProto BFVVector::save_proto() const {
     BFVVectorProto buffer;
 
     *buffer.mutable_ciphertext() = SEALSerialize<Ciphertext>(this->ciphertext);
-    buffer.set_size(this->_size);
+    buffer.set_size(static_cast<int>(this->_size));
 
     return buffer;
 }
@@ -250,7 +250,7 @@ void BFVVector::load(const std::string& vec) {
         throw invalid_argument("context missing for deserialization");
     }
     BFVVectorProto buffer;
-    if (!buffer.ParseFromArray(vec.c_str(), vec.size())) {
+    if (!buffer.ParseFromArray(vec.c_str(), static_cast<int>(vec.size()))) {
         throw invalid_argument("failed to parse BFV stream");
     }
     this->load_proto(buffer);
@@ -262,7 +262,7 @@ std::string BFVVector::save() const {
     output.resize(proto_bytes_size(buffer));
 
     if (!buffer.SerializeToArray((void*)output.c_str(),
-                                 proto_bytes_size(buffer))) {
+                                 static_cast<int>(proto_bytes_size(buffer)))) {
         throw invalid_argument("failed to save proto");
     }
 

@@ -369,7 +369,7 @@ bool TenSEALContext::save(std::ostream& stream) const {
 
 void TenSEALContext::load(const std::string& input) {
     TenSEALContextProto buffer;
-    if (!buffer.ParseFromArray(input.c_str(), input.size())) {
+    if (!buffer.ParseFromArray(input.c_str(), static_cast<int>(input.size()))) {
         throw invalid_argument("failed to parse stream");
     }
     this->load_proto(buffer);
@@ -381,7 +381,7 @@ std::string TenSEALContext::save() const {
     output.resize(proto_bytes_size(buffer));
 
     if (!buffer.SerializeToArray((void*)output.c_str(),
-                                 proto_bytes_size(buffer))) {
+                                 static_cast<int>(proto_bytes_size(buffer)))) {
         throw invalid_argument("failed to save proto");
     }
 

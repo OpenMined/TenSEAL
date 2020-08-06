@@ -501,7 +501,7 @@ CKKSVector& CKKSVector::replicate_first_slot_inplace(size_t n) {
     auto galois_keys = this->tenseal_context()->galois_keys();
     for (size_t i = 0; i < (size_t)ceil(log2(n)); i++) {
         this->tenseal_context()->evaluator->rotate_vector_inplace(
-            tmp, -pow(2, i), *galois_keys);
+            tmp, static_cast<int>(-pow(2, i)), *galois_keys);
         this->tenseal_context()->evaluator->add_inplace(this->ciphertext, tmp);
         tmp = this->ciphertext;
     }
@@ -614,9 +614,11 @@ CKKSVector& CKKSVector::conv2d_im2col_inplace(const vector<double>& kernel,
 
     while (chunks_nb > 1) {
         tmp = *this;
-        chunks_nb = 1 << (static_cast<size_t>(ceil(log2(chunks_nb))) - 1);
+        chunks_nb = static_cast<int>(
+            1 << (static_cast<size_t>(ceil(log2(chunks_nb))) - 1));
         this->context->evaluator->rotate_vector_inplace(
-            tmp.ciphertext, windows_nb * chunks_nb, *galois_keys);
+            tmp.ciphertext, static_cast<int>(windows_nb * chunks_nb),
+            *galois_keys);
         this->add_inplace(tmp);
     }
 
@@ -643,7 +645,7 @@ CKKSVectorProto CKKSVector::save_proto() const {
     CKKSVectorProto buffer;
 
     *buffer.mutable_ciphertext() = SEALSerialize<Ciphertext>(this->ciphertext);
-    buffer.set_size(this->_size);
+    buffer.set_size(static_cast<int>(this->_size));
     buffer.set_scale(this->init_scale);
 
     return buffer;
@@ -651,7 +653,7 @@ CKKSVectorProto CKKSVector::save_proto() const {
 
 void CKKSVector::load(const std::string& vec) {
     CKKSVectorProto buffer;
-    if (!buffer.ParseFromArray(vec.c_str(), vec.size())) {
+    if (!buffer.ParseFromArray(vec.c_str(), static_cast<int>(vec.size()))) {
         throw invalid_argument("failed to parse CKKS stream");
     }
     this->load_proto(buffer);
@@ -663,7 +665,7 @@ std::string CKKSVector::save() const {
     output.resize(proto_bytes_size(buffer));
 
     if (!buffer.SerializeToArray((void*)output.c_str(),
-                                 proto_bytes_size(buffer))) {
+                                 static_cast<int>(proto_bytes_size(buffer)))) {
         throw invalid_argument("failed to save CKKS proto");
     }
 
