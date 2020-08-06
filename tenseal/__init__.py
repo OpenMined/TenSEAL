@@ -16,6 +16,9 @@ SecretKey = _ts_cpp.SecretKey
 RelinKeys = _ts_cpp.RelinKeys
 GaloisKeys = _ts_cpp.GaloisKeys
 
+# utils
+im2col_encoding = _ts_cpp.im2col_encoding
+
 
 def context(
     scheme, poly_modulus_degree, plain_modulus=None, coeff_mod_bit_sizes=None, n_threads=None
@@ -80,5 +83,6 @@ __all__ = [
     "ckks_vector_from",
     "context",
     "context_from",
+    "im2col_encoding",
     "__version__",
 ]
