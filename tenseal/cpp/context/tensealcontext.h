@@ -240,6 +240,15 @@ class TenSEALContext {
     shared_ptr<sync::ThreadPool> dispatcher() { return _dispatcher; }
     size_t dispatcher_size() { return _threads; }
 
+    /**
+     * @return whether a context has the key in question present.
+     * If yes, return True, else return False
+     */
+    bool has_galois_key() const;
+    bool has_public_key() const;
+    bool has_secret_key() const;
+    bool has_relin_keys() const;
+
    private:
     EncryptionParameters _parms;
     shared_ptr<SEALContext> _context;
