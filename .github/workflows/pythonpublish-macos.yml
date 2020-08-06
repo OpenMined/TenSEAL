@@ -19,15 +19,9 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine auditwheel
+      run: .github/workflows/scripts/install_req_macos.sh 
     - name: Build and publish
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      run: |
-        # fetch third party libraries
-        git submodule init && git submodule update
-        pip wheel . -w wheel/
-        twine upload wheel/*
+      run: .github/workflows/scripts/release_macos.sh
