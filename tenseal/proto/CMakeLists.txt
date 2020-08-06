@@ -1,5 +1,10 @@
-include(FindProtobuf)
+set(CMAKE_CXX_STANDARD 17)	
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 find_package(Protobuf REQUIRED)
+
+include(FindProtobuf)
+include_directories(${Protobuf_INCLUDE_DIRS})
 set(Protobuf_USE_STATIC_LIBS YES)
 
 file(GLOB PROTOBUF_FILELIST tensealcontext.proto tensors.proto)

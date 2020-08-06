@@ -2,7 +2,6 @@ import sys, os
 import pytest
 import tenseal.sealapi as sealapi
 
-from tempfile import NamedTemporaryFile
 from pathlib import Path
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -18,11 +17,13 @@ def test_keygenerator_publickey(ctx):
     assert public_key.data().parms_id() == public_key.parms_id()
     assert public_key.data().poly_modulus_degree() == helper_poly_modulus_degree(ctx)
 
-    tmp = NamedTemporaryFile()
-    public_key.save(tmp.name)
-    save_test = sealapi.PublicKey()
-    save_test.load(ctx, tmp.name)
-    assert save_test.parms_id() == public_key.parms_id()
+    def save_load(path):
+        public_key.save(path)
+        save_test = sealapi.PublicKey()
+        save_test.load(ctx, path)
+        assert save_test.parms_id() == public_key.parms_id()
+
+    tmp_file(save_load)
 
 
 @pytest.mark.parametrize(
@@ -41,11 +42,13 @@ def test_keygenerator_secretkey(ctx):
 
     assert secret_key.data().coeff_count() == coeff_mod_count * poly_modulus_degree
 
-    tmp = NamedTemporaryFile()
-    secret_key.save(tmp.name)
-    save_test = sealapi.SecretKey()
-    save_test.load(ctx, tmp.name)
-    assert save_test.data().parms_id() == secret_key.parms_id()
+    def save_load(path):
+        secret_key.save(path)
+        save_test = sealapi.SecretKey()
+        save_test.load(ctx, path)
+        assert save_test.data().parms_id() == secret_key.parms_id()
+
+    tmp_file(save_load)
 
 
 @pytest.mark.parametrize(
@@ -70,17 +73,12 @@ def test_keygenerator_relinkeys(ctx):
     assert relin_keys.data(0)[0].data().poly_modulus_degree() == helper_poly_modulus_degree(ctx)
     assert len(relin_keys.parms_id()) == 4
 
-    tmp = NamedTemporaryFile()
-    serial = keygen.relin_keys()
-    serial.save(tmp.name)
-    assert Path(tmp.name).stat().st_size > 0
+    def save_load(path):
+        serial = keygen.relin_keys()
+        serial.save(path)
+        assert Path(path).stat().st_size > 0
 
-    tmp = NamedTemporaryFile()
-    keygen.relin_keys_local().save(tmp.name)
-    save_test = sealapi.RelinKeys()
-    assert save_test.has_key(2) is False
-    save_test.load(ctx, tmp.name)
-    assert save_test.has_key(2) is True
+    tmp_file(save_load)
 
 
 @pytest.mark.parametrize(
@@ -110,17 +108,12 @@ def test_keygenerator_galoiskeys(ctx):
     )
     assert len(galois_keys.parms_id()) == 4
 
-    tmp = NamedTemporaryFile()
-    serial = keygen.galois_keys()
-    serial.save(tmp.name)
-    assert Path(tmp.name).stat().st_size > 0
+    def save_load(path):
+        serial = keygen.galois_keys()
+        serial.save(path)
+        assert Path(path).stat().st_size > 0
 
-    tmp = NamedTemporaryFile()
-    keygen.galois_keys_local().save(tmp.name)
-    save_test = sealapi.GaloisKeys()
-    assert save_test.size() == 0
-    save_test.load(ctx, tmp.name)
-    assert save_test.size() > 0
+    tmp_file(save_load)
 
 
 @pytest.mark.parametrize(
@@ -150,8 +143,3 @@ def test_keygenerator_galoiskeys_with_steps(ctx):
         == poly_modulus_degree
     )
     assert len(galois_keys.parms_id()) == 4
-
-    tmp = NamedTemporaryFile()
-    serial = keygen.galois_keys([idx])
-    serial.save(tmp.name)
-    assert Path(tmp.name).stat().st_size > 0

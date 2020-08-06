@@ -143,7 +143,7 @@ void bind_evaluator(pybind11::module &m) {
                  &Evaluator::transform_from_ntt))
 
         .def("apply_galois_inplace",
-             [](Evaluator &e, Ciphertext &encrypted, std::uint64_t galois_elt,
+             [](Evaluator &e, Ciphertext &encrypted, std::uint32_t galois_elt,
                 const GaloisKeys &galois_keys) {
                  e.apply_galois_inplace(encrypted, galois_elt, galois_keys);
              })

@@ -48,7 +48,7 @@ class TenSEALContext {
                                              size_t poly_modulus_degree,
                                              uint64_t plain_modulus,
                                              vector<int> coeff_mod_bit_sizes,
-                                             optional<uint> n_threads = {});
+                                             optional<size_t> n_threads = {});
     /**
      * Create a context from an input stream.
      * @param[in] stream
@@ -57,7 +57,7 @@ class TenSEALContext {
      * @returns shared_ptr to a new TenSEALContext object.
      **/
     static shared_ptr<TenSEALContext> Create(istream& stream,
-                                             optional<uint> n_threads = {});
+                                             optional<size_t> n_threads = {});
     /**
      * Create a context from a serialized protobuffer.
      * @param[in] input: Serialized protobuffer.
@@ -66,7 +66,7 @@ class TenSEALContext {
      * @returns shared_ptr to a new TenSEALContext object.
      **/
     static shared_ptr<TenSEALContext> Create(const std::string& input,
-                                             optional<uint> n_threads = {});
+                                             optional<size_t> n_threads = {});
     /**
      * Create a context from a protobuffer.
      * @param[in] input: The protobuffer.
@@ -75,7 +75,7 @@ class TenSEALContext {
      * @returns shared_ptr to a new TenSEALContext object.
      **/
     static shared_ptr<TenSEALContext> Create(const TenSEALContextProto& input,
-                                             optional<uint> n_threads = {});
+                                             optional<size_t> n_threads = {});
     /**
      * @returns a pointer to the public key.
      **/
@@ -259,7 +259,7 @@ class TenSEALContext {
     shared_ptr<TenSEALEncoder> encoder_factory;
 
     shared_ptr<sync::ThreadPool> _dispatcher;
-    uint _threads;
+    size_t _threads;
 
     /**
      * Switches for automatic relinearization, rescaling, and modulus switching
@@ -272,13 +272,14 @@ class TenSEALContext {
     uint8_t _auto_flags =
         flag_auto_relin | flag_auto_rescale | flag_auto_mod_switch;
 
-    TenSEALContext(EncryptionParameters parms, optional<uint> n_threads);
-    TenSEALContext(istream& stream, optional<uint> n_threads);
-    TenSEALContext(const std::string& stream, optional<uint> n_threads);
-    TenSEALContext(const TenSEALContextProto& proto, optional<uint> n_threads);
+    TenSEALContext(EncryptionParameters parms, optional<size_t> n_threads);
+    TenSEALContext(istream& stream, optional<size_t> n_threads);
+    TenSEALContext(const std::string& stream, optional<size_t> n_threads);
+    TenSEALContext(const TenSEALContextProto& proto,
+                   optional<size_t> n_threads);
 
     void base_setup(EncryptionParameters parms);
-    void dispatcher_setup(optional<uint> n_threads);
+    void dispatcher_setup(optional<size_t> n_threads);
     void keys_setup(optional<PublicKey> public_key = {},
                     optional<SecretKey> secret_key = {},
                     bool generate_relin_keys = true,

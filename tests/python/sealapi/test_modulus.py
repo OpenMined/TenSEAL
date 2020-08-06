@@ -1,6 +1,5 @@
 import sys, os
 import pytest
-from tempfile import NamedTemporaryFile
 import tenseal.sealapi as sealapi
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -17,11 +16,13 @@ def test_modulus():
     assert not testcase.is_zero()
     assert not testcase.is_prime()
 
-    tmp = NamedTemporaryFile()
-    testcase.save(tmp.name)
-    save_test = sealapi.Modulus(0)
-    save_test.load(tmp.name)
-    assert save_test.value() == 1023
+    def save_load(path):
+        testcase.save(path)
+        save_test = sealapi.Modulus(0)
+        save_test.load(path)
+        assert save_test.value() == 1023
+
+    tmp_file(save_load)
 
     testcase = sealapi.Modulus(15451)
     assert testcase.is_prime()

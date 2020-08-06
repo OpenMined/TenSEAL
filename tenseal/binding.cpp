@@ -230,7 +230,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                       py::overload_cast<bool>(&TenSEALContext::auto_mod_switch))
         .def("new",
              py::overload_cast<scheme_type, size_t, uint64_t, vector<int>,
-                               optional<uint>>(&TenSEALContext::Create),
+                               optional<size_t>>(&TenSEALContext::Create),
              R"(Create a new TenSEALContext object to hold keys and parameters.
     Args:
         scheme : define the scheme to be used, either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS.
@@ -275,7 +275,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("serialize",
              [](const TenSEALContext &obj) { return py::bytes(obj.save()); })
         .def_static("deserialize",
-                    py::overload_cast<const std::string &, optional<uint>>(
+                    py::overload_cast<const std::string &, optional<size_t>>(
                         &TenSEALContext::Create),
                     py::arg("buffer"), py::arg("n_threads") = get_concurrency())
         .def("copy", &TenSEALContext::copy)

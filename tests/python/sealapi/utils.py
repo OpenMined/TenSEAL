@@ -1,4 +1,7 @@
+import os
+import time
 import tenseal.sealapi as sealapi
+from pathlib import Path
 
 
 def helper_params_bfv(poly_modulus_degree=4096, plain_modulus=1032193):
@@ -80,3 +83,27 @@ def helper_generate_evaluator(ctx):
 def is_close_enough(out, expected):
     for idx in range(len(expected)):
         assert abs(expected[idx] - out[idx]) < 0.1
+
+
+def tmp_file(cbk):
+    folder = Path("tmp")
+    try:
+        os.mkdir(folder)
+    except FileExistsError:
+        pass
+
+    path = folder / str(time.time())
+
+    e = None
+    try:
+        cbk(str(path))
+    except BaseException as fail:
+        e = fail
+
+    try:
+        os.remove(path)
+    except BaseException:
+        pass
+
+    if e:
+        raise e
