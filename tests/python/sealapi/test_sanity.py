@@ -2,8 +2,6 @@ import sys, os
 import pytest
 import tenseal.sealapi as sealapi
 
-from tempfile import NamedTemporaryFile
-
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils import *
 
@@ -51,16 +49,17 @@ def test_biguint_sanity():
     testcase.resize(16)
     assert testcase.bit_count() == 16
 
-    tmp = NamedTemporaryFile()
+    def save_load(path):
+        testcase = sealapi.BigUInt(16, "123B")
+        testcase.save(path)
 
-    testcase = sealapi.BigUInt(16, "123B")
-    testcase.save(tmp.name)
+        save_test = sealapi.BigUInt()
+        save_test.load(path)
 
-    save_test = sealapi.BigUInt()
-    save_test.load(tmp.name)
+        assert save_test.bit_count() == 16
+        assert save_test == 0x123B
 
-    assert save_test.bit_count() == 16
-    assert save_test == 0x123B
+    tmp_file(save_load)
 
 
 def test_biguint_ops():
@@ -198,13 +197,15 @@ def test_serialization_sanity():
     header = sealapi.Serialization.SEALHeader()
     header.compr_mode = sealapi.COMPR_MODE_TYPE.DEFLATE
 
-    tmp = NamedTemporaryFile()
-    sealapi.Serialization.SaveHeader(header, tmp.name)
-    save_test = sealapi.Serialization.SEALHeader()
-    sealapi.Serialization.LoadHeader(tmp.name, save_test, True)
-    assert save_test.compr_mode == sealapi.COMPR_MODE_TYPE.DEFLATE
-    sealapi.Serialization.LoadHeader(tmp.name, save_test, False)
-    assert save_test.compr_mode == sealapi.COMPR_MODE_TYPE.DEFLATE
+    def save_load(path):
+        sealapi.Serialization.SaveHeader(header, path)
+        save_test = sealapi.Serialization.SEALHeader()
+        sealapi.Serialization.LoadHeader(path, save_test, True)
+        assert save_test.compr_mode == sealapi.COMPR_MODE_TYPE.DEFLATE
+        sealapi.Serialization.LoadHeader(path, save_test, False)
+        assert save_test.compr_mode == sealapi.COMPR_MODE_TYPE.DEFLATE
+
+    tmp_file(save_load)
 
 
 @pytest.mark.parametrize(
@@ -243,11 +244,13 @@ def test_intarray():
     assert int_arr.size() == 4
     assert int_arr.capacity() == 4
 
-    tmp = NamedTemporaryFile()
-    int_arr.save(tmp.name)
-    save_test = sealapi.IntArray()
-    save_test.load(tmp.name)
-    assert save_test[0] == 3
+    def save_load(path):
+        int_arr.save(path)
+        save_test = sealapi.IntArray()
+        save_test.load(path)
+        assert save_test[0] == 3
+
+    tmp_file(save_load)
 
     int_arr.resize(10, True)
     assert int_arr.capacity() == 10
@@ -323,14 +326,15 @@ def test_plaintext():
     testcase = sealapi.Plaintext("7FFx^3 + 2x^1 + 3")
     assert testcase.is_ntt_form() is False
 
-    tmp = NamedTemporaryFile()
-    testcase = sealapi.Plaintext("7FFx^3 + 2x^1 + 3")
-    testcase.save(tmp.name)
+    def save_load(path):
+        testcase = sealapi.Plaintext("7FFx^3 + 2x^1 + 3")
+        testcase.save(path)
+        ctx = helper_context_bfv()
+        save_test = sealapi.Plaintext()
+        save_test.load(ctx, path)
+        assert save_test.coeff_count() == 4
 
-    ctx = helper_context_bfv()  # Plaintext load needs a context(??)
-    save_test = sealapi.Plaintext()
-    save_test.load(ctx, tmp.name)
-    assert save_test.coeff_count() == 4
+    tmp_file(save_load)
 
 
 @pytest.mark.parametrize(
@@ -371,13 +375,15 @@ def test_ciphertext(testcase, scheme, ctx):
     assert ciphertext.is_transparent() is False
     assert ciphertext.is_ntt_form() is (scheme == sealapi.SCHEME_TYPE.CKKS)
 
-    tmp = NamedTemporaryFile()
-    ciphertext.save(tmp.name)
-    save_test = sealapi.Ciphertext(ctx)
-    save_test.load(ctx, tmp.name)
-    decryptor.decrypt(save_test, plaintext)
-    decoded = helper_decode(scheme, ctx, plaintext)
-    is_close_enough(decoded[: len(testcase)], testcase)
+    def save_load(path):
+        ciphertext.save(path)
+        save_test = sealapi.Ciphertext(ctx)
+        save_test.load(ctx, path)
+        decryptor.decrypt(save_test, plaintext)
+        decoded = helper_decode(scheme, ctx, plaintext)
+        is_close_enough(decoded[: len(testcase)], testcase)
+
+    tmp_file(save_load)
 
     ciphertext.resize(ctx, 10)
     assert ciphertext.size() == 10

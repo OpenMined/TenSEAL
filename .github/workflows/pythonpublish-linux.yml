@@ -27,14 +27,9 @@ jobs:
       - name: Set target Python version PATH
         run: echo "::add-path::/opt/python/${{ matrix.python-version }}/bin"
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install setuptools wheel twine auditwheel
+        run: .github/workflows/scripts/install_req_ubuntu.sh 
       - name: Build and publish
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-        run: |
-          pip wheel . -w dist/ --no-deps
-          auditwheel repair dist/*.whl --plat $AUDITWHEEL_PLAT
-          twine upload --skip-existing wheelhouse/*
+        run: .github/workflows/scripts/release_ubuntu.sh

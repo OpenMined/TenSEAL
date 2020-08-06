@@ -1,8 +1,8 @@
 #include "tenseal/cpp/context/tensealcontext.h"
-#include "tenseal/cpp/utils/threadpool.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tenseal/cpp/utils/threadpool.h"
 
 namespace tenseal {
 
@@ -69,11 +69,10 @@ TEST_F(TenSEALContextTest, TestDispatcher) {
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ASSERT_EQ(ctx->dispatcher_size(), get_concurrency());
 
-    ctx =
-        TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60}, 8);
+    ctx = TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60},
+                                 8);
     ASSERT_EQ(ctx->dispatcher_size(), 8);
 }
-
 
 TEST_P(TenSEALContextTest, TestCreateBFV) {
     bool should_serialize_first = GetParam();

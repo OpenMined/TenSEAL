@@ -20,7 +20,7 @@ bool are_close(const std::vector<double>& l, const std::vector<int64_t>& r) {
 
 CKKSVector duplicate(const CKKSVector& in) {
     auto vec = in.save();
-    
+
     return CKKSVector(in.tenseal_context(), vec);
 }
 
@@ -37,9 +37,9 @@ TEST_P(CKKSVectorTest, TestCreateCKKS) {
 
     auto l = CKKSVector(ctx, {1, 2, 3}, 1);
 
-     if (should_serialize_first) {
-         l = duplicate(l);
-     }
+    if (should_serialize_first) {
+        l = duplicate(l);
+    }
 
     ASSERT_EQ(l.ciphertext_size(), 2);
 }
@@ -49,7 +49,8 @@ TEST_F(CKKSVectorTest, TestCreateCKKSFail) {
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
-    EXPECT_THROW(auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3})), std::exception);
+    EXPECT_THROW(auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3})),
+                 std::exception);
 }
 
 TEST_P(CKKSVectorTest, TestCKKSAdd) {
@@ -70,10 +71,9 @@ TEST_P(CKKSVectorTest, TestCKKSAdd) {
 
     auto add = l.add(r);
 
-     if (should_serialize_first) {
-         l = duplicate(l);
-     }
-
+    if (should_serialize_first) {
+        l = duplicate(l);
+    }
 
     ASSERT_EQ(add.ciphertext_size(), 2);
 
@@ -83,9 +83,9 @@ TEST_P(CKKSVectorTest, TestCKKSAdd) {
     l.add_inplace(r);
     l.add_inplace(r);
 
-     if (should_serialize_first) {
-         l = duplicate(l);
-     }
+    if (should_serialize_first) {
+        l = duplicate(l);
+    }
 
     ASSERT_EQ(l.ciphertext_size(), 2);
     decr = l.decrypt();
@@ -118,9 +118,9 @@ TEST_P(CKKSVectorTest, TestCKKSMul) {
     l.mul_inplace(r);
     l.mul_inplace(r);
 
-     if (should_serialize_first) {
-         l = duplicate(l);
-     }
+    if (should_serialize_first) {
+        l = duplicate(l);
+    }
 
     ASSERT_EQ(l.ciphertext_size(), 2);
     decr = l.decrypt();
@@ -146,9 +146,9 @@ TEST_P(CKKSVectorTest, TestCKKSMulMany) {
     l.mul_inplace(r);
     l.mul_inplace(r);
 
-     if (should_serialize_first) {
-         l = duplicate(l);
-     }
+    if (should_serialize_first) {
+        l = duplicate(l);
+    }
 
     ASSERT_EQ(l.ciphertext_size(), 2);
     auto decr = l.decrypt();
@@ -174,9 +174,9 @@ TEST_P(CKKSVectorTest, TestCKKSMulNoRelin) {
     l.mul_inplace(r);
     l.mul_inplace(r);
 
-     if (should_serialize_first) {
-         l = duplicate(l);
-     }
+    if (should_serialize_first) {
+        l = duplicate(l);
+    }
 
     ASSERT_EQ(l.ciphertext_size(), 4);
     auto decr = l.decrypt();
@@ -196,9 +196,9 @@ TEST_P(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
     auto vec = CKKSVector(ctx, std::vector<double>({1}));
     auto replicated_vec = vec.replicate_first_slot(4);
 
-     if (should_serialize_first) {
-         replicated_vec = duplicate(replicated_vec);
-     }
+    if (should_serialize_first) {
+        replicated_vec = duplicate(replicated_vec);
+    }
 
     auto result = replicated_vec.decrypt();
     ASSERT_EQ(result.size(), 4);
@@ -224,19 +224,18 @@ TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
     auto vec = CKKSVector(ctx, std::vector<double>({1, 2, 3}));
     auto matrix = vector<vector<double>>{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}};
     auto expected_result = vector<int64_t>{6, 12, 18};
-    
+
     auto result = vec.matmul_plain(matrix, 2);
 
-     if (should_serialize_first) {
-         result = duplicate(result);
-     }
+    if (should_serialize_first) {
+        result = duplicate(result);
+    }
 
     auto decrypted_result = result.decrypt();
 
     ASSERT_EQ(decrypted_result.size(), 3);
     ASSERT_TRUE(are_close(decrypted_result, expected_result));
 }
-
 
 TEST_P(CKKSVectorTest, TestEmptyPlaintext) {
     auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
@@ -246,9 +245,7 @@ TEST_P(CKKSVectorTest, TestEmptyPlaintext) {
 }
 
 INSTANTIATE_TEST_CASE_P(TestCKKSVector, CKKSVectorTest,
-                         ::testing::Values(false, true));
-
-
+                        ::testing::Values(false, true));
 
 }  // namespace
 }  // namespace tenseal

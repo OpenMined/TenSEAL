@@ -1,5 +1,4 @@
 import sys, os
-from tempfile import NamedTemporaryFile
 import pytest
 import tenseal.sealapi as sealapi
 
@@ -87,13 +86,15 @@ def test_encryptionparams_scheme_settings(scheme):
     testcase.set_poly_modulus_degree(32768)
     testcase.set_coeff_modulus([sealapi.Modulus(1023), sealapi.Modulus(234)])
 
-    tmp = NamedTemporaryFile()
-    testcase.save(tmp.name)
+    def save_load(path):
+        testcase.save(path)
 
-    saved = sealapi.EncryptionParameters(scheme)
-    saved.load(tmp.name)
-    assert saved.poly_modulus_degree() == 32768
-    assert saved.coeff_modulus()[0].value() == 1023
+        saved = sealapi.EncryptionParameters(scheme)
+        saved.load(path)
+        assert saved.poly_modulus_degree() == 32768
+        assert saved.coeff_modulus()[0].value() == 1023
+
+    tmp_file(save_load)
 
 
 @pytest.mark.parametrize(
