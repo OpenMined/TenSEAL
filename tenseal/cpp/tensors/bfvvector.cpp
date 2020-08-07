@@ -16,7 +16,7 @@ namespace tenseal {
 BFVVector::BFVVector(shared_ptr<TenSEALContext> ctx, vector<int64_t> vec) {
     this->link_tenseal_context(ctx);
     // Encrypts the whole vector into a single ciphertext using BFV batching
-    this->ciphertext = BFVVector::encrypt(context, vec);
+    this->ciphertext = BFVVector::encrypt(ctx, vec);
     this->_size = vec.size();
 }
 
