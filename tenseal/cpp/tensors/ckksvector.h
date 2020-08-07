@@ -128,7 +128,8 @@ class CKKSVector {
      * The input matrix should be encoded in a vertical scan (column-major).
      * The kernel vector should be padded with zeros to the next power of 2
      */
-    CKKSVector conv2d_im2col(const vector<vector<double>>& kernel, const size_t windows_nb);
+    CKKSVector conv2d_im2col(const vector<vector<double>>& kernel,
+                             const size_t windows_nb);
     CKKSVector& conv2d_im2col_inplace(const vector<vector<double>>& kernel,
                                       const size_t windows_nb);
 
