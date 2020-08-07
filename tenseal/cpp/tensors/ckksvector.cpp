@@ -579,7 +579,7 @@ CKKSVector& CKKSVector::conv2d_im2col_inplace(
 
     if (kernel.empty() ||
         (any_of(kernel.begin(), kernel.end(),
-                [](vector<double> i) { return i.empty(); }))) {
+                [](const vector<double>& i) { return i.empty(); }))) {
         throw invalid_argument("Kernel matrix can't be empty");
     }
 

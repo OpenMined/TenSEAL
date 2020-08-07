@@ -23,8 +23,9 @@ void horizontal_scan(const vector<vector<T>>& src, vector<T>& dst) {
     dst.resize(in_height * in_width);
 
     // check if each row size is equals to in_width
-    if (any_of(src.begin(), src.end(),
-               [in_width](vector<T> i) { return i.size() != in_width; })) {
+    if (any_of(src.begin(), src.end(), [in_width](const vector<T>& i) {
+            return i.size() != in_width;
+        })) {
         throw invalid_argument("rows sizes are different");
     }
 
@@ -48,8 +49,9 @@ void vertical_scan(const vector<vector<T>>& src, vector<T>& dst) {
     dst.resize(in_height * in_width);
 
     // check if each row size is equals to in_width
-    if (any_of(src.begin(), src.end(),
-               [in_width](vector<T> i) { return i.size() != in_width; })) {
+    if (any_of(src.begin(), src.end(), [in_width](const vector<T>& i) {
+            return i.size() != in_width;
+        })) {
         throw invalid_argument("rows sizes are different");
     }
 
@@ -76,8 +78,9 @@ size_t im2col(const vector<vector<T>>& src, vector<vector<T>>& dst,
     }
 
     // check if each row size is equals to in_width
-    if (any_of(src.begin(), src.end(),
-               [in_width](vector<T> i) { return i.size() != in_width; })) {
+    if (any_of(src.begin(), src.end(), [in_width](const vector<T>& i) {
+            return i.size() != in_width;
+        })) {
         throw invalid_argument("rows sizes are different");
     }
 
