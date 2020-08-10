@@ -41,11 +41,11 @@ cmake_external(
         "-DCMAKE_BUILD_TYPE=Release",
     ],
     generate_crosstool_file = True,
-    install_prefix = "native/src",
+    install_prefix = "native\src",
     lib_source = ":src",
-    make_commands = ["make"],
+    make_commands = ["msbuild .\native\src\SEAL.vcxproj /p:configuration=Release /p:platform=x64 /p:SolutionDir=..\..\"],
     out_include_dir = "include/SEAL-3.5",
-    static_libraries = ["libseal-3.5.a"],
+    static_libraries = ["seal.lib"],
     visibility = ["//visibility:public"],
 )
 
