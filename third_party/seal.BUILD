@@ -28,25 +28,9 @@ cmake_external(
     visibility = ["//visibility:public"],
 )
 
-cmake_external(
-    name = "seal_win",
-    cmake_options = [
-        "-G \"Visual Studio 16 2019\" -A x64",
-        "-DSEAL_USE_CXX17=17",
-        "-DSEAL_USE_INTRIN=ON",
-        "-DSEAL_USE_MSGSL=OFF",
-        "-DSEAL_USE_ZLIB=ON",
-        "-DSEAL_BUILD_TESTS=OFF",
-        "-DBUILD_SHARED_LIBS=OFF",
-        "-DCMAKE_BUILD_TYPE=Release",
-    ],
-    generate_crosstool_file = True,
-    install_prefix = "native/src",
-    lib_source = ":src",
-    make_commands = ["msbuild .\native\src\SEAL.vcxproj /p:configuration=Release /p:platform=x64 /p:SolutionDir=.,\..\  "],
-    out_include_dir = "include\SEAL-3.5",
-    static_libraries = ["seal.lib"],
-    visibility = ["//visibility:public"],
+cc_import(
+  name = seal_win",
+  static_library = "third_party/SEAL/lib/x64/Release/seal.lib",
 )
 
 cc_library(
