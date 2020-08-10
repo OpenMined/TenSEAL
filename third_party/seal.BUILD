@@ -29,7 +29,7 @@ cmake_external(
 )
 
 cc_import(
-  name = seal_win",
+  name = "seal_win",
   static_library = "third_party/SEAL/lib/x64/Release/seal.lib",
 )
 
