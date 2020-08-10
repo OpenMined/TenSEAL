@@ -31,6 +31,7 @@ cmake_external(
 cmake_external(
     name = "seal_win",
     cmake_options = [
+        "-G \"Visual Studio 16 2019\" -A x64",
         "-DSEAL_USE_CXX17=17",
         "-DSEAL_USE_INTRIN=ON",
         "-DSEAL_USE_MSGSL=OFF",
