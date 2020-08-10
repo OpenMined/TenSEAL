@@ -1,6 +1,8 @@
 #ifndef TENSEAL_UTILS_UTILS_H
 #define TENSEAL_UTILS_UTILS_H
 
+#include <algorithm>
+#include <iterator>
 #include <memory>
 
 #include "seal/seal.h"
@@ -9,6 +11,107 @@ namespace tenseal {
 
 using namespace seal;
 using namespace std;
+
+/**
+ * horizontally scan matrix (vector of vectors)
+ **/
+template <typename T>
+void horizontal_scan(const vector<vector<T>>& src, vector<T>& dst) {
+    size_t in_height = src.size();
+    size_t in_width = src[0].size();
+
+    dst.resize(in_height * in_width);
+
+    // check if each row size is equals to in_width
+    if (any_of(src.begin(), src.end(), [in_width](const vector<T>& i) {
+            return i.size() != in_width;
+        })) {
+        throw invalid_argument("rows sizes are different");
+    }
+
+    auto start = src.begin();
+    auto end = src.end();
+    auto iter = dst.begin();
+    while (start != end) {
+        iter = copy(start->begin(), start->end(), iter);
+        start++;
+    }
+}
+
+/**
+ * vertically scan matrix (vector of vectors)
+ **/
+template <typename T>
+void vertical_scan(const vector<vector<T>>& src, vector<T>& dst) {
+    size_t in_height = src.size();
+    size_t in_width = src[0].size();
+
+    dst.resize(in_height * in_width);
+
+    // check if each row size is equals to in_width
+    if (any_of(src.begin(), src.end(), [in_width](const vector<T>& i) {
+            return i.size() != in_width;
+        })) {
+        throw invalid_argument("rows sizes are different");
+    }
+
+    for (size_t i = 0; i < in_height; i++) {
+        for (size_t j = 0; j < in_width; j++) {
+            dst[i + j * in_height] = src[i][j];
+        }
+    }
+}
+
+/**
+ * Image Block to Columns implementation
+ **/
+template <typename T>
+size_t im2col(const vector<vector<T>>& src, vector<vector<T>>& dst,
+              const size_t window_height, const size_t window_width,
+              const size_t stride) {
+    // input shape
+    size_t in_height = src.size();
+    size_t in_width = src[0].size();
+
+    if (src.empty()) {
+        throw invalid_argument("empty matrix");
+    }
+
+    // check if each row size is equals to in_width
+    if (any_of(src.begin(), src.end(), [in_width](const vector<T>& i) {
+            return i.size() != in_width;
+        })) {
+        throw invalid_argument("rows sizes are different");
+    }
+
+    // output shape
+    size_t out_height = (in_height - window_height) / stride + 1;
+    size_t out_width = (in_width - window_width) / stride + 1;
+    dst.reserve(out_height);
+
+    // windows number
+    size_t windows_nb = out_height * out_width;
+
+    // kernel_size
+    size_t kernel_size = window_width * window_height;
+    // calculate the next power of 2
+    kernel_size = 1 << (static_cast<size_t>(ceil(log2(kernel_size))));
+
+    for (size_t j = 0; j < in_height - window_height + 1; j += stride) {
+        for (size_t i = 0; i < in_width - window_width + 1; i += stride) {
+            // pad the window vector to the next power of 2 of kernel size
+            vector<T> window_vec(kernel_size, 0);
+            auto iter = window_vec.begin();
+            for (size_t k = 0; k < window_height; k++) {
+                iter = copy(src[j + k].begin() + i,
+                            src[j + k].begin() + i + window_width, iter);
+            }
+            dst.push_back(window_vec);
+        }
+    }
+
+    return windows_nb;
+}
 
 /*
 Replicate the current vector as many times to fill `final_size` elements.

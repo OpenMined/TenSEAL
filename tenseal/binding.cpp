@@ -8,6 +8,7 @@
 #include "tenseal/cpp/context/tensealcontext.h"
 #include "tenseal/cpp/tensors/bfvvector.h"
 #include "tenseal/cpp/tensors/ckksvector.h"
+#include "tenseal/cpp/tensors/utils/utils.h"
 
 using namespace tenseal;
 using namespace seal;
@@ -80,6 +81,20 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__copy__", [](const BFVVector &self) { return self.deepcopy(); })
         .def("__deepcopy__",
              [](const BFVVector &self, py::dict) { return self.deepcopy(); });
+
+    // CKKSVector utils
+    m.def("im2col_encoding",
+          [](shared_ptr<TenSEALContext> ctx, vector<vector<double>> &input,
+             const size_t kernel_n_rows, const size_t kernel_n_cols,
+             const size_t stride) {
+              vector<vector<double>> view_as_window;
+              vector<double> final_vector;
+              size_t windows_nb = im2col(input, view_as_window, kernel_n_rows,
+                                         kernel_n_cols, stride);
+              vertical_scan(view_as_window, final_vector);
+              CKKSVector ckks_vector = CKKSVector(ctx, final_vector);
+              return make_pair(ckks_vector, windows_nb);
+          });
 
     py::class_<CKKSVector>(m, "CKKSVector")
         // specifying scale

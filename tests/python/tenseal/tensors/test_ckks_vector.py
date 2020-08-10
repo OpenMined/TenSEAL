@@ -1125,8 +1125,9 @@ def test_polynomial_rescale_off(context, data, polynom):
 @pytest.mark.parametrize(
     "input_size, kernel_size", [(2, 2), (3, 2), (4, 2), (4, 3), (7, 3), (12, 5)]
 )
-def test_conv2d_im2col(context, input_size, kernel_size):
-    def generate_input(input_size, kernel_size, stride=1):
+@pytest.mark.parametrize("stride", [1, 2, 3])
+def test_conv2d_im2col(context, input_size, kernel_size, stride):
+    def generate_input(input_size, kernel_size, stride):
         # generated random values and prepare the inputs
         x = np.random.randn(input_size, input_size)
         kernel = np.random.randn(kernel_size, kernel_size)
@@ -1136,27 +1137,27 @@ def test_conv2d_im2col(context, input_size, kernel_size):
             (x.shape[1] - kernel.shape[1]) // stride + 1,
         )
 
-        new_x = view_as_windows(x, kernel.shape, step=stride)
-        new_x = new_x.reshape(out_h * out_w, kernel.shape[0] * kernel.shape[1])
+        padded_im2col_x = view_as_windows(x, kernel.shape, step=stride)
+        padded_im2col_x = padded_im2col_x.reshape(out_h * out_w, kernel.shape[0] * kernel.shape[1])
 
         next_power2 = pow(2, math.ceil(math.log2(kernel.size)))
         pad_width = next_power2 - kernel.size
-        new_x = np.pad(new_x, ((0, 0), (0, pad_width)))
+        padded_im2col_x = np.pad(padded_im2col_x, ((0, 0), (0, pad_width)))
 
-        kernel = np.pad(kernel.flatten(), (0, pad_width))
-        return new_x, kernel
+        padded_kernel = np.pad(kernel.flatten(), (0, pad_width))
+        return x, padded_im2col_x, kernel, padded_kernel
 
     # generated galois keys in order to do rotation on ciphertext vectors
     context.generate_galois_keys()
 
-    x, kernel = generate_input(input_size, kernel_size)
-    windows_nb = x.shape[0]
+    x, padded_im2col_x, kernel, padded_kernel = generate_input(input_size, kernel_size, stride)
+    # windows_nb = padded_im2col_x.shape[0]
 
-    x_enc = ts.ckks_vector(context, x.flatten(order="F").tolist())
+    x_enc, windows_nb = ts.im2col_encoding(context, x, kernel.shape[0], kernel.shape[1], stride)
+
     y_enc = x_enc.conv2d_im2col(kernel.tolist(), windows_nb)
     decrypted_result = y_enc.decrypt()
-
-    expected = (x @ kernel).tolist()
+    expected = (padded_im2col_x @ padded_kernel).tolist()
     assert _almost_equal(decrypted_result, expected, 0)
 
 

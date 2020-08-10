@@ -564,39 +564,47 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
     return *this;
 }
 
-CKKSVector CKKSVector::conv2d_im2col(const vector<double>& kernel,
-                                     size_t windows_nb) {
+CKKSVector CKKSVector::conv2d_im2col(const vector<vector<double>>& kernel,
+                                     const size_t windows_nb) {
     CKKSVector new_vec = *this;
     new_vec.conv2d_im2col_inplace(kernel, windows_nb);
     return new_vec;
 }
 
-CKKSVector& CKKSVector::conv2d_im2col_inplace(const vector<double>& kernel,
-                                              const size_t windows_nb) {
-    vector<double> plain_vec;
-    size_t chunks_nb = kernel.size();
-
+CKKSVector& CKKSVector::conv2d_im2col_inplace(
+    const vector<vector<double>>& kernel, const size_t windows_nb) {
     if (windows_nb == 0) {
         throw invalid_argument("Windows number can't be zero");
     }
 
-    if (kernel.empty()) {
-        throw invalid_argument("Kernel vector can't be empty");
+    if (kernel.empty() ||
+        (any_of(kernel.begin(), kernel.end(),
+                [](const vector<double>& i) { return i.empty(); }))) {
+        throw invalid_argument("Kernel matrix can't be empty");
     }
 
-    // check if vector size is not a power of 2
-    if (!(chunks_nb && (!(chunks_nb & (chunks_nb - 1))))) {
-        throw invalid_argument("Kernel size should be a power of 2");
-    }
+    // flat the kernel
+    vector<double> flatten_kernel;
+    horizontal_scan(kernel, flatten_kernel);
+
+    // calculate the next power of 2
+    size_t kernel_size = kernel.size() * kernel[0].size();
+    kernel_size = 1 << (static_cast<size_t>(ceil(log2(kernel_size))));
+
+    // pad the kernel with zeros to the next power of 2
+    flatten_kernel.resize(kernel_size, 0);
+
+    size_t chunks_nb = flatten_kernel.size();
 
     if (this->_size / windows_nb != chunks_nb) {
         throw invalid_argument("Matrix shape doesn't match with vector size");
     }
 
+    vector<double> plain_vec;
     plain_vec.reserve(this->_size);
 
     for (size_t i = 0; i < chunks_nb; i++) {
-        vector<double> tmp(windows_nb, kernel[i]);
+        vector<double> tmp(windows_nb, flatten_kernel[i]);
         plain_vec.insert(plain_vec.end(), tmp.begin(), tmp.end());
     }
 
