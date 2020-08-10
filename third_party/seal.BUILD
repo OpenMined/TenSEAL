@@ -31,7 +31,6 @@ cmake_external(
 cmake_external(
     name = "seal_win",
     cmake_options = [
-        "-G \"Visual Studio 16 2019\" -A x64",
         "-DSEAL_USE_CXX17=17",
         "-DSEAL_USE_INTRIN=ON",
         "-DSEAL_USE_MSGSL=OFF",
@@ -44,7 +43,7 @@ cmake_external(
     install_prefix = "native\src",
     lib_source = ":src",
     make_commands = ["msbuild .\native\src\SEAL.vcxproj /p:configuration=Release /p:platform=x64 /p:SolutionDir=..\..\"],
-    out_include_dir = "include/SEAL-3.5",
+    out_include_dir = "include\SEAL-3.5",
     static_libraries = ["seal.lib"],
     visibility = ["//visibility:public"],
 )
