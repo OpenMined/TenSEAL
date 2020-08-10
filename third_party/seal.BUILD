@@ -6,6 +6,12 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
+filegroup(
+    name = "hdrs",
+    srcs = glob(["native/src/**"]),
+    visibility = ["//visibility:public"],
+)
+
 cmake_external(
     name = "seal_nix",
     cmake_options = [
@@ -30,6 +36,7 @@ cmake_external(
 
 cc_import(
   name = "seal_win",
+  hdrs = ":hdrs",
   static_library = "third_party/SEAL/lib/x64/Release/seal.lib",
 )
 
