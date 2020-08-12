@@ -23,9 +23,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.0
       if: ${{ matrix.os == 'windows-latest' }}
     - name: Compile SEAL for windows
-      run: |
-          git submodule init && git submodule update
-          msbuild .\third_party\SEAL\native\src\SEAL.vcxproj /p:configuration=Release /p:platform=x64 /p:SolutionDir=..\..\ 
+      run:  msbuild .\third_party\SEAL\native\src\SEAL.vcxproj /p:configuration=Release /p:platform=x64 /p:SolutionDir=..\..\ 
       if: ${{ matrix.os == 'windows-latest' }}
     - name: Run gtest
       timeout-minutes: 15
