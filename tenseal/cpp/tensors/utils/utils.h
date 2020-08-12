@@ -195,6 +195,44 @@ T compute_polynomial_term(int degree, double coeff,
     return x;
 }
 
+template <typename T, class Encoder>
+T pack_vectors(const vector<T>& vectors) {
+    size_t vectors_nb = vectors.size();
+    size_t vector_size = vectors[0].size();
+    size_t slot_count = vectors[0].context->slot_count<Encoder>();
+
+    // check if each vectors sizes are equal
+    if (any_of(vectors.begin(), vectors.end(),
+               [vector_size](const vector<T>& i) {
+                   return i.size() != vector_size;
+               })) {
+        throw invalid_argument("vectors sizes are different");
+    }
+
+    // mask vector to multiply with ciphertext
+    vector<int> mask(vectors_nb * vector_size, 0);
+    fill(mask.begin(), mask.beging() + vector_size, 1);
+
+    // copy and replicate mask vector
+    vector<int> replicated_mask = mask;
+    replicate_vector(replicated_mask, slot_count);
+
+    T packed_vec = vectors[0].mul_plain(replicated_mask);
+
+    for (size_t i = 1; i < vectors_nb; i++) {
+        replicated_mask = mask;
+        // rotate the mask then replicate it
+        rotate(replicated_mask.begin(), replicated_mask.begin() + vector_size,
+               replicated_mask.end());
+        replicate_vector(replicated_mask, slot_count);
+
+        // multiply with the mask vector then accumulate
+        packed_vec.add_inplace(vectors[i].mul_plain(replicated_mask));
+    }
+
+    return packed_vec;
+}
+
 }  // namespace tenseal
 
 #endif
