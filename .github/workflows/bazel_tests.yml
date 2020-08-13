@@ -12,8 +12,15 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8]
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [windows-latest]
+    defaults:
+        run:
+            shell: msys2 {0}
     steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+          update: true
+          install: base-devel git
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
