@@ -172,8 +172,7 @@ void TenSEALContext::generate_galois_keys() {
 void TenSEALContext::generate_galois_keys(const SecretKey& secret_key) {
     KeyGenerator keygen = KeyGenerator(this->_context, secret_key);
 
-    this->_galois_keys =
-        shared_ptr<GaloisKeys>(new GaloisKeys(keygen.galois_keys_local()));
+    this->_galois_keys = make_shared<GaloisKeys>(keygen.galois_keys_local());
 }
 
 void TenSEALContext::generate_galois_keys(const std::string& bytes) {
@@ -190,8 +189,7 @@ void TenSEALContext::generate_relin_keys() {
 
 void TenSEALContext::generate_relin_keys(const SecretKey& secret_key) {
     KeyGenerator keygen = KeyGenerator(this->_context, secret_key);
-    this->_relin_keys =
-        shared_ptr<RelinKeys>(new RelinKeys(keygen.relin_keys_local()));
+    this->_relin_keys = make_shared<RelinKeys>(keygen.relin_keys_local());
 }
 
 void TenSEALContext::generate_relin_keys(const std::string& bytes) {
@@ -222,13 +220,12 @@ void TenSEALContext::make_context_public(bool generate_galois_keys,
     // generate Galois Keys
     if (generate_galois_keys && this->_galois_keys == nullptr) {
         this->_galois_keys =
-            shared_ptr<GaloisKeys>(new GaloisKeys(keygen.galois_keys_local()));
+            make_shared<GaloisKeys>(keygen.galois_keys_local());
     }
 
     // generate Relinearization Keys
     if (generate_relin_keys && this->_relin_keys == nullptr) {
-        this->_relin_keys =
-            shared_ptr<RelinKeys>(new RelinKeys(keygen.relin_keys_local()));
+        this->_relin_keys = make_shared<RelinKeys>(keygen.relin_keys_local());
     }
 }
 
