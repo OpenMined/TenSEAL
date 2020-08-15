@@ -45,9 +45,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def(py::init<shared_ptr<TenSEALContext> &, vector<int64_t>>())
         .def(py::init<shared_ptr<TenSEALContext> &, const std::string &>())
         .def("size", &BFVVector::size)
-        .def("decrypt", py::overload_cast<>(&BFVVector::decrypt))
+        .def("decrypt", py::overload_cast<>(&BFVVector::decrypt, py::const_))
         .def("decrypt", py::overload_cast<const std::shared_ptr<SecretKey> &>(
-                            &BFVVector::decrypt))
+                            &BFVVector::decrypt, py::const_))
         .def("add", &BFVVector::add)
         .def("add_", &BFVVector::add_inplace)
         .def("add_plain", &BFVVector::add_plain)

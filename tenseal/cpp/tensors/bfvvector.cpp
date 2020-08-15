@@ -43,10 +43,10 @@ BFVVector::BFVVector(const TenSEALContextProto& ctx,
     this->load_proto(vec);
 }
 
-size_t BFVVector::size() { return this->_size; }
-size_t BFVVector::ciphertext_size() { return this->ciphertext.size(); }
+size_t BFVVector::size() const { return this->_size; }
+size_t BFVVector::ciphertext_size() const { return this->ciphertext.size(); }
 
-vector<int64_t> BFVVector::decrypt() {
+vector<int64_t> BFVVector::decrypt() const {
     if (this->tenseal_context()->decryptor == nullptr) {
         // this->context was loaded with public keys only
         throw invalid_argument(
@@ -57,7 +57,7 @@ vector<int64_t> BFVVector::decrypt() {
     return this->decrypt(this->tenseal_context()->secret_key());
 }
 
-vector<int64_t> BFVVector::decrypt(const shared_ptr<SecretKey>& sk) {
+vector<int64_t> BFVVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
     Decryptor decryptor =
         Decryptor(this->tenseal_context()->seal_context(), *sk);
@@ -74,7 +74,7 @@ vector<int64_t> BFVVector::decrypt(const shared_ptr<SecretKey>& sk) {
     return real_result;
 }
 
-BFVVector BFVVector::add(BFVVector to_add) {
+BFVVector BFVVector::add(const BFVVector& to_add) const {
     BFVVector new_vector = *this;
     new_vector.add_inplace(to_add);
 
@@ -98,7 +98,7 @@ BFVVector& BFVVector::add_inplace(BFVVector to_add) {
     return *this;
 }
 
-BFVVector BFVVector::add_plain(const vector<int64_t>& to_add) {
+BFVVector BFVVector::add_plain(const vector<int64_t>& to_add) const {
     BFVVector new_vector = *this;
     new_vector.add_plain_inplace(to_add);
 
@@ -119,7 +119,7 @@ BFVVector& BFVVector::add_plain_inplace(const vector<int64_t>& to_add) {
     return *this;
 }
 
-BFVVector BFVVector::sub(BFVVector to_sub) {
+BFVVector BFVVector::sub(const BFVVector& to_sub) const {
     BFVVector new_vector = *this;
     new_vector.sub_inplace(to_sub);
 
@@ -143,7 +143,7 @@ BFVVector& BFVVector::sub_inplace(BFVVector to_sub) {
     return *this;
 }
 
-BFVVector BFVVector::sub_plain(const vector<int64_t>& to_sub) {
+BFVVector BFVVector::sub_plain(const vector<int64_t>& to_sub) const {
     BFVVector new_vector = *this;
     new_vector.sub_plain_inplace(to_sub);
 
@@ -164,7 +164,7 @@ BFVVector& BFVVector::sub_plain_inplace(const vector<int64_t>& to_sub) {
     return *this;
 }
 
-BFVVector BFVVector::mul(BFVVector to_mul) {
+BFVVector BFVVector::mul(const BFVVector& to_mul) const {
     BFVVector new_vector = *this;
     new_vector.mul_inplace(to_mul);
 
@@ -193,7 +193,7 @@ BFVVector& BFVVector::mul_inplace(BFVVector to_mul) {
     return *this;
 }
 
-BFVVector BFVVector::mul_plain(const vector<int64_t>& to_mul) {
+BFVVector BFVVector::mul_plain(const vector<int64_t>& to_mul) const {
     BFVVector new_vector = *this;
     new_vector.mul_plain_inplace(to_mul);
 
