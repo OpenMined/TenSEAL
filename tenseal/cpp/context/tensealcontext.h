@@ -145,7 +145,7 @@ class TenSEALContext {
     /**
      * @returns the wrapped SEALContext object.
      **/
-    shared_ptr<SEALContext> seal_context();
+    shared_ptr<SEALContext> seal_context() const;
     /**
      * Template encoding function for the encoders.
      **/

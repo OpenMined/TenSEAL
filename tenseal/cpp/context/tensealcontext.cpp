@@ -232,7 +232,7 @@ void TenSEALContext::make_context_public(bool generate_galois_keys,
 bool TenSEALContext::is_public() const { return this->_secret_key == nullptr; }
 bool TenSEALContext::is_private() const { return !is_public(); }
 
-shared_ptr<SEALContext> TenSEALContext::seal_context() { return _context; }
+shared_ptr<SEALContext> TenSEALContext::seal_context() const { return _context; }
 
 void TenSEALContext::global_scale(double scale) {
     encoder_factory->global_scale(scale);
