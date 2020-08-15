@@ -96,6 +96,27 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
               return make_pair(ckks_vector, windows_nb);
           });
 
+    m.def("enc_matmul_encoding", [](shared_ptr<TenSEALContext> ctx,
+                                    const vector<vector<double>> &input) {
+        vector<double> final_vector;
+        vector<vector<double>> padded_matrix;
+        padded_matrix.reserve(input.size());
+        // calculate the next power of 2
+        size_t plain_vec_size =
+            1 << (static_cast<size_t>(ceil(log2(input[0].size()))));
+
+        for (size_t i = 0; i < input.size(); i++) {
+            // pad the row to the next power of 2
+            vector<double> row(plain_vec_size, 0);
+            copy(input[i].begin(), input[i].end(), row.begin());
+            padded_matrix.push_back(row);
+        }
+
+        vertical_scan(padded_matrix, final_vector);
+        CKKSVector ckks_vector = CKKSVector(ctx, final_vector);
+        return ckks_vector;
+    });
+
     py::class_<CKKSVector>(m, "CKKSVector")
         // specifying scale
         .def(py::init<shared_ptr<TenSEALContext> &, vector<double>, double>())
@@ -159,6 +180,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              py::arg("n_jobs") = 0)
         .def("conv2d_im2col", &CKKSVector::conv2d_im2col)
         .def("conv2d_im2col_inplace", &CKKSVector::conv2d_im2col_inplace)
+        .def("enc_matmul_plain", &CKKSVector::enc_matmul_plain)
+        .def("enc_matmul_plain_inplace", &CKKSVector::enc_matmul_plain)
         // python arithmetic
         .def("__neg__", &CKKSVector::negate)
         .def("__pow__", &CKKSVector::power)
