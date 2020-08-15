@@ -1009,6 +1009,29 @@ def test_vec_plain_matrix_mul_depth2(context, vec, matrix1, matrix2, precision):
 
 
 @pytest.mark.parametrize(
+    "matrix_shape, vector_size",
+    [((1, 1), 1), ((2, 1), 1), ((3, 2), 2), ((4, 4), 4), ((9, 7), 7), ((16, 12), 12),],
+)
+def test_enc_matmul_plain(context, matrix_shape, vector_size, precision):
+    def generate_input(matrix_shape, vector_size):
+        # generated random values
+        matrix = np.random.randn(*matrix_shape)
+        vector = np.random.randn(vector_size)
+
+        return matrix, vector
+
+    matrix, vector = generate_input(matrix_shape, vector_size)
+    expected = matrix @ vector
+
+    context.generate_galois_keys()
+    ckks_vector = ts.enc_matmul_encoding(context, matrix.tolist())
+    result = ckks_vector.enc_matmul_plain(vector.tolist(), matrix_shape[0])
+    assert _almost_equal(
+        result.decrypt(), expected, precision
+    ), "Matrix multiplication is incorrect."
+
+
+@pytest.mark.parametrize(
     "data, polynom",
     [
         # null polynom

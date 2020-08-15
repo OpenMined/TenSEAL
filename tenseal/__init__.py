@@ -18,6 +18,7 @@ GaloisKeys = _ts_cpp.GaloisKeys
 
 # utils
 im2col_encoding = _ts_cpp.im2col_encoding
+enc_matmul_encoding = _ts_cpp.enc_matmul_encoding
 
 
 def context(
