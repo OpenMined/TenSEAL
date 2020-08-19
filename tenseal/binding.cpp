@@ -179,9 +179,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("mm_", &CKKSVector::matmul_plain_inplace, py::arg("matrix"),
              py::arg("n_jobs") = 0)
         .def("conv2d_im2col", &CKKSVector::conv2d_im2col)
-        .def("conv2d_im2col_inplace", &CKKSVector::conv2d_im2col_inplace)
+        .def("conv2d_im2col_", &CKKSVector::conv2d_im2col_inplace)
         .def("enc_matmul_plain", &CKKSVector::enc_matmul_plain)
-        .def("enc_matmul_plain_inplace", &CKKSVector::enc_matmul_plain)
+        .def("enc_matmul_plain_", &CKKSVector::enc_matmul_plain_inplace)
         // python arithmetic
         .def("__neg__", &CKKSVector::negate)
         .def("__pow__", &CKKSVector::power)
