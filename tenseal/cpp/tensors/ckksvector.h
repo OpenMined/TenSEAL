@@ -108,12 +108,20 @@ class CKKSVector {
     CKKSVector& sum_inplace();
 
     /**
-     * Matrix multiplication operations.
+     * Encrypted Vector multiplication with plain matrix.
      **/
     CKKSVector matmul_plain(const vector<vector<double>>& matrix,
                             size_t n_jobs = 0);
     CKKSVector& matmul_plain_inplace(const vector<vector<double>>& matrix,
                                      size_t n_jobs = 0);
+
+    /**
+     * Encrypted Matrix multiplication with plain vector.
+     **/
+    CKKSVector enc_matmul_plain(const vector<double>& plain_vec,
+                                size_t row_size);
+    CKKSVector& enc_matmul_plain_inplace(const vector<double>& plain_vec,
+                                         size_t row_size);
 
     /**
      * Polynomial evaluation with `this` as variable.

@@ -587,34 +587,52 @@ CKKSVector& CKKSVector::conv2d_im2col_inplace(
     vector<double> flatten_kernel;
     horizontal_scan(kernel, flatten_kernel);
 
+    this->enc_matmul_plain_inplace(flatten_kernel, windows_nb);
+    return *this;
+}
+
+CKKSVector CKKSVector::enc_matmul_plain(const vector<double>& plain_vec,
+                                        const size_t rows_nb) {
+    CKKSVector new_vec = *this;
+    new_vec.enc_matmul_plain_inplace(plain_vec, rows_nb);
+    return new_vec;
+}
+
+CKKSVector& CKKSVector::enc_matmul_plain_inplace(
+    const vector<double>& plain_vec, const size_t rows_nb) {
+    if (plain_vec.empty()) {
+        throw invalid_argument("Plain vector can't be empty");
+    }
+
     // calculate the next power of 2
-    size_t kernel_size = kernel.size() * kernel[0].size();
-    kernel_size = 1 << (static_cast<size_t>(ceil(log2(kernel_size))));
+    size_t plain_vec_size =
+        1 << (static_cast<size_t>(ceil(log2(plain_vec.size()))));
 
-    // pad the kernel with zeros to the next power of 2
-    flatten_kernel.resize(kernel_size, 0);
+    // pad the vector with zeros to the next power of 2
+    vector<double> padded_plain_vec(plain_vec);
+    padded_plain_vec.resize(plain_vec_size, 0);
 
-    size_t chunks_nb = flatten_kernel.size();
+    size_t chunks_nb = padded_plain_vec.size();
 
-    if (this->_size / windows_nb != chunks_nb) {
+    if (this->_size / rows_nb != chunks_nb) {
         throw invalid_argument("Matrix shape doesn't match with vector size");
     }
 
-    vector<double> plain_vec;
-    plain_vec.reserve(this->_size);
+    vector<double> new_plain_vec;
+    new_plain_vec.reserve(this->_size);
 
     for (size_t i = 0; i < chunks_nb; i++) {
-        vector<double> tmp(windows_nb, flatten_kernel[i]);
-        plain_vec.insert(plain_vec.end(), tmp.begin(), tmp.end());
+        vector<double> tmp(rows_nb, padded_plain_vec[i]);
+        new_plain_vec.insert(new_plain_vec.end(), tmp.begin(), tmp.end());
     }
 
     // replicate the vector in order to be able to do multiple matrix
     // multiplications
     size_t slot_count = this->context->slot_count<CKKSEncoder>();
-    replicate_vector(plain_vec, slot_count);
+    replicate_vector(new_plain_vec, slot_count);
     this->_size = slot_count;
 
-    this->mul_plain_inplace(plain_vec);
+    this->mul_plain_inplace(new_plain_vec);
 
     auto galois_keys = this->context->galois_keys();
 
@@ -625,12 +643,12 @@ CKKSVector& CKKSVector::conv2d_im2col_inplace(
         chunks_nb = static_cast<int>(
             1 << (static_cast<size_t>(ceil(log2(chunks_nb))) - 1));
         this->context->evaluator->rotate_vector_inplace(
-            tmp.ciphertext, static_cast<int>(windows_nb * chunks_nb),
+            tmp.ciphertext, static_cast<int>(rows_nb * chunks_nb),
             *galois_keys);
         this->add_inplace(tmp);
     }
 
-    this->_size = windows_nb;
+    this->_size = rows_nb;
 
     return *this;
 }

@@ -2,9 +2,9 @@ name: Bazel Tests
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    types: [ opened, synchronize, reopened ]
+    types: [opened, synchronize, reopened]
 
 jobs:
   BAZEL:
@@ -14,17 +14,19 @@ jobs:
         python-version: [3.8]
         os: [macos-latest, ubuntu-latest]
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Run gtest
-      timeout-minutes: 15
-      run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/cpp/...
-    - name: Run SEALAPI tests
-      timeout-minutes: 15
-      run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/python/sealapi/...
-    - name: Run TenSEAL tests
-      timeout-minutes: 15
-      run: bazel test --test_output=all --spawn_strategy=standalone --test_output=streamed --local_sigkill_grace_seconds=30 --test_timeout=900 //tests/python/tenseal/...
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run gtest
+        timeout-minutes: 15
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/cpp/...
+      - name: Run SEALAPI tests
+        timeout-minutes: 15
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/python/sealapi/...
+      - name: Run TenSEAL tests
+        timeout-minutes: 15
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_output=streamed --local_sigkill_grace_seconds=30 --test_timeout=900 //tests/python/tenseal/...
