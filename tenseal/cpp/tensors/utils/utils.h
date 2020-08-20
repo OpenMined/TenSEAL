@@ -195,7 +195,7 @@ T compute_polynomial_term(int degree, double coeff,
     return x;
 }
 
-// TODO: use const for argument
+// TODO: use const for vectors argument after merging code-optimazation branche
 template <typename T, class Encoder, typename D>
 T pack_vectors(vector<T>& vectors) {
     size_t vectors_nb = vectors.size();
