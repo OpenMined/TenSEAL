@@ -196,8 +196,7 @@ class CKKSVector {
 
         Ciphertext ciphertext(context->seal_context());
         Plaintext plaintext;
-        // TODO: get rid of this after fixing # 46
-        if (pt.size() != 0) replicate_vector(pt, slot_count);
+        replicate_vector(pt, slot_count);
         context->encode<CKKSEncoder>(pt, plaintext, scale);
         context->encryptor->encrypt(plaintext, ciphertext);
 
