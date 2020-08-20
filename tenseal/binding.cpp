@@ -265,15 +265,18 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             "global_scale",
             py::overload_cast<>(&TenSEALContext::global_scale, py::const_),
             py::overload_cast<double>(&TenSEALContext::global_scale))
-        .def_property("auto_relin",
-                      py::overload_cast<>(&TenSEALContext::auto_relin),
-                      py::overload_cast<bool>(&TenSEALContext::auto_relin))
-        .def_property("auto_rescale",
-                      py::overload_cast<>(&TenSEALContext::auto_rescale),
-                      py::overload_cast<bool>(&TenSEALContext::auto_rescale))
-        .def_property("auto_mod_switch",
-                      py::overload_cast<>(&TenSEALContext::auto_mod_switch),
-                      py::overload_cast<bool>(&TenSEALContext::auto_mod_switch))
+        .def_property(
+            "auto_relin",
+            py::overload_cast<>(&TenSEALContext::auto_relin, py::const_),
+            py::overload_cast<bool>(&TenSEALContext::auto_relin))
+        .def_property(
+            "auto_rescale",
+            py::overload_cast<>(&TenSEALContext::auto_rescale, py::const_),
+            py::overload_cast<bool>(&TenSEALContext::auto_rescale))
+        .def_property(
+            "auto_mod_switch",
+            py::overload_cast<>(&TenSEALContext::auto_mod_switch, py::const_),
+            py::overload_cast<bool>(&TenSEALContext::auto_mod_switch))
         .def("new",
              py::overload_cast<scheme_type, size_t, uint64_t, vector<int>,
                                optional<size_t>>(&TenSEALContext::Create),

@@ -278,17 +278,18 @@ void TenSEALContext::auto_mod_switch(bool status) {
     this->_auto_flags |= flag;
 }
 
-bool TenSEALContext::auto_relin() {
+bool TenSEALContext::auto_relin() const {
     return this->_auto_flags & flag_auto_relin;
 }
-bool TenSEALContext::auto_rescale() {
+bool TenSEALContext::auto_rescale() const {
     return this->_auto_flags & flag_auto_rescale;
 }
-bool TenSEALContext::auto_mod_switch() {
+bool TenSEALContext::auto_mod_switch() const {
     return this->_auto_flags & flag_auto_mod_switch;
 }
 
-bool TenSEALContext::equals(const std::shared_ptr<TenSEALContext>& other) {
+bool TenSEALContext::equals(
+    const std::shared_ptr<TenSEALContext>& other) const {
     // TODO: improve checks
     if (this->safe_global_scale() != other->safe_global_scale()) return false;
 
