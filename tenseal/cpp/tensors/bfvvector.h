@@ -7,6 +7,7 @@
 
 #include "seal/seal.h"
 #include "tenseal/cpp/context/tensealcontext.h"
+#include "tenseal/cpp/tensors/utils/utils.h"
 #include "tenseal/proto/tensors.pb.h"
 
 namespace tenseal {
@@ -105,8 +106,16 @@ class BFVVector {
         if (pt.empty()) {
             throw invalid_argument("Attempting to encrypt an empty vector");
         }
+        auto slot_count = context->slot_count<BatchEncoder>();
+        if (pt.size() > slot_count)
+            // number of slots available is poly_modulus_degree / 2
+            throw invalid_argument(
+                "can't encrypt vectors of this size, please use a larger "
+                "polynomial modulus degree.");
+
         Ciphertext ciphertext(context->seal_context());
         Plaintext plaintext;
+        replicate_vector(pt, slot_count);
         context->encode<BatchEncoder>(pt, plaintext);
         context->encryptor->encrypt(plaintext, ciphertext);
 
