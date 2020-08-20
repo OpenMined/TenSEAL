@@ -7,6 +7,7 @@
 
 #include "seal/seal.h"
 #include "tenseal/cpp/context/tensealcontext.h"
+#include "tenseal/cpp/tensors/utils/utils.h"
 #include "tenseal/proto/tensors.pb.h"
 
 namespace tenseal {
@@ -117,6 +118,11 @@ class BFVVector {
     BFVVectorProto save_proto() const;
 
     void load_context_proto(const TenSEALContextProto& buffer);
+
+    // make pack_vectors a friend function in order to be able to modify vector
+    // size (_size private member)
+    friend BFVVector pack_vectors<BFVVector, BatchEncoder, int64_t>(
+        vector<BFVVector>&);
 };
 
 }  // namespace tenseal
