@@ -205,6 +205,16 @@ T pack_vectors(vector<T>& vectors) {
     size_t slot_count =
         vectors[0].tenseal_context()->template slot_count<Encoder>();
 
+    // output_size must be smaller than slot_count
+    if (vectors.empty()) {
+        throw invalid_argument("empty input vector");
+    }
+
+    // output_size must be smaller than slot_count
+    if (output_size > slot_count) {
+        throw invalid_argument("output size is bigger than slot count");
+    }
+
     // check if each vectors sizes are equal
     if (any_of(vectors.begin(), vectors.end(),
                [vector_size](T& i) { return i.size() != vector_size; })) {
