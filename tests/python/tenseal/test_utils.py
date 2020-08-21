@@ -19,7 +19,7 @@ def test_pack_ckks_vectors(vectors_nb, vector_size):
     # generate vectors
     vectors = [np.random.randn(vector_size).tolist() for _ in range(vectors_nb)]
 
-    enc_vectors = list(map(lambda v: ts.ckks_vector(context, v), vectors))
+    enc_vectors = [ts.ckks_vector(context, v) for v in vectors]
 
     result = ts.pack_vectors(enc_vectors)
     expected = reduce(lambda x, y: x + y, vectors, [])
@@ -37,7 +37,7 @@ def test_pack_bfv_vectors(vectors_nb, vector_size):
     # generate vectors
     vectors = [np.random.randint(1000, size=vector_size).tolist() for _ in range(vectors_nb)]
 
-    enc_vectors = list(map(lambda v: ts.bfv_vector(context, v), vectors))
+    enc_vectors = [ts.bfv_vector(context, v) for v in vectors]
 
     packed_vec = ts.pack_vectors(enc_vectors)
     result = packed_vec.decrypt()
