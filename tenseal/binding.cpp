@@ -117,6 +117,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         return ckks_vector;
     });
 
+    m.def("pack_vectors", &pack_vectors<CKKSVector, CKKSEncoder, double>);
+    m.def("pack_vectors", &pack_vectors<BFVVector, BatchEncoder, int64_t>);
+
     py::class_<CKKSVector>(m, "CKKSVector")
         // specifying scale
         .def(py::init<shared_ptr<TenSEALContext> &, vector<double>, double>())
