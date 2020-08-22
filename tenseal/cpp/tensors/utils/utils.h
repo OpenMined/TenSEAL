@@ -195,9 +195,8 @@ T compute_polynomial_term(int degree, double coeff,
     return x;
 }
 
-// TODO: use const for vectors argument after merging code-optimazation branche
 template <typename T, class Encoder, typename D>
-T pack_vectors(vector<T>& vectors) {
+T pack_vectors(const vector<T>& vectors) {
     size_t vectors_nb = vectors.size();
     size_t vector_size = vectors[0].size();
     size_t output_size = vectors_nb * vector_size;
@@ -217,7 +216,7 @@ T pack_vectors(vector<T>& vectors) {
 
     // check if each vectors sizes are equal
     if (any_of(vectors.begin(), vectors.end(),
-               [vector_size](T& i) { return i.size() != vector_size; })) {
+               [vector_size](const T& i) { return i.size() != vector_size; })) {
         throw invalid_argument("vectors sizes are different");
     }
 

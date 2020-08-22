@@ -130,7 +130,7 @@ class BFVVector {
     // make pack_vectors a friend function in order to be able to modify vector
     // size (_size private member)
     friend BFVVector pack_vectors<BFVVector, BatchEncoder, int64_t>(
-        vector<BFVVector>&);
+        const vector<BFVVector>&);
 };
 
 }  // namespace tenseal
