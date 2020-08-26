@@ -58,7 +58,7 @@ CKKSVector::CKKSVector(shared_ptr<TenSEALContext> ctx,
 size_t CKKSVector::size() const { return this->_size; }
 size_t CKKSVector::ciphertext_size() const { return this->ciphertext.size(); }
 
-vector<double> CKKSVector::decrypt() {
+vector<double> CKKSVector::decrypt() const {
     if (this->tenseal_context()->decryptor == NULL) {
         // this->context was loaded with public keys only
         throw invalid_argument(
@@ -69,7 +69,7 @@ vector<double> CKKSVector::decrypt() {
     return this->decrypt(this->tenseal_context()->secret_key());
 }
 
-vector<double> CKKSVector::decrypt(const shared_ptr<SecretKey>& sk) {
+vector<double> CKKSVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
     Decryptor decryptor =
         Decryptor(this->tenseal_context()->seal_context(), *sk);
@@ -86,7 +86,7 @@ vector<double> CKKSVector::decrypt(const shared_ptr<SecretKey>& sk) {
     return sub;
 }
 
-CKKSVector CKKSVector::negate() {
+CKKSVector CKKSVector::negate() const {
     CKKSVector new_vector = *this;
     new_vector.negate_inplace();
 
@@ -99,7 +99,7 @@ CKKSVector& CKKSVector::negate_inplace() {
     return *this;
 }
 
-CKKSVector CKKSVector::square() {
+CKKSVector CKKSVector::square() const {
     CKKSVector new_vector = *this;
     new_vector.square_inplace();
 
@@ -123,7 +123,7 @@ CKKSVector& CKKSVector::square_inplace() {
     return *this;
 }
 
-CKKSVector CKKSVector::power(unsigned int power) {
+CKKSVector CKKSVector::power(unsigned int power) const {
     CKKSVector new_vector = *this;
     new_vector.power_inplace(power);
 
@@ -158,7 +158,7 @@ CKKSVector& CKKSVector::power_inplace(unsigned int power) {
     return *this;
 }
 
-CKKSVector CKKSVector::add(CKKSVector to_add) {
+CKKSVector CKKSVector::add(const CKKSVector& to_add) const {
     CKKSVector new_vector = *this;
     new_vector.add_inplace(to_add);
 
@@ -194,14 +194,14 @@ CKKSVector& CKKSVector::add_inplace(CKKSVector to_add) {
     return *this;
 }
 
-CKKSVector CKKSVector::add_plain(const vector<double>& to_add) {
+CKKSVector CKKSVector::add_plain(const vector<double>& to_add) const {
     CKKSVector new_vector = *this;
     new_vector.add_plain_inplace(to_add);
 
     return new_vector;
 }
 
-CKKSVector CKKSVector::add_plain(double to_add) {
+CKKSVector CKKSVector::add_plain(double to_add) const {
     CKKSVector new_vector = *this;
     new_vector.add_plain_inplace(to_add);
 
@@ -237,7 +237,7 @@ CKKSVector& CKKSVector::_add_plain_inplace(const T& to_add) {
     return *this;
 }
 
-CKKSVector CKKSVector::sub(CKKSVector to_sub) {
+CKKSVector CKKSVector::sub(const CKKSVector& to_sub) const {
     CKKSVector new_vector = *this;
     new_vector.sub_inplace(to_sub);
 
@@ -273,14 +273,14 @@ CKKSVector& CKKSVector::sub_inplace(CKKSVector to_sub) {
     return *this;
 }
 
-CKKSVector CKKSVector::sub_plain(const vector<double>& to_sub) {
+CKKSVector CKKSVector::sub_plain(const vector<double>& to_sub) const {
     CKKSVector new_vector = *this;
     new_vector.sub_plain_inplace(to_sub);
 
     return new_vector;
 }
 
-CKKSVector CKKSVector::sub_plain(double to_sub) {
+CKKSVector CKKSVector::sub_plain(double to_sub) const {
     CKKSVector new_vector = *this;
     new_vector.sub_plain_inplace(to_sub);
 
@@ -316,7 +316,7 @@ CKKSVector& CKKSVector::_sub_plain_inplace(const T& to_sub) {
     return *this;
 }
 
-CKKSVector CKKSVector::mul(CKKSVector to_mul) {
+CKKSVector CKKSVector::mul(const CKKSVector& to_mul) const {
     CKKSVector new_vector = *this;
     new_vector.mul_inplace(to_mul);
 
@@ -363,14 +363,14 @@ CKKSVector& CKKSVector::mul_inplace(CKKSVector to_mul) {
     return *this;
 }
 
-CKKSVector CKKSVector::mul_plain(const vector<double>& to_mul) {
+CKKSVector CKKSVector::mul_plain(const vector<double>& to_mul) const {
     CKKSVector new_vector = *this;
     new_vector.mul_plain_inplace(to_mul);
 
     return new_vector;
 }
 
-CKKSVector CKKSVector::mul_plain(double to_mul) {
+CKKSVector CKKSVector::mul_plain(double to_mul) const {
     CKKSVector new_vector = *this;
     new_vector.mul_plain_inplace(to_mul);
 
@@ -423,20 +423,20 @@ CKKSVector& CKKSVector::_mul_plain_inplace(const T& to_mul) {
     return *this;
 }
 
-CKKSVector CKKSVector::dot_product(CKKSVector to_mul) {
+CKKSVector CKKSVector::dot_product(const CKKSVector& to_mul) const {
     CKKSVector new_vector = *this;
     new_vector.dot_product_inplace(to_mul);
 
     return new_vector;
 }
 
-CKKSVector& CKKSVector::dot_product_inplace(CKKSVector to_mul) {
+CKKSVector& CKKSVector::dot_product_inplace(const CKKSVector& to_mul) {
     this->mul_inplace(to_mul);
     this->sum_inplace();
     return *this;
 }
 
-CKKSVector CKKSVector::dot_product_plain(const vector<double>& to_mul) {
+CKKSVector CKKSVector::dot_product_plain(const vector<double>& to_mul) const {
     CKKSVector new_vector = *this;
     new_vector.dot_product_plain_inplace(to_mul);
 
@@ -450,7 +450,7 @@ CKKSVector& CKKSVector::dot_product_plain_inplace(
     return *this;
 }
 
-CKKSVector CKKSVector::sum() {
+CKKSVector CKKSVector::sum() const {
     CKKSVector new_vector = *this;
     new_vector.sum_inplace();
     return new_vector;
@@ -463,7 +463,7 @@ CKKSVector& CKKSVector::sum_inplace() {
 }
 
 CKKSVector CKKSVector::matmul_plain(const vector<vector<double>>& matrix,
-                                    size_t n_jobs) {
+                                    size_t n_jobs) const {
     CKKSVector new_vector = *this;
     return new_vector.matmul_plain_inplace(matrix, n_jobs);
 }
@@ -485,7 +485,7 @@ CKKSVector& CKKSVector::matmul_plain_inplace(
     return *this;
 }
 
-CKKSVector CKKSVector::replicate_first_slot(size_t n) {
+CKKSVector CKKSVector::replicate_first_slot(size_t n) const {
     CKKSVector new_vector = *this;
     return new_vector.replicate_first_slot_inplace(n);
 }
@@ -510,7 +510,7 @@ CKKSVector& CKKSVector::replicate_first_slot_inplace(size_t n) {
     return *this;
 }
 
-CKKSVector CKKSVector::polyval(const vector<double>& coefficients) {
+CKKSVector CKKSVector::polyval(const vector<double>& coefficients) const {
     CKKSVector new_vector = *this;
     return new_vector.polyval_inplace(coefficients);
 }
@@ -565,7 +565,7 @@ CKKSVector& CKKSVector::polyval_inplace(const vector<double>& coefficients) {
 }
 
 CKKSVector CKKSVector::conv2d_im2col(const vector<vector<double>>& kernel,
-                                     const size_t windows_nb) {
+                                     const size_t windows_nb) const {
     CKKSVector new_vec = *this;
     new_vec.conv2d_im2col_inplace(kernel, windows_nb);
     return new_vec;

@@ -35,8 +35,8 @@ class CKKSVector {
      * Decrypts and returns the plaintext representation of the encrypted vector
      *of real numbers using the secret-key.
      **/
-    vector<double> decrypt();
-    vector<double> decrypt(const std::shared_ptr<SecretKey>& sk);
+    vector<double> decrypt() const;
+    vector<double> decrypt(const std::shared_ptr<SecretKey>& sk) const;
 
     /**
      * Returns the size of the encrypted vector.
@@ -48,25 +48,25 @@ class CKKSVector {
      * Replicate the first slot of a ciphertext n times. Requires a
      *multiplication.
      **/
-    CKKSVector replicate_first_slot(size_t n);
+    CKKSVector replicate_first_slot(size_t n) const;
     CKKSVector& replicate_first_slot_inplace(size_t n);
 
     /**
      * Negates a CKKSVector.
      **/
-    CKKSVector negate();
+    CKKSVector negate() const;
     CKKSVector& negate_inplace();
 
     /**
      * Compute the square of the CKKSVector.
      **/
-    CKKSVector square();
+    CKKSVector square() const;
     CKKSVector& square_inplace();
 
     /**
      * Compute the power of the CKKSVector with minimal multiplication depth.
      **/
-    CKKSVector power(unsigned int power);
+    CKKSVector power(unsigned int power) const;
     CKKSVector& power_inplace(unsigned int power);
 
     /**
@@ -75,14 +75,14 @@ class CKKSVector {
      * substraction or multiplication in an element-wise fashion. in_place
      * functions return a reference to the same object.
      **/
-    CKKSVector add(CKKSVector to_add);
+    CKKSVector add(const CKKSVector& to_add) const;
     CKKSVector& add_inplace(CKKSVector to_add);
-    CKKSVector sub(CKKSVector to_sub);
+    CKKSVector sub(const CKKSVector& to_sub) const;
     CKKSVector& sub_inplace(CKKSVector to_sub);
-    CKKSVector mul(CKKSVector to_mul);
+    CKKSVector mul(const CKKSVector& to_mul) const;
     CKKSVector& mul_inplace(CKKSVector to_mul);
-    CKKSVector dot_product(CKKSVector to_mul);
-    CKKSVector& dot_product_inplace(CKKSVector to_mul);
+    CKKSVector dot_product(const CKKSVector& to_mul) const;
+    CKKSVector& dot_product_inplace(const CKKSVector& to_mul);
 
     /**
      * Plain evaluation function operates on an encrypted vector and plaintext
@@ -90,28 +90,28 @@ class CKKSVector {
      * either addition, substraction or multiplication in an element-wise
      *fashion. in_place functions return a reference to the same object.
      **/
-    CKKSVector add_plain(double to_add);
-    CKKSVector add_plain(const vector<double>& to_add);
+    CKKSVector add_plain(double to_add) const;
+    CKKSVector add_plain(const vector<double>& to_add) const;
     CKKSVector& add_plain_inplace(double to_add);
     CKKSVector& add_plain_inplace(const vector<double>& to_add);
-    CKKSVector sub_plain(double to_sub);
-    CKKSVector sub_plain(const vector<double>& to_sub);
+    CKKSVector sub_plain(double to_sub) const;
+    CKKSVector sub_plain(const vector<double>& to_sub) const;
     CKKSVector& sub_plain_inplace(double to_sub);
     CKKSVector& sub_plain_inplace(const vector<double>& to_sub);
-    CKKSVector mul_plain(double to_mul);
-    CKKSVector mul_plain(const vector<double>& to_mul);
+    CKKSVector mul_plain(double to_mul) const;
+    CKKSVector mul_plain(const vector<double>& to_mul) const;
     CKKSVector& mul_plain_inplace(double to_mul);
     CKKSVector& mul_plain_inplace(const vector<double>& to_mul);
-    CKKSVector dot_product_plain(const vector<double>& to_mul);
+    CKKSVector dot_product_plain(const vector<double>& to_mul) const;
     CKKSVector& dot_product_plain_inplace(const vector<double>& to_mul);
-    CKKSVector sum();
+    CKKSVector sum() const;
     CKKSVector& sum_inplace();
 
     /**
      * Encrypted Vector multiplication with plain matrix.
      **/
     CKKSVector matmul_plain(const vector<vector<double>>& matrix,
-                            size_t n_jobs = 0);
+                            size_t n_jobs = 0) const;
     CKKSVector& matmul_plain_inplace(const vector<vector<double>>& matrix,
                                      size_t n_jobs = 0);
 
@@ -128,7 +128,7 @@ class CKKSVector {
      * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
      *x^i
      **/
-    CKKSVector polyval(const vector<double>& coefficients);
+    CKKSVector polyval(const vector<double>& coefficients) const;
     CKKSVector& polyval_inplace(const vector<double>& coefficients);
 
     /*
@@ -137,7 +137,7 @@ class CKKSVector {
      * The kernel vector should be padded with zeros to the next power of 2
      */
     CKKSVector conv2d_im2col(const vector<vector<double>>& kernel,
-                             const size_t windows_nb);
+                             const size_t windows_nb) const;
     CKKSVector& conv2d_im2col_inplace(const vector<vector<double>>& kernel,
                                       const size_t windows_nb);
 
@@ -211,7 +211,7 @@ class CKKSVector {
     // make pack_vectors a friend function in order to be able to modify vector
     // size (_size private member)
     friend CKKSVector pack_vectors<CKKSVector, CKKSEncoder, double>(
-        vector<CKKSVector>&);
+        const vector<CKKSVector>&);
 };
 
 }  // namespace tenseal

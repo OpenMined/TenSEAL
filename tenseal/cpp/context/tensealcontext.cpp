@@ -172,8 +172,7 @@ void TenSEALContext::generate_galois_keys() {
 void TenSEALContext::generate_galois_keys(const SecretKey& secret_key) {
     KeyGenerator keygen = KeyGenerator(this->_context, secret_key);
 
-    this->_galois_keys =
-        shared_ptr<GaloisKeys>(new GaloisKeys(keygen.galois_keys_local()));
+    this->_galois_keys = make_shared<GaloisKeys>(keygen.galois_keys_local());
 }
 
 void TenSEALContext::generate_galois_keys(const std::string& bytes) {
@@ -190,8 +189,7 @@ void TenSEALContext::generate_relin_keys() {
 
 void TenSEALContext::generate_relin_keys(const SecretKey& secret_key) {
     KeyGenerator keygen = KeyGenerator(this->_context, secret_key);
-    this->_relin_keys =
-        shared_ptr<RelinKeys>(new RelinKeys(keygen.relin_keys_local()));
+    this->_relin_keys = make_shared<RelinKeys>(keygen.relin_keys_local());
 }
 
 void TenSEALContext::generate_relin_keys(const std::string& bytes) {
@@ -222,20 +220,21 @@ void TenSEALContext::make_context_public(bool generate_galois_keys,
     // generate Galois Keys
     if (generate_galois_keys && this->_galois_keys == nullptr) {
         this->_galois_keys =
-            shared_ptr<GaloisKeys>(new GaloisKeys(keygen.galois_keys_local()));
+            make_shared<GaloisKeys>(keygen.galois_keys_local());
     }
 
     // generate Relinearization Keys
     if (generate_relin_keys && this->_relin_keys == nullptr) {
-        this->_relin_keys =
-            shared_ptr<RelinKeys>(new RelinKeys(keygen.relin_keys_local()));
+        this->_relin_keys = make_shared<RelinKeys>(keygen.relin_keys_local());
     }
 }
 
 bool TenSEALContext::is_public() const { return this->_secret_key == nullptr; }
 bool TenSEALContext::is_private() const { return !is_public(); }
 
-shared_ptr<SEALContext> TenSEALContext::seal_context() { return _context; }
+shared_ptr<SEALContext> TenSEALContext::seal_context() const {
+    return _context;
+}
 
 void TenSEALContext::global_scale(double scale) {
     encoder_factory->global_scale(scale);
@@ -279,17 +278,18 @@ void TenSEALContext::auto_mod_switch(bool status) {
     this->_auto_flags |= flag;
 }
 
-bool TenSEALContext::auto_relin() {
+bool TenSEALContext::auto_relin() const {
     return this->_auto_flags & flag_auto_relin;
 }
-bool TenSEALContext::auto_rescale() {
+bool TenSEALContext::auto_rescale() const {
     return this->_auto_flags & flag_auto_rescale;
 }
-bool TenSEALContext::auto_mod_switch() {
+bool TenSEALContext::auto_mod_switch() const {
     return this->_auto_flags & flag_auto_mod_switch;
 }
 
-bool TenSEALContext::equals(const std::shared_ptr<TenSEALContext>& other) {
+bool TenSEALContext::equals(
+    const std::shared_ptr<TenSEALContext>& other) const {
     // TODO: improve checks
     if (this->safe_global_scale() != other->safe_global_scale()) return false;
 

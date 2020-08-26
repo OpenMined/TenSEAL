@@ -45,9 +45,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def(py::init<shared_ptr<TenSEALContext> &, vector<int64_t>>())
         .def(py::init<shared_ptr<TenSEALContext> &, const std::string &>())
         .def("size", &BFVVector::size)
-        .def("decrypt", py::overload_cast<>(&BFVVector::decrypt))
+        .def("decrypt", py::overload_cast<>(&BFVVector::decrypt, py::const_))
         .def("decrypt", py::overload_cast<const std::shared_ptr<SecretKey> &>(
-                            &BFVVector::decrypt))
+                            &BFVVector::decrypt, py::const_))
         .def("add", &BFVVector::add)
         .def("add_", &BFVVector::add_inplace)
         .def("add_plain", &BFVVector::add_plain)
@@ -127,9 +127,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def(py::init<shared_ptr<TenSEALContext> &, vector<double>>())
         .def(py::init<shared_ptr<TenSEALContext> &, const std::string &>())
         .def("size", &CKKSVector::size)
-        .def("decrypt", py::overload_cast<>(&CKKSVector::decrypt))
+        .def("decrypt", py::overload_cast<>(&CKKSVector::decrypt, py::const_))
         .def("decrypt", py::overload_cast<const shared_ptr<SecretKey> &>(
-                            &CKKSVector::decrypt))
+                            &CKKSVector::decrypt, py::const_))
         .def("neg", &CKKSVector::negate)
         .def("neg_", &CKKSVector::negate_inplace)
         .def("square", &CKKSVector::square)
@@ -138,27 +138,30 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("pow_", &CKKSVector::power_inplace)
         .def("add", &CKKSVector::add)
         .def("add_", &CKKSVector::add_inplace)
-        .def("add_plain", py::overload_cast<double>(&CKKSVector::add_plain))
         .def("add_plain",
-             py::overload_cast<const vector<double> &>(&CKKSVector::add_plain))
+             py::overload_cast<double>(&CKKSVector::add_plain, py::const_))
+        .def("add_plain", py::overload_cast<const vector<double> &>(
+                              &CKKSVector::add_plain, py::const_))
         .def("add_plain_",
              py::overload_cast<double>(&CKKSVector::add_plain_inplace))
         .def("add_plain_", py::overload_cast<const vector<double> &>(
                                &CKKSVector::add_plain_inplace))
         .def("sub", &CKKSVector::sub)
         .def("sub_", &CKKSVector::sub_inplace)
-        .def("sub_plain", py::overload_cast<double>(&CKKSVector::sub_plain))
         .def("sub_plain",
-             py::overload_cast<const vector<double> &>(&CKKSVector::sub_plain))
+             py::overload_cast<double>(&CKKSVector::sub_plain, py::const_))
+        .def("sub_plain", py::overload_cast<const vector<double> &>(
+                              &CKKSVector::sub_plain, py::const_))
         .def("sub_plain_",
              py::overload_cast<double>(&CKKSVector::sub_plain_inplace))
         .def("sub_plain_", py::overload_cast<const vector<double> &>(
                                &CKKSVector::sub_plain_inplace))
         .def("mul", &CKKSVector::mul)
         .def("mul_", &CKKSVector::mul_inplace)
-        .def("mul_plain", py::overload_cast<double>(&CKKSVector::mul_plain))
         .def("mul_plain",
-             py::overload_cast<const vector<double> &>(&CKKSVector::mul_plain))
+             py::overload_cast<double>(&CKKSVector::mul_plain, py::const_))
+        .def("mul_plain", py::overload_cast<const vector<double> &>(
+                              &CKKSVector::mul_plain, py::const_))
         .def("mul_plain_",
              py::overload_cast<double>(&CKKSVector::mul_plain_inplace))
         .def("mul_plain_", py::overload_cast<const vector<double> &>(
@@ -190,28 +193,31 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__pow__", &CKKSVector::power)
         .def("__ipow__", &CKKSVector::power_inplace)
         .def("__add__", &CKKSVector::add)
-        .def("__add__", py::overload_cast<double>(&CKKSVector::add_plain))
         .def("__add__",
-             py::overload_cast<const vector<double> &>(&CKKSVector::add_plain))
-        .def("__radd__", py::overload_cast<double>(&CKKSVector::add_plain))
+             py::overload_cast<double>(&CKKSVector::add_plain, py::const_))
+        .def("__add__", py::overload_cast<const vector<double> &>(
+                            &CKKSVector::add_plain, py::const_))
         .def("__radd__",
-             py::overload_cast<const vector<double> &>(&CKKSVector::add_plain))
+             py::overload_cast<double>(&CKKSVector::add_plain, py::const_))
+        .def("__radd__", py::overload_cast<const vector<double> &>(
+                             &CKKSVector::add_plain, py::const_))
         .def("__iadd__", &CKKSVector::add_inplace)
         .def("__iadd__",
              py::overload_cast<double>(&CKKSVector::add_plain_inplace))
         .def("__iadd__", py::overload_cast<const vector<double> &>(
                              &CKKSVector::add_plain_inplace))
         .def("__sub__", &CKKSVector::sub)
-        .def("__sub__", py::overload_cast<double>(&CKKSVector::sub_plain))
         .def("__sub__",
-             py::overload_cast<const vector<double> &>(&CKKSVector::sub_plain))
+             py::overload_cast<double>(&CKKSVector::sub_plain, py::const_))
+        .def("__sub__", py::overload_cast<const vector<double> &>(
+                            &CKKSVector::sub_plain, py::const_))
         /*
         Since subtraction operation is anticommutative, right subtraction
         operator need to negate the vector then do an addition with left
         operand.
         */
         .def("__rsub__",
-             [](CKKSVector vec, double left_operand) {
+             [](CKKSVector vec, const double left_operand) {
                  // vec should be a copy so it might be safe to do inplace
                  vec.negate_inplace();
                  vec.add_plain_inplace(left_operand);
@@ -230,12 +236,14 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__isub__", py::overload_cast<const vector<double> &>(
                              &CKKSVector::sub_plain_inplace))
         .def("__mul__", &CKKSVector::mul)
-        .def("__mul__", py::overload_cast<double>(&CKKSVector::mul_plain))
         .def("__mul__",
-             py::overload_cast<const vector<double> &>(&CKKSVector::mul_plain))
-        .def("__rmul__", py::overload_cast<double>(&CKKSVector::mul_plain))
+             py::overload_cast<double>(&CKKSVector::mul_plain, py::const_))
+        .def("__mul__", py::overload_cast<const vector<double> &>(
+                            &CKKSVector::mul_plain, py::const_))
         .def("__rmul__",
-             py::overload_cast<const vector<double> &>(&CKKSVector::mul_plain))
+             py::overload_cast<double>(&CKKSVector::mul_plain, py::const_))
+        .def("__rmul__", py::overload_cast<const vector<double> &>(
+                             &CKKSVector::mul_plain, py::const_))
         .def("__imul__", &CKKSVector::mul_inplace)
         .def("__imul__",
              py::overload_cast<double>(&CKKSVector::mul_plain_inplace))
@@ -260,15 +268,18 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             "global_scale",
             py::overload_cast<>(&TenSEALContext::global_scale, py::const_),
             py::overload_cast<double>(&TenSEALContext::global_scale))
-        .def_property("auto_relin",
-                      py::overload_cast<>(&TenSEALContext::auto_relin),
-                      py::overload_cast<bool>(&TenSEALContext::auto_relin))
-        .def_property("auto_rescale",
-                      py::overload_cast<>(&TenSEALContext::auto_rescale),
-                      py::overload_cast<bool>(&TenSEALContext::auto_rescale))
-        .def_property("auto_mod_switch",
-                      py::overload_cast<>(&TenSEALContext::auto_mod_switch),
-                      py::overload_cast<bool>(&TenSEALContext::auto_mod_switch))
+        .def_property(
+            "auto_relin",
+            py::overload_cast<>(&TenSEALContext::auto_relin, py::const_),
+            py::overload_cast<bool>(&TenSEALContext::auto_relin))
+        .def_property(
+            "auto_rescale",
+            py::overload_cast<>(&TenSEALContext::auto_rescale, py::const_),
+            py::overload_cast<bool>(&TenSEALContext::auto_rescale))
+        .def_property(
+            "auto_mod_switch",
+            py::overload_cast<>(&TenSEALContext::auto_mod_switch, py::const_),
+            py::overload_cast<bool>(&TenSEALContext::auto_mod_switch))
         .def("new",
              py::overload_cast<scheme_type, size_t, uint64_t, vector<int>,
                                optional<size_t>>(&TenSEALContext::Create),

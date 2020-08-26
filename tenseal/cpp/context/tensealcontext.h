@@ -145,26 +145,26 @@ class TenSEALContext {
     /**
      * @returns the wrapped SEALContext object.
      **/
-    shared_ptr<SEALContext> seal_context();
+    shared_ptr<SEALContext> seal_context() const;
     /**
      * Template encoding function for the encoders.
      **/
     template <typename T, typename... Args>
-    void encode(Args&&... args) {
+    void encode(Args&&... args) const {
         encoder_factory->encode<T>(std::forward<Args>(args)...);
     }
     /**
      * Template decoder function for the encoders.
      **/
     template <class T, class R>
-    void decode(const Plaintext& pt, R& result) {
+    void decode(const Plaintext& pt, R& result) const {
         encoder_factory->decode<T>(pt, result);
     }
     /**
      * Template slot_count function for the encoders.
      **/
     template <class T>
-    size_t slot_count() {
+    size_t slot_count() const {
         return encoder_factory->slot_count<T>();
     }
     /**
@@ -192,9 +192,9 @@ class TenSEALContext {
     /**
      * Get the state for automatic relinearization, rescaling, or mod switching.
      **/
-    bool auto_relin();
-    bool auto_rescale();
-    bool auto_mod_switch();
+    bool auto_relin() const;
+    bool auto_rescale() const;
+    bool auto_mod_switch() const;
     /**
      * Read a serialized protobuffer from an input stream and populate the
      *current context.
@@ -229,16 +229,16 @@ class TenSEALContext {
     /**
      * @returns the encryption params of the current context.
      **/
-    const EncryptionParameters& parms() { return _parms; }
+    const EncryptionParameters& parms() const { return _parms; }
     /**
      * @returns true if the contexts are identical.
      **/
-    bool equals(const std::shared_ptr<TenSEALContext>& other);
+    bool equals(const std::shared_ptr<TenSEALContext>& other) const;
     /**
      * @returns a pointer to the threadpool dispatcher
      **/
-    shared_ptr<sync::ThreadPool> dispatcher() { return _dispatcher; }
-    size_t dispatcher_size() { return _threads; }
+    shared_ptr<sync::ThreadPool> dispatcher() const { return _dispatcher; }
+    size_t dispatcher_size() const { return _threads; }
 
     /**
      * @return whether a context has the key in question present.
