@@ -1,4 +1,4 @@
-black>=10.3b0
+black==19.10b0
 bumpversion>=0.5.3
 flake8
 numpy
