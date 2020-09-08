@@ -1,7 +1,6 @@
 #ifndef TENSEAL_UTILS_QUEUE_H
 #define TENSEAL_UTILS_QUEUE_H
 
-#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <condition_variable>

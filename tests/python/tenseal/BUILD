@@ -12,6 +12,7 @@ py_test(
         "tensors/test_ckks_vector.py",
         "tensors/test_perf.py",
         "tensors/test_serialization.py",
+        "tensors/test_regression.py",
             ],
     main = "main.py",
     python_version = "PY3",

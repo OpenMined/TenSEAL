@@ -1,7 +1,6 @@
 #ifndef TENSEAL_UTILS_MATRIX_OPS_H
 #define TENSEAL_UTILS_MATRIX_OPS_H
 
-#include <atomic>
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -122,9 +121,18 @@ Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
             std::min((i + 1) * batch_size, vector_size)));
     }
 
+    std::optional<std::exception> fail;
     for (size_t i = 0; i < n_jobs; i++) {
-        tenseal_context->evaluator->add_inplace(result,
-                                                future_results[i].get());
+        try {
+            tenseal_context->evaluator->add_inplace(result,
+                                                    future_results[i].get());
+        } catch (std::exception& e) {
+            fail = e;
+        }
+    }
+
+    if (fail) {
+        throw invalid_argument(fail.value().what());
     }
 
     return result;
