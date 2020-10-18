@@ -210,8 +210,8 @@ class CKKSVector {
 
     // make pack_vectors a friend function in order to be able to modify vector
     // size (_size private member)
-    friend CKKSVector pack_vectors<CKKSVector, CKKSEncoder, double>(
-        const vector<CKKSVector>&);
+    friend shared_ptr<CKKSVector> pack_vectors<CKKSVector, CKKSEncoder, double>(
+        const vector<shared_ptr<CKKSVector>>&);
 };
 
 }  // namespace tenseal

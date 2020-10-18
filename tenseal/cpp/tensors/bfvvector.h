@@ -19,15 +19,13 @@ using namespace std;
  * Holds a vector of integers in its encrypted form using the BFV homomorphic
  * encryption scheme.
  **/
-class BFVVector {
+class BFVVector: enable_shared_from_this<BFVVector> {
    public:
-    BFVVector(shared_ptr<TenSEALContext> ctx, vector<int64_t> vec);
-
-    BFVVector(const BFVVector& vec);
-
-    BFVVector(shared_ptr<TenSEALContext> ctx, const string& vec);
-    BFVVector(const TenSEALContextProto& ctx, const BFVVectorProto& vec);
-    BFVVector(shared_ptr<TenSEALContext> ctx, const BFVVectorProto& vec);
+    static shared_ptr<BFVVector> Create(shared_ptr<TenSEALContext> ctx, const vector<int64_t>& vec);
+    static shared_ptr<BFVVector> Create(shared_ptr<TenSEALContext> ctx, const string& vec);
+    static shared_ptr<BFVVector> Create(const TenSEALContextProto& ctx, const BFVVectorProto& vec);
+    static shared_ptr<BFVVector> Create(shared_ptr<TenSEALContext> ctx, const BFVVectorProto& vec);
+    static shared_ptr<BFVVector> Create(shared_ptr<const BFVVector>);
 
     /**
      * Decrypts and returns the plaintext representation of the encrypted vector
@@ -51,12 +49,12 @@ class BFVVector {
      *substraction or multiplication in an element-wise fashion. in_place
      *functions return a reference to the same object.
      **/
-    BFVVector add(const BFVVector& to_add) const;
-    BFVVector& add_inplace(BFVVector to_add);
-    BFVVector sub(const BFVVector& to_sub) const;
-    BFVVector& sub_inplace(BFVVector to_sub);
-    BFVVector mul(const BFVVector& to_mul) const;
-    BFVVector& mul_inplace(BFVVector to_mul);
+    shared_ptr<BFVVector> add(shared_ptr<BFVVector> to_add) const;
+    shared_ptr<BFVVector> add_inplace(shared_ptr<BFVVector> to_add);
+    shared_ptr<BFVVector> sub(shared_ptr<BFVVector> to_sub) const;
+    shared_ptr<BFVVector> sub_inplace(shared_ptr<BFVVector> to_sub);
+    shared_ptr<BFVVector> mul(shared_ptr<BFVVector> to_mul) const;
+    shared_ptr<BFVVector> mul_inplace(shared_ptr<BFVVector> to_mul);
 
     /**
      * Plain evaluation function operates on an encrypted vector and plaintext
@@ -64,12 +62,12 @@ class BFVVector {
      * either addition, substraction or multiplication in an element-wise
      *fashion. in_place functions return a reference to the same object.
      **/
-    BFVVector add_plain(const vector<int64_t>& to_add) const;
-    BFVVector& add_plain_inplace(const vector<int64_t>& to_add);
-    BFVVector sub_plain(const vector<int64_t>& to_sub) const;
-    BFVVector& sub_plain_inplace(const vector<int64_t>& to_sub);
-    BFVVector mul_plain(const vector<int64_t>& to_mul) const;
-    BFVVector& mul_plain_inplace(const vector<int64_t>& to_mul);
+    shared_ptr<BFVVector> add_plain(const vector<int64_t>& to_add) const;
+    shared_ptr<BFVVector> add_plain_inplace(const vector<int64_t>& to_add);
+    shared_ptr<BFVVector> sub_plain(const vector<int64_t>& to_sub) const;
+    shared_ptr<BFVVector> sub_plain_inplace(const vector<int64_t>& to_sub);
+    shared_ptr<BFVVector> mul_plain(const vector<int64_t>& to_mul) const;
+    shared_ptr<BFVVector> mul_plain_inplace(const vector<int64_t>& to_mul);
     /**
      * Load/Save the vector from/to a serialized protobuffer.
      **/
@@ -79,27 +77,32 @@ class BFVVector {
      *Recreates a new BFVVector from the current one, without any
      *pointer/reference to this one.
      * **/
-    BFVVector deepcopy() const;
+    shared_ptr<BFVVector> deepcopy() const;
     /**
      * Get a pointer to the current TenSEAL context.
      **/
     shared_ptr<TenSEALContext> tenseal_context() const {
-        if (context == nullptr) throw invalid_argument("missing context");
-        return context;
+        if (_context == nullptr) throw invalid_argument("missing context");
+        return _context;
     }
     /**
      * Link to a TenSEAL context.
      **/
     void link_tenseal_context(shared_ptr<TenSEALContext> ctx) {
-        this->context = ctx;
+        this->_context = ctx;
     }
 
    private:
     size_t _size;
+    shared_ptr<TenSEALContext> _context;
+    Ciphertext _ciphertext;
 
-    shared_ptr<TenSEALContext> context;
+    BFVVector(shared_ptr<TenSEALContext> ctx, const vector<int64_t>& vec);
+    BFVVector(shared_ptr<const BFVVector>);
+    BFVVector(shared_ptr<TenSEALContext> ctx, const string& vec);
+    BFVVector(const TenSEALContextProto& ctx, const BFVVectorProto& vec);
+    BFVVector(shared_ptr<TenSEALContext> ctx, const BFVVectorProto& vec);
 
-    Ciphertext ciphertext;
 
     static Ciphertext encrypt(shared_ptr<TenSEALContext> context,
                               vector<int64_t> pt) {
@@ -129,8 +132,8 @@ class BFVVector {
 
     // make pack_vectors a friend function in order to be able to modify vector
     // size (_size private member)
-    friend BFVVector pack_vectors<BFVVector, BatchEncoder, int64_t>(
-        const vector<BFVVector>&);
+    friend shared_ptr<BFVVector> pack_vectors<BFVVector, BatchEncoder, int64_t>(
+        const vector<shared_ptr<BFVVector>>&);
 };
 
 }  // namespace tenseal
