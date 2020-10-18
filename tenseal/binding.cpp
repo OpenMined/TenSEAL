@@ -42,8 +42,14 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         py::arg("encryption_parameters"));
 
     py::class_<BFVVector>(m, "BFVVector")
-        .def(py::init<shared_ptr<TenSEALContext> &, vector<int64_t>>())
-        .def(py::init<shared_ptr<TenSEALContext> &, const std::string &>())
+        .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
+                         const vector<int64_t> &data) {
+            return BFVVector::Create(ctx, data);
+        }))
+        .def(py::init(
+            [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
+                return BFVVector::Create(ctx, data);
+            }))
         .def("size", &BFVVector::size)
         .def("decrypt", py::overload_cast<>(&BFVVector::decrypt, py::const_))
         .def("decrypt", py::overload_cast<const std::shared_ptr<SecretKey> &>(
@@ -74,13 +80,15 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__imul__", &BFVVector::mul_inplace)
         .def("__imul__", &BFVVector::mul_plain_inplace)
         .def("context",
-             [](const BFVVector &obj) { return obj.tenseal_context(); })
+             [](shared_ptr<BFVVector> obj) { return obj->tenseal_context(); })
         .def("serialize",
-             [](const BFVVector &obj) { return py::bytes(obj.save()); })
+             [](shared_ptr<BFVVector> &obj) { return py::bytes(obj->save()); })
         .def("copy", &BFVVector::deepcopy)
-        .def("__copy__", [](const BFVVector &self) { return self.deepcopy(); })
-        .def("__deepcopy__",
-             [](const BFVVector &self, py::dict) { return self.deepcopy(); });
+        .def("__copy__",
+             [](shared_ptr<BFVVector> &obj) { return obj->deepcopy(); })
+        .def("__deepcopy__", [](const shared_ptr<BFVVector> &obj, py::dict) {
+            return obj->deepcopy();
+        });
 
     // CKKSVector utils
     m.def("im2col_encoding",
@@ -92,7 +100,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
               size_t windows_nb = im2col(input, view_as_window, kernel_n_rows,
                                          kernel_n_cols, stride);
               vertical_scan(view_as_window, final_vector);
-              CKKSVector ckks_vector = CKKSVector(ctx, final_vector);
+              auto ckks_vector = CKKSVector::Create(ctx, final_vector);
               return make_pair(ckks_vector, windows_nb);
           });
 
@@ -113,7 +121,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         }
 
         vertical_scan(padded_matrix, final_vector);
-        CKKSVector ckks_vector = CKKSVector(ctx, final_vector);
+        auto ckks_vector = CKKSVector::Create(ctx, final_vector);
         return ckks_vector;
     });
 
@@ -122,10 +130,19 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     py::class_<CKKSVector>(m, "CKKSVector")
         // specifying scale
-        .def(py::init<shared_ptr<TenSEALContext> &, vector<double>, double>())
+        .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
+                         const vector<double> &data, double scale) {
+            return CKKSVector::Create(ctx, data, scale);
+        }))
         // using global_scale if set
-        .def(py::init<shared_ptr<TenSEALContext> &, vector<double>>())
-        .def(py::init<shared_ptr<TenSEALContext> &, const std::string &>())
+        .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
+                         const vector<double> &data) {
+            return CKKSVector::Create(ctx, data);
+        }))
+        .def(py::init(
+            [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
+                return CKKSVector::Create(ctx, data);
+            }))
         .def("size", &CKKSVector::size)
         .def("decrypt", py::overload_cast<>(&CKKSVector::decrypt, py::const_))
         .def("decrypt", py::overload_cast<const shared_ptr<SecretKey> &>(
@@ -217,19 +234,20 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         operand.
         */
         .def("__rsub__",
-             [](CKKSVector vec, const double left_operand) {
+             [](shared_ptr<CKKSVector> vec, const double left_operand) {
                  // vec should be a copy so it might be safe to do inplace
-                 vec.negate_inplace();
-                 vec.add_plain_inplace(left_operand);
+                 vec->negate_inplace();
+                 vec->add_plain_inplace(left_operand);
                  return vec;
              })
-        .def("__rsub__",
-             [](CKKSVector vec, const vector<double> &left_operand) {
-                 // vec should be a copy so it might be safe to do inplace
-                 vec.negate_inplace();
-                 vec.add_plain_inplace(left_operand);
-                 return vec;
-             })
+        .def(
+            "__rsub__",
+            [](shared_ptr<CKKSVector> vec, const vector<double> &left_operand) {
+                // vec should be a copy so it might be safe to do inplace
+                vec->negate_inplace();
+                vec->add_plain_inplace(left_operand);
+                return vec;
+            })
         .def("__isub__", &CKKSVector::sub_inplace)
         .def("__isub__",
              py::overload_cast<double>(&CKKSVector::sub_plain_inplace))
@@ -254,13 +272,15 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__imatmul__", &CKKSVector::matmul_plain_inplace,
              py::arg("matrix"), py::arg("n_jobs") = 0)
         .def("context",
-             [](const CKKSVector &obj) { return obj.tenseal_context(); })
+             [](shared_ptr<CKKSVector> obj) { return obj->tenseal_context(); })
         .def("serialize",
-             [](const CKKSVector &obj) { return py::bytes(obj.save()); })
+             [](shared_ptr<CKKSVector> obj) { return py::bytes(obj->save()); })
         .def("copy", &CKKSVector::deepcopy)
-        .def("__copy__", [](const CKKSVector &self) { return self.deepcopy(); })
-        .def("__deepcopy__",
-             [](const CKKSVector &self, py::dict) { return self.deepcopy(); });
+        .def("__copy__",
+             [](shared_ptr<CKKSVector> obj) { return obj->deepcopy(); })
+        .def("__deepcopy__", [](shared_ptr<CKKSVector> obj, py::dict) {
+            return obj->deepcopy();
+        });
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")

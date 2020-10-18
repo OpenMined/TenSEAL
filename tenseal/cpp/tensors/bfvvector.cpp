@@ -12,44 +12,50 @@ using namespace seal;
 using namespace std;
 
 namespace tenseal {
-    
-shared_ptr<BFVVector> BFVVector::Create(shared_ptr<TenSEALContext> ctx, const vector<int64_t>& vec){
-        return shared_ptr<BFVVector>(new BFVVector(ctx, vec));
-}
 
-shared_ptr<BFVVector> BFVVector::Create(shared_ptr<TenSEALContext> ctx, const string& vec){
-    return shared_ptr<BFVVector>(new BFVVector(ctx, vec));
-}
-shared_ptr<BFVVector> BFVVector::Create(const TenSEALContextProto& ctx, const BFVVectorProto& vec){
-    return shared_ptr<BFVVector>(new BFVVector(ctx, vec));
-}
-shared_ptr<BFVVector> BFVVector::Create(shared_ptr<TenSEALContext> ctx, const BFVVectorProto& vec){
+shared_ptr<BFVVector> BFVVector::Create(const shared_ptr<TenSEALContext>& ctx,
+                                        const vector<int64_t>& vec) {
     return shared_ptr<BFVVector>(new BFVVector(ctx, vec));
 }
 
-shared_ptr<BFVVector> BFVVector::Create(shared_ptr<const BFVVector> other){
+shared_ptr<BFVVector> BFVVector::Create(const shared_ptr<TenSEALContext>& ctx,
+                                        const string& vec) {
+    return shared_ptr<BFVVector>(new BFVVector(ctx, vec));
+}
+shared_ptr<BFVVector> BFVVector::Create(const TenSEALContextProto& ctx,
+                                        const BFVVectorProto& vec) {
+    return shared_ptr<BFVVector>(new BFVVector(ctx, vec));
+}
+shared_ptr<BFVVector> BFVVector::Create(const shared_ptr<TenSEALContext>& ctx,
+                                        const BFVVectorProto& vec) {
+    return shared_ptr<BFVVector>(new BFVVector(ctx, vec));
+}
+
+shared_ptr<BFVVector> BFVVector::Create(
+    const shared_ptr<const BFVVector>& other) {
     return shared_ptr<BFVVector>(new BFVVector(other));
 }
 
-BFVVector::BFVVector(shared_ptr<TenSEALContext> ctx, const vector<int64_t>& vec) {
+BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx,
+                     const vector<int64_t>& vec) {
     this->link_tenseal_context(ctx);
     // Encrypts the whole vector into a single ciphertext using BFV batching
     this->_ciphertext = BFVVector::encrypt(ctx, vec);
     this->_size = vec.size();
 }
 
-BFVVector::BFVVector(shared_ptr<const BFVVector> vec) {
+BFVVector::BFVVector(const shared_ptr<const BFVVector>& vec) {
     this->link_tenseal_context(vec->_context);
     this->_size = vec->_size;
     this->_ciphertext = vec->_ciphertext;
 }
 
-BFVVector::BFVVector(shared_ptr<TenSEALContext> ctx, const string& vec) {
+BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx, const string& vec) {
     this->link_tenseal_context(ctx);
     this->load(vec);
 }
 
-BFVVector::BFVVector(shared_ptr<TenSEALContext> ctx,
+BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx,
                      const BFVVectorProto& vec) {
     this->link_tenseal_context(ctx);
     this->load_proto(vec);
@@ -116,14 +122,16 @@ shared_ptr<BFVVector> BFVVector::add_inplace(shared_ptr<BFVVector> to_add) {
     return shared_from_this();
 }
 
-shared_ptr<BFVVector> BFVVector::add_plain(const vector<int64_t>& to_add) const {
+shared_ptr<BFVVector> BFVVector::add_plain(
+    const vector<int64_t>& to_add) const {
     auto new_vector = BFVVector::Create(shared_from_this());
     new_vector->add_plain_inplace(to_add);
 
     return new_vector;
 }
 
-shared_ptr<BFVVector> BFVVector::add_plain_inplace(const vector<int64_t>& to_add) {
+shared_ptr<BFVVector> BFVVector::add_plain_inplace(
+    const vector<int64_t>& to_add) {
     if (this->size() != to_add.size()) {
         throw invalid_argument("can't add vectors of different sizes");
     }
@@ -161,14 +169,16 @@ shared_ptr<BFVVector> BFVVector::sub_inplace(shared_ptr<BFVVector> to_sub) {
     return shared_from_this();
 }
 
-shared_ptr<BFVVector> BFVVector::sub_plain(const vector<int64_t>& to_sub) const {
+shared_ptr<BFVVector> BFVVector::sub_plain(
+    const vector<int64_t>& to_sub) const {
     auto new_vector = BFVVector::Create(shared_from_this());
     new_vector->sub_plain_inplace(to_sub);
 
     return new_vector;
 }
 
-shared_ptr<BFVVector> BFVVector::sub_plain_inplace(const vector<int64_t>& to_sub) {
+shared_ptr<BFVVector> BFVVector::sub_plain_inplace(
+    const vector<int64_t>& to_sub) {
     if (this->size() != to_sub.size()) {
         throw invalid_argument("can't sub vectors of different sizes");
     }
@@ -211,14 +221,16 @@ shared_ptr<BFVVector> BFVVector::mul_inplace(shared_ptr<BFVVector> to_mul) {
     return shared_from_this();
 }
 
-shared_ptr<BFVVector> BFVVector::mul_plain(const vector<int64_t>& to_mul) const {
+shared_ptr<BFVVector> BFVVector::mul_plain(
+    const vector<int64_t>& to_mul) const {
     auto new_vector = BFVVector::Create(shared_from_this());
     new_vector->mul_plain_inplace(to_mul);
 
     return new_vector;
 }
 
-shared_ptr<BFVVector> BFVVector::mul_plain_inplace(const vector<int64_t>& to_mul) {
+shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
+    const vector<int64_t>& to_mul) {
     if (this->size() != to_mul.size()) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }

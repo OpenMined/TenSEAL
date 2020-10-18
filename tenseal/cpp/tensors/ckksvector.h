@@ -20,23 +20,26 @@ using namespace std;
  * Holds a vector of real numbers in its encrypted form using the CKKS
  *homomorphic encryption scheme.
  **/
-class CKKSVector {
+class CKKSVector : enable_shared_from_this<CKKSVector> {
    public:
-    CKKSVector(shared_ptr<TenSEALContext> ctx, vector<double> vec,
-               std::optional<double> scale = {});
-
-    CKKSVector(const CKKSVector& vec);
-
-    CKKSVector(shared_ptr<TenSEALContext> ctx, const string& vec);
-    CKKSVector(const TenSEALContextProto& ctx, const CKKSVectorProto& vec);
-    CKKSVector(shared_ptr<TenSEALContext> ctx, const CKKSVectorProto& vec);
+    static shared_ptr<CKKSVector> Create(const shared_ptr<TenSEALContext>& ctx,
+                                         const vector<double>& vec,
+                                         optional<double> scale = {});
+    static shared_ptr<CKKSVector> Create(
+        const shared_ptr<const CKKSVector>& vec);
+    static shared_ptr<CKKSVector> Create(const shared_ptr<TenSEALContext>& ctx,
+                                         const string& vec);
+    static shared_ptr<CKKSVector> Create(const TenSEALContextProto& ctx,
+                                         const CKKSVectorProto& vec);
+    static shared_ptr<CKKSVector> Create(const shared_ptr<TenSEALContext>& ctx,
+                                         const CKKSVectorProto& vec);
 
     /**
      * Decrypts and returns the plaintext representation of the encrypted vector
      *of real numbers using the secret-key.
      **/
     vector<double> decrypt() const;
-    vector<double> decrypt(const std::shared_ptr<SecretKey>& sk) const;
+    vector<double> decrypt(const shared_ptr<SecretKey>& sk) const;
 
     /**
      * Returns the size of the encrypted vector.
@@ -48,26 +51,26 @@ class CKKSVector {
      * Replicate the first slot of a ciphertext n times. Requires a
      *multiplication.
      **/
-    CKKSVector replicate_first_slot(size_t n) const;
-    CKKSVector& replicate_first_slot_inplace(size_t n);
+    shared_ptr<CKKSVector> replicate_first_slot(size_t n) const;
+    shared_ptr<CKKSVector> replicate_first_slot_inplace(size_t n);
 
     /**
      * Negates a CKKSVector.
      **/
-    CKKSVector negate() const;
-    CKKSVector& negate_inplace();
+    shared_ptr<CKKSVector> negate() const;
+    shared_ptr<CKKSVector> negate_inplace();
 
     /**
      * Compute the square of the CKKSVector.
      **/
-    CKKSVector square() const;
-    CKKSVector& square_inplace();
+    shared_ptr<CKKSVector> square() const;
+    shared_ptr<CKKSVector> square_inplace();
 
     /**
      * Compute the power of the CKKSVector with minimal multiplication depth.
      **/
-    CKKSVector power(unsigned int power) const;
-    CKKSVector& power_inplace(unsigned int power);
+    shared_ptr<CKKSVector> power(unsigned int power) const;
+    shared_ptr<CKKSVector> power_inplace(unsigned int power);
 
     /**
      * Encrypted evaluation function operates on two encrypted vectors and
@@ -75,14 +78,14 @@ class CKKSVector {
      * substraction or multiplication in an element-wise fashion. in_place
      * functions return a reference to the same object.
      **/
-    CKKSVector add(const CKKSVector& to_add) const;
-    CKKSVector& add_inplace(CKKSVector to_add);
-    CKKSVector sub(const CKKSVector& to_sub) const;
-    CKKSVector& sub_inplace(CKKSVector to_sub);
-    CKKSVector mul(const CKKSVector& to_mul) const;
-    CKKSVector& mul_inplace(CKKSVector to_mul);
-    CKKSVector dot_product(const CKKSVector& to_mul) const;
-    CKKSVector& dot_product_inplace(const CKKSVector& to_mul);
+    shared_ptr<CKKSVector> add(shared_ptr<CKKSVector> to_add) const;
+    shared_ptr<CKKSVector> add_inplace(shared_ptr<CKKSVector> to_add);
+    shared_ptr<CKKSVector> sub(shared_ptr<CKKSVector> to_sub) const;
+    shared_ptr<CKKSVector> sub_inplace(shared_ptr<CKKSVector> to_sub);
+    shared_ptr<CKKSVector> mul(shared_ptr<CKKSVector> to_mul) const;
+    shared_ptr<CKKSVector> mul_inplace(shared_ptr<CKKSVector> to_mul);
+    shared_ptr<CKKSVector> dot_product(shared_ptr<CKKSVector> to_mul) const;
+    shared_ptr<CKKSVector> dot_product_inplace(shared_ptr<CKKSVector> to_mul);
 
     /**
      * Plain evaluation function operates on an encrypted vector and plaintext
@@ -90,80 +93,82 @@ class CKKSVector {
      * either addition, substraction or multiplication in an element-wise
      *fashion. in_place functions return a reference to the same object.
      **/
-    CKKSVector add_plain(double to_add) const;
-    CKKSVector add_plain(const vector<double>& to_add) const;
-    CKKSVector& add_plain_inplace(double to_add);
-    CKKSVector& add_plain_inplace(const vector<double>& to_add);
-    CKKSVector sub_plain(double to_sub) const;
-    CKKSVector sub_plain(const vector<double>& to_sub) const;
-    CKKSVector& sub_plain_inplace(double to_sub);
-    CKKSVector& sub_plain_inplace(const vector<double>& to_sub);
-    CKKSVector mul_plain(double to_mul) const;
-    CKKSVector mul_plain(const vector<double>& to_mul) const;
-    CKKSVector& mul_plain_inplace(double to_mul);
-    CKKSVector& mul_plain_inplace(const vector<double>& to_mul);
-    CKKSVector dot_product_plain(const vector<double>& to_mul) const;
-    CKKSVector& dot_product_plain_inplace(const vector<double>& to_mul);
-    CKKSVector sum() const;
-    CKKSVector& sum_inplace();
+    shared_ptr<CKKSVector> add_plain(double to_add) const;
+    shared_ptr<CKKSVector> add_plain(const vector<double>& to_add) const;
+    shared_ptr<CKKSVector> add_plain_inplace(double to_add);
+    shared_ptr<CKKSVector> add_plain_inplace(const vector<double>& to_add);
+    shared_ptr<CKKSVector> sub_plain(double to_sub) const;
+    shared_ptr<CKKSVector> sub_plain(const vector<double>& to_sub) const;
+    shared_ptr<CKKSVector> sub_plain_inplace(double to_sub);
+    shared_ptr<CKKSVector> sub_plain_inplace(const vector<double>& to_sub);
+    shared_ptr<CKKSVector> mul_plain(double to_mul) const;
+    shared_ptr<CKKSVector> mul_plain(const vector<double>& to_mul) const;
+    shared_ptr<CKKSVector> mul_plain_inplace(double to_mul);
+    shared_ptr<CKKSVector> mul_plain_inplace(const vector<double>& to_mul);
+    shared_ptr<CKKSVector> dot_product_plain(
+        const vector<double>& to_mul) const;
+    shared_ptr<CKKSVector> dot_product_plain_inplace(
+        const vector<double>& to_mul);
+    shared_ptr<CKKSVector> sum() const;
+    shared_ptr<CKKSVector> sum_inplace();
 
     /**
      * Encrypted Vector multiplication with plain matrix.
      **/
-    CKKSVector matmul_plain(const vector<vector<double>>& matrix,
-                            size_t n_jobs = 0) const;
-    CKKSVector& matmul_plain_inplace(const vector<vector<double>>& matrix,
-                                     size_t n_jobs = 0);
+    shared_ptr<CKKSVector> matmul_plain(const vector<vector<double>>& matrix,
+                                        size_t n_jobs = 0) const;
+    shared_ptr<CKKSVector> matmul_plain_inplace(
+        const vector<vector<double>>& matrix, size_t n_jobs = 0);
 
     /**
      * Encrypted Matrix multiplication with plain vector.
      **/
-    CKKSVector enc_matmul_plain(const vector<double>& plain_vec,
-                                size_t row_size);
-    CKKSVector& enc_matmul_plain_inplace(const vector<double>& plain_vec,
-                                         size_t row_size);
+    shared_ptr<CKKSVector> enc_matmul_plain(const vector<double>& plain_vec,
+                                            size_t row_size);
+    shared_ptr<CKKSVector> enc_matmul_plain_inplace(
+        const vector<double>& plain_vec, size_t row_size);
 
     /**
      * Polynomial evaluation with `this` as variable.
      * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
      *x^i
      **/
-    CKKSVector polyval(const vector<double>& coefficients) const;
-    CKKSVector& polyval_inplace(const vector<double>& coefficients);
+    shared_ptr<CKKSVector> polyval(const vector<double>& coefficients) const;
+    shared_ptr<CKKSVector> polyval_inplace(const vector<double>& coefficients);
 
     /*
      * Image Block to Columns.
      * The input matrix should be encoded in a vertical scan (column-major).
      * The kernel vector should be padded with zeros to the next power of 2
      */
-    CKKSVector conv2d_im2col(const vector<vector<double>>& kernel,
-                             const size_t windows_nb) const;
-    CKKSVector& conv2d_im2col_inplace(const vector<vector<double>>& kernel,
-                                      const size_t windows_nb);
+    shared_ptr<CKKSVector> conv2d_im2col(const vector<vector<double>>& kernel,
+                                         const size_t windows_nb) const;
+    shared_ptr<CKKSVector> conv2d_im2col_inplace(
+        const vector<vector<double>>& kernel, const size_t windows_nb);
 
     /**
      * Load/Save the vector from/to a serialized protobuffer.
      **/
-    void load(const std::string& vec);
-    std::string save() const;
+    void load(const string& vec);
+    string save() const;
 
     /**
      *Recreates a new CKKSVector from the current one, without any
      *pointer/reference to this one.
      **/
-    CKKSVector deepcopy() const;
+    shared_ptr<CKKSVector> deepcopy() const;
     /**
      * Get a pointer to the current TenSEAL context.
      **/
     shared_ptr<TenSEALContext> tenseal_context() const {
-        if (context == nullptr) throw invalid_argument("missing context");
-        return context;
+        if (_context == nullptr) throw invalid_argument("missing context");
+        return _context;
     }
     /**
      * Link to a TenSEAL context.
      **/
     void link_tenseal_context(shared_ptr<TenSEALContext> ctx) {
-        this->context = ctx;
+        this->_context = ctx;
     }
 
    private:
@@ -171,16 +176,24 @@ class CKKSVector {
     Private evaluation functions to process both scalar and vector arguments.
     */
     template <typename T>
-    CKKSVector& _add_plain_inplace(const T& to_add);
+    shared_ptr<CKKSVector> _add_plain_inplace(const T& to_add);
     template <typename T>
-    CKKSVector& _sub_plain_inplace(const T& to_sub);
+    shared_ptr<CKKSVector> _sub_plain_inplace(const T& to_sub);
     template <typename T>
-    CKKSVector& _mul_plain_inplace(const T& to_mul);
+    shared_ptr<CKKSVector> _mul_plain_inplace(const T& to_mul);
+
+    CKKSVector(const shared_ptr<TenSEALContext>& ctx, vector<double> vec,
+               optional<double> scale = {});
+    CKKSVector(const shared_ptr<const CKKSVector>& vec);
+    CKKSVector(const shared_ptr<TenSEALContext>& ctx, const string& vec);
+    CKKSVector(const TenSEALContextProto& ctx, const CKKSVectorProto& vec);
+    CKKSVector(const shared_ptr<TenSEALContext>& ctx,
+               const CKKSVectorProto& vec);
 
     size_t _size;
-    double init_scale;
-    shared_ptr<TenSEALContext> context;
-    Ciphertext ciphertext;
+    double _init_scale;
+    shared_ptr<TenSEALContext> _context;
+    Ciphertext _ciphertext;
 
     static Ciphertext encrypt(shared_ptr<TenSEALContext> context, double scale,
                               vector<double> pt) {

@@ -19,13 +19,17 @@ using namespace std;
  * Holds a vector of integers in its encrypted form using the BFV homomorphic
  * encryption scheme.
  **/
-class BFVVector: enable_shared_from_this<BFVVector> {
+class BFVVector : enable_shared_from_this<BFVVector> {
    public:
-    static shared_ptr<BFVVector> Create(shared_ptr<TenSEALContext> ctx, const vector<int64_t>& vec);
-    static shared_ptr<BFVVector> Create(shared_ptr<TenSEALContext> ctx, const string& vec);
-    static shared_ptr<BFVVector> Create(const TenSEALContextProto& ctx, const BFVVectorProto& vec);
-    static shared_ptr<BFVVector> Create(shared_ptr<TenSEALContext> ctx, const BFVVectorProto& vec);
-    static shared_ptr<BFVVector> Create(shared_ptr<const BFVVector>);
+    static shared_ptr<BFVVector> Create(const shared_ptr<TenSEALContext>& ctx,
+                                        const vector<int64_t>& vec);
+    static shared_ptr<BFVVector> Create(const shared_ptr<TenSEALContext>& ctx,
+                                        const string& vec);
+    static shared_ptr<BFVVector> Create(const TenSEALContextProto& ctx,
+                                        const BFVVectorProto& vec);
+    static shared_ptr<BFVVector> Create(const shared_ptr<TenSEALContext>& ctx,
+                                        const BFVVectorProto& vec);
+    static shared_ptr<BFVVector> Create(const shared_ptr<const BFVVector>&);
 
     /**
      * Decrypts and returns the plaintext representation of the encrypted vector
@@ -71,8 +75,8 @@ class BFVVector: enable_shared_from_this<BFVVector> {
     /**
      * Load/Save the vector from/to a serialized protobuffer.
      **/
-    void load(const std::string& vec);
-    std::string save() const;
+    void load(const string& vec);
+    string save() const;
     /**
      *Recreates a new BFVVector from the current one, without any
      *pointer/reference to this one.
@@ -97,12 +101,12 @@ class BFVVector: enable_shared_from_this<BFVVector> {
     shared_ptr<TenSEALContext> _context;
     Ciphertext _ciphertext;
 
-    BFVVector(shared_ptr<TenSEALContext> ctx, const vector<int64_t>& vec);
-    BFVVector(shared_ptr<const BFVVector>);
-    BFVVector(shared_ptr<TenSEALContext> ctx, const string& vec);
+    BFVVector(const shared_ptr<TenSEALContext>& ctx,
+              const vector<int64_t>& vec);
+    BFVVector(const shared_ptr<const BFVVector>&);
+    BFVVector(const shared_ptr<TenSEALContext>& ctx, const string& vec);
     BFVVector(const TenSEALContextProto& ctx, const BFVVectorProto& vec);
-    BFVVector(shared_ptr<TenSEALContext> ctx, const BFVVectorProto& vec);
-
+    BFVVector(const shared_ptr<TenSEALContext>& ctx, const BFVVectorProto& vec);
 
     static Ciphertext encrypt(shared_ptr<TenSEALContext> context,
                               vector<int64_t> pt) {

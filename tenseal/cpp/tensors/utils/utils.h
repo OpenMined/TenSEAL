@@ -186,10 +186,10 @@ T compute_polynomial_term(int degree, double coeff,
 
     if (new_degree == 0 && coeff != 1.0) {
         // x^(2^closest_power_of_2) * coeff
-        x.mul_plain_inplace(coeff);
+        x->mul_plain_inplace(coeff);
     } else if (new_degree != 0) {
         // x^(2^closest_power_of_2) * x^(new_degree) * coeff
-        x.mul_inplace(compute_polynomial_term(new_degree, coeff, x_squares));
+        x->mul_inplace(compute_polynomial_term(new_degree, coeff, x_squares));
     }
 
     return x;
@@ -216,7 +216,9 @@ shared_ptr<T> pack_vectors(const vector<shared_ptr<T>>& vectors) {
 
     // check if each vectors sizes are equal
     if (any_of(vectors.begin(), vectors.end(),
-               [vector_size](const shared_ptr<T>& i) { return i->size() != vector_size; })) {
+               [vector_size](const shared_ptr<T>& i) {
+                   return i->size() != vector_size;
+               })) {
         throw invalid_argument("vectors sizes are different");
     }
 
