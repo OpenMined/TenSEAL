@@ -19,7 +19,7 @@ using namespace std;
  * Holds a vector of integers in its encrypted form using the BFV homomorphic
  * encryption scheme.
  **/
-class BFVVector : enable_shared_from_this<BFVVector> {
+class BFVVector : public enable_shared_from_this<BFVVector> {
    public:
     static shared_ptr<BFVVector> Create(const shared_ptr<TenSEALContext>& ctx,
                                         const vector<int64_t>& vec);

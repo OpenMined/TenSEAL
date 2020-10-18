@@ -20,7 +20,7 @@ using namespace std;
  * Holds a vector of real numbers in its encrypted form using the CKKS
  *homomorphic encryption scheme.
  **/
-class CKKSVector : enable_shared_from_this<CKKSVector> {
+class CKKSVector : public enable_shared_from_this<CKKSVector> {
    public:
     static shared_ptr<CKKSVector> Create(const shared_ptr<TenSEALContext>& ctx,
                                          const vector<double>& vec,
