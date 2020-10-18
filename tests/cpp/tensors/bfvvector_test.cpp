@@ -6,10 +6,11 @@
 namespace tenseal {
 namespace {
 using namespace ::testing;
+using namespace std;
 
-BFVVector duplicate(const BFVVector& in) {
-    auto vec = in.save();
-    return BFVVector(in.tenseal_context(), vec);
+shared_ptr<BFVVector> duplicate(shared_ptr<BFVVector> in) {
+    auto vec = in->save();
+    return BFVVector::Create(in->tenseal_context(), vec);
 }
 
 class BFVVectorTest : public TestWithParam</*serialize=*/bool> {
@@ -23,14 +24,14 @@ TEST_P(BFVVectorTest, TestCreateBFV) {
     auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
-    auto l = BFVVector(ctx, vector<int64_t>({1, 2, 3}));
+    auto l = BFVVector::Create(ctx, vector<int64_t>({1, 2, 3}));
 
     if (should_serialize_first) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l.size(), 3);
-    ASSERT_EQ(l.ciphertext_size(), 2);
+    ASSERT_EQ(l->size(), 3);
+    ASSERT_EQ(l->ciphertext_size(), 2);
 }
 
 TEST_P(BFVVectorTest, TestBFVAdd) {
@@ -39,26 +40,26 @@ TEST_P(BFVVectorTest, TestBFVAdd) {
     auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
-    auto l = BFVVector(ctx, vector<int64_t>({1, 2, 3}));
-    auto r = BFVVector(ctx, vector<int64_t>({2, 3, 4}));
+    auto l = BFVVector::Create(ctx, vector<int64_t>({1, 2, 3}));
+    auto r = BFVVector::Create(ctx, vector<int64_t>({2, 3, 4}));
 
-    auto add = l.add(r);
-    ASSERT_EQ(add.ciphertext_size(), 2);
+    auto add = l->add(r);
+    ASSERT_EQ(add->ciphertext_size(), 2);
 
-    auto decr = add.decrypt();
+    auto decr = add->decrypt();
     EXPECT_THAT(decr, ElementsAreArray({3, 5, 7}));
 
-    l.add_inplace(r);
-    l.add_inplace(r);
-    l.add_inplace(r);
-    l.add_inplace(r);
+    l->add_inplace(r);
+    l->add_inplace(r);
+    l->add_inplace(r);
+    l->add_inplace(r);
 
     if (should_serialize_first) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l.ciphertext_size(), 2);
-    decr = l.decrypt();
+    ASSERT_EQ(l->ciphertext_size(), 2);
+    decr = l->decrypt();
     EXPECT_THAT(decr, ElementsAreArray({9, 14, 19}));
 }
 
@@ -68,29 +69,29 @@ TEST_P(BFVVectorTest, TestBFVMul) {
     auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
-    auto l = BFVVector(ctx, vector<int64_t>({1, 2, 3}));
-    auto r = BFVVector(ctx, vector<int64_t>({2, 3, 4}));
+    auto l = BFVVector::Create(ctx, vector<int64_t>({1, 2, 3}));
+    auto r = BFVVector::Create(ctx, vector<int64_t>({2, 3, 4}));
 
-    auto mul = l.mul(r);
-    ASSERT_EQ(mul.ciphertext_size(), 2);
+    auto mul = l->mul(r);
+    ASSERT_EQ(mul->ciphertext_size(), 2);
 
-    auto decr = mul.decrypt();
+    auto decr = mul->decrypt();
     EXPECT_THAT(decr, ElementsAreArray({2, 6, 12}));
 
-    r = BFVVector(ctx, vector<int64_t>({2, 2, 2}));
+    r = BFVVector::Create(ctx, vector<int64_t>({2, 2, 2}));
 
-    l.mul_inplace(r);
-    l.mul_inplace(r);
-    l.mul_inplace(r);
-    l.mul_inplace(r);
+    l->mul_inplace(r);
+    l->mul_inplace(r);
+    l->mul_inplace(r);
+    l->mul_inplace(r);
 
     if (should_serialize_first) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l.ciphertext_size(), 2);
+    ASSERT_EQ(l->ciphertext_size(), 2);
 
-    decr = l.decrypt();
+    decr = l->decrypt();
     EXPECT_THAT(decr, ElementsAreArray({16, 32, 48}));
 }
 
@@ -98,7 +99,8 @@ TEST_P(BFVVectorTest, TestEmptyPlaintext) {
     auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
-    EXPECT_THROW(BFVVector(ctx, std::vector<int64_t>({})), std::exception);
+    EXPECT_THROW(BFVVector::Create(ctx, std::vector<int64_t>({})),
+                 std::exception);
 }
 
 INSTANTIATE_TEST_CASE_P(TestBFVVector, BFVVectorTest,

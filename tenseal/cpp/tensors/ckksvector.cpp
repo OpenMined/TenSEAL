@@ -158,16 +158,16 @@ shared_ptr<CKKSVector> CKKSVector::power_inplace(unsigned int power) {
     if (power == 0) {
         vector<double> ones(this->size(), 1);
         *this = CKKSVector(this->tenseal_context(), ones, this->_init_scale);
-        return CKKSVector::Create(shared_from_this());
+        return shared_from_this();
     }
 
     if (power == 1) {
-        return CKKSVector::Create(shared_from_this());
+        return shared_from_this();
     }
 
     if (power == 2) {
         this->square_inplace();
-        return CKKSVector::Create(shared_from_this());
+        return shared_from_this();
     }
 
     int closest_power_of_2 = 1 << static_cast<int>(floor(log2(power)));
@@ -179,7 +179,7 @@ shared_ptr<CKKSVector> CKKSVector::power_inplace(unsigned int power) {
         this->power_inplace(power)->mul_inplace(closest_pow2_vector);
     }
 
-    return CKKSVector::Create(shared_from_this());
+    return shared_from_this();
 }
 
 shared_ptr<CKKSVector> CKKSVector::add(shared_ptr<CKKSVector> to_add) const {
@@ -189,7 +189,8 @@ shared_ptr<CKKSVector> CKKSVector::add(shared_ptr<CKKSVector> to_add) const {
     return new_vector;
 }
 
-shared_ptr<CKKSVector> CKKSVector::add_inplace(shared_ptr<CKKSVector> to_add) {
+shared_ptr<CKKSVector> CKKSVector::add_inplace(shared_ptr<CKKSVector> other) {
+    auto to_add = CKKSVector::Create(other);
     if (!this->tenseal_context()->equals(to_add->tenseal_context())) {
         // Different contexts means different parameters
         throw invalid_argument(
@@ -270,7 +271,8 @@ shared_ptr<CKKSVector> CKKSVector::sub(shared_ptr<CKKSVector> to_sub) const {
     return new_vector;
 }
 
-shared_ptr<CKKSVector> CKKSVector::sub_inplace(shared_ptr<CKKSVector> to_sub) {
+shared_ptr<CKKSVector> CKKSVector::sub_inplace(shared_ptr<CKKSVector> other) {
+    auto to_sub = CKKSVector::Create(other);
     if (!this->tenseal_context()->equals(to_sub->tenseal_context())) {
         // Different contexts means different parameters
         throw invalid_argument(
@@ -351,7 +353,8 @@ shared_ptr<CKKSVector> CKKSVector::mul(shared_ptr<CKKSVector> to_mul) const {
     return new_vector;
 }
 
-shared_ptr<CKKSVector> CKKSVector::mul_inplace(shared_ptr<CKKSVector> to_mul) {
+shared_ptr<CKKSVector> CKKSVector::mul_inplace(shared_ptr<CKKSVector> other) {
+    auto to_mul = CKKSVector::Create(other);
     if (!this->tenseal_context()->equals(to_mul->tenseal_context())) {
         // Different contexts means different parameters
         throw invalid_argument(
