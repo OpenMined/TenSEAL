@@ -587,10 +587,10 @@ shared_ptr<CKKSVector> CKKSVector::polyval_inplace(
     int max_square = static_cast<int>(floor(log2(degree)));
     vector<shared_ptr<CKKSVector>> x_squares;
     x_squares.reserve(max_square + 1);
-    x_squares.push_back(x);  // x
+    x_squares.push_back(CKKSVector::Create(x));  // x
     for (int i = 1; i <= max_square; i++) {
         x->square_inplace();
-        x_squares.push_back(x);  // x^(2^i)
+        x_squares.push_back(CKKSVector::Create(x));  // x^(2^i)
     }
 
     // coefficients[1] * x + ... + coefficients[degree] * x^(degree)

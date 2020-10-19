@@ -234,20 +234,22 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         operand.
         */
         .def("__rsub__",
-             [](shared_ptr<CKKSVector> vec, const double left_operand) {
+             [](shared_ptr<CKKSVector> other, const double left_operand) {
                  // vec should be a copy so it might be safe to do inplace
+                 auto vec = CKKSVector::Create(other);
                  vec->negate_inplace();
                  vec->add_plain_inplace(left_operand);
                  return vec;
              })
-        .def(
-            "__rsub__",
-            [](shared_ptr<CKKSVector> vec, const vector<double> &left_operand) {
-                // vec should be a copy so it might be safe to do inplace
-                vec->negate_inplace();
-                vec->add_plain_inplace(left_operand);
-                return vec;
-            })
+        .def("__rsub__",
+             [](shared_ptr<CKKSVector> other,
+                const vector<double> &left_operand) {
+                 // vec should be a copy so it might be safe to do inplace
+                 auto vec = CKKSVector::Create(other);
+                 vec->negate_inplace();
+                 vec->add_plain_inplace(left_operand);
+                 return vec;
+             })
         .def("__isub__", &CKKSVector::sub_inplace)
         .def("__isub__",
              py::overload_cast<double>(&CKKSVector::sub_plain_inplace))
