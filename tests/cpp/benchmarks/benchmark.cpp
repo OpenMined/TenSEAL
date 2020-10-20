@@ -1,6 +1,6 @@
 #include "benchmark/benchmark.h"
 
-#include "tenseal/cpp/tensors/ckksvector.h"
+#include "tenseal/cpp/tenseal.h"
 
 namespace tenseal {
 namespace {

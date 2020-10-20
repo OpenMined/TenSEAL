@@ -15,6 +15,7 @@ cc_test(
     linkstatic = True,
     deps = [
         "//tenseal/cpp/context:tenseal_context_cc",
+        "//tenseal/cpp:tenseal_cc",
         "//tenseal/cpp/tensors:tenseal_tensors_cc",
         "//tenseal/cpp/utils:tenseal_utils_cc",
         "@com_google_googletest//:gtest",

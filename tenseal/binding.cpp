@@ -4,11 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "seal/seal.h"
-#include "tenseal/cpp/context/tensealcontext.h"
-#include "tenseal/cpp/tensors/bfvvector.h"
-#include "tenseal/cpp/tensors/ckksvector.h"
-#include "tenseal/cpp/tensors/utils/utils.h"
+#include "tenseal/cpp/tenseal.h"
 
 using namespace tenseal;
 using namespace seal;

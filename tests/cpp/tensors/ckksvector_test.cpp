@@ -1,7 +1,6 @@
-#include "tenseal/cpp/tensors/ckksvector.h"
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tenseal/cpp/tenseal.h"
 
 namespace tenseal {
 namespace {
