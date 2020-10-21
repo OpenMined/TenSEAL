@@ -37,7 +37,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         encryption_parameters : parameters to use to create the SEALContext.)",
         py::arg("encryption_parameters"));
 
-    py::class_<BFVVector, std::shared_ptr<BFVVector>>(m, "BFVVector")
+    py::class_<BFVVector, std::shared_ptr<BFVVector>>(m, "BFVVector",
+                                                      py::module_local())
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<int64_t> &data) {
             return BFVVector::Create(ctx, data);
@@ -124,8 +125,11 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
     m.def("pack_vectors", &pack_vectors<EncryptedTensor, CKKSEncoder, double>);
     m.def("pack_vectors", &pack_vectors<BFVVector, BatchEncoder, int64_t>);
 
+    py::class_<EncryptedTensor, std::shared_ptr<EncryptedTensor>>(
+        m, "EncryptedTensor", py::module_local());
+
     py::class_<CKKSVector, EncryptedTensor, std::shared_ptr<CKKSVector>>(
-        m, "CKKSVector")
+        m, "CKKSVector", py::module_local())
         // specifying scale
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<double> &data, double scale) {
