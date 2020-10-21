@@ -325,4 +325,9 @@ shared_ptr<TenSEALContext> EncryptedTensor::tenseal_context() const {
 void EncryptedTensor::link_tenseal_context(shared_ptr<TenSEALContext> ctx) {
     this->_context = ctx;
 }
+
+shared_ptr<EncryptedTensor> EncryptedTensor::as_encrypted_tensor() {
+    return shared_from_this();
+}
+
 }  // namespace tenseal
