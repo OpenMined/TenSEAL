@@ -67,6 +67,28 @@ BFVVector::BFVVector(const TenSEALContextProto& ctx,
     this->load_proto(vec);
 }
 
+Ciphertext BFVVector::encrypt(shared_ptr<TenSEALContext> context,
+                              vector<double> input) {
+    vector<int64_t> pt(input.begin(), input.end());
+    if (pt.empty()) {
+        throw invalid_argument("Attempting to encrypt an empty vector");
+    }
+    auto slot_count = context->slot_count<BatchEncoder>();
+    if (pt.size() > slot_count)
+        // number of slots available is poly_modulus_degree / 2
+        throw invalid_argument(
+            "can't encrypt vectors of this size, please use a larger "
+            "polynomial modulus degree.");
+
+    Ciphertext ciphertext(context->seal_context());
+    Plaintext plaintext;
+    replicate_vector(pt, slot_count);
+    context->encode<BatchEncoder>(pt, plaintext);
+    context->encryptor->encrypt(plaintext, ciphertext);
+
+    return ciphertext;
+}
+
 vector<double> BFVVector::decrypt() const {
     if (this->tenseal_context()->decryptor == NULL) {
         // this->context was loaded with public keys only

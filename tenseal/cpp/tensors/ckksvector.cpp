@@ -74,6 +74,26 @@ CKKSVector::CKKSVector(const shared_ptr<TenSEALContext>& ctx,
     this->load_proto(vec);
 }
 
+Ciphertext CKKSVector::encrypt(shared_ptr<TenSEALContext> context, double scale,
+                               vector<double> pt) {
+    if (pt.empty()) {
+        throw invalid_argument("Attempting to encrypt an empty vector");
+    }
+    auto slot_count = context->slot_count<CKKSEncoder>();
+    if (pt.size() > slot_count)
+        // number of slots available is poly_modulus_degree / 2
+        throw invalid_argument(
+            "can't encrypt vectors of this size, please use a larger "
+            "polynomial modulus degree.");
+
+    Ciphertext ciphertext(context->seal_context());
+    Plaintext plaintext;
+    replicate_vector(pt, slot_count);
+    context->encode<CKKSEncoder>(pt, plaintext, scale);
+    context->encryptor->encrypt(plaintext, ciphertext);
+
+    return ciphertext;
+}
 vector<double> CKKSVector::decrypt() const {
     if (this->tenseal_context()->decryptor == NULL) {
         // this->context was loaded with public keys only
