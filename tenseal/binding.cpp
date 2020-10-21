@@ -121,10 +121,11 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         return ckks_vector;
     });
 
-    m.def("pack_vectors", &pack_vectors<CKKSVector, CKKSEncoder, double>);
+    m.def("pack_vectors", &pack_vectors<EncryptedTensor, CKKSEncoder, double>);
     m.def("pack_vectors", &pack_vectors<BFVVector, BatchEncoder, int64_t>);
 
-    py::class_<CKKSVector, std::shared_ptr<CKKSVector>>(m, "CKKSVector")
+    py::class_<CKKSVector, EncryptedTensor, std::shared_ptr<CKKSVector>>(
+        m, "CKKSVector")
         // specifying scale
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<double> &data, double scale) {
@@ -232,7 +233,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__rsub__",
              [](shared_ptr<CKKSVector> other, const double left_operand) {
                  // vec should be a copy so it might be safe to do inplace
-                 auto vec = CKKSVector::Create(other);
+                 auto vec = other->copy();
                  vec->negate_inplace();
                  vec->add_plain_inplace(left_operand);
                  return vec;
@@ -241,7 +242,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              [](shared_ptr<CKKSVector> other,
                 const vector<double> &left_operand) {
                  // vec should be a copy so it might be safe to do inplace
-                 auto vec = CKKSVector::Create(other);
+                 auto vec = other->copy();
                  vec->negate_inplace();
                  vec->add_plain_inplace(left_operand);
                  return vec;

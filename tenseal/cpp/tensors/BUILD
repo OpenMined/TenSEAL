@@ -16,6 +16,7 @@ cc_library(
     hdrs = [
         "bfvvector.h",
         "ckksvector.h",
+        "tensor.h",
     ],
     copts = TENSEAL_DEFAULT_COPTS,
     includes = TENSEAL_DEFAULT_INCLUDES,

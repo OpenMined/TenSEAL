@@ -299,6 +299,10 @@ std::string BFVVector::save() const {
     return output;
 }
 
+shared_ptr<BFVVector> BFVVector::copy() const {
+    return shared_ptr<BFVVector>(new BFVVector(shared_from_this()));
+}
+
 shared_ptr<BFVVector> BFVVector::deepcopy() const {
     TenSEALContextProto ctx = this->tenseal_context()->save_proto();
     BFVVectorProto vec = this->save_proto();

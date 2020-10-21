@@ -183,7 +183,7 @@ shared_ptr<T> compute_polynomial_term(int degree, double coeff,
     int closest_power_of_2 = static_cast<int>(floor(log2(degree)));
     int new_degree = degree - (1 << closest_power_of_2);
     shared_ptr<T> x =
-        T::Create(x_squares[closest_power_of_2]);  // x^(2^closest_power_of_2)
+        x_squares[closest_power_of_2]->copy();  // x^(2^closest_power_of_2)
 
     if (new_degree == 0 && coeff != 1.0) {
         // x^(2^closest_power_of_2) * coeff
@@ -231,7 +231,7 @@ shared_ptr<T> pack_vectors(const vector<shared_ptr<T>>& vectors) {
     vector<D> replicated_mask = mask;
     replicate_vector(replicated_mask, slot_count);
 
-    auto packed_vec = T::Create(vectors[0]);
+    auto packed_vec = vectors[0]->copy();
     packed_vec->_size = slot_count;
     packed_vec->mul_plain_inplace(replicated_mask);
 
@@ -242,7 +242,7 @@ shared_ptr<T> pack_vectors(const vector<shared_ptr<T>>& vectors) {
         replicate_vector(replicated_mask, slot_count);
 
         // multiply with the mask vector then accumulate
-        auto vec = T::Create(vectors[i]);
+        auto vec = vectors[i]->copy();
         vec->_size = slot_count;
         vec->mul_plain_inplace(replicated_mask);
         packed_vec->add_inplace(vec);

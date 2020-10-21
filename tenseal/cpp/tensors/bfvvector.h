@@ -81,6 +81,7 @@ class BFVVector : public enable_shared_from_this<BFVVector> {
      *Recreates a new BFVVector from the current one, without any
      *pointer/reference to this one.
      * **/
+    shared_ptr<BFVVector> copy() const;
     shared_ptr<BFVVector> deepcopy() const;
     /**
      * Get a pointer to the current TenSEAL context.
