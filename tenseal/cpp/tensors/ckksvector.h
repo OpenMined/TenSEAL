@@ -39,52 +39,9 @@ class CKKSVector : public EncryptedTensor {
     vector<double> decrypt(const shared_ptr<SecretKey>& sk) const override;
 
     /**
-     * Returns the size of the encrypted vector.
-     **/
-    size_t size() const override;
-    size_t ciphertext_size() const override;
-
-    /**
-     * Replicate the first slot of a ciphertext n times. Requires a
-     *multiplication.
-     **/
-    SharedEncryptedTensor replicate_first_slot(size_t n) const override;
-    SharedEncryptedTensor replicate_first_slot_inplace(size_t n) override;
-
-    /**
-     * Negates a CKKSVector.
-     **/
-    SharedEncryptedTensor negate() const override;
-    SharedEncryptedTensor negate_inplace() override;
-
-    /**
-     * Compute the square of the CKKSVector.
-     **/
-    SharedEncryptedTensor square() const override;
-    SharedEncryptedTensor square_inplace() override;
-
-    /**
      * Compute the power of the CKKSVector with minimal multiplication depth.
      **/
-    SharedEncryptedTensor power(unsigned int power) const override;
     SharedEncryptedTensor power_inplace(unsigned int power) override;
-
-    /**
-     * Encrypted evaluation function operates on two encrypted vectors and
-     * returns a new CKKSVector which is the result of either addition,
-     * substraction or multiplication in an element-wise fashion. in_place
-     * functions return a reference to the same object.
-     **/
-    SharedEncryptedTensor add(SharedEncryptedTensor to_add) const override;
-    SharedEncryptedTensor add_inplace(SharedEncryptedTensor to_add) override;
-    SharedEncryptedTensor sub(SharedEncryptedTensor to_sub) const override;
-    SharedEncryptedTensor sub_inplace(SharedEncryptedTensor to_sub) override;
-    SharedEncryptedTensor mul(SharedEncryptedTensor to_mul) const override;
-    SharedEncryptedTensor mul_inplace(SharedEncryptedTensor to_mul) override;
-    SharedEncryptedTensor dot_product(
-        SharedEncryptedTensor to_mul) const override;
-    SharedEncryptedTensor dot_product_inplace(
-        SharedEncryptedTensor to_mul) override;
 
     /**
      * Plain evaluation function operates on an encrypted vector and plaintext
@@ -92,44 +49,25 @@ class CKKSVector : public EncryptedTensor {
      * either addition, substraction or multiplication in an element-wise
      *fashion. in_place functions return a reference to the same object.
      **/
-    SharedEncryptedTensor add_plain(double to_add) const override;
-    SharedEncryptedTensor add_plain(
-        const vector<double>& to_add) const override;
     SharedEncryptedTensor add_plain_inplace(double to_add) override;
     SharedEncryptedTensor add_plain_inplace(
         const vector<double>& to_add) override;
-    SharedEncryptedTensor sub_plain(double to_sub) const override;
-    SharedEncryptedTensor sub_plain(
-        const vector<double>& to_sub) const override;
     SharedEncryptedTensor sub_plain_inplace(double to_sub) override;
     SharedEncryptedTensor sub_plain_inplace(
         const vector<double>& to_sub) override;
-    SharedEncryptedTensor mul_plain(double to_mul) const override;
-    SharedEncryptedTensor mul_plain(
-        const vector<double>& to_mul) const override;
     SharedEncryptedTensor mul_plain_inplace(double to_mul) override;
     SharedEncryptedTensor mul_plain_inplace(
         const vector<double>& to_mul) override;
-    SharedEncryptedTensor dot_product_plain(
-        const vector<double>& to_mul) const override;
-    SharedEncryptedTensor dot_product_plain_inplace(
-        const vector<double>& to_mul);
-    SharedEncryptedTensor sum() const override;
-    SharedEncryptedTensor sum_inplace() override;
 
     /**
      * Encrypted Vector multiplication with plain matrix.
      **/
-    SharedEncryptedTensor matmul_plain(const vector<vector<double>>& matrix,
-                                       size_t n_jobs = 0) const override;
     SharedEncryptedTensor matmul_plain_inplace(
         const vector<vector<double>>& matrix, size_t n_jobs = 0) override;
 
     /**
      * Encrypted Matrix multiplication with plain vector.
      **/
-    SharedEncryptedTensor enc_matmul_plain(const vector<double>& plain_vec,
-                                           size_t row_size) override;
     SharedEncryptedTensor enc_matmul_plain_inplace(
         const vector<double>& plain_vec, size_t row_size) override;
 
@@ -138,8 +76,6 @@ class CKKSVector : public EncryptedTensor {
      * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
      *x^i
      **/
-    SharedEncryptedTensor polyval(
-        const vector<double>& coefficients) const override;
     SharedEncryptedTensor polyval_inplace(
         const vector<double>& coefficients) override;
 
@@ -148,8 +84,6 @@ class CKKSVector : public EncryptedTensor {
      * The input matrix should be encoded in a vertical scan (column-major).
      * The kernel vector should be padded with zeros to the next power of 2
      */
-    SharedEncryptedTensor conv2d_im2col(const vector<vector<double>>& kernel,
-                                        const size_t windows_nb) const override;
     SharedEncryptedTensor conv2d_im2col_inplace(
         const vector<vector<double>>& kernel, const size_t windows_nb) override;
 
@@ -165,19 +99,6 @@ class CKKSVector : public EncryptedTensor {
      **/
     SharedEncryptedTensor copy() const override;
     SharedEncryptedTensor deepcopy() const override;
-    /**
-     * Get a pointer to the current TenSEAL context.
-     **/
-    shared_ptr<TenSEALContext> tenseal_context() const {
-        if (_context == nullptr) throw invalid_argument("missing context");
-        return _context;
-    }
-    /**
-     * Link to a TenSEAL context.
-     **/
-    void link_tenseal_context(shared_ptr<TenSEALContext> ctx) {
-        this->_context = ctx;
-    }
 
    private:
     /*

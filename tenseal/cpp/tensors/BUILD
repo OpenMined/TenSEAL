@@ -9,6 +9,7 @@ cc_library(
     srcs = [
         "bfvvector.cpp",
         "ckksvector.cpp",
+        "tensor.cpp",
         "utils/matrix_ops.h",
         "utils/utils.cpp",
         "utils/utils.h",
