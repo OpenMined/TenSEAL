@@ -37,10 +37,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         encryption_parameters : parameters to use to create the SEALContext.)",
         py::arg("encryption_parameters"));
 
-    py::class_<BFVVector, std::shared_ptr<BFVVector>>(m, "BFVVector",
-                                                      py::module_local())
+    py::class_<BFVVector, EncryptedTensor, std::shared_ptr<BFVVector>>(
+        m, "BFVVector", py::module_local())
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
-                         const vector<int64_t> &data) {
+                         const vector<double> &data) {
             return BFVVector::Create(ctx, data);
         }))
         .def(py::init(
@@ -53,29 +53,41 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                             &BFVVector::decrypt, py::const_))
         .def("add", &BFVVector::add)
         .def("add_", &BFVVector::add_inplace)
-        .def("add_plain", &BFVVector::add_plain)
-        .def("add_plain_", &BFVVector::add_plain_inplace)
+        .def("add_plain", py::overload_cast<const vector<double> &>(
+                              &BFVVector::add_plain, py::const_))
+        .def("add_plain_", py::overload_cast<const vector<double> &>(
+                               &BFVVector::add_plain_inplace))
         .def("sub", &BFVVector::sub)
         .def("sub_", &BFVVector::sub_inplace)
-        .def("sub_plain", &BFVVector::sub_plain)
-        .def("sub_plain_", &BFVVector::sub_plain_inplace)
+        .def("sub_plain", py::overload_cast<const vector<double> &>(
+                              &BFVVector::sub_plain, py::const_))
+        .def("sub_plain_", py::overload_cast<const vector<double> &>(
+                               &BFVVector::sub_plain_inplace))
         .def("mul", &BFVVector::mul)
         .def("mul_", &BFVVector::mul_inplace)
-        .def("mul_plain", &BFVVector::mul_plain)
-        .def("mul_plain_", &BFVVector::mul_plain_inplace)
+        .def("mul_plain", py::overload_cast<const vector<double> &>(
+                              &BFVVector::mul_plain, py::const_))
+        .def("mul_plain_", py::overload_cast<const vector<double> &>(
+                               &BFVVector::mul_plain_inplace))
         // python arithmetic
         .def("__add__", &BFVVector::add)
-        .def("__add__", &BFVVector::add_plain)
+        .def("__add__", py::overload_cast<const vector<double> &>(
+                            &BFVVector::add_plain, py::const_))
         .def("__iadd__", &BFVVector::add_inplace)
-        .def("__iadd__", &BFVVector::add_plain_inplace)
+        .def("__iadd__", py::overload_cast<const vector<double> &>(
+                             &BFVVector::add_plain_inplace))
         .def("__sub__", &BFVVector::sub)
-        .def("__sub__", &BFVVector::sub_plain)
+        .def("__sub__", py::overload_cast<const vector<double> &>(
+                            &BFVVector::sub_plain, py::const_))
         .def("__isub__", &BFVVector::sub_inplace)
-        .def("__isub__", &BFVVector::sub_plain_inplace)
+        .def("__isub__", py::overload_cast<const vector<double> &>(
+                             &BFVVector::sub_plain_inplace))
         .def("__mul__", &BFVVector::mul)
-        .def("__mul__", &BFVVector::mul_plain)
+        .def("__mul__", py::overload_cast<const vector<double> &>(
+                            &BFVVector::mul_plain, py::const_))
         .def("__imul__", &BFVVector::mul_inplace)
-        .def("__imul__", &BFVVector::mul_plain_inplace)
+        .def("__imul__", py::overload_cast<const vector<double> &>(
+                             &BFVVector::mul_plain_inplace))
         .def("context",
              [](shared_ptr<BFVVector> obj) { return obj->tenseal_context(); })
         .def("serialize",
@@ -123,7 +135,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
     });
 
     m.def("pack_vectors", &pack_vectors<EncryptedTensor, CKKSEncoder, double>);
-    m.def("pack_vectors", &pack_vectors<BFVVector, BatchEncoder, int64_t>);
+    m.def("pack_vectors", &pack_vectors<EncryptedTensor, BatchEncoder, double>);
 
     py::class_<EncryptedTensor, std::shared_ptr<EncryptedTensor>>(
         m, "EncryptedTensor", py::module_local());

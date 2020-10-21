@@ -1,11 +1,6 @@
 #ifndef TENSEAL_TENSOR_CKKSVECTOR_H
 #define TENSEAL_TENSOR_CKKSVECTOR_H
 
-#include <memory>
-#include <optional>
-#include <stdexcept>
-#include <vector>
-
 #include "tenseal/cpp/tensors/tensor.h"
 #include "tenseal/proto/tensors.pb.h"
 
@@ -23,7 +18,6 @@ class CKKSVector : public EncryptedTensor {
     static shared_ptr<CKKSVector> Create(const shared_ptr<TenSEALContext>& ctx,
                                          const vector<double>& vec,
                                          optional<double> scale = {});
-
     static shared_ptr<CKKSVector> Create(const shared_ptr<TenSEALContext>& ctx,
                                          const string& vec);
     static shared_ptr<CKKSVector> Create(const TenSEALContextProto& ctx,

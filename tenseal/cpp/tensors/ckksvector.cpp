@@ -84,7 +84,6 @@ vector<double> CKKSVector::decrypt() const {
 
     return this->decrypt(this->tenseal_context()->secret_key());
 }
-
 vector<double> CKKSVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
     Decryptor decryptor =

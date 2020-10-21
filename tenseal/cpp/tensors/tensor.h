@@ -1,6 +1,9 @@
 #ifndef TENSEAL_TENSOR_TENSOR_H
 #define TENSEAL_TENSOR_TENSOR_H
 
+#include <memory>
+#include <optional>
+#include <stdexcept>
 #include <vector>
 
 #include "seal/seal.h"
