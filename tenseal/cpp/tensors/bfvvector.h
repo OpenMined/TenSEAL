@@ -23,7 +23,8 @@ class BFVVector : public EncryptedTensor {
                                         const BFVVectorProto& vec);
     static shared_ptr<BFVVector> Create(const shared_ptr<TenSEALContext>& ctx,
                                         const BFVVectorProto& vec);
-    static shared_ptr<BFVVector> Create(const shared_ptr<const BFVVector>&);
+    static shared_ptr<BFVVector> Create(
+        const shared_ptr<const EncryptedTensor>&);
 
     /**
      * Decrypts and returns the plaintext representation of the encrypted vector

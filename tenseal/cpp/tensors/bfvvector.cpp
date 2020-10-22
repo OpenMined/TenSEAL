@@ -32,13 +32,14 @@ shared_ptr<BFVVector> BFVVector::Create(const shared_ptr<TenSEALContext>& ctx,
 }
 
 shared_ptr<BFVVector> BFVVector::Create(
-    const shared_ptr<const BFVVector>& other) {
+    const shared_ptr<const EncryptedTensor>& other) {
     return shared_ptr<BFVVector>(new BFVVector(other));
 }
 
 BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx,
                      const vector<double>& vec) {
     this->link_tenseal_context(ctx);
+    this->tenseal_context()->auto_rescale(false);
     // Encrypts the whole vector into a single ciphertext using BFV batching
     this->_ciphertext = BFVVector::encrypt(ctx, vec);
     this->_size = vec.size();
@@ -46,18 +47,21 @@ BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx,
 
 BFVVector::BFVVector(const shared_ptr<const EncryptedTensor>& vec) {
     this->link_tenseal_context(vec->_context);
+    this->tenseal_context()->auto_rescale(false);
     this->_size = vec->_size;
     this->_ciphertext = vec->_ciphertext;
 }
 
 BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx, const string& vec) {
     this->link_tenseal_context(ctx);
+    this->tenseal_context()->auto_rescale(false);
     this->load(vec);
 }
 
 BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx,
                      const BFVVectorProto& vec) {
     this->link_tenseal_context(ctx);
+    this->tenseal_context()->auto_rescale(false);
     this->load_proto(vec);
 }
 
