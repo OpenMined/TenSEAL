@@ -37,10 +37,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         encryption_parameters : parameters to use to create the SEALContext.)",
         py::arg("encryption_parameters"));
 
-    py::class_<EncryptedTensor, std::shared_ptr<EncryptedTensor>>(
-        m, "EncryptedTensor", py::module_local());
+    py::class_<EncryptedVector, std::shared_ptr<EncryptedVector>>(
+        m, "EncryptedVector", py::module_local());
 
-    py::class_<BFVVector, EncryptedTensor, std::shared_ptr<BFVVector>>(
+    py::class_<BFVVector, EncryptedVector, std::shared_ptr<BFVVector>>(
         m, "BFVVector", py::module_local())
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<double> &data) {
@@ -102,8 +102,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                                 py::dict) { return obj->deepcopy(); })
         .def_static(
             "pack_vectors",
-            [](const vector<shared_ptr<EncryptedTensor>> &vectors) {
-                return pack_vectors<EncryptedTensor, BatchEncoder, double>(
+            [](const vector<shared_ptr<EncryptedVector>> &vectors) {
+                return pack_vectors<EncryptedVector, BatchEncoder, double>(
                     vectors);
             });
 
@@ -142,7 +142,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         return ckks_vector;
     });
 
-    py::class_<CKKSVector, EncryptedTensor, std::shared_ptr<CKKSVector>>(
+    py::class_<CKKSVector, EncryptedVector, std::shared_ptr<CKKSVector>>(
         m, "CKKSVector", py::module_local())
         // specifying scale
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
@@ -299,8 +299,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                                 py::dict) { return obj->deepcopy(); })
         .def_static(
             "pack_vectors",
-            [](const vector<shared_ptr<EncryptedTensor>> &vectors) {
-                return pack_vectors<EncryptedTensor, CKKSEncoder, double>(
+            [](const vector<shared_ptr<EncryptedVector>> &vectors) {
+                return pack_vectors<EncryptedVector, CKKSEncoder, double>(
                     vectors);
             });
 

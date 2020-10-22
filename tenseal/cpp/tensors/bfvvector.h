@@ -1,7 +1,7 @@
 #ifndef TENSEAL_TENSOR_BFVVECTOR_H
 #define TENSEAL_TENSOR_BFVVECTOR_H
 
-#include "tenseal/cpp/tensors/tensor.h"
+#include "tenseal/cpp/tensors/vector.h"
 #include "tenseal/proto/tensors.pb.h"
 
 namespace tenseal {
@@ -13,7 +13,7 @@ using namespace std;
  * Holds a vector of integers in its encrypted form using the BFV homomorphic
  * encryption scheme.
  **/
-class BFVVector : public EncryptedTensor {
+class BFVVector : public EncryptedVector {
    public:
     static shared_ptr<BFVVector> Create(const shared_ptr<TenSEALContext>& ctx,
                                         const vector<double>& vec);
@@ -24,7 +24,7 @@ class BFVVector : public EncryptedTensor {
     static shared_ptr<BFVVector> Create(const shared_ptr<TenSEALContext>& ctx,
                                         const BFVVectorProto& vec);
     static shared_ptr<BFVVector> Create(
-        const shared_ptr<const EncryptedTensor>&);
+        const shared_ptr<const EncryptedVector>&);
 
     /**
      * Decrypts and returns the plaintext representation of the encrypted vector
@@ -35,32 +35,32 @@ class BFVVector : public EncryptedTensor {
     /**
      * Compute the power of the BFVVector with minimal multiplication depth.
      **/
-    SharedEncryptedTensor power_inplace(unsigned int power) override;
+    SharedEncryptedVector power_inplace(unsigned int power) override;
     /**
      * Plain evaluation function operates on an encrypted vector and plaintext
      * vector of integers and returns a new BFVVector which is the result of
      * either addition, substraction or multiplication in an element-wise
      *fashion. in_place functions return a reference to the same object.
      **/
-    SharedEncryptedTensor add_plain_inplace(double to_add) override;
-    SharedEncryptedTensor add_plain_inplace(
+    SharedEncryptedVector add_plain_inplace(double to_add) override;
+    SharedEncryptedVector add_plain_inplace(
         const vector<double>& to_add) override;
-    SharedEncryptedTensor sub_plain_inplace(double to_sub) override;
-    SharedEncryptedTensor sub_plain_inplace(
+    SharedEncryptedVector sub_plain_inplace(double to_sub) override;
+    SharedEncryptedVector sub_plain_inplace(
         const vector<double>& to_sub) override;
-    SharedEncryptedTensor mul_plain_inplace(double to_mul) override;
-    SharedEncryptedTensor mul_plain_inplace(
+    SharedEncryptedVector mul_plain_inplace(double to_mul) override;
+    SharedEncryptedVector mul_plain_inplace(
         const vector<double>& to_mul) override;
     /**
      * Encrypted Vector multiplication with plain matrix.
      **/
-    SharedEncryptedTensor matmul_plain_inplace(
+    SharedEncryptedVector matmul_plain_inplace(
         const vector<vector<double>>& matrix, size_t n_jobs = 0) override;
 
     /**
      * Encrypted Matrix multiplication with plain vector.
      **/
-    SharedEncryptedTensor enc_matmul_plain_inplace(
+    SharedEncryptedVector enc_matmul_plain_inplace(
         const vector<double>& plain_vec, size_t row_size) override;
 
     /**
@@ -68,7 +68,7 @@ class BFVVector : public EncryptedTensor {
      * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
      *x^i
      **/
-    SharedEncryptedTensor polyval_inplace(
+    SharedEncryptedVector polyval_inplace(
         const vector<double>& coefficients) override;
 
     /*
@@ -76,7 +76,7 @@ class BFVVector : public EncryptedTensor {
      * The input matrix should be encoded in a vertical scan (column-major).
      * The kernel vector should be padded with zeros to the next power of 2
      */
-    SharedEncryptedTensor conv2d_im2col_inplace(
+    SharedEncryptedVector conv2d_im2col_inplace(
         const vector<vector<double>>& kernel, const size_t windows_nb) override;
 
     /**
@@ -88,8 +88,8 @@ class BFVVector : public EncryptedTensor {
      *Recreates a new BFVVector from the current one, without any
      *pointer/reference to this one.
      * **/
-    SharedEncryptedTensor copy() const override;
-    SharedEncryptedTensor deepcopy() const override;
+    SharedEncryptedVector copy() const override;
+    SharedEncryptedVector deepcopy() const override;
 
     double scale() const override { throw logic_error("not implemented"); }
 
@@ -99,7 +99,7 @@ class BFVVector : public EncryptedTensor {
     BFVVector(const shared_ptr<TenSEALContext>& ctx, const string& vec);
     BFVVector(const TenSEALContextProto& ctx, const BFVVectorProto& vec);
     BFVVector(const shared_ptr<TenSEALContext>& ctx, const BFVVectorProto& vec);
-    BFVVector(const shared_ptr<const EncryptedTensor>& vec);
+    BFVVector(const shared_ptr<const EncryptedVector>& vec);
 
     static Ciphertext encrypt(shared_ptr<TenSEALContext> context,
                               vector<double> input);
@@ -112,9 +112,9 @@ class BFVVector : public EncryptedTensor {
 
     // make pack_vectors a friend function in order to be able to modify vector
     // size (_size private member)
-    friend SharedEncryptedTensor
-    pack_vectors<EncryptedTensor, BatchEncoder, double>(
-        const vector<SharedEncryptedTensor>&);
+    friend SharedEncryptedVector
+    pack_vectors<EncryptedVector, BatchEncoder, double>(
+        const vector<SharedEncryptedVector>&);
 };
 
 }  // namespace tenseal

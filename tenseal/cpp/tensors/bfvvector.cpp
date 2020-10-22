@@ -32,7 +32,7 @@ shared_ptr<BFVVector> BFVVector::Create(const shared_ptr<TenSEALContext>& ctx,
 }
 
 shared_ptr<BFVVector> BFVVector::Create(
-    const shared_ptr<const EncryptedTensor>& other) {
+    const shared_ptr<const EncryptedVector>& other) {
     return shared_ptr<BFVVector>(new BFVVector(other));
 }
 
@@ -50,7 +50,7 @@ BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx,
     this->_size = vec.size();
 }
 
-BFVVector::BFVVector(const shared_ptr<const EncryptedTensor>& vec) {
+BFVVector::BFVVector(const shared_ptr<const EncryptedVector>& vec) {
     this->prepare_context(vec->tenseal_context());
     this->_size = vec->size();
     this->_ciphertext = vec->ciphertext();
@@ -121,7 +121,7 @@ vector<double> BFVVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     return real_result;
 }
 
-SharedEncryptedTensor BFVVector::power_inplace(unsigned int power) {
+SharedEncryptedVector BFVVector::power_inplace(unsigned int power) {
     // if the power is zero, return a new encrypted vector of ones
     if (power == 0) {
         vector<double> ones(this->size(), 1);
@@ -150,11 +150,11 @@ SharedEncryptedTensor BFVVector::power_inplace(unsigned int power) {
     return shared_from_this();
 }
 
-SharedEncryptedTensor BFVVector::add_plain_inplace(double to_add) {
+SharedEncryptedVector BFVVector::add_plain_inplace(double to_add) {
     throw std::logic_error("not implemented");
 }
 
-SharedEncryptedTensor BFVVector::add_plain_inplace(
+SharedEncryptedVector BFVVector::add_plain_inplace(
     const vector<double>& to_add) {
     if (this->size() != to_add.size()) {
         throw invalid_argument("can't add vectors of different sizes");
@@ -170,11 +170,11 @@ SharedEncryptedTensor BFVVector::add_plain_inplace(
     return shared_from_this();
 }
 
-SharedEncryptedTensor BFVVector::sub_plain_inplace(double to_sub) {
+SharedEncryptedVector BFVVector::sub_plain_inplace(double to_sub) {
     throw std::logic_error("not implemented");
 }
 
-SharedEncryptedTensor BFVVector::sub_plain_inplace(
+SharedEncryptedVector BFVVector::sub_plain_inplace(
     const vector<double>& to_sub) {
     if (this->size() != to_sub.size()) {
         throw invalid_argument("can't sub vectors of different sizes");
@@ -190,11 +190,11 @@ SharedEncryptedTensor BFVVector::sub_plain_inplace(
     return shared_from_this();
 }
 
-SharedEncryptedTensor BFVVector::mul_plain_inplace(double to_sub) {
+SharedEncryptedVector BFVVector::mul_plain_inplace(double to_sub) {
     throw std::logic_error("not implemented");
 }
 
-SharedEncryptedTensor BFVVector::mul_plain_inplace(
+SharedEncryptedVector BFVVector::mul_plain_inplace(
     const vector<double>& to_mul) {
     if (this->size() != to_mul.size()) {
         throw invalid_argument("can't multiply vectors of different sizes");
@@ -219,22 +219,22 @@ SharedEncryptedTensor BFVVector::mul_plain_inplace(
     return shared_from_this();
 }
 
-SharedEncryptedTensor BFVVector::matmul_plain_inplace(
+SharedEncryptedVector BFVVector::matmul_plain_inplace(
     const vector<vector<double>>& matrix, size_t n_jobs) {
     throw std::logic_error("not implemented");
 }
 
-SharedEncryptedTensor BFVVector::polyval_inplace(
+SharedEncryptedVector BFVVector::polyval_inplace(
     const vector<double>& coefficients) {
     throw std::logic_error("not implemented");
 }
 
-SharedEncryptedTensor BFVVector::conv2d_im2col_inplace(
+SharedEncryptedVector BFVVector::conv2d_im2col_inplace(
     const vector<vector<double>>& kernel, const size_t windows_nb) {
     throw std::logic_error("not implemented");
 }
 
-SharedEncryptedTensor BFVVector::enc_matmul_plain_inplace(
+SharedEncryptedVector BFVVector::enc_matmul_plain_inplace(
     const vector<double>& plain_vec, const size_t rows_nb) {
     throw std::logic_error("not implemented");
 }
@@ -285,11 +285,11 @@ std::string BFVVector::save() const {
     return output;
 }
 
-SharedEncryptedTensor BFVVector::copy() const {
+SharedEncryptedVector BFVVector::copy() const {
     return shared_ptr<BFVVector>(new BFVVector(shared_from_this()));
 }
 
-SharedEncryptedTensor BFVVector::deepcopy() const {
+SharedEncryptedVector BFVVector::deepcopy() const {
     TenSEALContextProto ctx = this->tenseal_context()->save_proto();
     BFVVectorProto vec = this->save_proto();
     return BFVVector::Create(ctx, vec);

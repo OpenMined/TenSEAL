@@ -7,17 +7,18 @@ TENSEAL_DEFAULT_COPTS = ["-std=c++17"]
 cc_library(
     name = "tenseal_tensors_cc",
     srcs = [
+        "vector.cpp",
         "bfvvector.cpp",
         "ckksvector.cpp",
-        "tensor.cpp",
         "utils/matrix_ops.h",
         "utils/utils.cpp",
         "utils/utils.h",
     ],
     hdrs = [
+        "vector.h",
         "bfvvector.h",
         "ckksvector.h",
-        "tensor.h",
+        "api.h",
     ],
     copts = TENSEAL_DEFAULT_COPTS,
     includes = TENSEAL_DEFAULT_INCLUDES,
