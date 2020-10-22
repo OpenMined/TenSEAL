@@ -105,6 +105,7 @@ class BFVVector : public EncryptedTensor {
     void load_proto(const BFVVectorProto& buffer);
     BFVVectorProto save_proto() const;
 
+    void prepare_context(const shared_ptr<TenSEALContext>& ctx);
     void load_context_proto(const TenSEALContextProto& buffer);
 
     // make pack_vectors a friend function in order to be able to modify vector
