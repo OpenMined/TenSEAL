@@ -16,10 +16,13 @@ SecretKey = _ts_cpp.SecretKey
 RelinKeys = _ts_cpp.RelinKeys
 GaloisKeys = _ts_cpp.GaloisKeys
 
+# Vectors
+BFVVector = _ts_cpp.BFVVector
+CKKSVector = _ts_cpp.CKKSVector
+
 # utils
 im2col_encoding = _ts_cpp.im2col_encoding
 enc_matmul_encoding = _ts_cpp.enc_matmul_encoding
-pack_vectors = _ts_cpp.pack_vectors
 
 
 def context(

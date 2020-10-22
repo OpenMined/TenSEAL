@@ -98,9 +98,14 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("copy", &BFVVector::deepcopy)
         .def("__copy__",
              [](shared_ptr<BFVVector> &obj) { return obj->deepcopy(); })
-        .def("__deepcopy__", [](const shared_ptr<BFVVector> &obj, py::dict) {
-            return obj->deepcopy();
-        });
+        .def("__deepcopy__", [](const shared_ptr<BFVVector> &obj,
+                                py::dict) { return obj->deepcopy(); })
+        .def_static(
+            "pack_vectors",
+            [](const vector<shared_ptr<EncryptedTensor>> &vectors) {
+                return pack_vectors<EncryptedTensor, BatchEncoder, double>(
+                    vectors);
+            });
 
     // CKKSVector utils
     m.def("im2col_encoding",
@@ -136,9 +141,6 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         auto ckks_vector = CKKSVector::Create(ctx, final_vector);
         return ckks_vector;
     });
-
-    m.def("pack_vectors", &pack_vectors<EncryptedTensor, CKKSEncoder, double>);
-    m.def("pack_vectors", &pack_vectors<EncryptedTensor, BatchEncoder, double>);
 
     py::class_<CKKSVector, EncryptedTensor, std::shared_ptr<CKKSVector>>(
         m, "CKKSVector", py::module_local())
@@ -293,9 +295,14 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("copy", &CKKSVector::deepcopy)
         .def("__copy__",
              [](shared_ptr<CKKSVector> obj) { return obj->deepcopy(); })
-        .def("__deepcopy__", [](shared_ptr<CKKSVector> obj, py::dict) {
-            return obj->deepcopy();
-        });
+        .def("__deepcopy__", [](shared_ptr<CKKSVector> obj,
+                                py::dict) { return obj->deepcopy(); })
+        .def_static(
+            "pack_vectors",
+            [](const vector<shared_ptr<EncryptedTensor>> &vectors) {
+                return pack_vectors<EncryptedTensor, CKKSEncoder, double>(
+                    vectors);
+            });
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")
