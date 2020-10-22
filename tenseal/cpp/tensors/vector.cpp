@@ -5,40 +5,57 @@ namespace tenseal {
 using namespace seal;
 using namespace std;
 
-size_t EncryptedVector::size() const { return this->_size; }
-void EncryptedVector::size(size_t val) { this->_size = val; }
-size_t EncryptedVector::ciphertext_size() const {
+template <typename plain>
+size_t EncryptedVector<plain>::size() const {
+    return this->_size;
+}
+
+template <typename plain>
+void EncryptedVector<plain>::size(size_t val) {
+    this->_size = val;
+}
+
+template <typename plain>
+size_t EncryptedVector<plain>::ciphertext_size() const {
     return this->_ciphertext.size();
 }
-const Ciphertext& EncryptedVector::ciphertext() const {
+
+template <typename plain>
+const Ciphertext& EncryptedVector<plain>::ciphertext() const {
     return this->_ciphertext;
 }
 
-void EncryptedVector::ciphertext(Ciphertext&& other) {
+template <typename plain>
+void EncryptedVector<plain>::ciphertext(Ciphertext&& other) {
     this->_ciphertext = other;
 }
 
-SharedEncryptedVector EncryptedVector::negate() const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::negate() const {
     auto new_vector = this->copy();
     new_vector->negate_inplace();
 
     return new_vector;
 }
 
-SharedEncryptedVector EncryptedVector::negate_inplace() {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::negate_inplace() {
     this->tenseal_context()->evaluator->negate_inplace(this->_ciphertext);
 
-    return shared_from_this();
+    return std::enable_shared_from_this<
+        EncryptedVector<plain>>::shared_from_this();
 }
 
-SharedEncryptedVector EncryptedVector::square() const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::square() const {
     auto new_vector = this->copy();
     new_vector->square_inplace();
 
     return new_vector;
 }
 
-SharedEncryptedVector EncryptedVector::square_inplace() {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::square_inplace() {
     this->tenseal_context()->evaluator->square_inplace(this->_ciphertext);
 
     if (this->tenseal_context()->auto_relin()) {
@@ -52,25 +69,31 @@ SharedEncryptedVector EncryptedVector::square_inplace() {
         this->_ciphertext.scale() = this->scale();
     }
 
-    return shared_from_this();
+    return std::enable_shared_from_this<
+        EncryptedVector<plain>>::shared_from_this();
 }
 
-SharedEncryptedVector EncryptedVector::power(unsigned int power) const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::power(
+    unsigned int power) const {
     auto new_vector = this->copy();
     new_vector->power_inplace(power);
 
     return new_vector;
 }
 
-SharedEncryptedVector EncryptedVector::add(SharedEncryptedVector to_add) const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::add(
+    shared_ptr<EncryptedVector<plain>> to_add) const {
     auto new_vector = this->copy();
     new_vector->add_inplace(to_add);
 
     return new_vector;
 }
 
-SharedEncryptedVector EncryptedVector::add_inplace(
-    SharedEncryptedVector other) {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::add_inplace(
+    shared_ptr<EncryptedVector<plain>> other) {
     auto to_add = other->copy();
     if (!this->tenseal_context()->equals(to_add->tenseal_context())) {
         // Different contexts means different parameters
@@ -97,33 +120,40 @@ SharedEncryptedVector EncryptedVector::add_inplace(
     this->tenseal_context()->evaluator->add_inplace(this->_ciphertext,
                                                     to_add->_ciphertext);
 
-    return shared_from_this();
+    return std::enable_shared_from_this<
+        EncryptedVector<plain>>::shared_from_this();
 }
 
-SharedEncryptedVector EncryptedVector::add_plain(
-    const vector<double>& to_add) const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::add_plain(
+    const vector<plain>& to_add) const {
     auto new_vector = this->copy();
     new_vector->add_plain_inplace(to_add);
 
     return new_vector;
 }
 
-SharedEncryptedVector EncryptedVector::add_plain(double to_add) const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::add_plain(
+    plain to_add) const {
     auto new_vector = this->copy();
     new_vector->add_plain_inplace(to_add);
 
     return new_vector;
 }
 
-SharedEncryptedVector EncryptedVector::sub(SharedEncryptedVector to_sub) const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::sub(
+    shared_ptr<EncryptedVector<plain>> to_sub) const {
     auto new_vector = this->copy();
     new_vector->sub_inplace(to_sub);
 
     return new_vector;
 }
 
-SharedEncryptedVector EncryptedVector::sub_inplace(
-    SharedEncryptedVector other) {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::sub_inplace(
+    shared_ptr<EncryptedVector<plain>> other) {
     auto to_sub = other->copy();
     if (!this->tenseal_context()->equals(to_sub->tenseal_context())) {
         // Different contexts means different parameters
@@ -150,33 +180,40 @@ SharedEncryptedVector EncryptedVector::sub_inplace(
     this->tenseal_context()->evaluator->sub_inplace(this->_ciphertext,
                                                     to_sub->_ciphertext);
 
-    return shared_from_this();
+    return std::enable_shared_from_this<
+        EncryptedVector<plain>>::shared_from_this();
 }
 
-SharedEncryptedVector EncryptedVector::sub_plain(
-    const vector<double>& to_sub) const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::sub_plain(
+    const vector<plain>& to_sub) const {
     auto new_vector = this->copy();
     new_vector->sub_plain_inplace(to_sub);
 
     return new_vector;
 }
 
-SharedEncryptedVector EncryptedVector::sub_plain(double to_sub) const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::sub_plain(
+    plain to_sub) const {
     auto new_vector = this->copy();
     new_vector->sub_plain_inplace(to_sub);
 
     return new_vector;
 }
 
-SharedEncryptedVector EncryptedVector::mul(SharedEncryptedVector to_mul) const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::mul(
+    shared_ptr<EncryptedVector<plain>> to_mul) const {
     auto new_vector = this->copy();
     new_vector->mul_inplace(to_mul);
 
     return new_vector;
 }
 
-SharedEncryptedVector EncryptedVector::mul_inplace(
-    SharedEncryptedVector other) {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::mul_inplace(
+    shared_ptr<EncryptedVector<plain>> other) {
     auto to_mul = other->copy();
     if (!this->tenseal_context()->equals(to_mul->tenseal_context())) {
         // Different contexts means different parameters
@@ -214,80 +251,98 @@ SharedEncryptedVector EncryptedVector::mul_inplace(
         this->_ciphertext.scale() = this->scale();
     }
 
-    return shared_from_this();
+    return std::enable_shared_from_this<
+        EncryptedVector<plain>>::shared_from_this();
 }
 
-SharedEncryptedVector EncryptedVector::mul_plain(
-    const vector<double>& to_mul) const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::mul_plain(
+    const vector<plain>& to_mul) const {
     auto new_vector = this->copy();
     new_vector->mul_plain_inplace(to_mul);
 
     return new_vector;
 }
 
-SharedEncryptedVector EncryptedVector::mul_plain(double to_mul) const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::mul_plain(
+    plain to_mul) const {
     auto new_vector = this->copy();
     new_vector->mul_plain_inplace(to_mul);
 
     return new_vector;
 }
 
-SharedEncryptedVector EncryptedVector::dot_product(
-    SharedEncryptedVector to_mul) const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::dot_product(
+    shared_ptr<EncryptedVector<plain>> to_mul) const {
     auto new_vector = this->copy();
     new_vector->dot_product_inplace(to_mul);
 
     return new_vector;
 }
 
-SharedEncryptedVector EncryptedVector::dot_product_inplace(
-    SharedEncryptedVector to_mul) {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::dot_product_inplace(
+    shared_ptr<EncryptedVector<plain>> to_mul) {
     this->mul_inplace(to_mul);
     this->sum_inplace();
-    return shared_from_this();
+    return std::enable_shared_from_this<
+        EncryptedVector<plain>>::shared_from_this();
 }
 
-SharedEncryptedVector EncryptedVector::dot_product_plain(
-    const vector<double>& to_mul) const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::dot_product_plain(
+    const vector<plain>& to_mul) const {
     auto new_vector = this->copy();
     new_vector->dot_product_plain_inplace(to_mul);
 
     return new_vector;
 }
 
-SharedEncryptedVector EncryptedVector::dot_product_plain_inplace(
-    const vector<double>& to_mul) {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>>
+EncryptedVector<plain>::dot_product_plain_inplace(const vector<plain>& to_mul) {
     this->mul_plain_inplace(to_mul);
     this->sum_inplace();
-    return shared_from_this();
+    return std::enable_shared_from_this<
+        EncryptedVector<plain>>::shared_from_this();
 }
 
-SharedEncryptedVector EncryptedVector::sum() const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::sum() const {
     auto new_vector = this->copy();
     new_vector->sum_inplace();
     return new_vector;
 }
 
-SharedEncryptedVector EncryptedVector::sum_inplace() {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::sum_inplace() {
     sum_vector(this->tenseal_context(), this->_ciphertext, this->size());
     this->_size = 1;
-    return shared_from_this();
+    return std::enable_shared_from_this<
+        EncryptedVector<plain>>::shared_from_this();
 }
 
-SharedEncryptedVector EncryptedVector::matmul_plain(
-    const vector<vector<double>>& matrix, size_t n_jobs) const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::matmul_plain(
+    const vector<vector<plain>>& matrix, size_t n_jobs) const {
     auto new_vector = this->copy();
     return new_vector->matmul_plain_inplace(matrix, n_jobs);
 }
 
-SharedEncryptedVector EncryptedVector::replicate_first_slot(size_t n) const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::replicate_first_slot(
+    size_t n) const {
     auto new_vector = this->copy();
     return new_vector->replicate_first_slot_inplace(n);
 }
 
-SharedEncryptedVector EncryptedVector::replicate_first_slot_inplace(size_t n) {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>>
+EncryptedVector<plain>::replicate_first_slot_inplace(size_t n) {
     // mask
-    vector<double> mask(this->_size, 0);
+    vector<plain> mask(this->_size, 0);
     mask[0] = 1;
     this->mul_plain_inplace(mask);
 
@@ -302,46 +357,60 @@ SharedEncryptedVector EncryptedVector::replicate_first_slot_inplace(size_t n) {
     }
 
     this->_size = n;
-    return shared_from_this();
+    return std::enable_shared_from_this<
+        EncryptedVector<plain>>::shared_from_this();
 }
 
-SharedEncryptedVector EncryptedVector::polyval(
-    const vector<double>& coefficients) const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::polyval(
+    const vector<plain>& coefficients) const {
     auto new_vector = this->copy();
     return new_vector->polyval_inplace(coefficients);
 }
 
-SharedEncryptedVector EncryptedVector::conv2d_im2col(
-    const vector<vector<double>>& kernel, const size_t windows_nb) const {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::conv2d_im2col(
+    const vector<vector<plain>>& kernel, const size_t windows_nb) const {
     auto new_vector = this->copy();
     new_vector->conv2d_im2col_inplace(kernel, windows_nb);
     return new_vector;
 }
 
-SharedEncryptedVector EncryptedVector::enc_matmul_plain(
-    const vector<double>& plain_vec, const size_t rows_nb) {
+template <typename plain>
+shared_ptr<EncryptedVector<plain>> EncryptedVector<plain>::enc_matmul_plain(
+    const vector<plain>& plain_vec, const size_t rows_nb) {
     auto new_vector = this->copy();
     new_vector->enc_matmul_plain_inplace(plain_vec, rows_nb);
     return new_vector;
 }
 
-void EncryptedVector::rotate_vector_inplace(int steps,
-                                            const GaloisKeys& galois_keys) {
+template <typename plain>
+void EncryptedVector<plain>::rotate_vector_inplace(
+    int steps, const GaloisKeys& galois_keys) {
     this->tenseal_context()->evaluator->rotate_vector_inplace(
         this->_ciphertext, steps, galois_keys);
 }
 
-shared_ptr<TenSEALContext> EncryptedVector::tenseal_context() const {
+template <typename plain>
+shared_ptr<TenSEALContext> EncryptedVector<plain>::tenseal_context() const {
     if (_context == nullptr) throw invalid_argument("missing context");
     return _context;
 }
 
-void EncryptedVector::link_tenseal_context(shared_ptr<TenSEALContext> ctx) {
+template <typename plain>
+void EncryptedVector<plain>::link_tenseal_context(
+    shared_ptr<TenSEALContext> ctx) {
     this->_context = ctx;
 }
 
-shared_ptr<EncryptedVector> EncryptedVector::as_encrypted_tensor() {
-    return shared_from_this();
+template <typename plain>
+shared_ptr<EncryptedVector<plain>>
+EncryptedVector<plain>::as_encrypted_vector() {
+    return std::enable_shared_from_this<
+        EncryptedVector<plain>>::shared_from_this();
 }
+
+template class EncryptedVector<int64_t>;
+template class EncryptedVector<double>;
 
 }  // namespace tenseal

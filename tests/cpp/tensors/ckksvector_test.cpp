@@ -18,7 +18,8 @@ bool are_close(const std::vector<double>& l, const std::vector<int64_t>& r) {
     return true;
 }
 
-shared_ptr<EncryptedVector> duplicate(shared_ptr<EncryptedVector> in) {
+shared_ptr<EncryptedVector<double>> duplicate(
+    shared_ptr<EncryptedVector<double>> in) {
     auto vec = in->save();
 
     return CKKSVector::Create(in->tenseal_context(), vec);
@@ -35,7 +36,7 @@ TEST_P(CKKSVectorTest, TestCreateCKKS) {
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
-    auto l = CKKSVector::Create(ctx, {1, 2, 3}, 1)->as_encrypted_tensor();
+    auto l = CKKSVector::Create(ctx, {1, 2, 3}, 1)->as_encrypted_vector();
 
     if (should_serialize_first) {
         l = duplicate(l);
@@ -68,9 +69,9 @@ TEST_P(CKKSVectorTest, TestCKKSAdd) {
     ctx->auto_mod_switch(false);
 
     auto l = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}))
-                 ->as_encrypted_tensor();
+                 ->as_encrypted_vector();
     auto r = CKKSVector::Create(ctx, std::vector<double>({3, 4, 4}))
-                 ->as_encrypted_tensor();
+                 ->as_encrypted_vector();
 
     auto add = l->add(r);
 
@@ -109,9 +110,9 @@ TEST_P(CKKSVectorTest, TestCKKSMul) {
     ctx->auto_mod_switch(true);
 
     auto l = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}))
-                 ->as_encrypted_tensor();
+                 ->as_encrypted_vector();
     auto r = CKKSVector::Create(ctx, std::vector<double>({2, 2, 2}))
-                 ->as_encrypted_tensor();
+                 ->as_encrypted_vector();
 
     auto mul = l->mul(r);
     ASSERT_EQ(mul->ciphertext_size(), 2);
@@ -146,9 +147,9 @@ TEST_P(CKKSVectorTest, TestCKKSMulMany) {
     ctx->auto_mod_switch(true);
 
     auto l = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}))
-                 ->as_encrypted_tensor();
+                 ->as_encrypted_vector();
     auto r = CKKSVector::Create(ctx, std::vector<double>({2, 2, 2}))
-                 ->as_encrypted_tensor();
+                 ->as_encrypted_vector();
 
     l->mul_inplace(r);
     l->mul_inplace(r);
@@ -176,9 +177,9 @@ TEST_P(CKKSVectorTest, TestCKKSMulNoRelin) {
     ctx->auto_mod_switch(true);
 
     auto l = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}))
-                 ->as_encrypted_tensor();
+                 ->as_encrypted_vector();
     auto r = CKKSVector::Create(ctx, std::vector<double>({2, 2, 2}))
-                 ->as_encrypted_tensor();
+                 ->as_encrypted_vector();
 
     l->mul_inplace(r);
     l->mul_inplace(r);
@@ -203,7 +204,7 @@ TEST_P(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
     ctx->global_scale(std::pow(2, 40));
 
     auto vec = CKKSVector::Create(ctx, std::vector<double>({1}))
-                   ->as_encrypted_tensor();
+                   ->as_encrypted_vector();
     auto replicated_vec = vec->replicate_first_slot(4);
 
     if (should_serialize_first) {
@@ -232,7 +233,7 @@ TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
     ctx->global_scale(std::pow(2, 40));
 
     auto vec = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}))
-                   ->as_encrypted_tensor();
+                   ->as_encrypted_vector();
     auto matrix = vector<vector<double>>{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}};
     auto expected_result = vector<int64_t>{6, 12, 18};
 
