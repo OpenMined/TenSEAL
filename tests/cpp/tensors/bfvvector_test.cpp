@@ -7,7 +7,7 @@ namespace {
 using namespace ::testing;
 using namespace std;
 
-shared_ptr<EncryptedTensor> duplicate(shared_ptr<EncryptedTensor> in) {
+shared_ptr<EncryptedVector> duplicate(shared_ptr<EncryptedVector> in) {
     auto vec = in->save();
     return BFVVector::Create(in->tenseal_context(), vec);
 }

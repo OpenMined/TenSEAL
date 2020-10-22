@@ -18,7 +18,7 @@ bool are_close(const std::vector<double>& l, const std::vector<int64_t>& r) {
     return true;
 }
 
-shared_ptr<EncryptedTensor> duplicate(shared_ptr<EncryptedTensor> in) {
+shared_ptr<EncryptedVector> duplicate(shared_ptr<EncryptedVector> in) {
     auto vec = in->save();
 
     return CKKSVector::Create(in->tenseal_context(), vec);
