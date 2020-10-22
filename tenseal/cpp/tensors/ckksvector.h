@@ -94,7 +94,10 @@ class CKKSVector : public EncryptedTensor {
     SharedEncryptedTensor copy() const override;
     SharedEncryptedTensor deepcopy() const override;
 
+    double scale() const override { return _init_scale; }
+
    private:
+    double _init_scale;
     /*
     Private evaluation functions to process both scalar and vector arguments.
     */

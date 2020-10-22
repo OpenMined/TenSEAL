@@ -91,6 +91,8 @@ class BFVVector : public EncryptedTensor {
     SharedEncryptedTensor copy() const override;
     SharedEncryptedTensor deepcopy() const override;
 
+    double scale() const override { throw logic_error("not implemented"); }
+
    private:
     BFVVector(const shared_ptr<TenSEALContext>& ctx, const vector<double>& vec);
     BFVVector(const shared_ptr<const BFVVector>&);

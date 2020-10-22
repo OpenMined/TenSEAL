@@ -52,8 +52,8 @@ BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx,
 
 BFVVector::BFVVector(const shared_ptr<const EncryptedTensor>& vec) {
     this->prepare_context(vec->tenseal_context());
-    this->_size = vec->_size;
-    this->_ciphertext = vec->_ciphertext;
+    this->_size = vec->size();
+    this->_ciphertext = vec->ciphertext();
 }
 
 BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx, const string& vec) {

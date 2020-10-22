@@ -6,8 +6,16 @@ using namespace seal;
 using namespace std;
 
 size_t EncryptedTensor::size() const { return this->_size; }
+void EncryptedTensor::size(size_t val) { this->_size = val; }
 size_t EncryptedTensor::ciphertext_size() const {
     return this->_ciphertext.size();
+}
+const Ciphertext& EncryptedTensor::ciphertext() const {
+    return this->_ciphertext;
+}
+
+void EncryptedTensor::ciphertext(Ciphertext&& other) {
+    this->_ciphertext = other;
 }
 
 SharedEncryptedTensor EncryptedTensor::negate() const {
@@ -41,7 +49,7 @@ SharedEncryptedTensor EncryptedTensor::square_inplace() {
     if (this->tenseal_context()->auto_rescale()) {
         this->tenseal_context()->evaluator->rescale_to_next_inplace(
             this->_ciphertext);
-        this->_ciphertext.scale() = this->_init_scale;
+        this->_ciphertext.scale() = this->scale();
     }
 
     return shared_from_this();
@@ -203,7 +211,7 @@ SharedEncryptedTensor EncryptedTensor::mul_inplace(
     if (this->tenseal_context()->auto_rescale()) {
         this->tenseal_context()->evaluator->rescale_to_next_inplace(
             this->_ciphertext);
-        this->_ciphertext.scale() = this->_init_scale;
+        this->_ciphertext.scale() = this->scale();
     }
 
     return shared_from_this();
@@ -315,6 +323,12 @@ SharedEncryptedTensor EncryptedTensor::enc_matmul_plain(
     auto new_vector = this->copy();
     new_vector->enc_matmul_plain_inplace(plain_vec, rows_nb);
     return new_vector;
+}
+
+void EncryptedTensor::rotate_vector_inplace(int steps,
+                                            const GaloisKeys& galois_keys) {
+    this->tenseal_context()->evaluator->rotate_vector_inplace(
+        this->_ciphertext, steps, galois_keys);
 }
 
 shared_ptr<TenSEALContext> EncryptedTensor::tenseal_context() const {

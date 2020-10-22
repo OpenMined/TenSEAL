@@ -27,7 +27,11 @@ class EncryptedTensor : public enable_shared_from_this<EncryptedTensor> {
      * Returns the size of the encrypted vector.
      **/
     size_t size() const;
+    void size(size_t val);
+
     size_t ciphertext_size() const;
+    const Ciphertext& ciphertext() const;
+    void ciphertext(Ciphertext&&);
     /**
      * Negates a EncryptedTensor.
      **/
@@ -127,6 +131,7 @@ class EncryptedTensor : public enable_shared_from_this<EncryptedTensor> {
     virtual shared_ptr<EncryptedTensor> conv2d_im2col_inplace(
         const vector<vector<double>>& kernel, const size_t windows_nb) = 0;
 
+    void rotate_vector_inplace(int steps, const GaloisKeys& galois_keys);
     /**
      * Load/Save the vector from/to a serialized protobuffer.
      **/
@@ -149,13 +154,13 @@ class EncryptedTensor : public enable_shared_from_this<EncryptedTensor> {
     void link_tenseal_context(shared_ptr<TenSEALContext> ctx);
     shared_ptr<EncryptedTensor> as_encrypted_tensor();
 
+    virtual double scale() const = 0;
     virtual ~EncryptedTensor(){};
 
-    // protected:
+   protected:
     size_t _size;
     shared_ptr<TenSEALContext> _context;
     Ciphertext _ciphertext;
-    double _init_scale;
 };
 
 using SharedEncryptedTensor = shared_ptr<EncryptedTensor>;

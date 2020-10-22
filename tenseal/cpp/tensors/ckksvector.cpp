@@ -51,9 +51,9 @@ CKKSVector::CKKSVector(const shared_ptr<TenSEALContext>& ctx,
 
 CKKSVector::CKKSVector(const shared_ptr<const EncryptedTensor>& vec) {
     this->link_tenseal_context(vec->tenseal_context());
-    this->_init_scale = vec->_init_scale;
-    this->_size = vec->_size;
-    this->_ciphertext = vec->_ciphertext;
+    this->_init_scale = vec->scale();
+    this->_size = vec->size();
+    this->_ciphertext = vec->ciphertext();
 }
 
 CKKSVector::CKKSVector(const shared_ptr<TenSEALContext>& ctx,
@@ -390,9 +390,8 @@ SharedEncryptedTensor CKKSVector::enc_matmul_plain_inplace(
         tmp = this->copy();
         chunks_nb = static_cast<int>(
             1 << (static_cast<size_t>(ceil(log2(chunks_nb))) - 1));
-        this->tenseal_context()->evaluator->rotate_vector_inplace(
-            tmp->_ciphertext, static_cast<int>(rows_nb * chunks_nb),
-            *galois_keys);
+        tmp->rotate_vector_inplace(static_cast<int>(rows_nb * chunks_nb),
+                                   *galois_keys);
         this->add_inplace(tmp);
     }
 
