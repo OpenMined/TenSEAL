@@ -13,27 +13,26 @@ using namespace std;
 
 namespace tenseal {
 
-shared_ptr<BFVVector> BFVVector::Create(const shared_ptr<TenSEALContext>& ctx,
-                                        const vector<int64_t>& vec) {
+SharedBFVVector BFVVector::Create(const shared_ptr<TenSEALContext>& ctx,
+                                  const vector<int64_t>& vec) {
     return shared_ptr<BFVVector>(new BFVVector(ctx, vec));
 }
 
-shared_ptr<BFVVector> BFVVector::Create(const shared_ptr<TenSEALContext>& ctx,
-                                        const string& vec) {
+SharedBFVVector BFVVector::Create(const shared_ptr<TenSEALContext>& ctx,
+                                  const string& vec) {
     return shared_ptr<BFVVector>(new BFVVector(ctx, vec));
 }
-shared_ptr<BFVVector> BFVVector::Create(const TenSEALContextProto& ctx,
-                                        const BFVVectorProto& vec) {
+SharedBFVVector BFVVector::Create(const TenSEALContextProto& ctx,
+                                  const BFVVectorProto& vec) {
     return shared_ptr<BFVVector>(new BFVVector(ctx, vec));
 }
-shared_ptr<BFVVector> BFVVector::Create(const shared_ptr<TenSEALContext>& ctx,
-                                        const BFVVectorProto& vec) {
+SharedBFVVector BFVVector::Create(const shared_ptr<TenSEALContext>& ctx,
+                                  const BFVVectorProto& vec) {
     return shared_ptr<BFVVector>(new BFVVector(ctx, vec));
 }
 
-shared_ptr<BFVVector> BFVVector::Create(
-    const shared_ptr<const EncryptedVector>& other) {
-    return shared_ptr<BFVVector>(new BFVVector(other));
+shared_ptr<BFVVector> BFVVector::Create(const SharedBFVVector& vec) {
+    return shared_ptr<BFVVector>(new BFVVector(vec));
 }
 
 void BFVVector::prepare_context(const shared_ptr<TenSEALContext>& ctx) {
@@ -121,7 +120,7 @@ vector<int64_t> BFVVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     return real_result;
 }
 
-SharedEncryptedVectorInt BFVVector::power_inplace(unsigned int power) {
+SharedBFVVector BFVVector::power_inplace(unsigned int power) {
     // if the power is zero, return a new encrypted vector of ones
     if (power == 0) {
         vector<int64_t> ones(this->size(), 1);
@@ -150,12 +149,11 @@ SharedEncryptedVectorInt BFVVector::power_inplace(unsigned int power) {
     return shared_from_this();
 }
 
-SharedEncryptedVectorInt BFVVector::add_plain_inplace(int64_t to_add) {
+SharedBFVVector BFVVector::add_plain_inplace(int64_t to_add) {
     throw std::logic_error("not implemented");
 }
 
-SharedEncryptedVectorInt BFVVector::add_plain_inplace(
-    const vector<int64_t>& to_add) {
+SharedBFVVector BFVVector::add_plain_inplace(const vector<int64_t>& to_add) {
     if (this->size() != to_add.size()) {
         throw invalid_argument("can't add vectors of different sizes");
     }
@@ -169,12 +167,11 @@ SharedEncryptedVectorInt BFVVector::add_plain_inplace(
     return shared_from_this();
 }
 
-SharedEncryptedVectorInt BFVVector::sub_plain_inplace(int64_t to_sub) {
+SharedBFVVector BFVVector::sub_plain_inplace(int64_t to_sub) {
     throw std::logic_error("not implemented");
 }
 
-SharedEncryptedVectorInt BFVVector::sub_plain_inplace(
-    const vector<int64_t>& to_sub) {
+SharedBFVVector BFVVector::sub_plain_inplace(const vector<int64_t>& to_sub) {
     if (this->size() != to_sub.size()) {
         throw invalid_argument("can't sub vectors of different sizes");
     }
@@ -188,12 +185,11 @@ SharedEncryptedVectorInt BFVVector::sub_plain_inplace(
     return shared_from_this();
 }
 
-SharedEncryptedVectorInt BFVVector::mul_plain_inplace(int64_t to_sub) {
+SharedBFVVector BFVVector::mul_plain_inplace(int64_t to_sub) {
     throw std::logic_error("not implemented");
 }
 
-SharedEncryptedVectorInt BFVVector::mul_plain_inplace(
-    const vector<int64_t>& to_mul) {
+SharedBFVVector BFVVector::mul_plain_inplace(const vector<int64_t>& to_mul) {
     if (this->size() != to_mul.size()) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
@@ -216,22 +212,22 @@ SharedEncryptedVectorInt BFVVector::mul_plain_inplace(
     return shared_from_this();
 }
 
-SharedEncryptedVectorInt BFVVector::matmul_plain_inplace(
+SharedBFVVector BFVVector::matmul_plain_inplace(
     const vector<vector<int64_t>>& matrix, size_t n_jobs) {
     throw std::logic_error("not implemented");
 }
 
-SharedEncryptedVectorInt BFVVector::polyval_inplace(
+SharedBFVVector BFVVector::polyval_inplace(
     const vector<int64_t>& coefficients) {
     throw std::logic_error("not implemented");
 }
 
-SharedEncryptedVectorInt BFVVector::conv2d_im2col_inplace(
+SharedBFVVector BFVVector::conv2d_im2col_inplace(
     const vector<vector<int64_t>>& kernel, const size_t windows_nb) {
     throw std::logic_error("not implemented");
 }
 
-SharedEncryptedVectorInt BFVVector::enc_matmul_plain_inplace(
+SharedBFVVector BFVVector::enc_matmul_plain_inplace(
     const vector<int64_t>& plain_vec, const size_t rows_nb) {
     throw std::logic_error("not implemented");
 }
@@ -282,11 +278,11 @@ std::string BFVVector::save() const {
     return output;
 }
 
-SharedEncryptedVectorInt BFVVector::copy() const {
+SharedBFVVector BFVVector::copy() const {
     return shared_ptr<BFVVector>(new BFVVector(shared_from_this()));
 }
 
-SharedEncryptedVectorInt BFVVector::deepcopy() const {
+SharedBFVVector BFVVector::deepcopy() const {
     TenSEALContextProto ctx = this->tenseal_context()->save_proto();
     BFVVectorProto vec = this->save_proto();
     return BFVVector::Create(ctx, vec);

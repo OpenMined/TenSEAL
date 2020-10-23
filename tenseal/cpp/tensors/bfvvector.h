@@ -14,20 +14,19 @@ using namespace std;
  * encryption scheme.
  **/
 
-using SharedEncryptedVectorInt = shared_ptr<EncryptedVector<int64_t>>;
+using SharedBFVVector = shared_ptr<EncryptedVector<int64_t>>;
 
 class BFVVector : public EncryptedVector<int64_t> {
    public:
-    static shared_ptr<BFVVector> Create(const shared_ptr<TenSEALContext>& ctx,
-                                        const vector<int64_t>& vec);
-    static shared_ptr<BFVVector> Create(const shared_ptr<TenSEALContext>& ctx,
-                                        const string& vec);
-    static shared_ptr<BFVVector> Create(const TenSEALContextProto& ctx,
-                                        const BFVVectorProto& vec);
-    static shared_ptr<BFVVector> Create(const shared_ptr<TenSEALContext>& ctx,
-                                        const BFVVectorProto& vec);
-    static shared_ptr<BFVVector> Create(
-        const shared_ptr<const EncryptedVector>&);
+    static SharedBFVVector Create(const shared_ptr<TenSEALContext>& ctx,
+                                  const vector<int64_t>& vec);
+    static SharedBFVVector Create(const shared_ptr<TenSEALContext>& ctx,
+                                  const string& vec);
+    static SharedBFVVector Create(const TenSEALContextProto& ctx,
+                                  const BFVVectorProto& vec);
+    static SharedBFVVector Create(const shared_ptr<TenSEALContext>& ctx,
+                                  const BFVVectorProto& vec);
+    static shared_ptr<BFVVector> Create(const SharedBFVVector&);
 
     /**
      * Decrypts and returns the plaintext representation of the encrypted vector
@@ -38,40 +37,37 @@ class BFVVector : public EncryptedVector<int64_t> {
     /**
      * Compute the power of the BFVVector with minimal multiplication depth.
      **/
-    SharedEncryptedVectorInt power_inplace(unsigned int power) override;
+    SharedBFVVector power_inplace(unsigned int power) override;
     /**
      * Plain evaluation function operates on an encrypted vector and plaintext
      * vector of integers and returns a new BFVVector which is the result of
      * either addition, substraction or multiplication in an element-wise
      *fashion. in_place functions return a reference to the same object.
      **/
-    SharedEncryptedVectorInt add_plain_inplace(int64_t to_add) override;
-    SharedEncryptedVectorInt add_plain_inplace(
-        const vector<int64_t>& to_add) override;
-    SharedEncryptedVectorInt sub_plain_inplace(int64_t to_sub) override;
-    SharedEncryptedVectorInt sub_plain_inplace(
-        const vector<int64_t>& to_sub) override;
-    SharedEncryptedVectorInt mul_plain_inplace(int64_t to_mul) override;
-    SharedEncryptedVectorInt mul_plain_inplace(
-        const vector<int64_t>& to_mul) override;
+    SharedBFVVector add_plain_inplace(int64_t to_add) override;
+    SharedBFVVector add_plain_inplace(const vector<int64_t>& to_add) override;
+    SharedBFVVector sub_plain_inplace(int64_t to_sub) override;
+    SharedBFVVector sub_plain_inplace(const vector<int64_t>& to_sub) override;
+    SharedBFVVector mul_plain_inplace(int64_t to_mul) override;
+    SharedBFVVector mul_plain_inplace(const vector<int64_t>& to_mul) override;
     /**
      * Encrypted Vector multiplication with plain matrix.
      **/
-    SharedEncryptedVectorInt matmul_plain_inplace(
-        const vector<vector<int64_t>>& matrix, size_t n_jobs = 0) override;
+    SharedBFVVector matmul_plain_inplace(const vector<vector<int64_t>>& matrix,
+                                         size_t n_jobs = 0) override;
 
     /**
      * Encrypted Matrix multiplication with plain vector.
      **/
-    SharedEncryptedVectorInt enc_matmul_plain_inplace(
-        const vector<int64_t>& plain_vec, size_t row_size) override;
+    SharedBFVVector enc_matmul_plain_inplace(const vector<int64_t>& plain_vec,
+                                             size_t row_size) override;
 
     /**
      * Polynomial evaluation with `this` as variable.
      * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
      *x^i
      **/
-    SharedEncryptedVectorInt polyval_inplace(
+    SharedBFVVector polyval_inplace(
         const vector<int64_t>& coefficients) override;
 
     /*
@@ -79,9 +75,8 @@ class BFVVector : public EncryptedVector<int64_t> {
      * The input matrix should be encoded in a vertical scan (column-major).
      * The kernel vector should be padded with zeros to the next power of 2
      */
-    SharedEncryptedVectorInt conv2d_im2col_inplace(
-        const vector<vector<int64_t>>& kernel,
-        const size_t windows_nb) override;
+    SharedBFVVector conv2d_im2col_inplace(const vector<vector<int64_t>>& kernel,
+                                          const size_t windows_nb) override;
 
     /**
      * Load/Save the vector from/to a serialized protobuffer.
@@ -92,8 +87,8 @@ class BFVVector : public EncryptedVector<int64_t> {
      *Recreates a new BFVVector from the current one, without any
      *pointer/reference to this one.
      * **/
-    SharedEncryptedVectorInt copy() const override;
-    SharedEncryptedVectorInt deepcopy() const override;
+    SharedBFVVector copy() const override;
+    SharedBFVVector deepcopy() const override;
 
     double scale() const override { throw logic_error("not implemented"); }
 
@@ -117,9 +112,9 @@ class BFVVector : public EncryptedVector<int64_t> {
 
     // make pack_vectors a friend function in order to be able to modify vector
     // size (_size private member)
-    friend SharedEncryptedVectorInt
+    friend SharedBFVVector
     pack_vectors<EncryptedVector<int64_t>, BatchEncoder, int64_t>(
-        const vector<SharedEncryptedVectorInt>&);
+        const vector<SharedBFVVector>&);
 };
 
 }  // namespace tenseal

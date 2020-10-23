@@ -403,13 +403,6 @@ void EncryptedVector<plain>::link_tenseal_context(
     this->_context = ctx;
 }
 
-template <typename plain>
-shared_ptr<EncryptedVector<plain>>
-EncryptedVector<plain>::as_encrypted_vector() {
-    return std::enable_shared_from_this<
-        EncryptedVector<plain>>::shared_from_this();
-}
-
 template class EncryptedVector<int64_t>;
 template class EncryptedVector<double>;
 

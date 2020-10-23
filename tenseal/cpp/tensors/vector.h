@@ -169,7 +169,6 @@ class EncryptedVector : public enable_shared_from_this<EncryptedVector<plain>> {
      * Link to a TenSEAL context.
      **/
     void link_tenseal_context(shared_ptr<TenSEALContext> ctx);
-    shared_ptr<EncryptedVector<plain>> as_encrypted_vector();
 
     virtual double scale() const = 0;
     virtual ~EncryptedVector(){};
