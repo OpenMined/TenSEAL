@@ -1,7 +1,7 @@
 #ifndef TENSEAL_TENSOR_CKKSVECTOR_H
 #define TENSEAL_TENSOR_CKKSVECTOR_H
 
-#include "tenseal/cpp/tensors/vector.h"
+#include "tenseal/cpp/tensors/encrypted_vector.h"
 #include "tenseal/proto/tensors.pb.h"
 
 namespace tenseal {

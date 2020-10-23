@@ -1,4 +1,4 @@
-#include "tenseal/cpp/tensors/vector.h"
+#include "tenseal/cpp/tensors/encrypted_vector.h"
 
 namespace tenseal {
 

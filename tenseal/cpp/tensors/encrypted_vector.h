@@ -1,5 +1,5 @@
-#ifndef TENSEAL_TENSOR_VECTOR_H
-#define TENSEAL_TENSOR_VECTOR_H
+#ifndef TENSEAL_TENSOR_ENCRYPTED_VECTOR_H
+#define TENSEAL_TENSOR_ENCRYPTED_VECTOR_H
 
 #include <memory>
 #include <optional>
