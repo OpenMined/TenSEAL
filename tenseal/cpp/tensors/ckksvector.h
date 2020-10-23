@@ -17,17 +17,11 @@ using SharedCKKSVector = shared_ptr<EncryptedVector<double>>;
  **/
 class CKKSVector : public EncryptedVector<double> {
    public:
-    static SharedCKKSVector Create(const shared_ptr<TenSEALContext>& ctx,
-                                   const vector<double>& vec,
-                                   optional<double> scale = {});
-    static SharedCKKSVector Create(const shared_ptr<TenSEALContext>& ctx,
-                                   const string& vec);
-    static SharedCKKSVector Create(const TenSEALContextProto& ctx,
-                                   const CKKSVectorProto& vec);
-    static SharedCKKSVector Create(const shared_ptr<TenSEALContext>& ctx,
-                                   const CKKSVectorProto& vec);
-
-    static shared_ptr<CKKSVector> Create(const SharedCKKSVector& vec);
+    template <typename... Args>
+    static SharedCKKSVector Create(Args&&... args) {
+        return shared_ptr<CKKSVector>(
+            new CKKSVector(std::forward<Args>(args)...));
+    }
     /**
      * Decrypts and returns the plaintext representation of the encrypted vector
      *of real numbers using the secret-key.

@@ -18,15 +18,11 @@ using SharedBFVVector = shared_ptr<EncryptedVector<int64_t>>;
 
 class BFVVector : public EncryptedVector<int64_t> {
    public:
-    static SharedBFVVector Create(const shared_ptr<TenSEALContext>& ctx,
-                                  const vector<int64_t>& vec);
-    static SharedBFVVector Create(const shared_ptr<TenSEALContext>& ctx,
-                                  const string& vec);
-    static SharedBFVVector Create(const TenSEALContextProto& ctx,
-                                  const BFVVectorProto& vec);
-    static SharedBFVVector Create(const shared_ptr<TenSEALContext>& ctx,
-                                  const BFVVectorProto& vec);
-    static shared_ptr<BFVVector> Create(const SharedBFVVector&);
+    template <typename... Args>
+    static SharedBFVVector Create(Args&&... args) {
+        return shared_ptr<BFVVector>(
+            new BFVVector(std::forward<Args>(args)...));
+    }
 
     /**
      * Decrypts and returns the plaintext representation of the encrypted vector
@@ -95,11 +91,10 @@ class BFVVector : public EncryptedVector<int64_t> {
    private:
     BFVVector(const shared_ptr<TenSEALContext>& ctx,
               const vector<int64_t>& vec);
-    BFVVector(const shared_ptr<const BFVVector>&);
+    BFVVector(const shared_ptr<const EncryptedVector>&);
     BFVVector(const shared_ptr<TenSEALContext>& ctx, const string& vec);
     BFVVector(const TenSEALContextProto& ctx, const BFVVectorProto& vec);
     BFVVector(const shared_ptr<TenSEALContext>& ctx, const BFVVectorProto& vec);
-    BFVVector(const shared_ptr<const EncryptedVector>& vec);
 
     static Ciphertext encrypt(shared_ptr<TenSEALContext> context,
                               vector<int64_t> input);

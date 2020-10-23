@@ -17,28 +17,6 @@ using namespace std;
 
 namespace tenseal {
 
-SharedCKKSVector CKKSVector::Create(const shared_ptr<TenSEALContext>& ctx,
-                                    const vector<double>& vec,
-                                    optional<double> scale) {
-    return shared_ptr<CKKSVector>(new CKKSVector(ctx, vec, scale));
-}
-SharedCKKSVector CKKSVector::Create(const shared_ptr<TenSEALContext>& ctx,
-                                    const string& vec) {
-    return shared_ptr<CKKSVector>(new CKKSVector(ctx, vec));
-}
-SharedCKKSVector CKKSVector::Create(const TenSEALContextProto& ctx,
-                                    const CKKSVectorProto& vec) {
-    return shared_ptr<CKKSVector>(new CKKSVector(ctx, vec));
-}
-SharedCKKSVector CKKSVector::Create(const shared_ptr<TenSEALContext>& ctx,
-                                    const CKKSVectorProto& vec) {
-    return shared_ptr<CKKSVector>(new CKKSVector(ctx, vec));
-}
-
-shared_ptr<CKKSVector> CKKSVector::Create(const SharedCKKSVector& vec) {
-    return shared_ptr<CKKSVector>(new CKKSVector(vec));
-}
-
 CKKSVector::CKKSVector(const shared_ptr<TenSEALContext>& ctx,
                        vector<double> vec, std::optional<double> scale) {
     this->link_tenseal_context(ctx);
@@ -51,13 +29,6 @@ CKKSVector::CKKSVector(const shared_ptr<TenSEALContext>& ctx,
     // Encrypts the whole vector into a single ciphertext using CKKS batching
     this->_ciphertext = CKKSVector::encrypt(ctx, this->_init_scale, vec);
     this->_size = vec.size();
-}
-
-CKKSVector::CKKSVector(const shared_ptr<const EncryptedVector>& vec) {
-    this->link_tenseal_context(vec->tenseal_context());
-    this->_init_scale = vec->scale();
-    this->_size = vec->size();
-    this->_ciphertext = vec->ciphertext();
 }
 
 CKKSVector::CKKSVector(const shared_ptr<TenSEALContext>& ctx,
@@ -76,6 +47,13 @@ CKKSVector::CKKSVector(const shared_ptr<TenSEALContext>& ctx,
                        const CKKSVectorProto& vec) {
     this->link_tenseal_context(ctx);
     this->load_proto(vec);
+}
+
+CKKSVector::CKKSVector(const shared_ptr<const EncryptedVector>& vec) {
+    this->link_tenseal_context(vec->tenseal_context());
+    this->_init_scale = vec->scale();
+    this->_size = vec->size();
+    this->_ciphertext = vec->ciphertext();
 }
 
 Ciphertext CKKSVector::encrypt(shared_ptr<TenSEALContext> context, double scale,

@@ -13,28 +13,6 @@ using namespace std;
 
 namespace tenseal {
 
-SharedBFVVector BFVVector::Create(const shared_ptr<TenSEALContext>& ctx,
-                                  const vector<int64_t>& vec) {
-    return shared_ptr<BFVVector>(new BFVVector(ctx, vec));
-}
-
-SharedBFVVector BFVVector::Create(const shared_ptr<TenSEALContext>& ctx,
-                                  const string& vec) {
-    return shared_ptr<BFVVector>(new BFVVector(ctx, vec));
-}
-SharedBFVVector BFVVector::Create(const TenSEALContextProto& ctx,
-                                  const BFVVectorProto& vec) {
-    return shared_ptr<BFVVector>(new BFVVector(ctx, vec));
-}
-SharedBFVVector BFVVector::Create(const shared_ptr<TenSEALContext>& ctx,
-                                  const BFVVectorProto& vec) {
-    return shared_ptr<BFVVector>(new BFVVector(ctx, vec));
-}
-
-shared_ptr<BFVVector> BFVVector::Create(const SharedBFVVector& vec) {
-    return shared_ptr<BFVVector>(new BFVVector(vec));
-}
-
 void BFVVector::prepare_context(const shared_ptr<TenSEALContext>& ctx) {
     this->link_tenseal_context(ctx);
     this->tenseal_context()->auto_rescale(false);
@@ -47,12 +25,6 @@ BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx,
     // Encrypts the whole vector into a single ciphertext using BFV batching
     this->_ciphertext = BFVVector::encrypt(ctx, vec);
     this->_size = vec.size();
-}
-
-BFVVector::BFVVector(const shared_ptr<const EncryptedVector>& vec) {
-    this->prepare_context(vec->tenseal_context());
-    this->_size = vec->size();
-    this->_ciphertext = vec->ciphertext();
 }
 
 BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx, const string& vec) {
@@ -70,6 +42,11 @@ BFVVector::BFVVector(const TenSEALContextProto& ctx,
                      const BFVVectorProto& vec) {
     this->load_context_proto(ctx);
     this->load_proto(vec);
+}
+BFVVector::BFVVector(const shared_ptr<const EncryptedVector>& vec) {
+    this->prepare_context(vec->tenseal_context());
+    this->_size = vec->size();
+    this->_ciphertext = vec->ciphertext();
 }
 
 Ciphertext BFVVector::encrypt(shared_ptr<TenSEALContext> context,

@@ -48,11 +48,13 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         m, "BFVVector", py::module_local())
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<int64_t> &data) {
-            return BFVVector::Create(BFVVector::Create(ctx, data));
+            return std::dynamic_pointer_cast<BFVVector>(
+                BFVVector::Create(ctx, data));
         }))
         .def(py::init(
             [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
-                return BFVVector::Create(BFVVector::Create(ctx, data));
+                return std::dynamic_pointer_cast<BFVVector>(
+                    BFVVector::Create(ctx, data));
             }))
         .def("size", py::overload_cast<>(&BFVVector::size, py::const_))
         .def("decrypt", py::overload_cast<>(&BFVVector::decrypt, py::const_))
@@ -151,16 +153,19 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         // specifying scale
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<double> &data, double scale) {
-            return CKKSVector::Create(CKKSVector::Create(ctx, data, scale));
+            return std::dynamic_pointer_cast<CKKSVector>(
+                CKKSVector::Create(ctx, data, scale));
         }))
         // using global_scale if set
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<double> &data) {
-            return CKKSVector::Create(CKKSVector::Create(ctx, data));
+            return std::dynamic_pointer_cast<CKKSVector>(
+                CKKSVector::Create(ctx, data));
         }))
         .def(py::init(
             [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
-                return CKKSVector::Create(CKKSVector::Create(ctx, data));
+                return std::dynamic_pointer_cast<CKKSVector>(
+                    CKKSVector::Create(ctx, data));
             }))
         .def("size", py::overload_cast<>(&CKKSVector::size, py::const_))
         .def("decrypt", py::overload_cast<>(&CKKSVector::decrypt, py::const_))

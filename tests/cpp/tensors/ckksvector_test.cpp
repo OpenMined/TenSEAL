@@ -35,7 +35,7 @@ TEST_P(CKKSVectorTest, TestCreateCKKS) {
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
-    auto l = CKKSVector::Create(ctx, {1, 2, 3}, 1);
+    auto l = CKKSVector::Create(ctx, std::vector<double>{1, 2, 3}, 1);
 
     if (should_serialize_first) {
         l = duplicate(l);
