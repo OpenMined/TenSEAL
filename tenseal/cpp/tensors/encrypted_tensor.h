@@ -77,10 +77,10 @@ class EncryptedTensor {
     virtual encrypted_t dot_product_inplace(encrypted_t to_mul) = 0;
     /**
      * Plain evaluation function operates on an encrypted tensors and plaintext
-     * tensors of integers and returns a new EncryptedTensor<plain_t,
-     *plain_container_t, encrypted_t> which is the result of either addition,
-     *substraction or multiplication in an element-wise fashion. in_place
-     *functions return a reference to the same object.
+     * tensors and returns a new EncryptedTensor<plain_t, plain_container_t,
+     *encrypted_t> which is the result of either addition, substraction or
+     *multiplication in an element-wise fashion. in_place functions return a
+     *reference to the same object.
      **/
     encrypted_t add_plain(plain_t to_add) const {
         return this->copy()->add_plain_inplace(to_add);
@@ -121,11 +121,10 @@ class EncryptedTensor {
      * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
      *x^i
      **/
-    encrypted_t polyval(const plain_container_t& coefficients) const {
+    encrypted_t polyval(const vector<double>& coefficients) const {
         return this->copy()->polyval_inplace(coefficients);
     };
-    virtual encrypted_t polyval_inplace(
-        const plain_container_t& coefficients) = 0;
+    virtual encrypted_t polyval_inplace(const vector<double>& coefficients) = 0;
     /**
      * Load/Save the Tensor from/to a serialized protobuffer.
      **/

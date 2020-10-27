@@ -50,7 +50,6 @@ set(SEALAPI_BASEDIR tenseal/sealapi)
 set(SOURCES
     ${TENSEAL_BASEDIR}/cpp/context/tensealcontext.cpp
     ${TENSEAL_BASEDIR}/cpp/context/sealcontext.cpp
-    ${TENSEAL_BASEDIR}/cpp/tensors/encrypted_vector.cpp
     ${TENSEAL_BASEDIR}/cpp/tensors/bfvvector.cpp
     ${TENSEAL_BASEDIR}/cpp/tensors/ckksvector.cpp
     ${TENSEAL_BASEDIR}/cpp/tensors/utils/utils.cpp)

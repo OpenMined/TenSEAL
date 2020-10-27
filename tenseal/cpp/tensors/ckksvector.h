@@ -9,18 +9,18 @@ namespace tenseal {
 using namespace seal;
 using namespace std;
 
-using SharedCKKSVector = shared_ptr<EncryptedVector<double>>;
-
 /**
  * Holds a vector of real numbers in its encrypted form using the CKKS
  *homomorphic encryption scheme.
  **/
-class CKKSVector : public EncryptedVector<double> {
+class CKKSVector : public EncryptedVector<double, shared_ptr<CKKSVector>>,
+                   public enable_shared_from_this<CKKSVector> {
    public:
+    using encrypted_t = shared_ptr<CKKSVector>;
+
     template <typename... Args>
-    static SharedCKKSVector Create(Args&&... args) {
-        return shared_ptr<CKKSVector>(
-            new CKKSVector(std::forward<Args>(args)...));
+    static encrypted_t Create(Args&&... args) {
+        return encrypted_t(new CKKSVector(std::forward<Args>(args)...));
     }
     /**
      * Decrypts and returns the plaintext representation of the encrypted vector
@@ -32,7 +32,28 @@ class CKKSVector : public EncryptedVector<double> {
     /**
      * Compute the power of the CKKSVector with minimal multiplication depth.
      **/
-    SharedCKKSVector power_inplace(unsigned int power) override;
+    encrypted_t power_inplace(unsigned int power) override;
+    /**
+     * Negates a CKKSVector.
+     **/
+    encrypted_t negate_inplace() override;
+    /**
+     * Compute the square of the CKKSVector.
+     **/
+    encrypted_t square_inplace() override;
+    /**
+     * Encrypted evaluation function operates on two encrypted vectors and
+     * returns a new CKKSVector which is the result of either
+     *addition, substraction or multiplication in an element-wise fashion.
+     *in_place functions return a reference to the same object.
+     **/
+    encrypted_t add_inplace(encrypted_t to_add) override;
+    encrypted_t sub_inplace(encrypted_t to_sub) override;
+    encrypted_t mul_inplace(encrypted_t to_mul) override;
+    encrypted_t dot_product_inplace(encrypted_t to_mul) override;
+    encrypted_t dot_product_plain_inplace(
+        const vector<double>& to_mul) override;
+    encrypted_t sum_inplace() override;
 
     /**
      * Plain evaluation function operates on an encrypted vector and plaintext
@@ -40,40 +61,46 @@ class CKKSVector : public EncryptedVector<double> {
      * either addition, substraction or multiplication in an element-wise
      *fashion. in_place functions return a reference to the same object.
      **/
-    SharedCKKSVector add_plain_inplace(double to_add) override;
-    SharedCKKSVector add_plain_inplace(const vector<double>& to_add) override;
-    SharedCKKSVector sub_plain_inplace(double to_sub) override;
-    SharedCKKSVector sub_plain_inplace(const vector<double>& to_sub) override;
-    SharedCKKSVector mul_plain_inplace(double to_mul) override;
-    SharedCKKSVector mul_plain_inplace(const vector<double>& to_mul) override;
+    encrypted_t add_plain_inplace(double to_add) override;
+    encrypted_t add_plain_inplace(const vector<double>& to_add) override;
+    encrypted_t sub_plain_inplace(double to_sub) override;
+    encrypted_t sub_plain_inplace(const vector<double>& to_sub) override;
+    encrypted_t mul_plain_inplace(double to_mul) override;
+    encrypted_t mul_plain_inplace(const vector<double>& to_mul) override;
 
     /**
      * Encrypted Vector multiplication with plain matrix.
      **/
-    SharedCKKSVector matmul_plain_inplace(const vector<vector<double>>& matrix,
-                                          size_t n_jobs = 0) override;
+    encrypted_t matmul_plain_inplace(const vector<vector<double>>& matrix,
+                                     size_t n_jobs = 0) override;
 
     /**
      * Encrypted Matrix multiplication with plain vector.
      **/
-    SharedCKKSVector enc_matmul_plain_inplace(const vector<double>& plain_vec,
-                                              size_t row_size) override;
+    encrypted_t enc_matmul_plain_inplace(const vector<double>& plain_vec,
+                                         size_t row_size) override;
 
     /**
      * Polynomial evaluation with `this` as variable.
      * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
      *x^i
      **/
-    SharedCKKSVector polyval_inplace(
-        const vector<double>& coefficients) override;
+    encrypted_t polyval_inplace(const vector<double>& coefficients) override;
 
     /*
      * Image Block to Columns.
      * The input matrix should be encoded in a vertical scan (column-major).
      * The kernel vector should be padded with zeros to the next power of 2
      */
-    SharedCKKSVector conv2d_im2col_inplace(const vector<vector<double>>& kernel,
-                                           const size_t windows_nb) override;
+    encrypted_t conv2d_im2col_inplace(const vector<vector<double>>& kernel,
+                                      const size_t windows_nb) override;
+    /**
+     * Replicate the first slot of a ciphertext n times. Requires a
+     *multiplication.
+     **/
+    encrypted_t replicate_first_slot_inplace(size_t n) override;
+    void rotate_vector_inplace(int steps,
+                               const GaloisKeys& galois_keys) override;
 
     /**
      * Load/Save the vector from/to a serialized protobuffer.
@@ -85,8 +112,8 @@ class CKKSVector : public EncryptedVector<double> {
      *Recreates a new CKKSVector from the current one, without any
      *pointer/reference to this one.
      **/
-    SharedCKKSVector copy() const override;
-    SharedCKKSVector deepcopy() const override;
+    encrypted_t copy() const override;
+    encrypted_t deepcopy() const override;
 
     double scale() const override { return _init_scale; }
 
@@ -96,11 +123,11 @@ class CKKSVector : public EncryptedVector<double> {
     Private evaluation functions to process both scalar and vector arguments.
     */
     template <typename T>
-    SharedCKKSVector _add_plain_inplace(const T& to_add);
+    encrypted_t _add_plain_inplace(const T& to_add);
     template <typename T>
-    SharedCKKSVector _sub_plain_inplace(const T& to_sub);
+    encrypted_t _sub_plain_inplace(const T& to_sub);
     template <typename T>
-    SharedCKKSVector _mul_plain_inplace(const T& to_mul);
+    encrypted_t _mul_plain_inplace(const T& to_mul);
 
     CKKSVector(const shared_ptr<TenSEALContext>& ctx, vector<double> vec,
                optional<double> scale = {});
@@ -108,7 +135,7 @@ class CKKSVector : public EncryptedVector<double> {
     CKKSVector(const TenSEALContextProto& ctx, const CKKSVectorProto& vec);
     CKKSVector(const shared_ptr<TenSEALContext>& ctx,
                const CKKSVectorProto& vec);
-    CKKSVector(const shared_ptr<const EncryptedVector>& vec);
+    CKKSVector(const shared_ptr<const CKKSVector>& vec);
 
     static Ciphertext encrypt(shared_ptr<TenSEALContext> context, double scale,
                               vector<double> pt);
@@ -120,9 +147,8 @@ class CKKSVector : public EncryptedVector<double> {
 
     // make pack_vectors a friend function in order to be able to modify vector
     // size (_size private member)
-    friend SharedCKKSVector
-    pack_vectors<EncryptedVector<double>, CKKSEncoder, double>(
-        const vector<SharedCKKSVector>&);
+    friend encrypted_t pack_vectors<CKKSVector, CKKSEncoder, double>(
+        const vector<encrypted_t>&);
 };
 
 }  // namespace tenseal

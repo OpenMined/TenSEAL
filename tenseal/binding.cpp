@@ -37,15 +37,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         encryption_parameters : parameters to use to create the SEALContext.)",
         py::arg("encryption_parameters"));
 
-    py::class_<EncryptedVector<int64_t>,
-               std::shared_ptr<EncryptedVector<int64_t>>>(
-        m, "EncryptedVectorInt64", py::module_local());
-    py::class_<EncryptedVector<double>,
-               std::shared_ptr<EncryptedVector<double>>>(
-        m, "EncryptedVectorDouble", py::module_local());
-
-    py::class_<BFVVector, EncryptedVector<int64_t>, std::shared_ptr<BFVVector>>(
-        m, "BFVVector", py::module_local())
+    py::class_<BFVVector, std::shared_ptr<BFVVector>>(m, "BFVVector",
+                                                      py::module_local())
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<int64_t> &data) {
             return std::dynamic_pointer_cast<BFVVector>(
@@ -107,10 +100,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__deepcopy__", [](const shared_ptr<BFVVector> &obj,
                                 py::dict) { return obj->deepcopy(); })
         .def_static(
-            "pack_vectors",
-            [](const vector<shared_ptr<EncryptedVector<int64_t>>> &vectors) {
-                return pack_vectors<EncryptedVector<int64_t>, BatchEncoder,
-                                    int64_t>(vectors);
+            "pack_vectors", [](const vector<shared_ptr<BFVVector>> &vectors) {
+                return pack_vectors<BFVVector, BatchEncoder, int64_t>(vectors);
             });
 
     // CKKSVector utils
@@ -148,8 +139,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         return ckks_vector;
     });
 
-    py::class_<CKKSVector, EncryptedVector<double>,
-               std::shared_ptr<CKKSVector>>(m, "CKKSVector", py::module_local())
+    py::class_<CKKSVector, std::shared_ptr<CKKSVector>>(m, "CKKSVector",
+                                                        py::module_local())
         // specifying scale
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<double> &data, double scale) {
@@ -307,10 +298,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__deepcopy__", [](shared_ptr<CKKSVector> obj,
                                 py::dict) { return obj->deepcopy(); })
         .def_static(
-            "pack_vectors",
-            [](const vector<shared_ptr<EncryptedVector<double>>> &vectors) {
-                return pack_vectors<EncryptedVector<double>, CKKSEncoder,
-                                    double>(vectors);
+            "pack_vectors", [](const vector<shared_ptr<CKKSVector>> &vectors) {
+                return pack_vectors<CKKSVector, CKKSEncoder, double>(vectors);
             });
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
