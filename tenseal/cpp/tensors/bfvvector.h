@@ -132,11 +132,6 @@ class BFVVector : public EncryptedVector<int64_t, shared_ptr<BFVVector>>,
 
     void prepare_context(const shared_ptr<TenSEALContext>& ctx);
     void load_context_proto(const TenSEALContextProto& buffer);
-
-    // make pack_vectors a friend function in order to be able to modify vector
-    // size (_size private member)
-    friend encrypted_t pack_vectors<BFVVector, BatchEncoder, int64_t>(
-        const vector<encrypted_t>&);
 };
 
 }  // namespace tenseal

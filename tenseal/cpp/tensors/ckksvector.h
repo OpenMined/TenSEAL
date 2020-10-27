@@ -144,11 +144,6 @@ class CKKSVector : public EncryptedVector<double, shared_ptr<CKKSVector>>,
     CKKSVectorProto save_proto() const;
 
     void load_context_proto(const TenSEALContextProto& buffer);
-
-    // make pack_vectors a friend function in order to be able to modify vector
-    // size (_size private member)
-    friend encrypted_t pack_vectors<CKKSVector, CKKSEncoder, double>(
-        const vector<encrypted_t>&);
 };
 
 }  // namespace tenseal

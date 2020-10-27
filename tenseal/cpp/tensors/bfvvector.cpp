@@ -132,12 +132,6 @@ shared_ptr<BFVVector> BFVVector::square_inplace() {
             this->_ciphertext, *this->tenseal_context()->relin_keys());
     }
 
-    if (this->tenseal_context()->auto_rescale()) {
-        this->tenseal_context()->evaluator->rescale_to_next_inplace(
-            this->_ciphertext);
-        this->_ciphertext.scale() = this->scale();
-    }
-
     return shared_from_this();
 }
 
@@ -157,12 +151,6 @@ shared_ptr<BFVVector> BFVVector::add_inplace(shared_ptr<BFVVector> other) {
         } else {
             throw invalid_argument("can't add vectors of different sizes");
         }
-    }
-
-    if (should_set_to_same_mod(this->tenseal_context(), this->_ciphertext,
-                               to_add->_ciphertext)) {
-        set_to_same_mod(this->tenseal_context(), this->_ciphertext,
-                        to_add->_ciphertext);
     }
 
     this->tenseal_context()->evaluator->add_inplace(this->_ciphertext,
@@ -189,12 +177,6 @@ shared_ptr<BFVVector> BFVVector::sub_inplace(shared_ptr<BFVVector> other) {
         }
     }
 
-    if (should_set_to_same_mod(this->tenseal_context(), this->_ciphertext,
-                               to_sub->_ciphertext)) {
-        set_to_same_mod(this->tenseal_context(), this->_ciphertext,
-                        to_sub->_ciphertext);
-    }
-
     this->tenseal_context()->evaluator->sub_inplace(this->_ciphertext,
                                                     to_sub->_ciphertext);
 
@@ -219,24 +201,12 @@ shared_ptr<BFVVector> BFVVector::mul_inplace(shared_ptr<BFVVector> other) {
         }
     }
 
-    if (should_set_to_same_mod(this->tenseal_context(), this->_ciphertext,
-                               to_mul->_ciphertext)) {
-        set_to_same_mod(this->tenseal_context(), this->_ciphertext,
-                        to_mul->_ciphertext);
-    }
-
     this->tenseal_context()->evaluator->multiply_inplace(this->_ciphertext,
                                                          to_mul->_ciphertext);
 
     if (this->tenseal_context()->auto_relin()) {
         this->tenseal_context()->evaluator->relinearize_inplace(
             this->_ciphertext, *this->tenseal_context()->relin_keys());
-    }
-
-    if (this->tenseal_context()->auto_rescale()) {
-        this->tenseal_context()->evaluator->rescale_to_next_inplace(
-            this->_ciphertext);
-        this->_ciphertext.scale() = this->scale();
     }
 
     return shared_from_this();

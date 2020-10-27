@@ -245,13 +245,15 @@ shared_ptr<CKKSVector> CKKSVector::mul_inplace(shared_ptr<CKKSVector> other) {
 
 shared_ptr<CKKSVector> CKKSVector::dot_product_inplace(
     shared_ptr<CKKSVector> to_mul) {
-    this->mul_inplace(to_mul)->sum_inplace();
+    this->mul_inplace(to_mul);
+    this->sum_inplace();
     return shared_from_this();
 }
 
 shared_ptr<CKKSVector> CKKSVector::dot_product_plain_inplace(
     const vector<double>& to_mul) {
-    this->mul_plain_inplace(to_mul)->sum_inplace();
+    this->mul_plain_inplace(to_mul);
+    this->sum_inplace();
     return shared_from_this();
 }
 
