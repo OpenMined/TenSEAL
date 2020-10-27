@@ -69,6 +69,21 @@ class EncryptedVector
         return this->copy()->replicate_first_slot_inplace(n);
     }
     virtual encrypted_t replicate_first_slot_inplace(size_t n) = 0;
+    void broadcast_or_throw(encrypted_t other) {
+        if (this->size() == other->size()) return;
+
+        if (this->size() == 1) {
+            this->replicate_first_slot_inplace(other->size());
+            return;
+        }
+
+        if (other->size() == 1) {
+            other->replicate_first_slot_inplace(this->size());
+            return;
+        }
+
+        throw invalid_argument("can't compute on vectors of different sizes");
+    }
 
     /**
      * Encrypted Vector multiplication with plain matrix.
@@ -99,8 +114,32 @@ class EncryptedVector
     }
     virtual encrypted_t conv2d_im2col_inplace(
         const vector<vector<plain_t>>& kernel, const size_t windows_nb) = 0;
-    virtual void rotate_vector_inplace(int steps,
-                                       const GaloisKeys& galois_keys) = 0;
+    void rotate_vector_inplace(int steps, const GaloisKeys& galois_keys) {
+        this->tenseal_context()->evaluator->rotate_vector_inplace(
+            this->_ciphertext, steps, galois_keys);
+    }
+
+    void auto_relin() {
+        if (!this->tenseal_context()->auto_relin()) return;
+        this->tenseal_context()->evaluator->relinearize_inplace(
+            this->_ciphertext, *this->tenseal_context()->relin_keys());
+    }
+
+    void auto_rescale() {
+        if (!this->tenseal_context()->auto_rescale()) return;
+
+        this->tenseal_context()->evaluator->rescale_to_next_inplace(
+            this->_ciphertext);
+        this->_ciphertext.scale() = this->scale();
+    }
+
+    template <typename Other>
+    void auto_same_mod(Other& other) {
+        if (should_set_to_same_mod(this->tenseal_context(), this->_ciphertext,
+                                   other)) {
+            set_to_same_mod(this->tenseal_context(), this->_ciphertext, other);
+        }
+    }
 
     virtual double scale() const = 0;
     virtual ~EncryptedVector(){};

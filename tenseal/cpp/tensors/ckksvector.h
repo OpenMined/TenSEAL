@@ -99,9 +99,6 @@ class CKKSVector : public EncryptedVector<double, shared_ptr<CKKSVector>>,
      *multiplication.
      **/
     encrypted_t replicate_first_slot_inplace(size_t n) override;
-    void rotate_vector_inplace(int steps,
-                               const GaloisKeys& galois_keys) override;
-
     /**
      * Load/Save the vector from/to a serialized protobuffer.
      **/

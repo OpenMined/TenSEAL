@@ -126,11 +126,7 @@ shared_ptr<BFVVector> BFVVector::negate_inplace() {
 
 shared_ptr<BFVVector> BFVVector::square_inplace() {
     this->tenseal_context()->evaluator->square_inplace(this->_ciphertext);
-
-    if (this->tenseal_context()->auto_relin()) {
-        this->tenseal_context()->evaluator->relinearize_inplace(
-            this->_ciphertext, *this->tenseal_context()->relin_keys());
-    }
+    this->auto_relin();
 
     return shared_from_this();
 }
@@ -143,15 +139,7 @@ shared_ptr<BFVVector> BFVVector::add_inplace(shared_ptr<BFVVector> other) {
             "can't add vectors that have different contexts");
     }
 
-    if (this->size() != to_add->size()) {
-        if (this->size() == 1) {
-            this->replicate_first_slot_inplace(to_add->size());
-        } else if (to_add->size() == 1) {
-            to_add->replicate_first_slot_inplace(this->size());
-        } else {
-            throw invalid_argument("can't add vectors of different sizes");
-        }
-    }
+    this->broadcast_or_throw(to_add);
 
     this->tenseal_context()->evaluator->add_inplace(this->_ciphertext,
                                                     to_add->_ciphertext);
@@ -167,15 +155,7 @@ shared_ptr<BFVVector> BFVVector::sub_inplace(shared_ptr<BFVVector> other) {
             "can't sub vectors that have different contexts");
     }
 
-    if (this->size() != to_sub->size()) {
-        if (this->size() == 1) {
-            this->replicate_first_slot_inplace(to_sub->size());
-        } else if (to_sub->size() == 1) {
-            to_sub->replicate_first_slot_inplace(this->size());
-        } else {
-            throw invalid_argument("can't sub vectors of different sizes");
-        }
-    }
+    this->broadcast_or_throw(to_sub);
 
     this->tenseal_context()->evaluator->sub_inplace(this->_ciphertext,
                                                     to_sub->_ciphertext);
@@ -191,23 +171,11 @@ shared_ptr<BFVVector> BFVVector::mul_inplace(shared_ptr<BFVVector> other) {
             "can't multiply vectors that have different contexts");
     }
 
-    if (this->size() != to_mul->size()) {
-        if (this->size() == 1) {
-            this->replicate_first_slot_inplace(to_mul->size());
-        } else if (to_mul->size() == 1) {
-            to_mul->replicate_first_slot_inplace(this->size());
-        } else {
-            throw invalid_argument("can't multiply vectors of different sizes");
-        }
-    }
+    this->broadcast_or_throw(to_mul);
 
     this->tenseal_context()->evaluator->multiply_inplace(this->_ciphertext,
                                                          to_mul->_ciphertext);
-
-    if (this->tenseal_context()->auto_relin()) {
-        this->tenseal_context()->evaluator->relinearize_inplace(
-            this->_ciphertext, *this->tenseal_context()->relin_keys());
-    }
+    this->auto_relin();
 
     return shared_from_this();
 }
@@ -216,6 +184,7 @@ shared_ptr<BFVVector> BFVVector::dot_product_inplace(
     shared_ptr<BFVVector> to_mul) {
     this->mul_inplace(to_mul);
     this->sum_inplace();
+
     return shared_from_this();
 }
 
@@ -223,6 +192,7 @@ shared_ptr<BFVVector> BFVVector::dot_product_plain_inplace(
     const vector<int64_t>& to_mul) {
     this->mul_plain_inplace(to_mul);
     this->sum_inplace();
+
     return shared_from_this();
 }
 
@@ -336,12 +306,6 @@ shared_ptr<BFVVector> BFVVector::replicate_first_slot_inplace(size_t n) {
 
     this->_size = n;
     return shared_from_this();
-}
-
-void BFVVector::rotate_vector_inplace(int steps,
-                                      const GaloisKeys& galois_keys) {
-    this->tenseal_context()->evaluator->rotate_vector_inplace(
-        this->_ciphertext, steps, galois_keys);
 }
 
 void BFVVector::load_proto(const BFVVectorProto& vec) {
