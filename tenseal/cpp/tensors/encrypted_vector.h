@@ -69,8 +69,8 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
     }
     virtual encrypted_t replicate_first_slot_inplace(size_t n) = 0;
     /**
-     * Replicate two vectors to matches sizes.
-     * Returns the operand, in case it was altered.
+     * Adjusts two vectors to match sizes.
+     * Returns the right operand, in case it was copied and altered.
      **/
     encrypted_t broadcast_or_throw(encrypted_t other) {
         if (this->size() == other->size()) return other;
