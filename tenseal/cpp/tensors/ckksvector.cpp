@@ -134,15 +134,14 @@ shared_ptr<CKKSVector> CKKSVector::square_inplace() {
     return shared_from_this();
 }
 
-shared_ptr<CKKSVector> CKKSVector::add_inplace(shared_ptr<CKKSVector> other) {
-    auto to_add = other->copy();
+shared_ptr<CKKSVector> CKKSVector::add_inplace(shared_ptr<CKKSVector> to_add) {
     if (!this->tenseal_context()->equals(to_add->tenseal_context())) {
         // Different contexts means different parameters
         throw invalid_argument(
             "can't add vectors that have different contexts");
     }
 
-    this->broadcast_or_throw(to_add);
+    to_add = this->broadcast_or_throw(to_add);
     this->auto_same_mod(to_add->_ciphertext);
 
     this->tenseal_context()->evaluator->add_inplace(this->_ciphertext,
@@ -151,15 +150,14 @@ shared_ptr<CKKSVector> CKKSVector::add_inplace(shared_ptr<CKKSVector> other) {
     return shared_from_this();
 }
 
-shared_ptr<CKKSVector> CKKSVector::sub_inplace(shared_ptr<CKKSVector> other) {
-    auto to_sub = other->copy();
+shared_ptr<CKKSVector> CKKSVector::sub_inplace(shared_ptr<CKKSVector> to_sub) {
     if (!this->tenseal_context()->equals(to_sub->tenseal_context())) {
         // Different contexts means different parameters
         throw invalid_argument(
             "can't sub vectors that have different contexts");
     }
 
-    this->broadcast_or_throw(to_sub);
+    to_sub = this->broadcast_or_throw(to_sub);
     this->auto_same_mod(to_sub->_ciphertext);
 
     this->tenseal_context()->evaluator->sub_inplace(this->_ciphertext,
@@ -168,15 +166,14 @@ shared_ptr<CKKSVector> CKKSVector::sub_inplace(shared_ptr<CKKSVector> other) {
     return shared_from_this();
 }
 
-shared_ptr<CKKSVector> CKKSVector::mul_inplace(shared_ptr<CKKSVector> other) {
-    auto to_mul = other->copy();
+shared_ptr<CKKSVector> CKKSVector::mul_inplace(shared_ptr<CKKSVector> to_mul) {
     if (!this->tenseal_context()->equals(to_mul->tenseal_context())) {
         // Different contexts means different parameters
         throw invalid_argument(
             "can't multiply vectors that have different contexts");
     }
 
-    this->broadcast_or_throw(to_mul);
+    to_mul = this->broadcast_or_throw(to_mul);
     this->auto_same_mod(to_mul->_ciphertext);
 
     this->tenseal_context()->evaluator->multiply_inplace(this->_ciphertext,

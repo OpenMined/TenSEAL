@@ -68,17 +68,22 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
         return this->copy()->replicate_first_slot_inplace(n);
     }
     virtual encrypted_t replicate_first_slot_inplace(size_t n) = 0;
-    void broadcast_or_throw(encrypted_t other) {
-        if (this->size() == other->size()) return;
+    /**
+     * Replicate two vectors to matches sizes.
+     * Returns the operand, in case it was altered.
+     **/
+    encrypted_t broadcast_or_throw(encrypted_t other) {
+        if (this->size() == other->size()) return other;
 
         if (this->size() == 1) {
             this->replicate_first_slot_inplace(other->size());
-            return;
+            return other;
         }
 
         if (other->size() == 1) {
-            other->replicate_first_slot_inplace(this->size());
-            return;
+            auto other_copy = other->copy();
+            other_copy->replicate_first_slot_inplace(this->size());
+            return other_copy;
         }
 
         throw invalid_argument("can't compute on vectors of different sizes");
