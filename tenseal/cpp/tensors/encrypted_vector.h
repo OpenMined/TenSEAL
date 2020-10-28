@@ -46,8 +46,7 @@ using namespace std;
  * * encrypted_t EncryptedTensor::deepcopy() const = 0;
  **/
 template <typename plain_t, typename encrypted_t>
-class EncryptedVector
-    : public EncryptedTensor<plain_t, vector<plain_t>, encrypted_t> {
+class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
    public:
     /**
      * Returns the size of the encrypted vector.
@@ -88,32 +87,32 @@ class EncryptedVector
     /**
      * Encrypted Vector multiplication with plain matrix.
      **/
-    encrypted_t matmul_plain(const vector<vector<plain_t>>& matrix,
+    encrypted_t matmul_plain(const PlainTensor<plain_t>& matrix,
                              size_t n_jobs = 0) const {
         return this->copy()->matmul_plain_inplace(matrix, n_jobs);
     }
-    virtual encrypted_t matmul_plain_inplace(
-        const vector<vector<plain_t>>& matrix, size_t n_jobs = 0) = 0;
+    virtual encrypted_t matmul_plain_inplace(const PlainTensor<plain_t>& matrix,
+                                             size_t n_jobs = 0) = 0;
     /**
      * Encrypted Matrix multiplication with plain vector.
      **/
-    encrypted_t enc_matmul_plain(const vector<plain_t>& plain_vec,
+    encrypted_t enc_matmul_plain(const PlainTensor<plain_t>& plain_vec,
                                  size_t row_size) const {
         return this->copy()->enc_matmul_plain_inplace(plain_vec, row_size);
     }
     virtual encrypted_t enc_matmul_plain_inplace(
-        const vector<plain_t>& plain_vec, size_t row_size) = 0;
+        const PlainTensor<plain_t>& plain_vec, size_t row_size) = 0;
     /*
      * Image Block to Columns.
      * The input matrix should be encoded in a vertical scan (column-major).
      * The kernel vector should be padded with zeros to the next power of 2
      */
-    encrypted_t conv2d_im2col(const vector<vector<plain_t>>& kernel,
+    encrypted_t conv2d_im2col(const PlainTensor<plain_t>& kernel,
                               const size_t windows_nb) const {
         return this->copy()->conv2d_im2col_inplace(kernel, windows_nb);
     }
     virtual encrypted_t conv2d_im2col_inplace(
-        const vector<vector<plain_t>>& kernel, const size_t windows_nb) = 0;
+        const PlainTensor<plain_t>& kernel, const size_t windows_nb) = 0;
     void rotate_vector_inplace(int steps, const GaloisKeys& galois_keys) {
         this->tenseal_context()->evaluator->rotate_vector_inplace(
             this->_ciphertext, steps, galois_keys);

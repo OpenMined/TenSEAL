@@ -79,7 +79,7 @@ TEST_P(CKKSVectorTest, TestCKKSAdd) {
     ASSERT_EQ(add->ciphertext_size(), 2);
 
     auto decr = add->decrypt();
-    ASSERT_TRUE(are_close(decr, {4, 6, 7}));
+    ASSERT_TRUE(are_close(decr.data(), {4, 6, 7}));
 
     l->add_inplace(r);
     l->add_inplace(r);
@@ -90,7 +90,7 @@ TEST_P(CKKSVectorTest, TestCKKSAdd) {
 
     ASSERT_EQ(l->ciphertext_size(), 2);
     decr = l->decrypt();
-    ASSERT_TRUE(are_close(decr, {7, 10, 11}));
+    ASSERT_TRUE(are_close(decr.data(), {7, 10, 11}));
 }
 
 TEST_P(CKKSVectorTest, TestCKKSMul) {
@@ -113,8 +113,8 @@ TEST_P(CKKSVectorTest, TestCKKSMul) {
     ASSERT_EQ(mul->ciphertext_size(), 2);
 
     auto decr = mul->decrypt();
-    std::cout << decr[0] << std::endl;
-    ASSERT_TRUE(are_close(decr, {2, 4, 6}));
+    std::cout << decr.at({0}) << std::endl;
+    ASSERT_TRUE(are_close(decr.data(), {2, 4, 6}));
 
     l->mul_inplace(r);
     l->mul_inplace(r);
@@ -125,7 +125,7 @@ TEST_P(CKKSVectorTest, TestCKKSMul) {
 
     ASSERT_EQ(l->ciphertext_size(), 2);
     decr = l->decrypt();
-    ASSERT_TRUE(are_close(decr, {4, 8, 12}));
+    ASSERT_TRUE(are_close(decr.data(), {4, 8, 12}));
 }
 
 TEST_P(CKKSVectorTest, TestCKKSMulMany) {
@@ -153,7 +153,7 @@ TEST_P(CKKSVectorTest, TestCKKSMulMany) {
 
     ASSERT_EQ(l->ciphertext_size(), 2);
     auto decr = l->decrypt();
-    ASSERT_TRUE(are_close(decr, {4, 8, 12}));
+    ASSERT_TRUE(are_close(decr.data(), {4, 8, 12}));
 }
 
 TEST_P(CKKSVectorTest, TestCKKSMulNoRelin) {
@@ -181,7 +181,7 @@ TEST_P(CKKSVectorTest, TestCKKSMulNoRelin) {
 
     ASSERT_EQ(l->ciphertext_size(), 4);
     auto decr = l->decrypt();
-    ASSERT_TRUE(are_close(decr, {4, 8, 12}));
+    ASSERT_TRUE(are_close(decr.data(), {4, 8, 12}));
 }
 
 TEST_P(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
@@ -203,13 +203,13 @@ TEST_P(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
 
     auto result = replicated_vec->decrypt();
     ASSERT_EQ(result.size(), 4);
-    ASSERT_TRUE(are_close(result, {1, 1, 1, 1}));
+    ASSERT_TRUE(are_close(result.data(), {1, 1, 1, 1}));
 
     vec->mul_plain_inplace(2);
     vec->replicate_first_slot_inplace(6);
     result = vec->decrypt();
     ASSERT_EQ(result.size(), 6);
-    ASSERT_TRUE(are_close(result, {2, 2, 2, 2, 2, 2}));
+    ASSERT_TRUE(are_close(result.data(), {2, 2, 2, 2, 2, 2}));
 }
 
 TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
@@ -235,7 +235,7 @@ TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
     auto decrypted_result = result->decrypt();
 
     ASSERT_EQ(decrypted_result.size(), 3);
-    ASSERT_TRUE(are_close(decrypted_result, expected_result));
+    ASSERT_TRUE(are_close(decrypted_result.data(), expected_result));
 }
 
 TEST_P(CKKSVectorTest, TestEmptyPlaintext) {

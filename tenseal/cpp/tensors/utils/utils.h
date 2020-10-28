@@ -13,32 +13,6 @@ using namespace seal;
 using namespace std;
 
 /**
- * horizontally scan matrix (vector of vectors)
- **/
-template <typename T>
-void horizontal_scan(const vector<vector<T>>& src, vector<T>& dst) {
-    size_t in_height = src.size();
-    size_t in_width = src[0].size();
-
-    dst.resize(in_height * in_width);
-
-    // check if each row size is equals to in_width
-    if (any_of(src.begin(), src.end(), [in_width](const vector<T>& i) {
-            return i.size() != in_width;
-        })) {
-        throw invalid_argument("rows sizes are different");
-    }
-
-    auto start = src.begin();
-    auto end = src.end();
-    auto iter = dst.begin();
-    while (start != end) {
-        iter = copy(start->begin(), start->end(), iter);
-        start++;
-    }
-}
-
-/**
  * vertically scan matrix (vector of vectors)
  **/
 template <typename T>

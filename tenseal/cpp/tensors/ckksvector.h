@@ -17,6 +17,7 @@ class CKKSVector : public EncryptedVector<double, shared_ptr<CKKSVector>>,
                    public enable_shared_from_this<CKKSVector> {
    public:
     using encrypted_t = shared_ptr<CKKSVector>;
+    using plain_t = PlainTensor<double>;
 
     template <typename... Args>
     static encrypted_t Create(Args&&... args) {
@@ -26,8 +27,8 @@ class CKKSVector : public EncryptedVector<double, shared_ptr<CKKSVector>>,
      * Decrypts and returns the plaintext representation of the encrypted vector
      *of real numbers using the secret-key.
      **/
-    vector<double> decrypt() const override;
-    vector<double> decrypt(const shared_ptr<SecretKey>& sk) const override;
+    plain_t decrypt() const override;
+    plain_t decrypt(const shared_ptr<SecretKey>& sk) const override;
 
     /**
      * Compute the power of the CKKSVector with minimal multiplication depth.
@@ -51,8 +52,7 @@ class CKKSVector : public EncryptedVector<double, shared_ptr<CKKSVector>>,
     encrypted_t sub_inplace(encrypted_t to_sub) override;
     encrypted_t mul_inplace(encrypted_t to_mul) override;
     encrypted_t dot_product_inplace(encrypted_t to_mul) override;
-    encrypted_t dot_product_plain_inplace(
-        const vector<double>& to_mul) override;
+    encrypted_t dot_product_plain_inplace(const plain_t& to_mul) override;
     encrypted_t sum_inplace() override;
 
     /**
@@ -61,23 +61,23 @@ class CKKSVector : public EncryptedVector<double, shared_ptr<CKKSVector>>,
      * either addition, substraction or multiplication in an element-wise
      *fashion. in_place functions return a reference to the same object.
      **/
-    encrypted_t add_plain_inplace(double to_add) override;
-    encrypted_t add_plain_inplace(const vector<double>& to_add) override;
-    encrypted_t sub_plain_inplace(double to_sub) override;
-    encrypted_t sub_plain_inplace(const vector<double>& to_sub) override;
-    encrypted_t mul_plain_inplace(double to_mul) override;
-    encrypted_t mul_plain_inplace(const vector<double>& to_mul) override;
+    encrypted_t add_plain_inplace(plain_t::dtype to_add) override;
+    encrypted_t add_plain_inplace(const plain_t& to_add) override;
+    encrypted_t sub_plain_inplace(plain_t::dtype to_sub) override;
+    encrypted_t sub_plain_inplace(const plain_t& to_sub) override;
+    encrypted_t mul_plain_inplace(plain_t::dtype to_mul) override;
+    encrypted_t mul_plain_inplace(const plain_t& to_mul) override;
 
     /**
      * Encrypted Vector multiplication with plain matrix.
      **/
-    encrypted_t matmul_plain_inplace(const vector<vector<double>>& matrix,
+    encrypted_t matmul_plain_inplace(const plain_t& matrix,
                                      size_t n_jobs = 0) override;
 
     /**
      * Encrypted Matrix multiplication with plain vector.
      **/
-    encrypted_t enc_matmul_plain_inplace(const vector<double>& plain_vec,
+    encrypted_t enc_matmul_plain_inplace(const plain_t& plain_vec,
                                          size_t row_size) override;
 
     /**
@@ -92,7 +92,7 @@ class CKKSVector : public EncryptedVector<double, shared_ptr<CKKSVector>>,
      * The input matrix should be encoded in a vertical scan (column-major).
      * The kernel vector should be padded with zeros to the next power of 2
      */
-    encrypted_t conv2d_im2col_inplace(const vector<vector<double>>& kernel,
+    encrypted_t conv2d_im2col_inplace(const plain_t& kernel,
                                       const size_t windows_nb) override;
     /**
      * Replicate the first slot of a ciphertext n times. Requires a
@@ -126,7 +126,7 @@ class CKKSVector : public EncryptedVector<double, shared_ptr<CKKSVector>>,
     template <typename T>
     encrypted_t _mul_plain_inplace(const T& to_mul);
 
-    CKKSVector(const shared_ptr<TenSEALContext>& ctx, vector<double> vec,
+    CKKSVector(const shared_ptr<TenSEALContext>& ctx, const plain_t& vec,
                optional<double> scale = {});
     CKKSVector(const shared_ptr<TenSEALContext>& ctx, const string& vec);
     CKKSVector(const TenSEALContextProto& ctx, const CKKSVectorProto& vec);
@@ -135,7 +135,7 @@ class CKKSVector : public EncryptedVector<double, shared_ptr<CKKSVector>>,
     CKKSVector(const shared_ptr<const CKKSVector>& vec);
 
     static Ciphertext encrypt(shared_ptr<TenSEALContext> context, double scale,
-                              vector<double> pt);
+                              plain_t pt);
 
     void load_proto(const CKKSVectorProto& buffer);
     CKKSVectorProto save_proto() const;

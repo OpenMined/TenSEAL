@@ -6,7 +6,8 @@ using namespace std;
 namespace tenseal {
 
 CKKSVector::CKKSVector(const shared_ptr<TenSEALContext>& ctx,
-                       vector<double> vec, std::optional<double> scale) {
+                       const CKKSVector::plain_t& vec,
+                       std::optional<double> scale) {
     this->link_tenseal_context(ctx);
     if (scale.has_value()) {
         this->_init_scale = scale.value();
@@ -45,7 +46,7 @@ CKKSVector::CKKSVector(const shared_ptr<const CKKSVector>& vec) {
 }
 
 Ciphertext CKKSVector::encrypt(shared_ptr<TenSEALContext> context, double scale,
-                               vector<double> pt) {
+                               plain_t pt) {
     if (pt.empty()) {
         throw invalid_argument("Attempting to encrypt an empty vector");
     }
@@ -58,13 +59,13 @@ Ciphertext CKKSVector::encrypt(shared_ptr<TenSEALContext> context, double scale,
 
     Ciphertext ciphertext(context->seal_context());
     Plaintext plaintext;
-    replicate_vector(pt, slot_count);
-    context->encode<CKKSEncoder>(pt, plaintext, scale);
+    pt.replicate(slot_count);
+    context->encode<CKKSEncoder>(pt.data(), plaintext, scale);
     context->encryptor->encrypt(plaintext, ciphertext);
 
     return ciphertext;
 }
-vector<double> CKKSVector::decrypt() const {
+CKKSVector::plain_t CKKSVector::decrypt() const {
     if (this->tenseal_context()->decryptor == NULL) {
         // this->context was loaded with public keys only
         throw invalid_argument(
@@ -74,7 +75,7 @@ vector<double> CKKSVector::decrypt() const {
 
     return this->decrypt(this->tenseal_context()->secret_key());
 }
-vector<double> CKKSVector::decrypt(const shared_ptr<SecretKey>& sk) const {
+CKKSVector::plain_t CKKSVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
     Decryptor decryptor =
         Decryptor(this->tenseal_context()->seal_context(), *sk);
@@ -196,7 +197,7 @@ shared_ptr<CKKSVector> CKKSVector::dot_product_inplace(
 }
 
 shared_ptr<CKKSVector> CKKSVector::dot_product_plain_inplace(
-    const vector<double>& to_mul) {
+    const plain_t& to_mul) {
     this->mul_plain_inplace(to_mul);
     this->sum_inplace();
 
@@ -209,12 +210,11 @@ shared_ptr<CKKSVector> CKKSVector::sum_inplace() {
     return shared_from_this();
 }
 
-shared_ptr<CKKSVector> CKKSVector::add_plain_inplace(
-    const vector<double>& to_add) {
+shared_ptr<CKKSVector> CKKSVector::add_plain_inplace(const plain_t& to_add) {
     if (this->size() != to_add.size()) {
         throw invalid_argument("can't add vectors of different sizes");
     }
-    return this->_add_plain_inplace(to_add);
+    return this->_add_plain_inplace(to_add.data());
 }
 
 shared_ptr<CKKSVector> CKKSVector::add_plain_inplace(double to_add) {
@@ -232,12 +232,11 @@ shared_ptr<CKKSVector> CKKSVector::_add_plain_inplace(const T& to_add) {
     return shared_from_this();
 }
 
-shared_ptr<CKKSVector> CKKSVector::sub_plain_inplace(
-    const vector<double>& to_sub) {
+shared_ptr<CKKSVector> CKKSVector::sub_plain_inplace(const plain_t& to_sub) {
     if (this->size() != to_sub.size()) {
         throw invalid_argument("can't sub vectors of different sizes");
     }
-    return this->_sub_plain_inplace(to_sub);
+    return this->_sub_plain_inplace(to_sub.data());
 }
 
 shared_ptr<CKKSVector> CKKSVector::sub_plain_inplace(double to_sub) {
@@ -257,13 +256,12 @@ shared_ptr<CKKSVector> CKKSVector::_sub_plain_inplace(const T& to_sub) {
     return shared_from_this();
 }
 
-shared_ptr<CKKSVector> CKKSVector::mul_plain_inplace(
-    const vector<double>& to_mul) {
+shared_ptr<CKKSVector> CKKSVector::mul_plain_inplace(const plain_t& to_mul) {
     if (this->size() != to_mul.size()) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
 
-    return this->_mul_plain_inplace(to_mul);
+    return this->_mul_plain_inplace(to_mul.data());
 }
 
 shared_ptr<CKKSVector> CKKSVector::mul_plain_inplace(double to_mul) {
@@ -297,12 +295,12 @@ shared_ptr<CKKSVector> CKKSVector::_mul_plain_inplace(const T& to_mul) {
 }
 
 shared_ptr<CKKSVector> CKKSVector::matmul_plain_inplace(
-    const vector<vector<double>>& matrix, size_t n_jobs) {
+    const CKKSVector::plain_t& matrix, size_t n_jobs) {
     this->_ciphertext = diagonal_ct_vector_matmul<double, CKKSEncoder>(
         this->tenseal_context(), this->_ciphertext, this->size(), matrix,
         n_jobs);
 
-    this->_size = matrix[0].size();
+    this->_size = matrix.shape()[1];
     this->auto_rescale();
 
     return shared_from_this();
@@ -361,27 +359,23 @@ shared_ptr<CKKSVector> CKKSVector::polyval_inplace(
 }
 
 shared_ptr<CKKSVector> CKKSVector::conv2d_im2col_inplace(
-    const vector<vector<double>>& kernel, const size_t windows_nb) {
+    const CKKSVector::plain_t& kernel, const size_t windows_nb) {
     if (windows_nb == 0) {
         throw invalid_argument("Windows number can't be zero");
     }
 
-    if (kernel.empty() ||
-        (any_of(kernel.begin(), kernel.end(),
-                [](const vector<double>& i) { return i.empty(); }))) {
+    if (kernel.empty()) {
         throw invalid_argument("Kernel matrix can't be empty");
     }
 
     // flat the kernel
-    vector<double> flatten_kernel;
-    horizontal_scan(kernel, flatten_kernel);
-
+    auto flatten_kernel = kernel.horizontal_scan();
     this->enc_matmul_plain_inplace(flatten_kernel, windows_nb);
     return shared_from_this();
 }
 
 shared_ptr<CKKSVector> CKKSVector::enc_matmul_plain_inplace(
-    const vector<double>& plain_vec, const size_t rows_nb) {
+    const CKKSVector::plain_t& plain_vec, const size_t rows_nb) {
     if (plain_vec.empty()) {
         throw invalid_argument("Plain vector can't be empty");
     }
@@ -391,7 +385,7 @@ shared_ptr<CKKSVector> CKKSVector::enc_matmul_plain_inplace(
         1 << (static_cast<size_t>(ceil(log2(plain_vec.size()))));
 
     // pad the vector with zeros to the next power of 2
-    vector<double> padded_plain_vec(plain_vec);
+    vector<double> padded_plain_vec(plain_vec.data());
     padded_plain_vec.resize(plain_vec_size, 0);
 
     size_t chunks_nb = padded_plain_vec.size();

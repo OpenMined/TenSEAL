@@ -7,6 +7,7 @@
 
 #include "seal/seal.h"
 #include "tenseal/cpp/context/tensealcontext.h"
+#include "tenseal/cpp/tensors/plain_tensor.h"
 #include "tenseal/cpp/tensors/utils/utils.h"
 
 namespace tenseal {
@@ -22,12 +23,11 @@ the matrix, we do that by rotating whenever we reach the boundaries of the
 matrix.
 */
 template <typename T>
-vector<T> get_diagonal(const vector<vector<T>>& matrix, int k,
-                       size_t max_size) {
-    size_t n_rows = matrix.size();
-    size_t n_cols = matrix[0].size();
+vector<T> get_diagonal(const PlainTensor<T>& matrix, int k, size_t max_size) {
+    size_t n_rows = matrix.shape()[0];
+    size_t n_cols = matrix.shape()[1];
 
-    vector<double> t_diag;
+    vector<T> t_diag;
     t_diag.reserve(n_rows * n_cols);
 
     size_t r_offset = 0, c_offset = 0;
@@ -40,7 +40,7 @@ vector<T> get_diagonal(const vector<vector<T>>& matrix, int k,
     size_t diag_size = min(max_size, n_rows * n_cols);
     for (size_t i = 0; i < diag_size; i++) {
         t_diag.push_back(
-            matrix[(r_offset + i) % n_rows][(c_offset + i) % n_cols]);
+            matrix.at({(r_offset + i) % n_rows, (c_offset + i) % n_cols}));
     }
 
     return t_diag;
@@ -56,12 +56,12 @@ Cryptology Conference (pp. 554-571). Springer, Berlin, Heidelberg.
 template <typename T, class Encoder>
 Ciphertext diagonal_ct_vector_matmul(shared_ptr<TenSEALContext> tenseal_context,
                                      Ciphertext& vec, const size_t vector_size,
-                                     const vector<vector<T>>& matrix,
+                                     const PlainTensor<T>& matrix,
                                      size_t n_jobs) {
     // matrix is organized by rows
     // _check_matrix(matrix, this->size())
 
-    if (vector_size != matrix.size()) {
+    if (vector_size != matrix.shape()[0]) {
         throw invalid_argument("matrix shape doesn't match with vector size");
     }
 
