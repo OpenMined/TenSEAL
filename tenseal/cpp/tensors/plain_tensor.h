@@ -52,13 +52,46 @@ class PlainTensor {
      */
     plain_t at(const vector<size_t>& index) const {
         if (_strides.size() != index.size())
-            throw invalid_argument("tensor cannot be viewed as a matrix");
+            throw invalid_argument(
+                "tensor cannot be viewed in the requested format");
 
         size_t tensor_idx = 0;
         for (size_t d = 0; d < index.size(); ++d)
             tensor_idx += index[d] * _strides[d];
 
         return _data[tensor_idx];
+    }
+
+    /*
+    Returns the k-th diagonal of a matrix. Positive values of k represent upper
+    diagonals while negative values represent lower diagonal with 0 being the
+    main diagonal. It's important to note that diagonals are extended to fit the
+    size of the matrix, we do that by rotating whenever we reach the boundaries
+    of the matrix.
+    */
+    vector<plain_t> get_diagonal(int k, size_t max_size) const {
+        if (_shape.size() != 2)
+            throw invalid_argument("tensor cannot be viewed as a matrix");
+        size_t n_rows = _shape[0];
+        size_t n_cols = _shape[1];
+
+        vector<plain_t> t_diag;
+        t_diag.reserve(n_rows * n_cols);
+
+        size_t r_offset = 0, c_offset = 0;
+        if (k > 0) {  // upper diagonals
+            c_offset = k;
+        } else {  // lower diagonal
+            r_offset = -k;
+        }
+
+        size_t diag_size = min(max_size, n_rows * n_cols);
+        for (size_t i = 0; i < diag_size; i++) {
+            t_diag.push_back(
+                this->at({(r_offset + i) % n_rows, (c_offset + i) % n_cols}));
+        }
+
+        return t_diag;
     }
     /**
      * Returns the horizontal view of the tensor.

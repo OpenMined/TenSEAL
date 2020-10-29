@@ -6,7 +6,6 @@
 #include "tenseal/cpp/tensors/encrypted_tensor.h"
 #include "tenseal/cpp/tensors/encrypted_vector.h"
 #include "tenseal/cpp/tensors/plain_tensor.h"
-#include "tenseal/cpp/tensors/utils/matrix_ops.h"
 #include "tenseal/cpp/tensors/utils/utils.h"
 
 #endif

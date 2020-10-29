@@ -13,8 +13,9 @@ using namespace std;
  * Holds a vector of real numbers in its encrypted form using the CKKS
  *homomorphic encryption scheme.
  **/
-class CKKSVector : public EncryptedVector<double, shared_ptr<CKKSVector>>,
-                   public enable_shared_from_this<CKKSVector> {
+class CKKSVector
+    : public EncryptedVector<double, shared_ptr<CKKSVector>, CKKSEncoder>,
+      public enable_shared_from_this<CKKSVector> {
    public:
     using encrypted_t = shared_ptr<CKKSVector>;
     using plain_t = PlainTensor<double>;

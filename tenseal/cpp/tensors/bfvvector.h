@@ -14,8 +14,9 @@ using namespace std;
  * encryption scheme.
  **/
 
-class BFVVector : public EncryptedVector<int64_t, shared_ptr<BFVVector>>,
-                  public enable_shared_from_this<BFVVector> {
+class BFVVector
+    : public EncryptedVector<int64_t, shared_ptr<BFVVector>, BatchEncoder>,
+      public enable_shared_from_this<BFVVector> {
    public:
     using encrypted_t = shared_ptr<BFVVector>;
     using plain_t = PlainTensor<int64_t>;

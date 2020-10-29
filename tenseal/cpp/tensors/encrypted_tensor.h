@@ -3,7 +3,6 @@
 
 #include "tenseal/cpp/context/tensealcontext.h"
 #include "tenseal/cpp/tensors/plain_tensor.h"
-#include "tenseal/cpp/tensors/utils/matrix_ops.h"
 #include "tenseal/cpp/tensors/utils/utils.h"
 #include "tenseal/cpp/utils/proto.h"
 #include "tenseal/cpp/utils/serialization.h"
