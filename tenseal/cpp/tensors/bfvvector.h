@@ -1,13 +1,7 @@
 #ifndef TENSEAL_TENSOR_BFVVECTOR_H
 #define TENSEAL_TENSOR_BFVVECTOR_H
 
-#include <memory>
-#include <stdexcept>
-#include <vector>
-
-#include "seal/seal.h"
-#include "tenseal/cpp/context/tensealcontext.h"
-#include "tenseal/cpp/tensors/utils/utils.h"
+#include "tenseal/cpp/tensors/encrypted_vector.h"
 #include "tenseal/proto/tensors.pb.h"
 
 namespace tenseal {
@@ -19,44 +13,50 @@ using namespace std;
  * Holds a vector of integers in its encrypted form using the BFV homomorphic
  * encryption scheme.
  **/
-class BFVVector {
+
+class BFVVector
+    : public EncryptedVector<int64_t, shared_ptr<BFVVector>, BatchEncoder>,
+      public enable_shared_from_this<BFVVector> {
    public:
-    BFVVector(shared_ptr<TenSEALContext> ctx, vector<int64_t> vec);
+    using encrypted_t = shared_ptr<BFVVector>;
+    using plain_t = PlainTensor<int64_t>;
 
-    BFVVector(const BFVVector& vec);
-
-    BFVVector(shared_ptr<TenSEALContext> ctx, const string& vec);
-    BFVVector(const TenSEALContextProto& ctx, const BFVVectorProto& vec);
-    BFVVector(shared_ptr<TenSEALContext> ctx, const BFVVectorProto& vec);
+    template <typename... Args>
+    static encrypted_t Create(Args&&... args) {
+        return shared_ptr<BFVVector>(
+            new BFVVector(std::forward<Args>(args)...));
+    }
 
     /**
      * Decrypts and returns the plaintext representation of the encrypted vector
      *of integers using the secret-key.
      **/
-    vector<int64_t> decrypt() const;
-    vector<int64_t> decrypt(const shared_ptr<SecretKey>& sk) const;
+    plain_t decrypt() const override;
+    plain_t decrypt(const shared_ptr<SecretKey>& sk) const override;
     /**
-     * Returns the size of the encrypted vector.
+     * Compute the power of the BFVVector with minimal multiplication depth.
      **/
-    size_t size() const;
-
+    encrypted_t power_inplace(unsigned int power) override;
     /**
-     * Returns the size of the ciphertext.
+     * Negates a BFVVector.
      **/
-    size_t ciphertext_size() const;
-
+    encrypted_t negate_inplace() override;
+    /**
+     * Compute the square of the BFVVector.
+     **/
+    encrypted_t square_inplace() override;
     /**
      * Encrypted evaluation function operates on two encrypted vectors and
-     *returns a new BFVVector which is the result of either addition,
-     *substraction or multiplication in an element-wise fashion. in_place
-     *functions return a reference to the same object.
+     * returns a new BFVVector which is the result of either
+     *addition, substraction or multiplication in an element-wise fashion.
+     *in_place functions return a reference to the same object.
      **/
-    BFVVector add(const BFVVector& to_add) const;
-    BFVVector& add_inplace(BFVVector to_add);
-    BFVVector sub(const BFVVector& to_sub) const;
-    BFVVector& sub_inplace(BFVVector to_sub);
-    BFVVector mul(const BFVVector& to_mul) const;
-    BFVVector& mul_inplace(BFVVector to_mul);
+    encrypted_t add_inplace(const encrypted_t& to_add) override;
+    encrypted_t sub_inplace(const encrypted_t& to_sub) override;
+    encrypted_t mul_inplace(const encrypted_t& to_mul) override;
+    encrypted_t dot_product_inplace(const encrypted_t& to_mul) override;
+    encrypted_t dot_product_plain_inplace(const plain_t& to_mul) override;
+    encrypted_t sum_inplace() override;
 
     /**
      * Plain evaluation function operates on an encrypted vector and plaintext
@@ -64,73 +64,72 @@ class BFVVector {
      * either addition, substraction or multiplication in an element-wise
      *fashion. in_place functions return a reference to the same object.
      **/
-    BFVVector add_plain(const vector<int64_t>& to_add) const;
-    BFVVector& add_plain_inplace(const vector<int64_t>& to_add);
-    BFVVector sub_plain(const vector<int64_t>& to_sub) const;
-    BFVVector& sub_plain_inplace(const vector<int64_t>& to_sub);
-    BFVVector mul_plain(const vector<int64_t>& to_mul) const;
-    BFVVector& mul_plain_inplace(const vector<int64_t>& to_mul);
+    encrypted_t add_plain_inplace(const plain_t::dtype& to_add) override;
+    encrypted_t add_plain_inplace(const plain_t& to_add) override;
+    encrypted_t sub_plain_inplace(const plain_t::dtype& to_sub) override;
+    encrypted_t sub_plain_inplace(const plain_t& to_sub) override;
+    encrypted_t mul_plain_inplace(const plain_t::dtype& to_mul) override;
+    encrypted_t mul_plain_inplace(const plain_t& to_mul) override;
+    /**
+     * Encrypted Vector multiplication with plain matrix.
+     **/
+    encrypted_t matmul_plain_inplace(const plain_t& matrix,
+                                     size_t n_jobs = 0) override;
+
+    /**
+     * Encrypted Matrix multiplication with plain vector.
+     **/
+    encrypted_t enc_matmul_plain_inplace(const plain_t& plain_vec,
+                                         size_t row_size) override;
+
+    /**
+     * Polynomial evaluation with `this` as variable.
+     * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
+     *x^i
+     **/
+    encrypted_t polyval_inplace(const vector<double>& coefficients) override;
+
+    /*
+     * Image Block to Columns.
+     * The input matrix should be encoded in a vertical scan (column-major).
+     * The kernel vector should be padded with zeros to the next power of 2
+     */
+    encrypted_t conv2d_im2col_inplace(const plain_t& kernel,
+                                      const size_t windows_nb) override;
+    /**
+     * Replicate the first slot of a ciphertext n times. Requires a
+     *multiplication.
+     **/
+    encrypted_t replicate_first_slot_inplace(size_t n) override;
     /**
      * Load/Save the vector from/to a serialized protobuffer.
      **/
-    void load(const std::string& vec);
-    std::string save() const;
+    void load(const string& vec) override;
+    string save() const override;
     /**
      *Recreates a new BFVVector from the current one, without any
      *pointer/reference to this one.
      * **/
-    BFVVector deepcopy() const;
-    /**
-     * Get a pointer to the current TenSEAL context.
-     **/
-    shared_ptr<TenSEALContext> tenseal_context() const {
-        if (context == nullptr) throw invalid_argument("missing context");
-        return context;
-    }
-    /**
-     * Link to a TenSEAL context.
-     **/
-    void link_tenseal_context(shared_ptr<TenSEALContext> ctx) {
-        this->context = ctx;
-    }
+    encrypted_t copy() const override;
+    encrypted_t deepcopy() const override;
+
+    double scale() const override { throw logic_error("not implemented"); }
 
    private:
-    size_t _size;
-
-    shared_ptr<TenSEALContext> context;
-
-    Ciphertext ciphertext;
+    BFVVector(const shared_ptr<TenSEALContext>& ctx, const plain_t& vec);
+    BFVVector(const shared_ptr<const BFVVector>&);
+    BFVVector(const shared_ptr<TenSEALContext>& ctx, const string& vec);
+    BFVVector(const TenSEALContextProto& ctx, const BFVVectorProto& vec);
+    BFVVector(const shared_ptr<TenSEALContext>& ctx, const BFVVectorProto& vec);
 
     static Ciphertext encrypt(shared_ptr<TenSEALContext> context,
-                              vector<int64_t> pt) {
-        if (pt.empty()) {
-            throw invalid_argument("Attempting to encrypt an empty vector");
-        }
-        auto slot_count = context->slot_count<BatchEncoder>();
-        if (pt.size() > slot_count)
-            // number of slots available is poly_modulus_degree / 2
-            throw invalid_argument(
-                "can't encrypt vectors of this size, please use a larger "
-                "polynomial modulus degree.");
-
-        Ciphertext ciphertext(context->seal_context());
-        Plaintext plaintext;
-        replicate_vector(pt, slot_count);
-        context->encode<BatchEncoder>(pt, plaintext);
-        context->encryptor->encrypt(plaintext, ciphertext);
-
-        return ciphertext;
-    }
+                              plain_t input);
 
     void load_proto(const BFVVectorProto& buffer);
     BFVVectorProto save_proto() const;
 
+    void prepare_context(const shared_ptr<TenSEALContext>& ctx);
     void load_context_proto(const TenSEALContextProto& buffer);
-
-    // make pack_vectors a friend function in order to be able to modify vector
-    // size (_size private member)
-    friend BFVVector pack_vectors<BFVVector, BatchEncoder, int64_t>(
-        const vector<BFVVector>&);
 };
 
 }  // namespace tenseal

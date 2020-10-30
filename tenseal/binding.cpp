@@ -4,16 +4,32 @@
 #include <memory>
 #include <vector>
 
-#include "seal/seal.h"
-#include "tenseal/cpp/context/tensealcontext.h"
-#include "tenseal/cpp/tensors/bfvvector.h"
-#include "tenseal/cpp/tensors/ckksvector.h"
-#include "tenseal/cpp/tensors/utils/utils.h"
+#include "tenseal/cpp/tenseal.h"
 
 using namespace tenseal;
 using namespace seal;
 using namespace std;
 namespace py = pybind11;
+
+template <typename plain_t>
+void bind_plain_tensor(py::module &m, const std::string &name) {
+    using type = PlainTensor<plain_t>;
+    std::string class_name = "PlainTensor" + name;
+
+    py::class_<type>(m, class_name.c_str(), py::module_local())
+        .def(py::init<const vector<plain_t> &>())
+        .def(py::init<const vector<vector<plain_t>> &>())
+        .def("at", &type::at)
+        .def("get_diagonal", &type::get_diagonal)
+        .def("horizontal_scan", &type::horizontal_scan)
+        .def("vertical_scan", &type::vertical_scan)
+        .def("data", &type::data)
+        .def("shape", &type::shape)
+        .def("strides", &type::strides)
+        .def("size", &type::size)
+        .def("empty", &type::empty)
+        .def("replicate", &type::replicate);
+}
 
 PYBIND11_MODULE(_tenseal_cpp, m) {
     m.doc() = "Library for doing homomorphic encryption operations on tensors";
@@ -41,64 +57,122 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         encryption_parameters : parameters to use to create the SEALContext.)",
         py::arg("encryption_parameters"));
 
-    py::class_<BFVVector>(m, "BFVVector")
-        .def(py::init<shared_ptr<TenSEALContext> &, vector<int64_t>>())
-        .def(py::init<shared_ptr<TenSEALContext> &, const std::string &>())
-        .def("size", &BFVVector::size)
-        .def("decrypt", py::overload_cast<>(&BFVVector::decrypt, py::const_))
-        .def("decrypt", py::overload_cast<const std::shared_ptr<SecretKey> &>(
-                            &BFVVector::decrypt, py::const_))
+    bind_plain_tensor<double>(m, "Double");
+    bind_plain_tensor<int64_t>(m, "Int64");
+
+    py::class_<BFVVector, std::shared_ptr<BFVVector>>(m, "BFVVector",
+                                                      py::module_local())
+        .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
+                         const vector<int64_t> &data) {
+            return BFVVector::Create(ctx, data);
+        }))
+        .def(py::init(
+            [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
+                return BFVVector::Create(ctx, data);
+            }))
+        .def("size", py::overload_cast<>(&BFVVector::size, py::const_))
+        .def("decrypt",
+             [](shared_ptr<BFVVector> obj) { return obj->decrypt().data(); })
+        .def("decrypt",
+             [](shared_ptr<BFVVector> obj,
+                const std::shared_ptr<SecretKey> &sk) {
+                 return obj->decrypt(sk).data();
+             })
         .def("add", &BFVVector::add)
         .def("add_", &BFVVector::add_inplace)
-        .def("add_plain", &BFVVector::add_plain)
-        .def("add_plain_", &BFVVector::add_plain_inplace)
+        .def("add_plain",
+             [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
+                 return obj->add_plain(other);
+             })
+        .def("add_plain_",
+             [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
+                 return obj->add_plain_inplace(other);
+             })
         .def("sub", &BFVVector::sub)
         .def("sub_", &BFVVector::sub_inplace)
-        .def("sub_plain", &BFVVector::sub_plain)
-        .def("sub_plain_", &BFVVector::sub_plain_inplace)
+        .def("sub_plain",
+             [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
+                 return obj->sub_plain(other);
+             })
+        .def("sub_plain_",
+             [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
+                 return obj->sub_plain_inplace(other);
+             })
         .def("mul", &BFVVector::mul)
         .def("mul_", &BFVVector::mul_inplace)
-        .def("mul_plain", &BFVVector::mul_plain)
-        .def("mul_plain_", &BFVVector::mul_plain_inplace)
+        .def("mul_plain",
+             [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
+                 return obj->mul_plain(other);
+             })
+        .def("mul_plain_",
+             [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
+                 return obj->mul_plain_inplace(other);
+             })
         // python arithmetic
         .def("__add__", &BFVVector::add)
-        .def("__add__", &BFVVector::add_plain)
+        .def("__add__",
+             [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
+                 return obj->add_plain(other);
+             })
         .def("__iadd__", &BFVVector::add_inplace)
-        .def("__iadd__", &BFVVector::add_plain_inplace)
+        .def("__iadd__",
+             [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
+                 return obj->add_plain_inplace(other);
+             })
         .def("__sub__", &BFVVector::sub)
-        .def("__sub__", &BFVVector::sub_plain)
+        .def("__sub__",
+             [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
+                 return obj->sub_plain(other);
+             })
         .def("__isub__", &BFVVector::sub_inplace)
-        .def("__isub__", &BFVVector::sub_plain_inplace)
+        .def("__isub__",
+             [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
+                 return obj->sub_plain_inplace(other);
+             })
         .def("__mul__", &BFVVector::mul)
-        .def("__mul__", &BFVVector::mul_plain)
+        .def("__mul__",
+             [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
+                 return obj->mul_plain(other);
+             })
         .def("__imul__", &BFVVector::mul_inplace)
-        .def("__imul__", &BFVVector::mul_plain_inplace)
+        .def("__imul__",
+             [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
+                 return obj->mul_plain_inplace(other);
+             })
         .def("context",
-             [](const BFVVector &obj) { return obj.tenseal_context(); })
+             [](shared_ptr<BFVVector> obj) { return obj->tenseal_context(); })
         .def("serialize",
-             [](const BFVVector &obj) { return py::bytes(obj.save()); })
+             [](shared_ptr<BFVVector> &obj) { return py::bytes(obj->save()); })
         .def("copy", &BFVVector::deepcopy)
-        .def("__copy__", [](const BFVVector &self) { return self.deepcopy(); })
-        .def("__deepcopy__",
-             [](const BFVVector &self, py::dict) { return self.deepcopy(); });
+        .def("__copy__",
+             [](shared_ptr<BFVVector> &obj) { return obj->deepcopy(); })
+        .def("__deepcopy__", [](const shared_ptr<BFVVector> &obj,
+                                py::dict) { return obj->deepcopy(); })
+        .def_static(
+            "pack_vectors", [](const vector<shared_ptr<BFVVector>> &vectors) {
+                return pack_vectors<BFVVector, BatchEncoder, int64_t>(vectors);
+            });
 
     // CKKSVector utils
     m.def("im2col_encoding",
-          [](shared_ptr<TenSEALContext> ctx, vector<vector<double>> &input,
+          [](shared_ptr<TenSEALContext> ctx, vector<vector<double>> &raw_input,
              const size_t kernel_n_rows, const size_t kernel_n_cols,
              const size_t stride) {
               vector<vector<double>> view_as_window;
-              vector<double> final_vector;
-              size_t windows_nb = im2col(input, view_as_window, kernel_n_rows,
-                                         kernel_n_cols, stride);
-              vertical_scan(view_as_window, final_vector);
-              CKKSVector ckks_vector = CKKSVector(ctx, final_vector);
+
+              PlainTensor<double> input(raw_input);
+              size_t windows_nb = input.im2col(view_as_window, kernel_n_rows,
+                                               kernel_n_cols, stride);
+
+              PlainTensor<double> view_as_window_tensor(view_as_window);
+              auto final_vector = view_as_window_tensor.vertical_scan();
+
+              auto ckks_vector = CKKSVector::Create(ctx, final_vector);
               return make_pair(ckks_vector, windows_nb);
           });
 
     m.def("enc_matmul_encoding", [](shared_ptr<TenSEALContext> ctx,
                                     const vector<vector<double>> &input) {
-        vector<double> final_vector;
         vector<vector<double>> padded_matrix;
         padded_matrix.reserve(input.size());
         // calculate the next power of 2
@@ -112,24 +186,36 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             padded_matrix.push_back(row);
         }
 
-        vertical_scan(padded_matrix, final_vector);
-        CKKSVector ckks_vector = CKKSVector(ctx, final_vector);
+        PlainTensor<double> padded_tensor(padded_matrix);
+        auto final_vector = padded_tensor.vertical_scan();
+
+        auto ckks_vector = CKKSVector::Create(ctx, final_vector);
         return ckks_vector;
     });
 
-    m.def("pack_vectors", &pack_vectors<CKKSVector, CKKSEncoder, double>);
-    m.def("pack_vectors", &pack_vectors<BFVVector, BatchEncoder, int64_t>);
-
-    py::class_<CKKSVector>(m, "CKKSVector")
+    py::class_<CKKSVector, std::shared_ptr<CKKSVector>>(m, "CKKSVector",
+                                                        py::module_local())
         // specifying scale
-        .def(py::init<shared_ptr<TenSEALContext> &, vector<double>, double>())
+        .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
+                         const vector<double> &data, double scale) {
+            return CKKSVector::Create(ctx, data, scale);
+        }))
         // using global_scale if set
-        .def(py::init<shared_ptr<TenSEALContext> &, vector<double>>())
-        .def(py::init<shared_ptr<TenSEALContext> &, const std::string &>())
-        .def("size", &CKKSVector::size)
-        .def("decrypt", py::overload_cast<>(&CKKSVector::decrypt, py::const_))
-        .def("decrypt", py::overload_cast<const shared_ptr<SecretKey> &>(
-                            &CKKSVector::decrypt, py::const_))
+        .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
+                         const vector<double> &data) {
+            return CKKSVector::Create(ctx, data);
+        }))
+        .def(py::init(
+            [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
+                return CKKSVector::Create(ctx, data);
+            }))
+        .def("size", py::overload_cast<>(&CKKSVector::size, py::const_))
+        .def("decrypt",
+             [](shared_ptr<CKKSVector> obj) { return obj->decrypt().data(); })
+        .def("decrypt",
+             [](shared_ptr<CKKSVector> obj, const shared_ptr<SecretKey> &sk) {
+                 return obj->decrypt(sk).data();
+             })
         .def("neg", &CKKSVector::negate)
         .def("neg_", &CKKSVector::negate_inplace)
         .def("square", &CKKSVector::square)
@@ -138,129 +224,211 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("pow_", &CKKSVector::power_inplace)
         .def("add", &CKKSVector::add)
         .def("add_", &CKKSVector::add_inplace)
-        .def("add_plain",
-             py::overload_cast<double>(&CKKSVector::add_plain, py::const_))
-        .def("add_plain", py::overload_cast<const vector<double> &>(
+        .def("add_plain", py::overload_cast<const double &>(
                               &CKKSVector::add_plain, py::const_))
+        .def("add_plain",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
+                 return obj->add_plain(other);
+             })
         .def("add_plain_",
-             py::overload_cast<double>(&CKKSVector::add_plain_inplace))
-        .def("add_plain_", py::overload_cast<const vector<double> &>(
-                               &CKKSVector::add_plain_inplace))
+             py::overload_cast<const double &>(&CKKSVector::add_plain_inplace))
+        .def("add_plain_",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
+                 return obj->add_plain_inplace(other);
+             })
         .def("sub", &CKKSVector::sub)
         .def("sub_", &CKKSVector::sub_inplace)
-        .def("sub_plain",
-             py::overload_cast<double>(&CKKSVector::sub_plain, py::const_))
-        .def("sub_plain", py::overload_cast<const vector<double> &>(
+        .def("sub_plain", py::overload_cast<const double &>(
                               &CKKSVector::sub_plain, py::const_))
+        .def("sub_plain",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
+                 return obj->sub_plain(other);
+             })
         .def("sub_plain_",
-             py::overload_cast<double>(&CKKSVector::sub_plain_inplace))
-        .def("sub_plain_", py::overload_cast<const vector<double> &>(
-                               &CKKSVector::sub_plain_inplace))
+             py::overload_cast<const double &>(&CKKSVector::sub_plain_inplace))
+        .def("sub_plain_",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
+                 return obj->sub_plain_inplace(other);
+             })
         .def("mul", &CKKSVector::mul)
         .def("mul_", &CKKSVector::mul_inplace)
-        .def("mul_plain",
-             py::overload_cast<double>(&CKKSVector::mul_plain, py::const_))
-        .def("mul_plain", py::overload_cast<const vector<double> &>(
+        .def("mul_plain", py::overload_cast<const double &>(
                               &CKKSVector::mul_plain, py::const_))
+        .def("mul_plain",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
+                 return obj->mul_plain(other);
+             })
         .def("mul_plain_",
-             py::overload_cast<double>(&CKKSVector::mul_plain_inplace))
-        .def("mul_plain_", py::overload_cast<const vector<double> &>(
-                               &CKKSVector::mul_plain_inplace))
+             py::overload_cast<const double &>(&CKKSVector::mul_plain_inplace))
+        .def("mul_plain_",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
+                 return obj->mul_plain_inplace(other);
+             })
         .def("polyval", &CKKSVector::polyval)
         .def("polyval_", &CKKSVector::polyval_inplace)
         // because dot doesn't have a magic function like __add__
         // we prefer to overload it instead of having dot_plain functions
         .def("dot", &CKKSVector::dot_product)
-        .def("dot", &CKKSVector::dot_product_plain)
+        .def("dot",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
+                 return obj->dot_product_plain(other);
+             })
         .def("dot_", &CKKSVector::dot_product_inplace)
-        .def("dot_", &CKKSVector::dot_product_plain_inplace)
+        .def("dot_",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
+                 return obj->dot_product_plain_inplace(other);
+             })
         .def("sum", &CKKSVector::sum)
         .def("sum_", &CKKSVector::sum_inplace)
-        .def("matmul", &CKKSVector::matmul_plain, py::arg("matrix"),
-             py::arg("n_jobs") = 0)
-        .def("matmul_", &CKKSVector::matmul_plain_inplace, py::arg("matrix"),
-             py::arg("n_jobs") = 0)
-        .def("mm", &CKKSVector::matmul_plain, py::arg("matrix"),
-             py::arg("n_jobs") = 0)
-        .def("mm_", &CKKSVector::matmul_plain_inplace, py::arg("matrix"),
-             py::arg("n_jobs") = 0)
-        .def("conv2d_im2col", &CKKSVector::conv2d_im2col)
-        .def("conv2d_im2col_", &CKKSVector::conv2d_im2col_inplace)
-        .def("enc_matmul_plain", &CKKSVector::enc_matmul_plain)
-        .def("enc_matmul_plain_", &CKKSVector::enc_matmul_plain_inplace)
+        .def(
+            "matmul",
+            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
+               size_t n_jobs) { return obj->matmul_plain(matrix, n_jobs); },
+            py::arg("matrix"), py::arg("n_jobs") = 0)
+        .def(
+            "matmul_",
+            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
+               size_t n_jobs) {
+                return obj->matmul_plain_inplace(matrix, n_jobs);
+            },
+            py::arg("matrix"), py::arg("n_jobs") = 0)
+        .def(
+            "mm",
+            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
+               size_t n_jobs) { return obj->matmul_plain(matrix, n_jobs); },
+            py::arg("matrix"), py::arg("n_jobs") = 0)
+        .def(
+            "mm_",
+            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
+               size_t n_jobs) {
+                return obj->matmul_plain_inplace(matrix, n_jobs);
+            },
+            py::arg("matrix"), py::arg("n_jobs") = 0)
+        .def("conv2d_im2col",
+             [](shared_ptr<CKKSVector> obj,
+                const vector<vector<double>> &matrix, const size_t windows_nb) {
+                 return obj->conv2d_im2col(matrix, windows_nb);
+             })
+        .def("conv2d_im2col_",
+             [](shared_ptr<CKKSVector> obj,
+                const vector<vector<double>> &matrix, const size_t windows_nb) {
+                 return obj->conv2d_im2col_inplace(matrix, windows_nb);
+             })
+        .def("enc_matmul_plain",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &matrix,
+                size_t row_size) {
+                 return obj->enc_matmul_plain(matrix, row_size);
+             })
+        .def("enc_matmul_plain_",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &matrix,
+                size_t row_size) {
+                 return obj->enc_matmul_plain_inplace(matrix, row_size);
+             })
         // python arithmetic
         .def("__neg__", &CKKSVector::negate)
         .def("__pow__", &CKKSVector::power)
         .def("__ipow__", &CKKSVector::power_inplace)
         .def("__add__", &CKKSVector::add)
-        .def("__add__",
-             py::overload_cast<double>(&CKKSVector::add_plain, py::const_))
-        .def("__add__", py::overload_cast<const vector<double> &>(
+        .def("__add__", py::overload_cast<const double &>(
                             &CKKSVector::add_plain, py::const_))
-        .def("__radd__",
-             py::overload_cast<double>(&CKKSVector::add_plain, py::const_))
-        .def("__radd__", py::overload_cast<const vector<double> &>(
+        .def("__add__",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
+                 return obj->add_plain(other);
+             })
+        .def("__radd__", py::overload_cast<const double &>(
                              &CKKSVector::add_plain, py::const_))
+        .def("__radd__",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
+                 return obj->add_plain(other);
+             })
         .def("__iadd__", &CKKSVector::add_inplace)
         .def("__iadd__",
-             py::overload_cast<double>(&CKKSVector::add_plain_inplace))
-        .def("__iadd__", py::overload_cast<const vector<double> &>(
-                             &CKKSVector::add_plain_inplace))
+             py::overload_cast<const double &>(&CKKSVector::add_plain_inplace))
+        .def("__iadd__",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
+                 return obj->add_plain_inplace(other);
+             })
         .def("__sub__", &CKKSVector::sub)
-        .def("__sub__",
-             py::overload_cast<double>(&CKKSVector::sub_plain, py::const_))
-        .def("__sub__", py::overload_cast<const vector<double> &>(
+        .def("__sub__", py::overload_cast<const double &>(
                             &CKKSVector::sub_plain, py::const_))
+        .def("__sub__",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
+                 return obj->sub_plain(other);
+             })
         /*
         Since subtraction operation is anticommutative, right subtraction
         operator need to negate the vector then do an addition with left
         operand.
         */
         .def("__rsub__",
-             [](CKKSVector vec, const double left_operand) {
+             [](shared_ptr<CKKSVector> other, const double left_operand) {
                  // vec should be a copy so it might be safe to do inplace
-                 vec.negate_inplace();
-                 vec.add_plain_inplace(left_operand);
+                 auto vec = other->copy();
+                 vec->negate_inplace();
+                 vec->add_plain_inplace(left_operand);
                  return vec;
              })
         .def("__rsub__",
-             [](CKKSVector vec, const vector<double> &left_operand) {
+             [](shared_ptr<CKKSVector> other,
+                const vector<double> &left_operand) {
                  // vec should be a copy so it might be safe to do inplace
-                 vec.negate_inplace();
-                 vec.add_plain_inplace(left_operand);
+                 auto vec = other->copy();
+                 vec->negate_inplace();
+                 vec->add_plain_inplace(left_operand);
                  return vec;
              })
         .def("__isub__", &CKKSVector::sub_inplace)
         .def("__isub__",
-             py::overload_cast<double>(&CKKSVector::sub_plain_inplace))
-        .def("__isub__", py::overload_cast<const vector<double> &>(
-                             &CKKSVector::sub_plain_inplace))
+             py::overload_cast<const double &>(&CKKSVector::sub_plain_inplace))
+        .def("__isub__",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
+                 return obj->sub_plain_inplace(other);
+             })
         .def("__mul__", &CKKSVector::mul)
-        .def("__mul__",
-             py::overload_cast<double>(&CKKSVector::mul_plain, py::const_))
-        .def("__mul__", py::overload_cast<const vector<double> &>(
+        .def("__mul__", py::overload_cast<const double &>(
                             &CKKSVector::mul_plain, py::const_))
-        .def("__rmul__",
-             py::overload_cast<double>(&CKKSVector::mul_plain, py::const_))
-        .def("__rmul__", py::overload_cast<const vector<double> &>(
+        .def("__mul__",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
+                 return obj->mul_plain(other);
+             })
+        .def("__rmul__", py::overload_cast<const double &>(
                              &CKKSVector::mul_plain, py::const_))
+        .def("__rmul__",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
+                 return obj->mul_plain(other);
+             })
         .def("__imul__", &CKKSVector::mul_inplace)
         .def("__imul__",
-             py::overload_cast<double>(&CKKSVector::mul_plain_inplace))
-        .def("__imul__", py::overload_cast<const vector<double> &>(
-                             &CKKSVector::mul_plain_inplace))
-        .def("__matmul__", &CKKSVector::matmul_plain, py::arg("matrix"),
-             py::arg("n_jobs") = 0)
-        .def("__imatmul__", &CKKSVector::matmul_plain_inplace,
-             py::arg("matrix"), py::arg("n_jobs") = 0)
+             py::overload_cast<const double &>(&CKKSVector::mul_plain_inplace))
+        .def("__imul__",
+             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
+                 return obj->mul_plain_inplace(other);
+             })
+        .def(
+            "__matmul__",
+            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
+               size_t n_jobs) { return obj->matmul_plain(matrix, n_jobs); },
+            py::arg("matrix"), py::arg("n_jobs") = 0)
+        .def(
+            "__imatmul__",
+            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
+               size_t n_jobs) {
+                return obj->matmul_plain_inplace(matrix, n_jobs);
+            },
+            py::arg("matrix"), py::arg("n_jobs") = 0)
         .def("context",
-             [](const CKKSVector &obj) { return obj.tenseal_context(); })
+             [](shared_ptr<CKKSVector> obj) { return obj->tenseal_context(); })
         .def("serialize",
-             [](const CKKSVector &obj) { return py::bytes(obj.save()); })
+             [](shared_ptr<CKKSVector> obj) { return py::bytes(obj->save()); })
         .def("copy", &CKKSVector::deepcopy)
-        .def("__copy__", [](const CKKSVector &self) { return self.deepcopy(); })
-        .def("__deepcopy__",
-             [](const CKKSVector &self, py::dict) { return self.deepcopy(); });
+        .def("__copy__",
+             [](shared_ptr<CKKSVector> obj) { return obj->deepcopy(); })
+        .def("__deepcopy__", [](shared_ptr<CKKSVector> obj,
+                                py::dict) { return obj->deepcopy(); })
+        .def_static(
+            "pack_vectors", [](const vector<shared_ptr<CKKSVector>> &vectors) {
+                return pack_vectors<CKKSVector, CKKSEncoder, double>(vectors);
+            });
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")

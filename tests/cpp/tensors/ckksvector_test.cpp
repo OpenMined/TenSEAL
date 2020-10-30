@@ -1,12 +1,12 @@
-#include "tenseal/cpp/tensors/ckksvector.h"
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tenseal/cpp/tenseal.h"
 
 namespace tenseal {
 namespace {
 
 using namespace ::testing;
+using namespace std;
 
 bool are_close(const std::vector<double>& l, const std::vector<int64_t>& r) {
     if (l.size() != r.size()) {
@@ -18,10 +18,10 @@ bool are_close(const std::vector<double>& l, const std::vector<int64_t>& r) {
     return true;
 }
 
-CKKSVector duplicate(const CKKSVector& in) {
-    auto vec = in.save();
+auto duplicate(shared_ptr<CKKSVector> in) {
+    auto vec = in->save();
 
-    return CKKSVector(in.tenseal_context(), vec);
+    return CKKSVector::Create(in->tenseal_context(), vec);
 }
 
 class CKKSVectorTest : public TestWithParam</*serialize=*/bool> {
@@ -35,13 +35,13 @@ TEST_P(CKKSVectorTest, TestCreateCKKS) {
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
-    auto l = CKKSVector(ctx, {1, 2, 3}, 1);
+    auto l = CKKSVector::Create(ctx, std::vector<double>{1, 2, 3}, 1);
 
     if (should_serialize_first) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l.ciphertext_size(), 2);
+    ASSERT_EQ(l->ciphertext_size(), 2);
 }
 
 TEST_F(CKKSVectorTest, TestCreateCKKSFail) {
@@ -49,8 +49,9 @@ TEST_F(CKKSVectorTest, TestCreateCKKSFail) {
         TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
-    EXPECT_THROW(auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3})),
-                 std::exception);
+    EXPECT_THROW(
+        auto l = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3})),
+        std::exception);
 }
 
 TEST_P(CKKSVectorTest, TestCKKSAdd) {
@@ -66,30 +67,30 @@ TEST_P(CKKSVectorTest, TestCKKSAdd) {
     ctx->auto_rescale(false);
     ctx->auto_mod_switch(false);
 
-    auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3}));
-    auto r = CKKSVector(ctx, std::vector<double>({3, 4, 4}));
+    auto l = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}));
+    auto r = CKKSVector::Create(ctx, std::vector<double>({3, 4, 4}));
 
-    auto add = l.add(r);
-
-    if (should_serialize_first) {
-        l = duplicate(l);
-    }
-
-    ASSERT_EQ(add.ciphertext_size(), 2);
-
-    auto decr = add.decrypt();
-    ASSERT_TRUE(are_close(decr, {4, 6, 7}));
-
-    l.add_inplace(r);
-    l.add_inplace(r);
+    auto add = l->add(r);
 
     if (should_serialize_first) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l.ciphertext_size(), 2);
-    decr = l.decrypt();
-    ASSERT_TRUE(are_close(decr, {7, 10, 11}));
+    ASSERT_EQ(add->ciphertext_size(), 2);
+
+    auto decr = add->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {4, 6, 7}));
+
+    l->add_inplace(r);
+    l->add_inplace(r);
+
+    if (should_serialize_first) {
+        l = duplicate(l);
+    }
+
+    ASSERT_EQ(l->ciphertext_size(), 2);
+    decr = l->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {7, 10, 11}));
 }
 
 TEST_P(CKKSVectorTest, TestCKKSMul) {
@@ -105,26 +106,26 @@ TEST_P(CKKSVectorTest, TestCKKSMul) {
     ctx->auto_rescale(true);
     ctx->auto_mod_switch(true);
 
-    auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3}));
-    auto r = CKKSVector(ctx, std::vector<double>({2, 2, 2}));
+    auto l = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}));
+    auto r = CKKSVector::Create(ctx, std::vector<double>({2, 2, 2}));
 
-    auto mul = l.mul(r);
-    ASSERT_EQ(mul.ciphertext_size(), 2);
+    auto mul = l->mul(r);
+    ASSERT_EQ(mul->ciphertext_size(), 2);
 
-    auto decr = mul.decrypt();
-    std::cout << decr[0] << std::endl;
-    ASSERT_TRUE(are_close(decr, {2, 4, 6}));
+    auto decr = mul->decrypt();
+    std::cout << decr.at({0}) << std::endl;
+    ASSERT_TRUE(are_close(decr.data(), {2, 4, 6}));
 
-    l.mul_inplace(r);
-    l.mul_inplace(r);
+    l->mul_inplace(r);
+    l->mul_inplace(r);
 
     if (should_serialize_first) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l.ciphertext_size(), 2);
-    decr = l.decrypt();
-    ASSERT_TRUE(are_close(decr, {4, 8, 12}));
+    ASSERT_EQ(l->ciphertext_size(), 2);
+    decr = l->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {4, 8, 12}));
 }
 
 TEST_P(CKKSVectorTest, TestCKKSMulMany) {
@@ -140,19 +141,19 @@ TEST_P(CKKSVectorTest, TestCKKSMulMany) {
     ctx->auto_rescale(true);
     ctx->auto_mod_switch(true);
 
-    auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3}));
-    auto r = CKKSVector(ctx, std::vector<double>({2, 2, 2}));
+    auto l = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}));
+    auto r = CKKSVector::Create(ctx, std::vector<double>({2, 2, 2}));
 
-    l.mul_inplace(r);
-    l.mul_inplace(r);
+    l->mul_inplace(r);
+    l->mul_inplace(r);
 
     if (should_serialize_first) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l.ciphertext_size(), 2);
-    auto decr = l.decrypt();
-    ASSERT_TRUE(are_close(decr, {4, 8, 12}));
+    ASSERT_EQ(l->ciphertext_size(), 2);
+    auto decr = l->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {4, 8, 12}));
 }
 
 TEST_P(CKKSVectorTest, TestCKKSMulNoRelin) {
@@ -168,19 +169,19 @@ TEST_P(CKKSVectorTest, TestCKKSMulNoRelin) {
     ctx->auto_rescale(true);
     ctx->auto_mod_switch(true);
 
-    auto l = CKKSVector(ctx, std::vector<double>({1, 2, 3}));
-    auto r = CKKSVector(ctx, std::vector<double>({2, 2, 2}));
+    auto l = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}));
+    auto r = CKKSVector::Create(ctx, std::vector<double>({2, 2, 2}));
 
-    l.mul_inplace(r);
-    l.mul_inplace(r);
+    l->mul_inplace(r);
+    l->mul_inplace(r);
 
     if (should_serialize_first) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l.ciphertext_size(), 4);
-    auto decr = l.decrypt();
-    ASSERT_TRUE(are_close(decr, {4, 8, 12}));
+    ASSERT_EQ(l->ciphertext_size(), 4);
+    auto decr = l->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {4, 8, 12}));
 }
 
 TEST_P(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
@@ -193,22 +194,22 @@ TEST_P(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
     ctx->generate_galois_keys();
     ctx->global_scale(std::pow(2, 40));
 
-    auto vec = CKKSVector(ctx, std::vector<double>({1}));
-    auto replicated_vec = vec.replicate_first_slot(4);
+    auto vec = CKKSVector::Create(ctx, std::vector<double>({1}));
+    auto replicated_vec = vec->replicate_first_slot(4);
 
     if (should_serialize_first) {
         replicated_vec = duplicate(replicated_vec);
     }
 
-    auto result = replicated_vec.decrypt();
+    auto result = replicated_vec->decrypt();
     ASSERT_EQ(result.size(), 4);
-    ASSERT_TRUE(are_close(result, {1, 1, 1, 1}));
+    ASSERT_TRUE(are_close(result.data(), {1, 1, 1, 1}));
 
-    vec.mul_plain_inplace(2);
-    vec.replicate_first_slot_inplace(6);
-    result = vec.decrypt();
+    vec->mul_plain_inplace(2);
+    vec->replicate_first_slot_inplace(6);
+    result = vec->decrypt();
     ASSERT_EQ(result.size(), 6);
-    ASSERT_TRUE(are_close(result, {2, 2, 2, 2, 2, 2}));
+    ASSERT_TRUE(are_close(result.data(), {2, 2, 2, 2, 2, 2}));
 }
 
 TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
@@ -221,27 +222,28 @@ TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
     ctx->generate_galois_keys();
     ctx->global_scale(std::pow(2, 40));
 
-    auto vec = CKKSVector(ctx, std::vector<double>({1, 2, 3}));
+    auto vec = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}));
     auto matrix = vector<vector<double>>{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}};
     auto expected_result = vector<int64_t>{6, 12, 18};
 
-    auto result = vec.matmul_plain(matrix, 2);
+    auto result = vec->matmul_plain(matrix, 2);
 
     if (should_serialize_first) {
         result = duplicate(result);
     }
 
-    auto decrypted_result = result.decrypt();
+    auto decrypted_result = result->decrypt();
 
     ASSERT_EQ(decrypted_result.size(), 3);
-    ASSERT_TRUE(are_close(decrypted_result, expected_result));
+    ASSERT_TRUE(are_close(decrypted_result.data(), expected_result));
 }
 
 TEST_P(CKKSVectorTest, TestEmptyPlaintext) {
     auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
-    EXPECT_THROW(CKKSVector(ctx, std::vector<double>({})), std::exception);
+    EXPECT_THROW(CKKSVector::Create(ctx, std::vector<double>({})),
+                 std::exception);
 }
 
 INSTANTIATE_TEST_CASE_P(TestCKKSVector, CKKSVectorTest,

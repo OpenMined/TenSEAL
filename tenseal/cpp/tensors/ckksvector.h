@@ -1,14 +1,7 @@
 #ifndef TENSEAL_TENSOR_CKKSVECTOR_H
 #define TENSEAL_TENSOR_CKKSVECTOR_H
 
-#include <memory>
-#include <optional>
-#include <stdexcept>
-#include <vector>
-
-#include "seal/seal.h"
-#include "tenseal/cpp/context/tensealcontext.h"
-#include "tenseal/cpp/tensors/utils/utils.h"
+#include "tenseal/cpp/tensors/encrypted_vector.h"
 #include "tenseal/proto/tensors.pb.h"
 
 namespace tenseal {
@@ -20,69 +13,48 @@ using namespace std;
  * Holds a vector of real numbers in its encrypted form using the CKKS
  *homomorphic encryption scheme.
  **/
-class CKKSVector {
+class CKKSVector
+    : public EncryptedVector<double, shared_ptr<CKKSVector>, CKKSEncoder>,
+      public enable_shared_from_this<CKKSVector> {
    public:
-    CKKSVector(shared_ptr<TenSEALContext> ctx, vector<double> vec,
-               std::optional<double> scale = {});
+    using encrypted_t = shared_ptr<CKKSVector>;
+    using plain_t = PlainTensor<double>;
 
-    CKKSVector(const CKKSVector& vec);
-
-    CKKSVector(shared_ptr<TenSEALContext> ctx, const string& vec);
-    CKKSVector(const TenSEALContextProto& ctx, const CKKSVectorProto& vec);
-    CKKSVector(shared_ptr<TenSEALContext> ctx, const CKKSVectorProto& vec);
-
+    template <typename... Args>
+    static encrypted_t Create(Args&&... args) {
+        return encrypted_t(new CKKSVector(std::forward<Args>(args)...));
+    }
     /**
      * Decrypts and returns the plaintext representation of the encrypted vector
      *of real numbers using the secret-key.
      **/
-    vector<double> decrypt() const;
-    vector<double> decrypt(const std::shared_ptr<SecretKey>& sk) const;
-
-    /**
-     * Returns the size of the encrypted vector.
-     **/
-    size_t size() const;
-    size_t ciphertext_size() const;
-
-    /**
-     * Replicate the first slot of a ciphertext n times. Requires a
-     *multiplication.
-     **/
-    CKKSVector replicate_first_slot(size_t n) const;
-    CKKSVector& replicate_first_slot_inplace(size_t n);
-
-    /**
-     * Negates a CKKSVector.
-     **/
-    CKKSVector negate() const;
-    CKKSVector& negate_inplace();
-
-    /**
-     * Compute the square of the CKKSVector.
-     **/
-    CKKSVector square() const;
-    CKKSVector& square_inplace();
+    plain_t decrypt() const override;
+    plain_t decrypt(const shared_ptr<SecretKey>& sk) const override;
 
     /**
      * Compute the power of the CKKSVector with minimal multiplication depth.
      **/
-    CKKSVector power(unsigned int power) const;
-    CKKSVector& power_inplace(unsigned int power);
-
+    encrypted_t power_inplace(unsigned int power) override;
+    /**
+     * Negates a CKKSVector.
+     **/
+    encrypted_t negate_inplace() override;
+    /**
+     * Compute the square of the CKKSVector.
+     **/
+    encrypted_t square_inplace() override;
     /**
      * Encrypted evaluation function operates on two encrypted vectors and
-     * returns a new CKKSVector which is the result of either addition,
-     * substraction or multiplication in an element-wise fashion. in_place
-     * functions return a reference to the same object.
+     * returns a new CKKSVector which is the result of either
+     *addition, substraction or multiplication in an element-wise fashion.
+     *in_place functions return a reference to the same object.
      **/
-    CKKSVector add(const CKKSVector& to_add) const;
-    CKKSVector& add_inplace(CKKSVector to_add);
-    CKKSVector sub(const CKKSVector& to_sub) const;
-    CKKSVector& sub_inplace(CKKSVector to_sub);
-    CKKSVector mul(const CKKSVector& to_mul) const;
-    CKKSVector& mul_inplace(CKKSVector to_mul);
-    CKKSVector dot_product(const CKKSVector& to_mul) const;
-    CKKSVector& dot_product_inplace(const CKKSVector& to_mul);
+    encrypted_t add_inplace(const encrypted_t& to_add) override;
+    encrypted_t sub_inplace(const encrypted_t& to_sub) override;
+    encrypted_t mul_inplace(const encrypted_t& to_mul) override;
+    encrypted_t dot_product_inplace(const encrypted_t& to_mul) override;
+    encrypted_t dot_product_plain_inplace(const plain_t& to_mul) override;
+    encrypted_t sum_inplace() override;
 
     /**
      * Plain evaluation function operates on an encrypted vector and plaintext
@@ -90,128 +62,86 @@ class CKKSVector {
      * either addition, substraction or multiplication in an element-wise
      *fashion. in_place functions return a reference to the same object.
      **/
-    CKKSVector add_plain(double to_add) const;
-    CKKSVector add_plain(const vector<double>& to_add) const;
-    CKKSVector& add_plain_inplace(double to_add);
-    CKKSVector& add_plain_inplace(const vector<double>& to_add);
-    CKKSVector sub_plain(double to_sub) const;
-    CKKSVector sub_plain(const vector<double>& to_sub) const;
-    CKKSVector& sub_plain_inplace(double to_sub);
-    CKKSVector& sub_plain_inplace(const vector<double>& to_sub);
-    CKKSVector mul_plain(double to_mul) const;
-    CKKSVector mul_plain(const vector<double>& to_mul) const;
-    CKKSVector& mul_plain_inplace(double to_mul);
-    CKKSVector& mul_plain_inplace(const vector<double>& to_mul);
-    CKKSVector dot_product_plain(const vector<double>& to_mul) const;
-    CKKSVector& dot_product_plain_inplace(const vector<double>& to_mul);
-    CKKSVector sum() const;
-    CKKSVector& sum_inplace();
+    encrypted_t add_plain_inplace(const plain_t::dtype& to_add) override;
+    encrypted_t add_plain_inplace(const plain_t& to_add) override;
+    encrypted_t sub_plain_inplace(const plain_t::dtype& to_sub) override;
+    encrypted_t sub_plain_inplace(const plain_t& to_sub) override;
+    encrypted_t mul_plain_inplace(const plain_t::dtype& to_mul) override;
+    encrypted_t mul_plain_inplace(const plain_t& to_mul) override;
 
     /**
      * Encrypted Vector multiplication with plain matrix.
      **/
-    CKKSVector matmul_plain(const vector<vector<double>>& matrix,
-                            size_t n_jobs = 0) const;
-    CKKSVector& matmul_plain_inplace(const vector<vector<double>>& matrix,
-                                     size_t n_jobs = 0);
+    encrypted_t matmul_plain_inplace(const plain_t& matrix,
+                                     size_t n_jobs = 0) override;
 
     /**
      * Encrypted Matrix multiplication with plain vector.
      **/
-    CKKSVector enc_matmul_plain(const vector<double>& plain_vec,
-                                size_t row_size);
-    CKKSVector& enc_matmul_plain_inplace(const vector<double>& plain_vec,
-                                         size_t row_size);
+    encrypted_t enc_matmul_plain_inplace(const plain_t& plain_vec,
+                                         size_t row_size) override;
 
     /**
      * Polynomial evaluation with `this` as variable.
      * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
      *x^i
      **/
-    CKKSVector polyval(const vector<double>& coefficients) const;
-    CKKSVector& polyval_inplace(const vector<double>& coefficients);
+    encrypted_t polyval_inplace(const vector<double>& coefficients) override;
 
     /*
      * Image Block to Columns.
      * The input matrix should be encoded in a vertical scan (column-major).
      * The kernel vector should be padded with zeros to the next power of 2
      */
-    CKKSVector conv2d_im2col(const vector<vector<double>>& kernel,
-                             const size_t windows_nb) const;
-    CKKSVector& conv2d_im2col_inplace(const vector<vector<double>>& kernel,
-                                      const size_t windows_nb);
-
+    encrypted_t conv2d_im2col_inplace(const plain_t& kernel,
+                                      const size_t windows_nb) override;
+    /**
+     * Replicate the first slot of a ciphertext n times. Requires a
+     *multiplication.
+     **/
+    encrypted_t replicate_first_slot_inplace(size_t n) override;
     /**
      * Load/Save the vector from/to a serialized protobuffer.
      **/
-    void load(const std::string& vec);
-    std::string save() const;
+    void load(const string& vec) override;
+    string save() const override;
 
     /**
      *Recreates a new CKKSVector from the current one, without any
      *pointer/reference to this one.
      **/
-    CKKSVector deepcopy() const;
-    /**
-     * Get a pointer to the current TenSEAL context.
-     **/
-    shared_ptr<TenSEALContext> tenseal_context() const {
-        if (context == nullptr) throw invalid_argument("missing context");
-        return context;
-    }
-    /**
-     * Link to a TenSEAL context.
-     **/
-    void link_tenseal_context(shared_ptr<TenSEALContext> ctx) {
-        this->context = ctx;
-    }
+    encrypted_t copy() const override;
+    encrypted_t deepcopy() const override;
+
+    double scale() const override { return _init_scale; }
 
    private:
+    double _init_scale;
     /*
     Private evaluation functions to process both scalar and vector arguments.
     */
     template <typename T>
-    CKKSVector& _add_plain_inplace(const T& to_add);
+    encrypted_t _add_plain_inplace(const T& to_add);
     template <typename T>
-    CKKSVector& _sub_plain_inplace(const T& to_sub);
+    encrypted_t _sub_plain_inplace(const T& to_sub);
     template <typename T>
-    CKKSVector& _mul_plain_inplace(const T& to_mul);
+    encrypted_t _mul_plain_inplace(const T& to_mul);
 
-    size_t _size;
-    double init_scale;
-    shared_ptr<TenSEALContext> context;
-    Ciphertext ciphertext;
+    CKKSVector(const shared_ptr<TenSEALContext>& ctx, const plain_t& vec,
+               optional<double> scale = {});
+    CKKSVector(const shared_ptr<TenSEALContext>& ctx, const string& vec);
+    CKKSVector(const TenSEALContextProto& ctx, const CKKSVectorProto& vec);
+    CKKSVector(const shared_ptr<TenSEALContext>& ctx,
+               const CKKSVectorProto& vec);
+    CKKSVector(const shared_ptr<const CKKSVector>& vec);
 
     static Ciphertext encrypt(shared_ptr<TenSEALContext> context, double scale,
-                              vector<double> pt) {
-        if (pt.empty()) {
-            throw invalid_argument("Attempting to encrypt an empty vector");
-        }
-        auto slot_count = context->slot_count<CKKSEncoder>();
-        if (pt.size() > slot_count)
-            // number of slots available is poly_modulus_degree / 2
-            throw invalid_argument(
-                "can't encrypt vectors of this size, please use a larger "
-                "polynomial modulus degree.");
-
-        Ciphertext ciphertext(context->seal_context());
-        Plaintext plaintext;
-        replicate_vector(pt, slot_count);
-        context->encode<CKKSEncoder>(pt, plaintext, scale);
-        context->encryptor->encrypt(plaintext, ciphertext);
-
-        return ciphertext;
-    }
+                              plain_t pt);
 
     void load_proto(const CKKSVectorProto& buffer);
     CKKSVectorProto save_proto() const;
 
     void load_context_proto(const TenSEALContextProto& buffer);
-
-    // make pack_vectors a friend function in order to be able to modify vector
-    // size (_size private member)
-    friend CKKSVector pack_vectors<CKKSVector, CKKSEncoder, double>(
-        const vector<CKKSVector>&);
 };
 
 }  // namespace tenseal

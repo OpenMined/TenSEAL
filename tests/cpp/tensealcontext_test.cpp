@@ -1,7 +1,6 @@
-#include "tenseal/cpp/context/tensealcontext.h"
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tenseal/cpp/tenseal.h"
 #include "tenseal/cpp/utils/threadpool.h"
 
 namespace tenseal {

@@ -6,6 +6,7 @@ TENSEAL_DEFAULT_COPTS = ["-std=c++17"]
 
 cc_library(
     name = "tenseal_cc",
+    hdrs = ["tenseal.h"],
     copts = TENSEAL_DEFAULT_COPTS,
     features = ["-use_header_modules"],
     includes = TENSEAL_DEFAULT_INCLUDES,

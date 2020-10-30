@@ -1,39 +1,32 @@
 #include "tenseal/cpp/tensors/bfvvector.h"
 
-#include <memory>
-#include <vector>
-
-#include "seal/seal.h"
-#include "tenseal/cpp/context/tensealcontext.h"
-#include "tenseal/cpp/utils/proto.h"
-#include "tenseal/cpp/utils/serialization.h"
-
 using namespace seal;
 using namespace std;
 
 namespace tenseal {
 
-BFVVector::BFVVector(shared_ptr<TenSEALContext> ctx, vector<int64_t> vec) {
+void BFVVector::prepare_context(const shared_ptr<TenSEALContext>& ctx) {
     this->link_tenseal_context(ctx);
+    this->tenseal_context()->auto_rescale(false);
+    this->tenseal_context()->auto_mod_switch(false);
+}
+
+BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx,
+                     const plain_t& vec) {
+    this->prepare_context(ctx);
     // Encrypts the whole vector into a single ciphertext using BFV batching
-    this->ciphertext = BFVVector::encrypt(ctx, vec);
+    this->_ciphertext = BFVVector::encrypt(ctx, vec);
     this->_size = vec.size();
 }
 
-BFVVector::BFVVector(const BFVVector& vec) {
-    this->link_tenseal_context(vec.context);
-    this->_size = vec._size;
-    this->ciphertext = vec.ciphertext;
-}
-
-BFVVector::BFVVector(shared_ptr<TenSEALContext> ctx, const string& vec) {
-    this->link_tenseal_context(ctx);
+BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx, const string& vec) {
+    this->prepare_context(ctx);
     this->load(vec);
 }
 
-BFVVector::BFVVector(shared_ptr<TenSEALContext> ctx,
+BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx,
                      const BFVVectorProto& vec) {
-    this->link_tenseal_context(ctx);
+    this->prepare_context(ctx);
     this->load_proto(vec);
 }
 
@@ -42,12 +35,35 @@ BFVVector::BFVVector(const TenSEALContextProto& ctx,
     this->load_context_proto(ctx);
     this->load_proto(vec);
 }
+BFVVector::BFVVector(const shared_ptr<const BFVVector>& vec) {
+    this->prepare_context(vec->tenseal_context());
+    this->_size = vec->size();
+    this->_ciphertext = vec->ciphertext();
+}
 
-size_t BFVVector::size() const { return this->_size; }
-size_t BFVVector::ciphertext_size() const { return this->ciphertext.size(); }
+Ciphertext BFVVector::encrypt(shared_ptr<TenSEALContext> context,
+                              BFVVector::plain_t pt) {
+    if (pt.empty()) {
+        throw invalid_argument("Attempting to encrypt an empty vector");
+    }
+    auto slot_count = context->slot_count<BatchEncoder>();
+    if (pt.size() > slot_count)
+        // number of slots available is poly_modulus_degree / 2
+        throw invalid_argument(
+            "can't encrypt vectors of this size, please use a larger "
+            "polynomial modulus degree.");
 
-vector<int64_t> BFVVector::decrypt() const {
-    if (this->tenseal_context()->decryptor == nullptr) {
+    Ciphertext ciphertext(context->seal_context());
+    Plaintext plaintext;
+    pt.replicate(slot_count);
+    context->encode<BatchEncoder>(pt.data(), plaintext);
+    context->encryptor->encrypt(plaintext, ciphertext);
+
+    return ciphertext;
+}
+
+BFVVector::plain_t BFVVector::decrypt() const {
+    if (this->tenseal_context()->decryptor == NULL) {
         // this->context was loaded with public keys only
         throw invalid_argument(
             "the current context of the vector doesn't hold a secret_key, "
@@ -56,171 +72,244 @@ vector<int64_t> BFVVector::decrypt() const {
 
     return this->decrypt(this->tenseal_context()->secret_key());
 }
-
-vector<int64_t> BFVVector::decrypt(const shared_ptr<SecretKey>& sk) const {
+BFVVector::plain_t BFVVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
     Decryptor decryptor =
         Decryptor(this->tenseal_context()->seal_context(), *sk);
 
     vector<int64_t> result;
 
-    decryptor.decrypt(this->ciphertext, plaintext);
+    decryptor.decrypt(this->_ciphertext, plaintext);
     this->tenseal_context()->decode<BatchEncoder>(plaintext, result);
 
     // result contains all slots of ciphertext (poly_modulus_degree)
     // we use the real vector size to delimit the resulting plaintext vector
-    vector<int64_t> real_result(result.cbegin(),
-                                result.cbegin() + this->size());
-    return real_result;
+    return vector<int64_t>(result.cbegin(), result.cbegin() + this->size());
 }
 
-BFVVector BFVVector::add(const BFVVector& to_add) const {
-    BFVVector new_vector = *this;
-    new_vector.add_inplace(to_add);
+shared_ptr<BFVVector> BFVVector::power_inplace(unsigned int power) {
+    // if the power is zero, return a new encrypted vector of ones
+    if (power == 0) {
+        vector<int64_t> ones(this->size(), 1);
+        *this = BFVVector(this->tenseal_context(), ones);
+        return shared_from_this();
+    }
 
-    return new_vector;
+    if (power == 1) {
+        return shared_from_this();
+    }
+
+    if (power == 2) {
+        this->square_inplace();
+        return shared_from_this();
+    }
+
+    int closest_power_of_2 = 1 << static_cast<int>(floor(log2(power)));
+    power -= closest_power_of_2;
+    if (power == 0) {
+        this->power_inplace(closest_power_of_2 / 2)->square_inplace();
+    } else {
+        auto closest_pow2_vector = this->power(closest_power_of_2);
+        this->power_inplace(power)->mul_inplace(closest_pow2_vector);
+    }
+
+    return shared_from_this();
 }
 
-BFVVector& BFVVector::add_inplace(BFVVector to_add) {
-    if (!this->tenseal_context()->equals(to_add.context)) {
+shared_ptr<BFVVector> BFVVector::negate_inplace() {
+    this->tenseal_context()->evaluator->negate_inplace(this->_ciphertext);
+
+    return shared_from_this();
+}
+
+shared_ptr<BFVVector> BFVVector::square_inplace() {
+    this->tenseal_context()->evaluator->square_inplace(this->_ciphertext);
+    this->auto_relin();
+
+    return shared_from_this();
+}
+
+shared_ptr<BFVVector> BFVVector::add_inplace(
+    const shared_ptr<BFVVector>& other) {
+    auto to_add = other->copy();
+    if (!this->tenseal_context()->equals(to_add->tenseal_context())) {
         // Different contexts means different parameters
         throw invalid_argument(
             "can't add vectors that have different contexts");
     }
 
-    if (this->size() != to_add.size()) {
-        throw invalid_argument("can't add vectors of different sizes");
-    }
+    this->broadcast_or_throw(to_add);
 
-    this->tenseal_context()->evaluator->add_inplace(this->ciphertext,
-                                                    to_add.ciphertext);
+    this->tenseal_context()->evaluator->add_inplace(this->_ciphertext,
+                                                    to_add->_ciphertext);
 
-    return *this;
+    return shared_from_this();
 }
 
-BFVVector BFVVector::add_plain(const vector<int64_t>& to_add) const {
-    BFVVector new_vector = *this;
-    new_vector.add_plain_inplace(to_add);
-
-    return new_vector;
-}
-
-BFVVector& BFVVector::add_plain_inplace(const vector<int64_t>& to_add) {
-    if (this->size() != to_add.size()) {
-        throw invalid_argument("can't add vectors of different sizes");
-    }
-
-    Plaintext plaintext;
-
-    this->tenseal_context()->encode<BatchEncoder>(to_add, plaintext);
-    this->tenseal_context()->evaluator->add_plain_inplace(this->ciphertext,
-                                                          plaintext);
-
-    return *this;
-}
-
-BFVVector BFVVector::sub(const BFVVector& to_sub) const {
-    BFVVector new_vector = *this;
-    new_vector.sub_inplace(to_sub);
-
-    return new_vector;
-}
-
-BFVVector& BFVVector::sub_inplace(BFVVector to_sub) {
-    if (!this->tenseal_context()->equals(to_sub.context)) {
+shared_ptr<BFVVector> BFVVector::sub_inplace(
+    const shared_ptr<BFVVector>& other) {
+    auto to_sub = other->copy();
+    if (!this->tenseal_context()->equals(to_sub->tenseal_context())) {
         // Different contexts means different parameters
         throw invalid_argument(
             "can't sub vectors that have different contexts");
     }
 
-    if (this->size() != to_sub.size()) {
-        throw invalid_argument("can't sub vectors of different sizes");
+    this->broadcast_or_throw(to_sub);
+
+    this->tenseal_context()->evaluator->sub_inplace(this->_ciphertext,
+                                                    to_sub->_ciphertext);
+
+    return shared_from_this();
+}
+
+shared_ptr<BFVVector> BFVVector::mul_inplace(
+    const shared_ptr<BFVVector>& other) {
+    auto to_mul = other->copy();
+    if (!this->tenseal_context()->equals(to_mul->tenseal_context())) {
+        // Different contexts means different parameters
+        throw invalid_argument(
+            "can't multiply vectors that have different contexts");
     }
 
-    this->tenseal_context()->evaluator->sub_inplace(this->ciphertext,
-                                                    to_sub.ciphertext);
+    this->broadcast_or_throw(to_mul);
 
-    return *this;
+    this->tenseal_context()->evaluator->multiply_inplace(this->_ciphertext,
+                                                         to_mul->_ciphertext);
+    this->auto_relin();
+
+    return shared_from_this();
 }
 
-BFVVector BFVVector::sub_plain(const vector<int64_t>& to_sub) const {
-    BFVVector new_vector = *this;
-    new_vector.sub_plain_inplace(to_sub);
+shared_ptr<BFVVector> BFVVector::dot_product_inplace(
+    const shared_ptr<BFVVector>& to_mul) {
+    this->mul_inplace(to_mul);
+    this->sum_inplace();
 
-    return new_vector;
+    return shared_from_this();
 }
 
-BFVVector& BFVVector::sub_plain_inplace(const vector<int64_t>& to_sub) {
+shared_ptr<BFVVector> BFVVector::dot_product_plain_inplace(
+    const BFVVector::plain_t& to_mul) {
+    this->mul_plain_inplace(to_mul);
+    this->sum_inplace();
+
+    return shared_from_this();
+}
+
+shared_ptr<BFVVector> BFVVector::sum_inplace() {
+    sum_vector(this->tenseal_context(), this->_ciphertext, this->size());
+    this->_size = 1;
+    return shared_from_this();
+}
+
+shared_ptr<BFVVector> BFVVector::add_plain_inplace(
+    const plain_t::dtype& to_add) {
+    throw std::logic_error("not implemented");
+}
+
+shared_ptr<BFVVector> BFVVector::add_plain_inplace(
+    const BFVVector::plain_t& to_add) {
+    if (this->size() != to_add.size()) {
+        throw invalid_argument("can't add vectors of different sizes");
+    }
+
+    Plaintext plaintext;
+
+    this->tenseal_context()->encode<BatchEncoder>(to_add.data(), plaintext);
+    this->tenseal_context()->evaluator->add_plain_inplace(this->_ciphertext,
+                                                          plaintext);
+
+    return shared_from_this();
+}
+
+shared_ptr<BFVVector> BFVVector::sub_plain_inplace(
+    const plain_t::dtype& to_sub) {
+    throw std::logic_error("not implemented");
+}
+
+shared_ptr<BFVVector> BFVVector::sub_plain_inplace(
+    const BFVVector::plain_t& to_sub) {
     if (this->size() != to_sub.size()) {
         throw invalid_argument("can't sub vectors of different sizes");
     }
 
     Plaintext plaintext;
 
-    this->tenseal_context()->encode<BatchEncoder>(to_sub, plaintext);
-    this->tenseal_context()->evaluator->sub_plain_inplace(this->ciphertext,
+    this->tenseal_context()->encode<BatchEncoder>(to_sub.data(), plaintext);
+    this->tenseal_context()->evaluator->sub_plain_inplace(this->_ciphertext,
                                                           plaintext);
 
-    return *this;
+    return shared_from_this();
 }
 
-BFVVector BFVVector::mul(const BFVVector& to_mul) const {
-    BFVVector new_vector = *this;
-    new_vector.mul_inplace(to_mul);
-
-    return new_vector;
+shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
+    const plain_t::dtype& to_sub) {
+    throw std::logic_error("not implemented");
 }
 
-BFVVector& BFVVector::mul_inplace(BFVVector to_mul) {
-    if (!this->tenseal_context()->equals(to_mul.context)) {
-        // Different contexts means different parameters
-        throw invalid_argument(
-            "can't mul vectors that have different contexts");
-    }
-
-    if (this->size() != to_mul.size()) {
-        throw invalid_argument("can't mul vectors of different sizes");
-    }
-
-    this->tenseal_context()->evaluator->multiply_inplace(this->ciphertext,
-                                                         to_mul.ciphertext);
-
-    if (this->tenseal_context()->auto_relin()) {
-        // relineraization after ciphertext-ciphertext multiplication
-        this->tenseal_context()->evaluator->relinearize_inplace(
-            this->ciphertext, *this->tenseal_context()->relin_keys());
-    }
-    return *this;
-}
-
-BFVVector BFVVector::mul_plain(const vector<int64_t>& to_mul) const {
-    BFVVector new_vector = *this;
-    new_vector.mul_plain_inplace(to_mul);
-
-    return new_vector;
-}
-
-BFVVector& BFVVector::mul_plain_inplace(const vector<int64_t>& to_mul) {
+shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
+    const BFVVector::plain_t& to_mul) {
     if (this->size() != to_mul.size()) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
 
     Plaintext plaintext;
-    this->tenseal_context()->encode<BatchEncoder>(to_mul, plaintext);
+    this->tenseal_context()->encode<BatchEncoder>(to_mul.data(), plaintext);
 
     try {
         this->tenseal_context()->evaluator->multiply_plain_inplace(
-            this->ciphertext, plaintext);
+            this->_ciphertext, plaintext);
     } catch (const std::logic_error& e) {
         if (strcmp(e.what(), "result ciphertext is transparent") == 0) {
             // replace by encryption of zero
-            this->tenseal_context()->encryptor->encrypt_zero(this->ciphertext);
+            this->tenseal_context()->encryptor->encrypt_zero(this->_ciphertext);
         } else {  // Something else, need to be forwarded
             throw;
         }
     }
 
-    return *this;
+    return shared_from_this();
+}
+
+shared_ptr<BFVVector> BFVVector::matmul_plain_inplace(
+    const BFVVector::plain_t& matrix, size_t n_jobs) {
+    throw std::logic_error("not implemented");
+}
+
+shared_ptr<BFVVector> BFVVector::polyval_inplace(
+    const vector<double>& coefficients) {
+    throw std::logic_error("not implemented");
+}
+
+shared_ptr<BFVVector> BFVVector::conv2d_im2col_inplace(
+    const BFVVector::plain_t& kernel, const size_t windows_nb) {
+    throw std::logic_error("not implemented");
+}
+
+shared_ptr<BFVVector> BFVVector::enc_matmul_plain_inplace(
+    const BFVVector::plain_t& plain_vec, const size_t rows_nb) {
+    throw std::logic_error("not implemented");
+}
+
+shared_ptr<BFVVector> BFVVector::replicate_first_slot_inplace(size_t n) {
+    // mask
+    vector<int64_t> mask(this->_size, 0);
+    mask[0] = 1;
+    this->mul_plain_inplace(mask);
+
+    // replicate
+    Ciphertext tmp = this->_ciphertext;
+    auto galois_keys = this->tenseal_context()->galois_keys();
+    for (size_t i = 0; i < (size_t)ceil(log2(n)); i++) {
+        this->tenseal_context()->evaluator->rotate_vector_inplace(
+            tmp, static_cast<int>(-pow(2, i)), *galois_keys);
+        this->tenseal_context()->evaluator->add_inplace(this->_ciphertext, tmp);
+        tmp = this->_ciphertext;
+    }
+
+    this->_size = n;
+    return shared_from_this();
 }
 
 void BFVVector::load_proto(const BFVVectorProto& vec) {
@@ -228,7 +317,7 @@ void BFVVector::load_proto(const BFVVectorProto& vec) {
         throw invalid_argument("context missing for deserialization");
     }
     this->_size = vec.size();
-    this->ciphertext = SEALDeserialize<Ciphertext>(
+    this->_ciphertext = SEALDeserialize<Ciphertext>(
         this->tenseal_context()->seal_context(), vec.ciphertext());
 }
 
@@ -239,7 +328,7 @@ void BFVVector::load_context_proto(const TenSEALContextProto& ctx) {
 BFVVectorProto BFVVector::save_proto() const {
     BFVVectorProto buffer;
 
-    *buffer.mutable_ciphertext() = SEALSerialize<Ciphertext>(this->ciphertext);
+    *buffer.mutable_ciphertext() = SEALSerialize<Ciphertext>(this->_ciphertext);
     buffer.set_size(static_cast<int>(this->_size));
 
     return buffer;
@@ -269,9 +358,13 @@ std::string BFVVector::save() const {
     return output;
 }
 
-BFVVector BFVVector::deepcopy() const {
+shared_ptr<BFVVector> BFVVector::copy() const {
+    return shared_ptr<BFVVector>(new BFVVector(shared_from_this()));
+}
+
+shared_ptr<BFVVector> BFVVector::deepcopy() const {
     TenSEALContextProto ctx = this->tenseal_context()->save_proto();
     BFVVectorProto vec = this->save_proto();
-    return BFVVector(ctx, vec);
+    return BFVVector::Create(ctx, vec);
 }
 }  // namespace tenseal

@@ -21,7 +21,7 @@ def test_pack_ckks_vectors(vectors_nb, vector_size):
 
     enc_vectors = [ts.ckks_vector(context, v) for v in vectors]
 
-    result = ts.pack_vectors(enc_vectors)
+    result = ts.CKKSVector.pack_vectors(enc_vectors)
     expected = reduce(lambda x, y: x + y, vectors, [])
 
     assert almost_equal(result.decrypt(), expected, 1), "packing CKKS vectors is incorrect."
@@ -39,7 +39,7 @@ def test_pack_bfv_vectors(vectors_nb, vector_size):
 
     enc_vectors = [ts.bfv_vector(context, v) for v in vectors]
 
-    packed_vec = ts.pack_vectors(enc_vectors)
+    packed_vec = ts.BFVVector.pack_vectors(enc_vectors)
     result = packed_vec.decrypt()
     expected = reduce(lambda x, y: x + y, vectors, [])
 

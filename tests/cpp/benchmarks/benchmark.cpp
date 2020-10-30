@@ -1,6 +1,6 @@
 #include "benchmark/benchmark.h"
 
-#include "tenseal/cpp/tensors/ckksvector.h"
+#include "tenseal/cpp/tenseal.h"
 
 namespace tenseal {
 namespace {
@@ -26,10 +26,10 @@ void BM_matmul_plain(benchmark::State& state) {
         matrix.push_back(data);
     }
 
-    auto vec = CKKSVector(ctx, data);
+    auto vec = CKKSVector::Create(ctx, data);
 
     for (auto _ : state) {
-        auto res = vec.matmul_plain(matrix);
+        auto res = vec->matmul_plain(matrix);
         ::benchmark::DoNotOptimize(res);
     }
 }

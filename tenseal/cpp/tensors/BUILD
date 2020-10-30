@@ -9,13 +9,16 @@ cc_library(
     srcs = [
         "bfvvector.cpp",
         "ckksvector.cpp",
-        "utils/matrix_ops.h",
         "utils/utils.cpp",
         "utils/utils.h",
     ],
     hdrs = [
+        "api.h",
         "bfvvector.h",
         "ckksvector.h",
+        "encrypted_tensor.h",
+        "encrypted_vector.h",
+        "plain_tensor.h",
     ],
     copts = TENSEAL_DEFAULT_COPTS,
     includes = TENSEAL_DEFAULT_INCLUDES,
