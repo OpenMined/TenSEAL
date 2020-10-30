@@ -11,6 +11,26 @@ using namespace seal;
 using namespace std;
 namespace py = pybind11;
 
+template <typename plain_t>
+void bind_plain_tensor(py::module &m, const std::string &name) {
+    using type = PlainTensor<plain_t>;
+    std::string class_name = "PlainTensor" + name;
+
+    py::class_<type>(m, class_name.c_str(), py::module_local())
+        .def(py::init<const vector<plain_t> &>())
+        .def(py::init<const vector<vector<plain_t>> &>())
+        .def("at", &type::at)
+        .def("get_diagonal", &type::get_diagonal)
+        .def("horizontal_scan", &type::horizontal_scan)
+        .def("vertical_scan", &type::vertical_scan)
+        .def("data", &type::data)
+        .def("shape", &type::shape)
+        .def("strides", &type::strides)
+        .def("size", &type::size)
+        .def("empty", &type::empty)
+        .def("replicate", &type::replicate);
+}
+
 PYBIND11_MODULE(_tenseal_cpp, m) {
     m.doc() = "Library for doing homomorphic encryption operations on tensors";
 
@@ -37,17 +57,18 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         encryption_parameters : parameters to use to create the SEALContext.)",
         py::arg("encryption_parameters"));
 
+    bind_plain_tensor<double>(m, "Double");
+    bind_plain_tensor<int64_t>(m, "Int64");
+
     py::class_<BFVVector, std::shared_ptr<BFVVector>>(m, "BFVVector",
                                                       py::module_local())
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<int64_t> &data) {
-            return std::dynamic_pointer_cast<BFVVector>(
-                BFVVector::Create(ctx, data));
+            return BFVVector::Create(ctx, data);
         }))
         .def(py::init(
             [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
-                return std::dynamic_pointer_cast<BFVVector>(
-                    BFVVector::Create(ctx, data));
+                return BFVVector::Create(ctx, data);
             }))
         .def("size", py::overload_cast<>(&BFVVector::size, py::const_))
         .def("decrypt",
@@ -134,21 +155,24 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     // CKKSVector utils
     m.def("im2col_encoding",
-          [](shared_ptr<TenSEALContext> ctx, vector<vector<double>> &input,
+          [](shared_ptr<TenSEALContext> ctx, vector<vector<double>> &raw_input,
              const size_t kernel_n_rows, const size_t kernel_n_cols,
              const size_t stride) {
               vector<vector<double>> view_as_window;
-              vector<double> final_vector;
-              size_t windows_nb = im2col(input, view_as_window, kernel_n_rows,
-                                         kernel_n_cols, stride);
-              vertical_scan(view_as_window, final_vector);
+
+              PlainTensor<double> input(raw_input);
+              size_t windows_nb = input.im2col(view_as_window, kernel_n_rows,
+                                               kernel_n_cols, stride);
+
+              PlainTensor<double> view_as_window_tensor(view_as_window);
+              auto final_vector = view_as_window_tensor.vertical_scan();
+
               auto ckks_vector = CKKSVector::Create(ctx, final_vector);
               return make_pair(ckks_vector, windows_nb);
           });
 
     m.def("enc_matmul_encoding", [](shared_ptr<TenSEALContext> ctx,
                                     const vector<vector<double>> &input) {
-        vector<double> final_vector;
         vector<vector<double>> padded_matrix;
         padded_matrix.reserve(input.size());
         // calculate the next power of 2
@@ -162,7 +186,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             padded_matrix.push_back(row);
         }
 
-        vertical_scan(padded_matrix, final_vector);
+        PlainTensor<double> padded_tensor(padded_matrix);
+        auto final_vector = padded_tensor.vertical_scan();
+
         auto ckks_vector = CKKSVector::Create(ctx, final_vector);
         return ckks_vector;
     });
@@ -172,19 +198,16 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         // specifying scale
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<double> &data, double scale) {
-            return std::dynamic_pointer_cast<CKKSVector>(
-                CKKSVector::Create(ctx, data, scale));
+            return CKKSVector::Create(ctx, data, scale);
         }))
         // using global_scale if set
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<double> &data) {
-            return std::dynamic_pointer_cast<CKKSVector>(
-                CKKSVector::Create(ctx, data));
+            return CKKSVector::Create(ctx, data);
         }))
         .def(py::init(
             [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
-                return std::dynamic_pointer_cast<CKKSVector>(
-                    CKKSVector::Create(ctx, data));
+                return CKKSVector::Create(ctx, data);
             }))
         .def("size", py::overload_cast<>(&CKKSVector::size, py::const_))
         .def("decrypt",

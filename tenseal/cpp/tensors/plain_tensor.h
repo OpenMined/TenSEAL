@@ -47,7 +47,8 @@ class PlainTensor {
         }
     }
     /**
-     * Returns element at position {idx1, idx2, ..., idxn} in the current shape
+     * Returns the element at position {idx1, idx2, ..., idxn} in the current
+     * shape
      * @param[in] desired position from the tensor.
      */
     plain_t at(const vector<size_t>& index) const {
@@ -61,6 +62,11 @@ class PlainTensor {
 
         return _data[tensor_idx];
     }
+    /**
+     * Returns iterator to row.
+     * @param[in] desired row.
+     */
+    auto row(size_t idx) const { return _data.begin() + idx * _strides[0]; }
 
     /*
     Returns the k-th diagonal of a matrix. Positive values of k represent upper
@@ -94,11 +100,72 @@ class PlainTensor {
         return t_diag;
     }
     /**
+     * Image Block to Columns implementation
+     **/
+    size_t im2col(vector<vector<plain_t>>& dst, const size_t window_height,
+                  const size_t window_width, const size_t stride) {
+        if (_shape.size() != 2)
+            throw invalid_argument("tensor cannot be viewed as a matrix");
+
+        // input shape
+        size_t in_height = _shape[0];
+        size_t in_width = _shape[1];
+
+        // output shape
+        size_t out_height = (in_height - window_height) / stride + 1;
+        size_t out_width = (in_width - window_width) / stride + 1;
+        dst.reserve(out_height);
+
+        // windows number
+        size_t windows_nb = out_height * out_width;
+
+        // kernel_size
+        size_t kernel_size = window_width * window_height;
+        // calculate the next power of 2
+        kernel_size = 1 << (static_cast<size_t>(ceil(log2(kernel_size))));
+
+        for (size_t j = 0; j < in_height - window_height + 1; j += stride) {
+            for (size_t i = 0; i < in_width - window_width + 1; i += stride) {
+                // pad the window vector to the next power of 2 of kernel size
+                vector<plain_t> window_vec(kernel_size, 0);
+                auto iter = window_vec.begin();
+                for (size_t k = 0; k < window_height; k++) {
+                    iter = copy(this->row(j + k) + i,
+                                this->row(j + k) + i + window_width, iter);
+                }
+                dst.push_back(window_vec);
+            }
+        }
+
+        return windows_nb;
+    }
+    /**
      * Returns the horizontal view of the tensor.
      */
     auto horizontal_scan() const { return _data; }
     /**
-     * Returns a reference to the internal representation of the tensor.
+     * Returns the vertical view of a 2D tensor.
+     */
+    auto vertical_scan() const {
+        if (_shape.size() != 2)
+            throw invalid_argument("tensor cannot be viewed as a matrix");
+
+        size_t in_height = _shape[0];
+        size_t in_width = _shape[1];
+
+        vector<plain_t> dst;
+        dst.resize(in_height * in_width);
+
+        for (size_t i = 0; i < in_height; i++) {
+            for (size_t j = 0; j < in_width; j++) {
+                dst[i + j * in_height] = this->at({i, j});
+            }
+        }
+        return dst;
+    }
+    /**
+     * Returns a reference to the internal representation of the
+     * tensor.
      */
     const vector<plain_t>& data() const { return _data; }
     /**
