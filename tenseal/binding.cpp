@@ -201,42 +201,42 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("pow_", &CKKSVector::power_inplace)
         .def("add", &CKKSVector::add)
         .def("add_", &CKKSVector::add_inplace)
-        .def("add_plain",
-             py::overload_cast<double>(&CKKSVector::add_plain, py::const_))
+        .def("add_plain", py::overload_cast<const double &>(
+                              &CKKSVector::add_plain, py::const_))
         .def("add_plain",
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->add_plain(other);
              })
         .def("add_plain_",
-             py::overload_cast<double>(&CKKSVector::add_plain_inplace))
+             py::overload_cast<const double &>(&CKKSVector::add_plain_inplace))
         .def("add_plain_",
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->add_plain_inplace(other);
              })
         .def("sub", &CKKSVector::sub)
         .def("sub_", &CKKSVector::sub_inplace)
-        .def("sub_plain",
-             py::overload_cast<double>(&CKKSVector::sub_plain, py::const_))
+        .def("sub_plain", py::overload_cast<const double &>(
+                              &CKKSVector::sub_plain, py::const_))
         .def("sub_plain",
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->sub_plain(other);
              })
         .def("sub_plain_",
-             py::overload_cast<double>(&CKKSVector::sub_plain_inplace))
+             py::overload_cast<const double &>(&CKKSVector::sub_plain_inplace))
         .def("sub_plain_",
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->sub_plain_inplace(other);
              })
         .def("mul", &CKKSVector::mul)
         .def("mul_", &CKKSVector::mul_inplace)
-        .def("mul_plain",
-             py::overload_cast<double>(&CKKSVector::mul_plain, py::const_))
+        .def("mul_plain", py::overload_cast<const double &>(
+                              &CKKSVector::mul_plain, py::const_))
         .def("mul_plain",
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->mul_plain(other);
              })
         .def("mul_plain_",
-             py::overload_cast<double>(&CKKSVector::mul_plain_inplace))
+             py::overload_cast<const double &>(&CKKSVector::mul_plain_inplace))
         .def("mul_plain_",
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->mul_plain_inplace(other);
@@ -306,28 +306,28 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__pow__", &CKKSVector::power)
         .def("__ipow__", &CKKSVector::power_inplace)
         .def("__add__", &CKKSVector::add)
-        .def("__add__",
-             py::overload_cast<double>(&CKKSVector::add_plain, py::const_))
+        .def("__add__", py::overload_cast<const double &>(
+                            &CKKSVector::add_plain, py::const_))
         .def("__add__",
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->add_plain(other);
              })
-        .def("__radd__",
-             py::overload_cast<double>(&CKKSVector::add_plain, py::const_))
+        .def("__radd__", py::overload_cast<const double &>(
+                             &CKKSVector::add_plain, py::const_))
         .def("__radd__",
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->add_plain(other);
              })
         .def("__iadd__", &CKKSVector::add_inplace)
         .def("__iadd__",
-             py::overload_cast<double>(&CKKSVector::add_plain_inplace))
+             py::overload_cast<const double &>(&CKKSVector::add_plain_inplace))
         .def("__iadd__",
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->add_plain_inplace(other);
              })
         .def("__sub__", &CKKSVector::sub)
-        .def("__sub__",
-             py::overload_cast<double>(&CKKSVector::sub_plain, py::const_))
+        .def("__sub__", py::overload_cast<const double &>(
+                            &CKKSVector::sub_plain, py::const_))
         .def("__sub__",
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->sub_plain(other);
@@ -356,27 +356,27 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              })
         .def("__isub__", &CKKSVector::sub_inplace)
         .def("__isub__",
-             py::overload_cast<double>(&CKKSVector::sub_plain_inplace))
+             py::overload_cast<const double &>(&CKKSVector::sub_plain_inplace))
         .def("__isub__",
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->sub_plain_inplace(other);
              })
         .def("__mul__", &CKKSVector::mul)
-        .def("__mul__",
-             py::overload_cast<double>(&CKKSVector::mul_plain, py::const_))
+        .def("__mul__", py::overload_cast<const double &>(
+                            &CKKSVector::mul_plain, py::const_))
         .def("__mul__",
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->mul_plain(other);
              })
-        .def("__rmul__",
-             py::overload_cast<double>(&CKKSVector::mul_plain, py::const_))
+        .def("__rmul__", py::overload_cast<const double &>(
+                             &CKKSVector::mul_plain, py::const_))
         .def("__rmul__",
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->mul_plain(other);
              })
         .def("__imul__", &CKKSVector::mul_inplace)
         .def("__imul__",
-             py::overload_cast<double>(&CKKSVector::mul_plain_inplace))
+             py::overload_cast<const double &>(&CKKSVector::mul_plain_inplace))
         .def("__imul__",
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->mul_plain_inplace(other);

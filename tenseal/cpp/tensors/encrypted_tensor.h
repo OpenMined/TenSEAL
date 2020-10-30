@@ -56,22 +56,22 @@ class EncryptedTensor {
      *an element-wise fashion. in_place functions return a reference to the same
      *object.
      **/
-    encrypted_t add(encrypted_t to_add) const {
+    encrypted_t add(const encrypted_t& to_add) const {
         return this->copy()->add_inplace(to_add);
     };
-    virtual encrypted_t add_inplace(encrypted_t to_add) = 0;
+    virtual encrypted_t add_inplace(const encrypted_t& to_add) = 0;
     encrypted_t sub(encrypted_t to_sub) const {
         return this->copy()->sub_inplace(to_sub);
     };
-    virtual encrypted_t sub_inplace(encrypted_t to_sub) = 0;
+    virtual encrypted_t sub_inplace(const encrypted_t& to_sub) = 0;
     encrypted_t mul(encrypted_t to_mul) const {
         return this->copy()->mul_inplace(to_mul);
     };
-    virtual encrypted_t mul_inplace(encrypted_t to_mul) = 0;
+    virtual encrypted_t mul_inplace(const encrypted_t& to_mul) = 0;
     encrypted_t dot_product(encrypted_t to_mul) const {
         return this->copy()->dot_product_inplace(to_mul);
     };
-    virtual encrypted_t dot_product_inplace(encrypted_t to_mul) = 0;
+    virtual encrypted_t dot_product_inplace(const encrypted_t& to_mul) = 0;
     /**
      * Plain evaluation function operates on an encrypted tensors and plaintext
      * tensors and returns a new EncryptedTensor<plain_data_t, encrypted_t>
@@ -79,33 +79,33 @@ class EncryptedTensor {
      *an element-wise fashion. in_place functions return a reference to the same
      *object.
      **/
-    encrypted_t add_plain(plain_data_t to_add) const {
+    encrypted_t add_plain(const plain_data_t& to_add) const {
         return this->copy()->add_plain_inplace(to_add);
     };
     encrypted_t add_plain(const PlainTensor<plain_data_t>& to_add) const {
         return this->copy()->add_plain_inplace(to_add);
     };
-    virtual encrypted_t add_plain_inplace(plain_data_t to_add) = 0;
+    virtual encrypted_t add_plain_inplace(const plain_data_t& to_add) = 0;
     virtual encrypted_t add_plain_inplace(
         const PlainTensor<plain_data_t>& to_add) = 0;
 
-    encrypted_t sub_plain(plain_data_t to_sub) const {
+    encrypted_t sub_plain(const plain_data_t& to_sub) const {
         return this->copy()->sub_plain_inplace(to_sub);
     };
     encrypted_t sub_plain(const PlainTensor<plain_data_t>& to_sub) const {
         return this->copy()->sub_plain_inplace(to_sub);
     };
-    virtual encrypted_t sub_plain_inplace(plain_data_t to_sub) = 0;
+    virtual encrypted_t sub_plain_inplace(const plain_data_t& to_sub) = 0;
     virtual encrypted_t sub_plain_inplace(
         const PlainTensor<plain_data_t>& to_sub) = 0;
 
-    encrypted_t mul_plain(plain_data_t to_mul) const {
+    encrypted_t mul_plain(const plain_data_t& to_mul) const {
         return this->copy()->mul_plain_inplace(to_mul);
     };
     encrypted_t mul_plain(const PlainTensor<plain_data_t>& to_mul) const {
         return this->copy()->mul_plain_inplace(to_mul);
     };
-    virtual encrypted_t mul_plain_inplace(plain_data_t to_mul) = 0;
+    virtual encrypted_t mul_plain_inplace(const plain_data_t& to_mul) = 0;
     virtual encrypted_t mul_plain_inplace(
         const PlainTensor<plain_data_t>& to_mul) = 0;
 

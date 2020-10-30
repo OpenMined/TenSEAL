@@ -49,10 +49,10 @@ class CKKSVector
      *addition, substraction or multiplication in an element-wise fashion.
      *in_place functions return a reference to the same object.
      **/
-    encrypted_t add_inplace(encrypted_t to_add) override;
-    encrypted_t sub_inplace(encrypted_t to_sub) override;
-    encrypted_t mul_inplace(encrypted_t to_mul) override;
-    encrypted_t dot_product_inplace(encrypted_t to_mul) override;
+    encrypted_t add_inplace(const encrypted_t& to_add) override;
+    encrypted_t sub_inplace(const encrypted_t& to_sub) override;
+    encrypted_t mul_inplace(const encrypted_t& to_mul) override;
+    encrypted_t dot_product_inplace(const encrypted_t& to_mul) override;
     encrypted_t dot_product_plain_inplace(const plain_t& to_mul) override;
     encrypted_t sum_inplace() override;
 
@@ -62,11 +62,11 @@ class CKKSVector
      * either addition, substraction or multiplication in an element-wise
      *fashion. in_place functions return a reference to the same object.
      **/
-    encrypted_t add_plain_inplace(plain_t::dtype to_add) override;
+    encrypted_t add_plain_inplace(const plain_t::dtype& to_add) override;
     encrypted_t add_plain_inplace(const plain_t& to_add) override;
-    encrypted_t sub_plain_inplace(plain_t::dtype to_sub) override;
+    encrypted_t sub_plain_inplace(const plain_t::dtype& to_sub) override;
     encrypted_t sub_plain_inplace(const plain_t& to_sub) override;
-    encrypted_t mul_plain_inplace(plain_t::dtype to_mul) override;
+    encrypted_t mul_plain_inplace(const plain_t::dtype& to_mul) override;
     encrypted_t mul_plain_inplace(const plain_t& to_mul) override;
 
     /**

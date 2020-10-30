@@ -129,7 +129,8 @@ shared_ptr<BFVVector> BFVVector::square_inplace() {
     return shared_from_this();
 }
 
-shared_ptr<BFVVector> BFVVector::add_inplace(shared_ptr<BFVVector> other) {
+shared_ptr<BFVVector> BFVVector::add_inplace(
+    const shared_ptr<BFVVector>& other) {
     auto to_add = other->copy();
     if (!this->tenseal_context()->equals(to_add->tenseal_context())) {
         // Different contexts means different parameters
@@ -145,7 +146,8 @@ shared_ptr<BFVVector> BFVVector::add_inplace(shared_ptr<BFVVector> other) {
     return shared_from_this();
 }
 
-shared_ptr<BFVVector> BFVVector::sub_inplace(shared_ptr<BFVVector> other) {
+shared_ptr<BFVVector> BFVVector::sub_inplace(
+    const shared_ptr<BFVVector>& other) {
     auto to_sub = other->copy();
     if (!this->tenseal_context()->equals(to_sub->tenseal_context())) {
         // Different contexts means different parameters
@@ -161,7 +163,8 @@ shared_ptr<BFVVector> BFVVector::sub_inplace(shared_ptr<BFVVector> other) {
     return shared_from_this();
 }
 
-shared_ptr<BFVVector> BFVVector::mul_inplace(shared_ptr<BFVVector> other) {
+shared_ptr<BFVVector> BFVVector::mul_inplace(
+    const shared_ptr<BFVVector>& other) {
     auto to_mul = other->copy();
     if (!this->tenseal_context()->equals(to_mul->tenseal_context())) {
         // Different contexts means different parameters
@@ -179,7 +182,7 @@ shared_ptr<BFVVector> BFVVector::mul_inplace(shared_ptr<BFVVector> other) {
 }
 
 shared_ptr<BFVVector> BFVVector::dot_product_inplace(
-    shared_ptr<BFVVector> to_mul) {
+    const shared_ptr<BFVVector>& to_mul) {
     this->mul_inplace(to_mul);
     this->sum_inplace();
 
@@ -200,7 +203,8 @@ shared_ptr<BFVVector> BFVVector::sum_inplace() {
     return shared_from_this();
 }
 
-shared_ptr<BFVVector> BFVVector::add_plain_inplace(plain_t::dtype to_add) {
+shared_ptr<BFVVector> BFVVector::add_plain_inplace(
+    const plain_t::dtype& to_add) {
     throw std::logic_error("not implemented");
 }
 
@@ -219,7 +223,8 @@ shared_ptr<BFVVector> BFVVector::add_plain_inplace(
     return shared_from_this();
 }
 
-shared_ptr<BFVVector> BFVVector::sub_plain_inplace(plain_t::dtype to_sub) {
+shared_ptr<BFVVector> BFVVector::sub_plain_inplace(
+    const plain_t::dtype& to_sub) {
     throw std::logic_error("not implemented");
 }
 
@@ -238,7 +243,8 @@ shared_ptr<BFVVector> BFVVector::sub_plain_inplace(
     return shared_from_this();
 }
 
-shared_ptr<BFVVector> BFVVector::mul_plain_inplace(plain_t::dtype to_sub) {
+shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
+    const plain_t::dtype& to_sub) {
     throw std::logic_error("not implemented");
 }
 

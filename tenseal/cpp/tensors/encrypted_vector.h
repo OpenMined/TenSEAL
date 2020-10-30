@@ -72,7 +72,7 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
      * Adjust two vectors to match sizes.
      * @return the right operand, in case it was copied and altered.
      **/
-    encrypted_t broadcast_or_throw(encrypted_t other) {
+    encrypted_t broadcast_or_throw(const encrypted_t& other) {
         if (this->size() == other->size()) return other;
 
         if (this->size() == 1) {

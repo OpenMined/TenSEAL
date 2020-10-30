@@ -134,7 +134,9 @@ shared_ptr<CKKSVector> CKKSVector::square_inplace() {
     return shared_from_this();
 }
 
-shared_ptr<CKKSVector> CKKSVector::add_inplace(shared_ptr<CKKSVector> to_add) {
+shared_ptr<CKKSVector> CKKSVector::add_inplace(
+    const shared_ptr<CKKSVector>& other) {
+    auto to_add = other;
     if (!this->tenseal_context()->equals(to_add->tenseal_context())) {
         // Different contexts means different parameters
         throw invalid_argument(
@@ -150,7 +152,9 @@ shared_ptr<CKKSVector> CKKSVector::add_inplace(shared_ptr<CKKSVector> to_add) {
     return shared_from_this();
 }
 
-shared_ptr<CKKSVector> CKKSVector::sub_inplace(shared_ptr<CKKSVector> to_sub) {
+shared_ptr<CKKSVector> CKKSVector::sub_inplace(
+    const shared_ptr<CKKSVector>& other) {
+    auto to_sub = other;
     if (!this->tenseal_context()->equals(to_sub->tenseal_context())) {
         // Different contexts means different parameters
         throw invalid_argument(
@@ -166,7 +170,9 @@ shared_ptr<CKKSVector> CKKSVector::sub_inplace(shared_ptr<CKKSVector> to_sub) {
     return shared_from_this();
 }
 
-shared_ptr<CKKSVector> CKKSVector::mul_inplace(shared_ptr<CKKSVector> to_mul) {
+shared_ptr<CKKSVector> CKKSVector::mul_inplace(
+    const shared_ptr<CKKSVector>& other) {
+    auto to_mul = other;
     if (!this->tenseal_context()->equals(to_mul->tenseal_context())) {
         // Different contexts means different parameters
         throw invalid_argument(
@@ -186,7 +192,7 @@ shared_ptr<CKKSVector> CKKSVector::mul_inplace(shared_ptr<CKKSVector> to_mul) {
 }
 
 shared_ptr<CKKSVector> CKKSVector::dot_product_inplace(
-    shared_ptr<CKKSVector> to_mul) {
+    const shared_ptr<CKKSVector>& to_mul) {
     this->mul_inplace(to_mul);
     this->sum_inplace();
 
@@ -214,7 +220,7 @@ shared_ptr<CKKSVector> CKKSVector::add_plain_inplace(const plain_t& to_add) {
     return this->_add_plain_inplace(to_add.data());
 }
 
-shared_ptr<CKKSVector> CKKSVector::add_plain_inplace(double to_add) {
+shared_ptr<CKKSVector> CKKSVector::add_plain_inplace(const double& to_add) {
     return this->_add_plain_inplace(to_add);
 }
 
@@ -236,7 +242,7 @@ shared_ptr<CKKSVector> CKKSVector::sub_plain_inplace(const plain_t& to_sub) {
     return this->_sub_plain_inplace(to_sub.data());
 }
 
-shared_ptr<CKKSVector> CKKSVector::sub_plain_inplace(double to_sub) {
+shared_ptr<CKKSVector> CKKSVector::sub_plain_inplace(const double& to_sub) {
     return this->_sub_plain_inplace(to_sub);
 }
 
@@ -261,7 +267,7 @@ shared_ptr<CKKSVector> CKKSVector::mul_plain_inplace(const plain_t& to_mul) {
     return this->_mul_plain_inplace(to_mul.data());
 }
 
-shared_ptr<CKKSVector> CKKSVector::mul_plain_inplace(double to_mul) {
+shared_ptr<CKKSVector> CKKSVector::mul_plain_inplace(const double& to_mul) {
     return this->_mul_plain_inplace(to_mul);
 }
 
