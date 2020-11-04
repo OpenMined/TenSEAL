@@ -27,9 +27,9 @@ def tenseal_deps():
         http_archive(
             name = "com_microsoft_seal",
             build_file = "//third_party:seal.BUILD",
-            sha256 = "13674a39a48c0d1c6ff544521cf10ee539ce1af75c02bfbe093f7621869e3406",
-            strip_prefix = "SEAL-3.5.6",
-            urls = ["https://github.com/microsoft/SEAL/archive/v3.5.6.tar.gz"],
+            sha256 = "23bf3bf7ae1dae5dae271244a5baa66fa01856c52e263fe8368c3a40f2399fc7",
+            strip_prefix = "SEAL-3.5.9",
+            urls = ["https://github.com/microsoft/SEAL/archive/v3.5.9.tar.gz"],
         )
 
     rules_proto_dependencies()
