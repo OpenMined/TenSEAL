@@ -84,11 +84,13 @@ void bind_util_namespace(pybind11::module &m) {
         .def("is_superbase_of", &RNSBase::is_superbase_of)
         .def("is_proper_subbase_of", &RNSBase::is_proper_subbase_of)
         .def("is_proper_superbase_of", &RNSBase::is_proper_superbase_of)
-        .def("extend", py::overload_cast<Modulus>(&RNSBase::extend, py::const_))
+        .def("extend",
+             py::overload_cast<const Modulus &>(&RNSBase::extend, py::const_))
         .def("extend",
              py::overload_cast<const RNSBase &>(&RNSBase::extend, py::const_))
         .def("drop", py::overload_cast<>(&RNSBase::drop, py::const_))
-        .def("drop", py::overload_cast<Modulus>(&RNSBase::drop, py::const_))
+        .def("drop",
+             py::overload_cast<const Modulus &>(&RNSBase::drop, py::const_))
         .def("decompose",
              [](const RNSBase &obj, std::vector<std::uint64_t> &value) {
                  std::vector<std::uint64_t> out = value;
