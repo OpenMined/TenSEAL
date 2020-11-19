@@ -430,6 +430,18 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                 return pack_vectors<CKKSVector, CKKSEncoder, double>(vectors);
             });
 
+    py::class_<CKKSTensor, std::shared_ptr<CKKSTensor>>(m, "CKKSTensor",
+                                                        py::module_local())
+        .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
+                         const PlainTensor<double> &tensor, double scale) {
+            return CKKSTensor::Create(ctx, tensor, scale);
+        }))
+        .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
+                         const PlainTensor<double> &tensor) {
+            return CKKSTensor::Create(ctx, tensor);
+        }))
+        .def("decrypt", py::overload_cast<>(&CKKSTensor::decrypt, py::const_));
+
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")
         .def_property(

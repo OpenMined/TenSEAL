@@ -2,25 +2,26 @@
 #define TENSEAL_TENSOR_CKKSTENSOR_H
 
 #include "tenseal/cpp/tensors/encrypted_tensor.h"
+#include "tenseal/cpp/tensors/plain_tensor.h"
 
 namespace tenseal {
 
 using namespace seal;
 using namespace std;
 
-class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>> {
+class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
+                   public enable_shared_from_this<CKKSTensor> {
    public:
-    
     /**
      * Create a new CKKSTensor from an 1D vector.
      * @param[in] input vector.
      * @param[in] input vector.
      * @param[in] input vector.
      */
-    static shared_ptr<CKKSTensor> Create(const shared_ptr<TenSEALContext>& ctx,
-                                         const vector<double>& data,
-                                         std::optional<double> scale) {
-        return shared_ptr<CKKSTensor>(new CKKSTensor(ctx, data, scale));
+    template <typename... Args>
+    static shared_ptr<CKKSTensor> Create(Args&&... args) {
+        return shared_ptr<CKKSTensor>(
+            new CKKSTensor(std::forward<Args>(args)...));
     }
 
     PlainTensor<double> decrypt() const override;
@@ -74,7 +75,8 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>> {
     double _init_scale;
 
     CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
-               const vector<double>& data, std::optional<double> scale = {});
+               const PlainTensor<double>& tensor,
+               std::optional<double> scale = {});
 
     static Ciphertext encrypt(const shared_ptr<TenSEALContext>& ctx,
                               const double scale, const vector<double>& data);
