@@ -440,12 +440,12 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                          const PlainTensor<double> &tensor) {
             return CKKSTensor::Create(ctx, tensor);
         }))
-        .def("decrypt", [](shared_ptr<CKKSTensor> obj){
-            return obj->decrypt().data();
-        })
-        .def("decrypt", [](shared_ptr<CKKSTensor> obj, const shared_ptr<SecretKey> &sk){
-            return obj->decrypt(sk).data();
-        });
+        .def("decrypt",
+             [](shared_ptr<CKKSTensor> obj) { return obj->decrypt().data(); })
+        .def("decrypt",
+             [](shared_ptr<CKKSTensor> obj, const shared_ptr<SecretKey> &sk) {
+                 return obj->decrypt(sk).data();
+             });
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")
