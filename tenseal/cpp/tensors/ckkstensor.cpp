@@ -176,10 +176,12 @@ string CKKSTensor::save() const {
 
 shared_ptr<CKKSTensor> CKKSTensor::copy() const {
     // TODO
+    return nullptr;
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::deepcopy() const {
     // TODO
+    return nullptr;
 }
 
 }  // namespace tenseal
