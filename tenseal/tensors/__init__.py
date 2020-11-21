@@ -121,14 +121,14 @@ def ckks_vector_from(context, data):
 
 
 def ckks_tensor(context, tensor, scale=None):
-    """Constructor method for the CKKSVector object, which can store a list
+    """Constructor method for the CKKSTensor object, which can store a list
     of float numbers in encrypted form, using the CKKS homomorphic encryption
     scheme.
 
     Args:
         context: a TenSEALContext object, holding the encryption parameters and keys.
         tensor: a PlainTensorDouble holding data to be encrypted.
-        scale: the scale to be used to encode vector values. CKKSVector will use the global_scale provided by the context if it's set to None.
+        scale: the scale to be used to encode vector values. CKKSTensor will use the global_scale provided by the context if it's set to None.
 
     Returns:
         CKKSTensor object.
