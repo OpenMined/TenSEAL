@@ -30,7 +30,7 @@ void bind_encrypt_decrypt(pybind11::module &m) {
                  out.close();
              })
         .def("load",
-             [](PublicKey &c, const SEALContext &&context, std::string &path) {
+             [](PublicKey &c, const SEALContext &context, std::string &path) {
                  std::ifstream in(path, std::ifstream::binary);
                  c.load(context, in);
                  in.close();
@@ -55,7 +55,7 @@ void bind_encrypt_decrypt(pybind11::module &m) {
                  out.close();
              })
         .def("load",
-             [](SecretKey &s, const SEALContext &&context, std::string &path) {
+             [](SecretKey &s, const SEALContext &context, std::string &path) {
                  std::ifstream in(path, std::ifstream::binary);
                  s.load(context, in);
                  in.close();
@@ -92,13 +92,12 @@ void bind_encrypt_decrypt(pybind11::module &m) {
                  obj.save(out);
                  out.close();
              })
-        .def(
-            "load",
-            [](RelinKeys &obj, const SEALContext &&context, std::string &path) {
-                std::ifstream in(path, std::ifstream::binary);
-                obj.load(context, in);
-                in.close();
-            })
+        .def("load",
+             [](RelinKeys &obj, const SEALContext &context, std::string &path) {
+                 std::ifstream in(path, std::ifstream::binary);
+                 obj.load(context, in);
+                 in.close();
+             })
         // RelinKeys
         .def_static("get_index", &RelinKeys::get_index)
         .def("has_key", &RelinKeys::has_key)
@@ -127,13 +126,13 @@ void bind_encrypt_decrypt(pybind11::module &m) {
                  obj.save(out);
                  out.close();
              })
-        .def("load",
-             [](GaloisKeys &obj, const SEALContext &&context,
-                std::string &path) {
-                 std::ifstream in(path, std::ifstream::binary);
-                 obj.load(context, in);
-                 in.close();
-             })
+        .def(
+            "load",
+            [](GaloisKeys &obj, const SEALContext &context, std::string &path) {
+                std::ifstream in(path, std::ifstream::binary);
+                obj.load(context, in);
+                in.close();
+            })
         // GaloisKeys
         .def_static("get_index", &GaloisKeys::get_index)
         .def("has_key", &GaloisKeys::has_key)
@@ -150,14 +149,29 @@ void bind_encrypt_decrypt(pybind11::module &m) {
         .def(py::init<const SEALContext &>())
         .def(py::init<const SEALContext &, const SecretKey &>())
         .def("secret_key", &KeyGenerator::secret_key)
-        .def("create_public_key", &KeyGenerator::create_public_key)
+        .def("create_public_key",
+             py::overload_cast<>(&KeyGenerator::create_public_key, py::const_))
+        .def("create_public_key",
+             py::overload_cast<PublicKey &>(&KeyGenerator::create_public_key,
+                                            py::const_))
         .def("create_relin_keys",
              py::overload_cast<>(&KeyGenerator::create_relin_keys))
+        .def("create_relin_keys",
+             py::overload_cast<RelinKeys &>(&KeyGenerator::create_relin_keys))
+        .def(
+            "create_galois_keys",
+            py::overload_cast<const std::vector<std::uint32_t> &, GaloisKeys &>(
+                &KeyGenerator::create_galois_keys))
         .def("create_galois_keys",
              py::overload_cast<const std::vector<std::uint32_t> &>(
                  &KeyGenerator::create_galois_keys))
+        .def("create_galois_keys",
+             py::overload_cast<const std::vector<int> &, GaloisKeys &>(
+                 &KeyGenerator::create_galois_keys))
         .def("create_galois_keys", py::overload_cast<const std::vector<int> &>(
                                        &KeyGenerator::create_galois_keys))
+        .def("create_galois_keys",
+             py::overload_cast<GaloisKeys &>(&KeyGenerator::create_galois_keys))
         .def("create_galois_keys",
              py::overload_cast<>(&KeyGenerator::create_galois_keys));
     /***
@@ -183,7 +197,7 @@ void bind_encrypt_decrypt(pybind11::module &m) {
         .def("set_zero", py::overload_cast<std::size_t>(&Plaintext::set_zero))
         .def("set_zero", py::overload_cast<>(&Plaintext::set_zero))
         .def("is_zero", &Plaintext::is_zero)
-        .def("int_array", &Plaintext::int_array,
+        .def("dyn_array", &Plaintext::dyn_array,
              py::return_value_policy::reference)
         .def("data",
              py::overload_cast<std::size_t>(&Plaintext::data, py::const_),
@@ -205,7 +219,7 @@ void bind_encrypt_decrypt(pybind11::module &m) {
                  out.close();
              })
         .def("load",
-             [](Plaintext &p, const SEALContext &&context, std::string &path) {
+             [](Plaintext &p, const SEALContext &context, std::string &path) {
                  std::ifstream in(path, std::ifstream::binary);
                  p.load(context, in);
                  in.close();
@@ -240,7 +254,7 @@ void bind_encrypt_decrypt(pybind11::module &m) {
                            &Ciphertext::resize))
         .def("resize", py::overload_cast<std::size_t>(&Ciphertext::resize))
         .def("release", &Ciphertext::release)
-        .def("int_array", &Ciphertext::int_array,
+        .def("dyn_array", &Ciphertext::dyn_array,
              py::return_value_policy::reference)
         .def("data", py::overload_cast<>(&Ciphertext::data, py::const_),
              py::return_value_policy::reference)

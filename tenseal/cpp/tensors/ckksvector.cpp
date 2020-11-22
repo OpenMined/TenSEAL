@@ -57,7 +57,7 @@ Ciphertext CKKSVector::encrypt(shared_ptr<TenSEALContext> context, double scale,
             "can't encrypt vectors of this size, please use a larger "
             "polynomial modulus degree.");
 
-    Ciphertext ciphertext(context->seal_context());
+    Ciphertext ciphertext(*context->seal_context());
     Plaintext plaintext;
     pt.replicate(slot_count);
     context->encode<CKKSEncoder>(pt.data(), plaintext, scale);
@@ -78,7 +78,7 @@ CKKSVector::plain_t CKKSVector::decrypt() const {
 CKKSVector::plain_t CKKSVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
     Decryptor decryptor =
-        Decryptor(this->tenseal_context()->seal_context(), *sk);
+        Decryptor(*this->tenseal_context()->seal_context(), *sk);
 
     vector<double> result;
     result.reserve(this->size());
@@ -455,7 +455,7 @@ void CKKSVector::load_proto(const CKKSVectorProto& vec) {
     }
     this->_size = vec.size();
     this->_ciphertext = SEALDeserialize<Ciphertext>(
-        this->tenseal_context()->seal_context(), vec.ciphertext());
+        *this->tenseal_context()->seal_context(), vec.ciphertext());
     this->_init_scale = vec.scale();
 }
 

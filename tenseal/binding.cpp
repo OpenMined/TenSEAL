@@ -508,14 +508,28 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
     // SEAL objects
 
     py::class_<KeyGenerator>(m, "KeyGenerator")
-        .def(py::init<std::shared_ptr<seal::SEALContext> &>())
-        .def("public_key", &KeyGenerator::public_key, "get the public key.")
+        .def(py::init<const seal::SEALContext &>())
+        .def(
+            "public_key",
+            [](const KeyGenerator &keygen) {
+                PublicKey pk;
+                keygen.create_public_key(pk);
+
+                return pk;
+            },
+            "get the public key.")
         .def("secret_key", &KeyGenerator::secret_key, "get the secret key.")
-        .def("relin_keys", py::overload_cast<>(&KeyGenerator::relin_keys),
-             "get the relinearization keys.");
+        .def(
+            "relin_keys",
+            [](KeyGenerator &keygen) {
+                RelinKeys rk;
+                keygen.create_relin_keys(rk);
+                return rk;
+            },
+            "get the relinearization keys.");
 
     py::class_<EncryptionParameters>(m, "EncryptionParameters");
-    py::class_<SEALContext, SEALContext>(m, "SEALContext");
+    py::class_<SEALContext, shared_ptr<SEALContext>>(m, "SEALContext");
     py::class_<PublicKey, std::shared_ptr<PublicKey>>(m, "PublicKey");
     py::class_<SecretKey, std::shared_ptr<SecretKey>>(m, "SecretKey");
     py::class_<RelinKeys, std::shared_ptr<RelinKeys>>(m, "RelinKeys");

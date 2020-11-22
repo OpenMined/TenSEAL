@@ -60,15 +60,13 @@ void bind_encoder_decoder(pybind11::module &m) {
      * "seal/batchencoder.h" {
      ***/
     py::class_<BatchEncoder>(m, "BatchEncoder", py::module_local())
-        .def(py::init<std::shared_ptr<SEALContext>>())
+        .def(py::init<const SEALContext &>())
         .def("encode",
              py::overload_cast<const std::vector<std::uint64_t> &, Plaintext &>(
                  &BatchEncoder::encode))
         .def("encode",
              py::overload_cast<const std::vector<std::int64_t> &, Plaintext &>(
                  &BatchEncoder::encode))
-        .def("encode",
-             [](BatchEncoder &b, Plaintext &plain) { return b.encode(plain); })
         .def("decode_uint64",
              [](BatchEncoder &b, const Plaintext &plain) {
                  std::vector<std::uint64_t> destination;
@@ -81,8 +79,6 @@ void bind_encoder_decoder(pybind11::module &m) {
                  b.decode(plain, destination);
                  return destination;
              })
-        .def("decode",
-             [](BatchEncoder &b, Plaintext &plain) { return b.decode(plain); })
         .def("slot_count", &BatchEncoder::slot_count);
     /***
      * } "seal/batchencoder.h"
@@ -92,7 +88,7 @@ void bind_encoder_decoder(pybind11::module &m) {
      * "seal/ckks.h" {
      ***/
     py::class_<CKKSEncoder>(m, "CKKSEncoder", py::module_local())
-        .def(py::init<std::shared_ptr<SEALContext>>())
+        .def(py::init<const SEALContext &>())
         .def("slot_count", &CKKSEncoder::slot_count)
         .def("encode",
              [](CKKSEncoder &e, const std::vector<double> &values,
