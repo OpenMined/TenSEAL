@@ -20,39 +20,6 @@ namespace py = pybind11;
 
 void bind_encoder_decoder(pybind11::module &m) {
     /*******************
-     * "seal/intencoder.h" {
-     ***/
-    py::class_<IntegerEncoder>(m, "IntegerEncoder", py::module_local())
-        .def(py::init<std::shared_ptr<SEALContext>>())
-        .def("encode",
-             py::overload_cast<std::uint64_t>(&IntegerEncoder::encode))
-        .def("encode", py::overload_cast<std::uint64_t, Plaintext &>(
-                           &IntegerEncoder::encode))
-        .def("encode",
-             py::overload_cast<std::uint32_t>(&IntegerEncoder::encode))
-        .def("encode", py::overload_cast<std::uint32_t, Plaintext &>(
-                           &IntegerEncoder::encode))
-        .def("decode_uint32", &IntegerEncoder::decode_uint32)
-        .def("decode_uint64", &IntegerEncoder::decode_uint64)
-        .def("encode", py::overload_cast<std::int64_t>(&IntegerEncoder::encode))
-        .def("encode", py::overload_cast<std::int64_t, Plaintext &>(
-                           &IntegerEncoder::encode))
-        .def("encode", py::overload_cast<std::int32_t>(&IntegerEncoder::encode))
-        .def("encode", py::overload_cast<std::int32_t, Plaintext &>(
-                           &IntegerEncoder::encode))
-        .def("encode",
-             py::overload_cast<const BigUInt &>(&IntegerEncoder::encode))
-        .def("encode", py::overload_cast<const BigUInt &, Plaintext &>(
-                           &IntegerEncoder::encode))
-        .def("decode_int32", &IntegerEncoder::decode_int32)
-        .def("decode_int64", &IntegerEncoder::decode_int64)
-        .def("decode_biguint", &IntegerEncoder::decode_biguint)
-        .def("plain_modulus", &IntegerEncoder::plain_modulus);
-    /***
-     * } "seal/intencoder.h"
-     *******************/
-
-    /*******************
      * "seal/intarray.h" {
      ***/
     using IntArray64 = IntArray<std::uint64_t>;

@@ -515,7 +515,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              "get the relinearization keys.");
 
     py::class_<EncryptionParameters>(m, "EncryptionParameters");
-    py::class_<SEALContext, std::shared_ptr<SEALContext>>(m, "SEALContext");
+    py::class_<SEALContext, SEALContext>(m, "SEALContext");
     py::class_<PublicKey, std::shared_ptr<PublicKey>>(m, "PublicKey");
     py::class_<SecretKey, std::shared_ptr<SecretKey>>(m, "SecretKey");
     py::class_<RelinKeys, std::shared_ptr<RelinKeys>>(m, "RelinKeys");
@@ -524,6 +524,6 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
     // globals
     py::enum_<scheme_type>(m, "SCHEME_TYPE")
         .value("NONE", scheme_type::none)
-        .value("BFV", scheme_type::BFV)
-        .value("CKKS", scheme_type::CKKS);
+        .value("BFV", scheme_type::bfv)
+        .value("CKKS", scheme_type::ckks);
 }

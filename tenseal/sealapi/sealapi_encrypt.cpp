@@ -29,12 +29,12 @@ void bind_encrypt_decrypt(pybind11::module &m) {
                  c.save(out);
                  out.close();
              })
-        .def("load", [](PublicKey &c, std::shared_ptr<SEALContext> &context,
-                        std::string &path) {
-            std::ifstream in(path, std::ifstream::binary);
-            c.load(context, in);
-            in.close();
-        });
+        .def("load",
+             [](PublicKey &c, const SEALContext &&context, std::string &path) {
+                 std::ifstream in(path, std::ifstream::binary);
+                 c.load(context, in);
+                 in.close();
+             });
     /***
      * } "seal/publickey.h"
      *******************/
@@ -54,12 +54,12 @@ void bind_encrypt_decrypt(pybind11::module &m) {
                  s.save(out);
                  out.close();
              })
-        .def("load", [](SecretKey &s, std::shared_ptr<SEALContext> &context,
-                        std::string &path) {
-            std::ifstream in(path, std::ifstream::binary);
-            s.load(context, in);
-            in.close();
-        });
+        .def("load",
+             [](SecretKey &s, const SEALContext &&context, std::string &path) {
+                 std::ifstream in(path, std::ifstream::binary);
+                 s.load(context, in);
+                 in.close();
+             });
     /***
      * } "seal/secretkey.h"
      *******************/
@@ -92,13 +92,13 @@ void bind_encrypt_decrypt(pybind11::module &m) {
                  obj.save(out);
                  out.close();
              })
-        .def("load",
-             [](RelinKeys &obj, std::shared_ptr<SEALContext> &context,
-                std::string &path) {
-                 std::ifstream in(path, std::ifstream::binary);
-                 obj.load(context, in);
-                 in.close();
-             })
+        .def(
+            "load",
+            [](RelinKeys &obj, const SEALContext &&context, std::string &path) {
+                std::ifstream in(path, std::ifstream::binary);
+                obj.load(context, in);
+                in.close();
+            })
         // RelinKeys
         .def_static("get_index", &RelinKeys::get_index)
         .def("has_key", &RelinKeys::has_key)
@@ -128,7 +128,7 @@ void bind_encrypt_decrypt(pybind11::module &m) {
                  out.close();
              })
         .def("load",
-             [](GaloisKeys &obj, std::shared_ptr<SEALContext> &context,
+             [](GaloisKeys &obj, const SEALContext &&context,
                 std::string &path) {
                  std::ifstream in(path, std::ifstream::binary);
                  obj.load(context, in);
@@ -147,8 +147,8 @@ void bind_encrypt_decrypt(pybind11::module &m) {
      ***/
     py::class_<KeyGenerator, std::shared_ptr<KeyGenerator>>(m, "KeyGenerator",
                                                             py::module_local())
-        .def(py::init<std::shared_ptr<SEALContext>>())
-        .def(py::init<std::shared_ptr<SEALContext>, const SecretKey &>())
+        .def(py::init<const SEALContext &>())
+        .def(py::init<const SEALContext &, const SecretKey &>())
         .def("secret_key", &KeyGenerator::secret_key)
         .def("public_key", &KeyGenerator::public_key)
         .def("relin_keys_local",
@@ -212,8 +212,7 @@ void bind_encrypt_decrypt(pybind11::module &m) {
                  out.close();
              })
         .def("load",
-             [](Plaintext &p, std::shared_ptr<SEALContext> &context,
-                std::string &path) {
+             [](Plaintext &p, const SEALContext &&context, std::string &path) {
                  std::ifstream in(path, std::ifstream::binary);
                  p.load(context, in);
                  in.close();
@@ -232,23 +231,20 @@ void bind_encrypt_decrypt(pybind11::module &m) {
      ***/
     py::class_<Ciphertext>(m, "Ciphertext", py::module_local())
         .def(py::init<>())
-        .def(py::init<std::shared_ptr<SEALContext>>())
-        .def(py::init<std::shared_ptr<SEALContext>, parms_id_type>())
-        .def(py::init<std::shared_ptr<SEALContext>, parms_id_type,
-                      std::size_t>())
+        .def(py::init<const SEALContext &>())
+        .def(py::init<const SEALContext &, parms_id_type>())
+        .def(py::init<const SEALContext &, parms_id_type, std::size_t>())
         .def("reserve",
-             py::overload_cast<std::shared_ptr<SEALContext>, parms_id_type,
-                               std::size_t>(&Ciphertext::reserve))
-        .def("reserve",
-             py::overload_cast<std::shared_ptr<SEALContext>, std::size_t>(
+             py::overload_cast<const SEALContext &, parms_id_type, std::size_t>(
                  &Ciphertext::reserve))
+        .def("reserve", py::overload_cast<const SEALContext &, std::size_t>(
+                            &Ciphertext::reserve))
         .def("reserve", py::overload_cast<std::size_t>(&Ciphertext::reserve))
         .def("resize",
-             py::overload_cast<std::shared_ptr<SEALContext>, parms_id_type,
-                               std::size_t>(&Ciphertext::resize))
-        .def("resize",
-             py::overload_cast<std::shared_ptr<SEALContext>, std::size_t>(
+             py::overload_cast<const SEALContext &, parms_id_type, std::size_t>(
                  &Ciphertext::resize))
+        .def("resize", py::overload_cast<const SEALContext &, std::size_t>(
+                           &Ciphertext::resize))
         .def("resize", py::overload_cast<std::size_t>(&Ciphertext::resize))
         .def("release", &Ciphertext::release)
         .def("int_array", &Ciphertext::int_array,
@@ -275,8 +271,7 @@ void bind_encrypt_decrypt(pybind11::module &m) {
                  out.close();
              })
         .def("load",
-             [](Ciphertext &c, std::shared_ptr<SEALContext> ctx,
-                std::string &path) {
+             [](Ciphertext &c, const SEALContext &ctx, std::string &path) {
                  std::ifstream in(path, std::ifstream::binary);
                  c.load(ctx, in);
                  in.close();
@@ -292,7 +287,7 @@ void bind_encrypt_decrypt(pybind11::module &m) {
      ***/
     py::class_<Decryptor, std::shared_ptr<Decryptor>>(m, "Decryptor",
                                                       py::module_local())
-        .def(py::init<std::shared_ptr<SEALContext>, const SecretKey &>())
+        .def(py::init<const SEALContext &, const SecretKey &>())
         .def("decrypt", &Decryptor::decrypt)
         .def("invariant_noise_budget", &Decryptor::invariant_noise_budget);
     /***
@@ -304,9 +299,9 @@ void bind_encrypt_decrypt(pybind11::module &m) {
      ***/
     py::class_<Encryptor, std::shared_ptr<Encryptor>>(m, "Encryptor",
                                                       py::module_local())
-        .def(py::init<std::shared_ptr<SEALContext>, const PublicKey &>())
-        .def(py::init<std::shared_ptr<SEALContext>, const SecretKey &>())
-        .def(py::init<std::shared_ptr<SEALContext>, const PublicKey &,
+        .def(py::init<const SEALContext &, const PublicKey &>())
+        .def(py::init<const SEALContext &, const SecretKey &>())
+        .def(py::init<const SEALContext &, const PublicKey &,
                       const SecretKey &>())
         .def("set_public_key", &Encryptor::set_public_key)
         .def("set_secret_key", &Encryptor::set_secret_key)

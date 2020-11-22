@@ -86,12 +86,12 @@ shared_ptr<TenSEALContext> TenSEALContext::Create(
     vector<int> coeff_mod_bit_sizes, optional<size_t> n_threads) {
     EncryptionParameters parms;
     switch (scheme) {
-        case scheme_type::BFV:
+        case scheme_type::bfv:
             parms = create_bfv_parameters(poly_modulus_degree, plain_modulus,
                                           coeff_mod_bit_sizes);
             break;
 
-        case scheme_type::CKKS:
+        case scheme_type::ckks:
             parms = create_ckks_parameters(poly_modulus_degree,
                                            coeff_mod_bit_sizes);
             break;

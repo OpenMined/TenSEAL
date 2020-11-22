@@ -26,7 +26,7 @@ std::string SEALSerialize(const T& sealobj) {
  *GaloisKeys, RelinKeys.
  **/
 template <class T>
-T SEALDeserialize(const shared_ptr<SEALContext>& sealctx, const string& in) {
+T SEALDeserialize(const SEALContext& sealctx, const string& in) {
     T out;
 
     std::stringstream stream;

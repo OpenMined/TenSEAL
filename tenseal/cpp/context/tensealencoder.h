@@ -17,7 +17,7 @@ class TenSEALEncoder {
    public:
     TenSEALEncoder() = delete;
     TenSEALEncoder(TenSEALEncoder&) = delete;
-    TenSEALEncoder(std::shared_ptr<SEALContext> context) : _context(context){};
+    TenSEALEncoder(const SEALContext& context) : _context(context){};
 
     template <typename T>
     std::shared_ptr<T> get() {
@@ -115,7 +115,7 @@ class TenSEALEncoder {
     /*
     Stores a shared_pointer to the SEAL Context.
     */
-    std::shared_ptr<SEALContext> _context;
+    SEALContext _context;
 
     /*
     Stores a global scale used across ciphertext encrypted using CKKS.

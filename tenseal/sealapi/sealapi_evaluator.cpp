@@ -25,7 +25,7 @@ void bind_evaluator(pybind11::module &m) {
      ***/
     py::class_<Evaluator, std::shared_ptr<Evaluator>>(m, "Evaluator",
                                                       py::module_local())
-        .def(py::init<std::shared_ptr<SEALContext>>())
+        .def(py::init<const SEALContext &>())
         .def("add_inplace", &Evaluator::add_inplace)
         .def("sub_inplace", &Evaluator::sub_inplace)
         .def("multiply_inplace",
