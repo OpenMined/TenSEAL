@@ -169,7 +169,8 @@ def test_biguint_operators():
 
 
 @pytest.mark.parametrize(
-    "compr_type", [sealapi.COMPR_MODE_TYPE.NONE, sealapi.COMPR_MODE_TYPE.DEFLATE]
+    "compr_type",
+    [sealapi.COMPR_MODE_TYPE.NONE, sealapi.COMPR_MODE_TYPE.ZLIB, sealapi.COMPR_MODE_TYPE.ZSTD],
 )
 def test_serialization_compression(compr_type):
     assert sealapi.Serialization.IsSupportedComprMode(compr_type) is True
@@ -178,7 +179,8 @@ def test_serialization_compression(compr_type):
 
 def test_serialization_sanity():
     assert int(sealapi.COMPR_MODE_TYPE.NONE) == 0
-    assert int(sealapi.COMPR_MODE_TYPE.DEFLATE) == 1
+    assert int(sealapi.COMPR_MODE_TYPE.ZLIB) == 1
+    assert int(sealapi.COMPR_MODE_TYPE.ZSTD) == 1
 
     header = sealapi.Serialization.SEALHeader()
     assert header.magic == 0xA15E
@@ -195,15 +197,15 @@ def test_serialization_sanity():
     assert sealapi.Serialization.IsValidHeader(header) is True
 
     header = sealapi.Serialization.SEALHeader()
-    header.compr_mode = sealapi.COMPR_MODE_TYPE.DEFLATE
+    header.compr_mode = sealapi.COMPR_MODE_TYPE.ZLIB
 
     def save_load(path):
         sealapi.Serialization.SaveHeader(header, path)
         save_test = sealapi.Serialization.SEALHeader()
         sealapi.Serialization.LoadHeader(path, save_test, True)
-        assert save_test.compr_mode == sealapi.COMPR_MODE_TYPE.DEFLATE
+        assert save_test.compr_mode == sealapi.COMPR_MODE_TYPE.ZLIB
         sealapi.Serialization.LoadHeader(path, save_test, False)
-        assert save_test.compr_mode == sealapi.COMPR_MODE_TYPE.DEFLATE
+        assert save_test.compr_mode == sealapi.COMPR_MODE_TYPE.ZLIB
 
     tmp_file(save_load)
 

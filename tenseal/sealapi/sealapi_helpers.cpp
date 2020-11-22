@@ -19,7 +19,8 @@ void bind_helpers(pybind11::module &m) {
      ***/
     py::enum_<compr_mode_type>(m, "COMPR_MODE_TYPE", py::module_local())
         .value("NONE", compr_mode_type::none)
-        .value("DEFLATE", compr_mode_type::deflate);
+        .value("ZLIB", compr_mode_type::zlib)
+        .value("ZSTD", compr_mode_type::zstd);
 
     py::class_<Serialization> serialization(m, "Serialization",
                                             py::module_local());

@@ -150,23 +150,16 @@ void bind_encrypt_decrypt(pybind11::module &m) {
         .def(py::init<const SEALContext &>())
         .def(py::init<const SEALContext &, const SecretKey &>())
         .def("secret_key", &KeyGenerator::secret_key)
-        .def("public_key", &KeyGenerator::public_key)
-        .def("relin_keys_local",
-             py::overload_cast<>(&KeyGenerator::relin_keys_local))
-        .def("relin_keys", py::overload_cast<>(&KeyGenerator::relin_keys))
-        .def("galois_keys_local",
+        .def("create_public_key", &KeyGenerator::create_public_key)
+        .def("create_relin_keys",
+             py::overload_cast<>(&KeyGenerator::create_relin_keys))
+        .def("create_galois_keys",
              py::overload_cast<const std::vector<std::uint32_t> &>(
-                 &KeyGenerator::galois_keys_local))
-        .def("galois_keys",
-             py::overload_cast<const std::vector<std::uint32_t> &>(
-                 &KeyGenerator::galois_keys))
-        .def("galois_keys_local", py::overload_cast<const std::vector<int> &>(
-                                      &KeyGenerator::galois_keys_local))
-        .def("galois_keys", py::overload_cast<const std::vector<int> &>(
-                                &KeyGenerator::galois_keys))
-        .def("galois_keys_local",
-             py::overload_cast<>(&KeyGenerator::galois_keys_local))
-        .def("galois_keys", py::overload_cast<>(&KeyGenerator::galois_keys));
+                 &KeyGenerator::create_galois_keys))
+        .def("create_galois_keys", py::overload_cast<const std::vector<int> &>(
+                                       &KeyGenerator::create_galois_keys))
+        .def("create_galois_keys",
+             py::overload_cast<>(&KeyGenerator::create_galois_keys));
     /***
      * } "seal/keygenerator.h"
      *******************/
