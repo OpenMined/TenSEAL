@@ -55,12 +55,12 @@ is_primitive_root = _sealapi_util_cpp.is_primitive_root
 try_minimal_primitive_root = _sealapi_util_cpp.try_minimal_primitive_root
 
 ## util/hestdparms.h ##
-SEAL_HE_STD_PARMS_128_TC = _sealapi_util_cpp.SEAL_HE_STD_PARMS_128_TC
-SEAL_HE_STD_PARMS_192_TC = _sealapi_util_cpp.SEAL_HE_STD_PARMS_192_TC
-SEAL_HE_STD_PARMS_256_TC = _sealapi_util_cpp.SEAL_HE_STD_PARMS_256_TC
-SEAL_HE_STD_PARMS_128_TQ = _sealapi_util_cpp.SEAL_HE_STD_PARMS_128_TQ
-SEAL_HE_STD_PARMS_192_TQ = _sealapi_util_cpp.SEAL_HE_STD_PARMS_192_TQ
-SEAL_HE_STD_PARMS_256_TQ = _sealapi_util_cpp.SEAL_HE_STD_PARMS_256_TQ
+seal_he_std_parms_128_tc = _sealapi_util_cpp.seal_he_std_parms_128_tc
+seal_he_std_parms_192_tc = _sealapi_util_cpp.seal_he_std_parms_192_tc
+seal_he_std_parms_256_tc = _sealapi_util_cpp.seal_he_std_parms_256_tc
+seal_he_std_parms_128_tq = _sealapi_util_cpp.seal_he_std_parms_128_tq
+seal_he_std_parms_192_tq = _sealapi_util_cpp.seal_he_std_parms_192_tq
+seal_he_std_parms_256_tq = _sealapi_util_cpp.seal_he_std_parms_256_tq
 
 ## util/clipnormal.h ##
 ClippedNormalDistribution = _sealapi_util_cpp.ClippedNormalDistribution

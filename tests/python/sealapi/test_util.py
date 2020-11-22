@@ -90,12 +90,12 @@ def test_util_baseconverter_conversion(test, out):
 
 
 def test_util_hestdparms():
-    assert util.SEAL_HE_STD_PARMS_128_TC(1024) == 27
-    assert util.SEAL_HE_STD_PARMS_192_TC(1024) == 19
-    assert util.SEAL_HE_STD_PARMS_256_TC(1024) == 14
-    assert util.SEAL_HE_STD_PARMS_128_TQ(1024) == 25
-    assert util.SEAL_HE_STD_PARMS_192_TQ(1024) == 17
-    assert util.SEAL_HE_STD_PARMS_256_TQ(1024) == 13
+    assert util.seal_he_std_parms_128_tc(1024) == 27
+    assert util.seal_he_std_parms_192_tc(1024) == 19
+    assert util.seal_he_std_parms_256_tc(1024) == 14
+    assert util.seal_he_std_parms_128_tq(1024) == 25
+    assert util.seal_he_std_parms_192_tq(1024) == 17
+    assert util.seal_he_std_parms_256_tq(1024) == 13
 
 
 def test_util_hash():
@@ -111,7 +111,7 @@ def test_util_clipnormal():
     assert dist.min() == 30
     assert dist.max() == 70
 
-    generator = sealapi.BlakePRNGFactory.DefaultFactory().create()
+    generator = sealapi.Blake2xbPRNGFactory.DefaultFactory().create()
     adapter = sealapi.RandomToStandardAdapter(generator)
 
     assert dist(adapter) != dist(adapter)
@@ -152,7 +152,7 @@ def test_util_pointer():
     "params", [helper_params_bfv(), helper_params_ckks(),],
 )
 def test_util_rlwe(params):
-    generator = sealapi.BlakePRNGFactory.DefaultFactory().create()
+    generator = sealapi.Blake2xbPRNGFactory.DefaultFactory().create()
     assert (
         len(util.sample_poly_ternary(generator, params))
         == len(params.coeff_modulus()) * params.poly_modulus_degree()
@@ -182,7 +182,7 @@ def test_util_galois():
     coeff = sealapi.CoeffModulus.Create(poly_modulus_degree, [17])
     parms.set_coeff_modulus(coeff)
 
-    ctx = sealapi.SEALContext.Create(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
+    ctx = sealapi.SEALContext(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
 
     gtool = ctx.key_context_data().galois_tool()
     assert gtool.apply_galois(

@@ -239,7 +239,7 @@ TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
 }
 
 TEST_P(CKKSVectorTest, TestEmptyPlaintext) {
-    auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
     EXPECT_THROW(CKKSVector::Create(ctx, std::vector<double>({})),

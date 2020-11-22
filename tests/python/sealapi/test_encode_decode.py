@@ -7,34 +7,6 @@ from utils import *
 
 
 @pytest.mark.parametrize(
-    "ctx", [helper_context_bfv()],
-)
-def test_intencoder(ctx):
-    encoder = sealapi.IntegerEncoder(ctx)
-
-    enc = encoder.encode(5)
-    assert enc.to_string() == "1x^2 + 1"
-    assert enc.int_array()[2] == 1
-    assert encoder.decode_uint32(enc) == 5
-    assert encoder.decode_int32(enc) == 5
-    assert encoder.decode_uint64(enc) == 5
-    assert encoder.decode_int32(enc) == 5
-
-    enc = sealapi.Plaintext()
-    encoder.encode(7, enc)
-    assert enc.to_string() == "1x^2 + 1x^1 + 1"
-
-    big = sealapi.BigUInt("5555555555")
-    enc = encoder.encode(big)
-    assert enc.int_array()[0] == 1
-    assert encoder.decode_biguint(enc) == 0x5555555555
-
-    enc = sealapi.Plaintext()
-    encoder.encode(big + 1, enc)
-    assert encoder.decode_biguint(enc) == 0x5555555556
-
-
-@pytest.mark.parametrize(
     "ctx", [helper_context_bfv(1024)],
 )
 def test_batchencoder(ctx):
@@ -44,7 +16,7 @@ def test_batchencoder(ctx):
     testcase = [1, 2, 3, 4, 5]
     encoder = sealapi.BatchEncoder(ctx)
     encoder.encode(testcase, enc_out)
-    assert enc_out.int_array().size() == poly_modulus_degree
+    assert enc_out.dyn_array().size() == poly_modulus_degree
     assert encoder.decode_uint64(enc_out)[: len(testcase)] == testcase
     assert encoder.decode_int64(enc_out)[: len(testcase)] == testcase
 

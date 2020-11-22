@@ -41,13 +41,13 @@ TEST_F(TenSEALContextTest, TestSerialization) {
     auto recreated_ctx = TenSEALContext::Create(buff);
 
     ASSERT_TRUE(recreated_ctx != nullptr);
-    auto &orig_pubkey = ctx->public_key()->data().int_array();
-    auto &serial_pubkey = recreated_ctx->public_key()->data().int_array();
+    auto &orig_pubkey = ctx->public_key()->data().dyn_array();
+    auto &serial_pubkey = recreated_ctx->public_key()->data().dyn_array();
     for (size_t idx = 0; idx < orig_pubkey.size(); ++idx) {
         EXPECT_EQ(orig_pubkey[idx], serial_pubkey[idx]);
     }
-    auto &orig_privkey = ctx->secret_key()->data().int_array();
-    auto &serial_privkey = recreated_ctx->secret_key()->data().int_array();
+    auto &orig_privkey = ctx->secret_key()->data().dyn_array();
+    auto &serial_privkey = recreated_ctx->secret_key()->data().dyn_array();
     for (size_t idx = 0; idx < orig_privkey.size(); ++idx) {
         EXPECT_EQ(orig_privkey[idx], serial_privkey[idx]);
     }

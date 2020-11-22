@@ -213,9 +213,12 @@ def test_serialization_sanity():
 @pytest.mark.parametrize(
     "factory",
     [
-        sealapi.BlakePRNGFactory.DefaultFactory(),
-        sealapi.BlakePRNGFactory(),
-        sealapi.BlakePRNGFactory([sealapi.random_uint64() for i in range(8)]),
+        sealapi.Blake2xbPRNGFactory.DefaultFactory(),
+        sealapi.Blake2xbPRNGFactory(),
+        sealapi.Blake2xbPRNGFactory([sealapi.random_uint64() for i in range(8)]),
+        sealapi.Shake256PRNGFactory.DefaultFactory(),
+        sealapi.Shake256PRNGFactory(),
+        sealapi.Shake256PRNGFactory([sealapi.random_uint64() for i in range(8)]),
     ],
 )
 def test_randomgen(factory):
@@ -237,7 +240,7 @@ def test_randomgen(factory):
 
 def test_intarray():
     testcase = sealapi.Plaintext("3x^3 + 1x^1 + 3")
-    int_arr = testcase.int_array()
+    int_arr = testcase.dyn_array()
 
     assert int_arr[0] == 3
     assert int_arr.at(3) == 3
@@ -248,7 +251,7 @@ def test_intarray():
 
     def save_load(path):
         int_arr.save(path)
-        save_test = sealapi.IntArray()
+        save_test = sealapi.DynArray()
         save_test.load(path)
         assert save_test[0] == 3
 

@@ -15,7 +15,7 @@ def helper_params_bfv(poly_modulus_degree=4096, plain_modulus=1032193):
 
 
 def helper_context_bfv(poly_modulus_degree=4096, plain_modulus=1032193):
-    return sealapi.SEALContext.Create(
+    return sealapi.SEALContext(
         helper_params_bfv(poly_modulus_degree, plain_modulus), True, sealapi.SEC_LEVEL_TYPE.TC128
     )
 
@@ -30,14 +30,14 @@ def helper_params_ckks(poly_modulus_degree=8192):
 
 
 def helper_context_ckks(poly_modulus_degree=8192):
-    return sealapi.SEALContext.Create(
+    return sealapi.SEALContext(
         helper_params_ckks(poly_modulus_degree), True, sealapi.SEC_LEVEL_TYPE.TC128
     )
 
 
 def helper_context_invalid():
     parms = sealapi.EncryptionParameters(sealapi.SCHEME_TYPE.BFV)
-    return sealapi.SEALContext.Create(parms, True, sealapi.SEC_LEVEL_TYPE.TC128)
+    return sealapi.SEALContext(parms, True, sealapi.SEC_LEVEL_TYPE.TC128)
 
 
 def helper_poly_modulus_degree(ctx):

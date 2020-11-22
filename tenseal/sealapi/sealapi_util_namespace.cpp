@@ -495,8 +495,8 @@ void bind_util_namespace(pybind11::module &m) {
      * "util/hestdparms.h" {
      ***/
     m.def("seal_he_std_parms_128_tc", &seal_he_std_parms_128_tc)
-        .def("seal_he_std_parms_192_tq", &seal_he_std_parms_192_tc)
-        .def("seal_he_std_parms_256_tq", &seal_he_std_parms_256_tc)
+        .def("seal_he_std_parms_192_tc", &seal_he_std_parms_192_tc)
+        .def("seal_he_std_parms_256_tc", &seal_he_std_parms_256_tc)
         .def("seal_he_std_parms_128_tq", &seal_he_std_parms_128_tq)
         .def("seal_he_std_parms_192_tq", &seal_he_std_parms_192_tq)
         .def("seal_he_std_parms_256_tq", &seal_he_std_parms_256_tq);

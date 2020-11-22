@@ -369,7 +369,7 @@ def test_evaluator_mod_switch():
     parms.set_plain_modulus(1 << 6)
     coeff = sealapi.CoeffModulus.Create(128, [30, 30, 30])
     parms.set_coeff_modulus(coeff)
-    ctx = sealapi.SEALContext.Create(parms, True, sealapi.SEC_LEVEL_TYPE.NONE)
+    ctx = sealapi.SEALContext(parms, True, sealapi.SEC_LEVEL_TYPE.NONE)
 
     intenc = sealapi.IntegerEncoder(ctx)
     keygen = sealapi.KeyGenerator(ctx)
@@ -610,7 +610,7 @@ def test_evaluator_galois():
     parms.set_plain_modulus(257)
     coeff = sealapi.CoeffModulus.Create(8, [40, 40])
     parms.set_coeff_modulus(coeff)
-    ctx = sealapi.SEALContext.Create(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
+    ctx = sealapi.SEALContext(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
 
     keygen = sealapi.KeyGenerator(ctx)
     public_key = keygen.public_key()
@@ -642,7 +642,7 @@ def test_evaluator_rotate_bfv():
 
     coeff = sealapi.CoeffModulus.Create(8, [40, 40])
     parms.set_coeff_modulus(coeff)
-    ctx = sealapi.SEALContext.Create(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
+    ctx = sealapi.SEALContext(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
 
     keygen = sealapi.KeyGenerator(ctx)
     galois_keys = keygen.galois_keys_local()
@@ -708,7 +708,7 @@ def test_evaluator_rotate_vector():
 
     coeff = sealapi.CoeffModulus.Create(poly_modulus, [40, 40, 40, 40])
     parms.set_coeff_modulus(coeff)
-    ctx = sealapi.SEALContext.Create(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
+    ctx = sealapi.SEALContext(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
 
     ctx = helper_context_ckks()
 
@@ -765,7 +765,7 @@ def test_evaluator_conjugate():
 
     coeff = sealapi.CoeffModulus.Create(poly_modulus, [40, 40, 40, 40])
     parms.set_coeff_modulus(coeff)
-    ctx = sealapi.SEALContext.Create(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
+    ctx = sealapi.SEALContext(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
 
     ctx = helper_context_ckks()
 
