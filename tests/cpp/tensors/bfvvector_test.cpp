@@ -20,7 +20,7 @@ class BFVVectorTest : public TestWithParam</*serialize=*/bool> {
 TEST_P(BFVVectorTest, TestCreateBFV) {
     bool should_serialize_first = GetParam();
 
-    auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
     auto l = BFVVector::Create(ctx, vector<int64_t>({1, 2, 3}));
@@ -36,7 +36,7 @@ TEST_P(BFVVectorTest, TestCreateBFV) {
 TEST_P(BFVVectorTest, TestBFVAdd) {
     bool should_serialize_first = GetParam();
 
-    auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
     auto l = BFVVector::Create(ctx, vector<int64_t>({1, 2, 3}));
@@ -65,7 +65,7 @@ TEST_P(BFVVectorTest, TestBFVAdd) {
 TEST_P(BFVVectorTest, TestBFVMul) {
     bool should_serialize_first = GetParam();
 
-    auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
     auto l = BFVVector::Create(ctx, vector<int64_t>({1, 2, 3}));
@@ -95,7 +95,7 @@ TEST_P(BFVVectorTest, TestBFVMul) {
 }
 
 TEST_P(BFVVectorTest, TestEmptyPlaintext) {
-    auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
     EXPECT_THROW(BFVVector::Create(ctx, std::vector<int64_t>({})),

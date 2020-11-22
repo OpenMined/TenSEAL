@@ -8,7 +8,7 @@ namespace {
 void BM_matmul_plain(benchmark::State& state) {
     int threads = state.range(0);
 
-    auto ctx = TenSEALContext::Create(scheme_type::CKKS, 8192, -1,
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
                                       {60, 40, 40, 60}, threads);
     ctx->generate_galois_keys();
     ctx->global_scale(std::pow(2, 40));
