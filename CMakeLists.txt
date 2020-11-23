@@ -25,9 +25,6 @@ if(WIN32)
   link_libraries("$ENV{PROGRAMFILES\(x86\)}/protobuf/lib/libprotobuf.lib")
   link_libraries("$ENV{PROGRAMFILES\(x86\)}/protobuf/lib/libprotoc.lib")
 else()
-  # building SEAL using cmake
-  add_subdirectory(third_party/SEAL)
-
   # building protobuf using cmake
   add_subdirectory(tenseal/proto)
 
@@ -35,6 +32,9 @@ else()
   include(FindProtobuf)
   include_directories(${Protobuf_INCLUDE_DIRS})
 endif()
+
+# building SEAL using cmake
+add_subdirectory(third_party/SEAL)
 
 add_subdirectory(third_party/pybind11)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
