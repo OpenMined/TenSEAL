@@ -31,6 +31,8 @@ else()
   include_directories(${Protobuf_INCLUDE_DIRS})
 endif()
 
+set(SEAL_BUILD_DEPS ON)
+
 # building SEAL using cmake
 add_subdirectory(third_party/SEAL)
 
@@ -42,8 +44,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # ##############################################################################
 set(TENSEAL_BASEDIR tenseal)
 set(SEALAPI_BASEDIR tenseal/sealapi)
-
-set(SEAL_BUILD_DEPS ON)
 
 set(SOURCES
     ${TENSEAL_BASEDIR}/cpp/context/tensealcontext.cpp
@@ -94,9 +94,9 @@ if(${BUILD_TEST})
       ${TENSEAL_TESTS_BASEDIR}/tensors/ckksvector_test.cpp
       ${TENSEAL_TESTS_BASEDIR}/tensors/bfvvector_test.cpp)
   add_executable(tenseal_tests ${TESTING_SOURCES} ${SOURCES})
-  target_link_libraries(tenseal_tests PRIVATE gtest gtest_main)
+  target_link_libraries(tenseal_tests PRIVATE gtest gtest_main seal tenseal)
   if(NOT WIN32)
-    target_link_libraries(tenseal_tests PRIVATE seal tenseal tenseal_proto)
+    target_link_libraries(tenseal_tests PRIVATE tenseal_proto)
   endif()
   add_test(tenseal_tests tenseal_tests)
 endif()
