@@ -3,8 +3,9 @@
 set PATH=%PATH%;%programfiles%/protobuf/bin/;%programfiles(x86)%/protobuf/bin/
 
 cd third_party\SEAL
-cmakei --build -DSEAL_THROW_ON_TRANSPARENT_CIPHERTEXT=OFF -DALLOW_COMMAND_LINE_BUILD=ON -DSEAL_USE_MSGSL=OFF -DSEAL_USE_ZLIB=OFF -DSEAL_USE_ZSTD=OFF .
-
+cmake -S . -B build -G "Visual Studio 16 2019" -A x64
+cmake --build build --config Release
+cmake --install build --config Release
 cd ..\..
 
 :: MT vs MD: static runtime library linking vs dynamic runtime library linking.
