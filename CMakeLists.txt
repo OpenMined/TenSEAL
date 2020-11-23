@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(third_party/SEAL/native/src)
 
 # ##############################################################################
 # Third party
@@ -17,11 +18,16 @@ if(WIN32)
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 
+  link_libraries(${PROJECT_SOURCE_DIR}/third_party/SEAL/lib/x64/Release/seal.lib)
+
   include_directories(protobuf/src)
   link_libraries("$ENV{PROGRAMFILES\(x86\)}/protobuf/lib/libprotobuf-lite.lib")
   link_libraries("$ENV{PROGRAMFILES\(x86\)}/protobuf/lib/libprotobuf.lib")
   link_libraries("$ENV{PROGRAMFILES\(x86\)}/protobuf/lib/libprotoc.lib")
 else()
+  # building SEAL using cmake
+  add_subdirectory(third_party/SEAL)
+
   # building protobuf using cmake
   add_subdirectory(tenseal/proto)
 
@@ -29,10 +35,6 @@ else()
   include(FindProtobuf)
   include_directories(${Protobuf_INCLUDE_DIRS})
 endif()
-
-include_directories(third_party/SEAL/native/src)
-# building SEAL using cmake
-add_subdirectory(third_party/SEAL)
 
 add_subdirectory(third_party/pybind11)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
