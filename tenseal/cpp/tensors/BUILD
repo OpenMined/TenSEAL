@@ -8,16 +8,16 @@ cc_library(
     name = "tenseal_tensors_cc",
     srcs = [
         "bfvvector.cpp",
-        "ckksvector.cpp",
         "ckkstensor.cpp",
+        "ckksvector.cpp",
         "utils/utils.cpp",
         "utils/utils.h",
     ],
     hdrs = [
         "api.h",
         "bfvvector.h",
-        "ckksvector.h",
         "ckkstensor.h",
+        "ckksvector.h",
         "encrypted_tensor.h",
         "encrypted_vector.h",
         "plain_tensor.h",
