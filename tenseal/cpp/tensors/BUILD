@@ -9,6 +9,7 @@ cc_library(
     srcs = [
         "bfvvector.cpp",
         "ckksvector.cpp",
+        "ckkstensor.cpp",
         "utils/utils.cpp",
         "utils/utils.h",
     ],
@@ -16,6 +17,7 @@ cc_library(
         "api.h",
         "bfvvector.h",
         "ckksvector.h",
+        "ckkstensor.h",
         "encrypted_tensor.h",
         "encrypted_vector.h",
         "plain_tensor.h",

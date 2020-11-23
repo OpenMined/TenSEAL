@@ -8,6 +8,23 @@ except ImportError:
     import tenseal._tenseal_cpp as _ts_cpp
 
 
+def plain_tensor(data, shape=None, stride=None, dtype="float"):
+    """Constructor method for the PlainTensor object.
+    Args:
+        data:
+        shape:
+        stride:
+        dtype:
+    Returns:
+        PlainTensor object.
+    """
+    # just create a plaintensor using python lists for now
+    if dtype == "float":
+        return _ts_cpp.PlainTensorDouble(data)
+    else:
+        raise ValueError("Invalid dtype")
+
+
 def bfv_vector(context, data):
     """Constructor method for the BFVVector object, which can store a list
     of integers in encrypted form, using the BFV homomorphic encryption
@@ -103,4 +120,32 @@ def ckks_vector_from(context, data):
     )
 
 
-__all__ = ["bfv_vector", "bfv_vector_from", "ckks_vector", "ckks_vector_from"]
+def ckks_tensor(context, tensor, scale=None):
+    """Constructor method for the CKKSTensor object, which can store a list
+    of float numbers in encrypted form, using the CKKS homomorphic encryption
+    scheme.
+
+    Args:
+        context: a TenSEALContext object, holding the encryption parameters and keys.
+        tensor: a PlainTensorDouble holding data to be encrypted.
+        scale: the scale to be used to encode vector values. CKKSTensor will use the global_scale provided by the context if it's set to None.
+
+    Returns:
+        CKKSTensor object.
+    """
+    if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(
+        tensor, _ts_cpp.PlainTensorDouble
+    ):
+        if scale is None:
+            return _ts_cpp.CKKSTensor(context, tensor)
+        else:
+            return _ts_cpp.CKKSTensor(context, tensor, scale)
+
+    raise TypeError(
+        "Invalid CKKSTensor input types context: {} and vector: {}".format(
+            type(context), type(tensor)
+        )
+    )
+
+
+__all__ = ["bfv_vector", "bfv_vector_from", "ckks_vector", "ckks_vector_from", "ckks_tensor"]
