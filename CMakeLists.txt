@@ -18,8 +18,6 @@ if(WIN32)
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 
-  link_libraries(${PROJECT_SOURCE_DIR}/third_party/SEAL/lib/x64/Release/seal.lib)
-
   include_directories(protobuf/src)
   link_libraries("$ENV{PROGRAMFILES\(x86\)}/protobuf/lib/libprotobuf-lite.lib")
   link_libraries("$ENV{PROGRAMFILES\(x86\)}/protobuf/lib/libprotobuf.lib")
@@ -72,10 +70,12 @@ set(SEALAPI_SOURCES
     ${SEALAPI_BASEDIR}/sealapi_util_namespace.cpp)
 pybind11_add_module(_sealapi_cpp ${SEALAPI_SOURCES})
 
+target_link_libraries(_sealapi_cpp PRIVATE seal)
+target_link_libraries(_tenseal_cpp PRIVATE seal)
+target_link_libraries(tenseal PRIVATE seal)
 if(NOT WIN32)
-  target_link_libraries(tenseal PRIVATE seal tenseal_proto)
-  target_link_libraries(_tenseal_cpp PRIVATE seal tenseal_proto)
-  target_link_libraries(_sealapi_cpp PRIVATE seal)
+  target_link_libraries(tenseal PRIVATE tenseal_proto)
+  target_link_libraries(_tenseal_cpp PRIVATE tenseal_proto)
 endif()
 
 # ##############################################################################
