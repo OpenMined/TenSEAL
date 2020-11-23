@@ -20,13 +20,6 @@ def test_batchencoder(ctx):
     assert encoder.decode_uint64(enc_out)[: len(testcase)] == testcase
     assert encoder.decode_int64(enc_out)[: len(testcase)] == testcase
 
-    test_str = "7FFx^3 + 1x^1 + 3"
-    testcase = sealapi.Plaintext(test_str)
-    encoder.encode(testcase)
-    assert testcase.to_string() != test_str
-    encoder.decode(testcase)
-    assert testcase.to_string() == test_str
-
 
 @pytest.mark.parametrize("testcase", [[10, 20, 30], [1 / div for div in range(2, 10)]])
 def test_ckks_encoder(testcase):
@@ -40,11 +33,12 @@ def test_ckks_encoder(testcase):
     is_close_enough(out, testcase)
 
     keygen = sealapi.KeyGenerator(ctx)
-    public_key = keygen.public_key()
+    pk = sealapi.PublicKey()
+    public_key = keygen.create_public_key(pk)
     secret_key = keygen.secret_key()
 
     decryptor = sealapi.Decryptor(ctx, secret_key)
-    encryptor = sealapi.Encryptor(ctx, public_key, secret_key)
+    encryptor = sealapi.Encryptor(ctx, pk, secret_key)
 
     plaintext = sealapi.Plaintext()
     ciphertext = sealapi.Ciphertext(ctx)

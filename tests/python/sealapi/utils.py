@@ -70,9 +70,11 @@ def helper_generate_evaluator(ctx):
     evaluator = sealapi.Evaluator(ctx)
 
     keygen = sealapi.KeyGenerator(ctx)
-    public_key = keygen.public_key()
+    public_key = sealapi.PublicKey()
+    keygen.create_public_key(public_key)
     secret_key = keygen.secret_key()
-    relin_keys = keygen.relin_keys_local()
+    relin_keys = sealapi.RelinKeys()
+    keygen.create_relin_keys(relin_keys)
 
     decryptor = sealapi.Decryptor(ctx, secret_key)
     encryptor = sealapi.Encryptor(ctx, public_key, secret_key)

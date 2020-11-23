@@ -47,6 +47,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 set(TENSEAL_BASEDIR tenseal)
 set(SEALAPI_BASEDIR tenseal/sealapi)
 
+set(SEAL_BUILD_DEPS ON)
+
 set(SOURCES
     ${TENSEAL_BASEDIR}/cpp/context/tensealcontext.cpp
     ${TENSEAL_BASEDIR}/cpp/context/sealcontext.cpp

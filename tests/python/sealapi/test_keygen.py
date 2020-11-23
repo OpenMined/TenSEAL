@@ -13,7 +13,8 @@ from utils import *
 )
 def test_keygenerator_publickey(ctx):
     keygen = sealapi.KeyGenerator(ctx)
-    public_key = keygen.public_key()
+    public_key = sealapi.PublicKey()
+    keygen.create_public_key(public_key)
     assert public_key.data().parms_id() == public_key.parms_id()
     assert public_key.data().poly_modulus_degree() == helper_poly_modulus_degree(ctx)
 
@@ -61,7 +62,8 @@ def test_keygenerator_relinkeys(ctx):
     assert sealapi.RelinKeys.get_index(index) == index - 2
 
     keygen = sealapi.KeyGenerator(ctx)
-    relin_keys = keygen.relin_keys_local()
+    relin_keys = sealapi.RelinKeys()
+    keygen.create_relin_keys(relin_keys)
 
     assert relin_keys.has_key(2) is True
 
@@ -74,8 +76,9 @@ def test_keygenerator_relinkeys(ctx):
     assert len(relin_keys.parms_id()) == 4
 
     def save_load(path):
-        serial = keygen.relin_keys()
-        serial.save(path)
+        rk = sealapi.RelinKeys()
+        keygen.create_relin_keys(rk)
+        rk.save(path)
         assert Path(path).stat().st_size > 0
 
     tmp_file(save_load)
@@ -91,7 +94,8 @@ def test_keygenerator_galoiskeys(ctx):
     assert sealapi.GaloisKeys.get_index(idx) == (idx - 1) >> 1
 
     keygen = sealapi.KeyGenerator(ctx)
-    galois_keys = keygen.galois_keys_local()
+    galois_keys = sealapi.GaloisKeys()
+    keygen.create_galois_keys(galois_keys)
 
     assert galois_keys.has_key(idx) is True
 
@@ -109,8 +113,9 @@ def test_keygenerator_galoiskeys(ctx):
     assert len(galois_keys.parms_id()) == 4
 
     def save_load(path):
-        serial = keygen.galois_keys()
-        serial.save(path)
+        gk = sealapi.GaloisKeys()
+        keygen.create_galois_keys(gk)
+        gk.save(path)
         assert Path(path).stat().st_size > 0
 
     tmp_file(save_load)
@@ -127,7 +132,8 @@ def test_keygenerator_galoiskeys_with_steps(ctx):
     idx = sealapi.GaloisKeys.get_index(7)
 
     keygen = sealapi.KeyGenerator(ctx)
-    galois_keys = keygen.galois_keys_local([idx])
+    galois_keys = sealapi.GaloisKeys()
+    keygen.create_galois_keys([idx], galois_keys)
 
     assert galois_keys.has_key(idx) is True
 

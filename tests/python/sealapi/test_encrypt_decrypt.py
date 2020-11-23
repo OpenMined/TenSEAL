@@ -18,10 +18,15 @@ def test_encryptor_bfv():
     keygen = sealapi.KeyGenerator(ctx)
     batchenc = sealapi.BatchEncoder(ctx)
 
-    public_key = keygen.public_key()
+    public_key = sealapi.PublicKey()
+    keygen.create_public_key(public_key)
+
     secret_key = keygen.secret_key()
 
     decryptor = sealapi.Decryptor(ctx, secret_key)
+
+    plaintext = sealapi.Plaintext()
+    batchenc.encode(batch, plaintext)
 
     def _test_encryptor_symmetric_setup(encryptor):
         # encrypt symmetric
@@ -45,7 +50,7 @@ def test_encryptor_bfv():
         encryptor.encrypt_zero_symmetric(ciphertext)
         plaintext_out = sealapi.Plaintext()
         decryptor.decrypt(ciphertext, plaintext_out)
-        assert batchenc.decode_int64(plaintext_out)[: len(batch)] == batch
+        assert batchenc.decode_int64(plaintext_out)[: len(batch)] == [0] * len(batch)
         plaintext_out.set_zero()
 
         # zero symmetric parms_id
@@ -53,7 +58,7 @@ def test_encryptor_bfv():
         encryptor.encrypt_zero_symmetric(ctx.last_parms_id(), ciphertext)
         plaintext_out = sealapi.Plaintext()
         decryptor.decrypt(ciphertext, plaintext_out)
-        assert batchenc.decode_int64(plaintext_out)[: len(batch)] == batch
+        assert batchenc.decode_int64(plaintext_out)[: len(batch)] == [0] * len(batch)
         plaintext_out.set_zero()
 
     def _test_encryptor_pk_setup(encryptor):
@@ -68,14 +73,14 @@ def test_encryptor_bfv():
         encryptor.encrypt_zero(ciphertext)
         plaintext_out = sealapi.Plaintext()
         decryptor.decrypt(ciphertext, plaintext_out)
-        assert batchenc.decode_int64(plaintext_out)[: len(batch)] == 0
+        assert batchenc.decode_int64(plaintext_out)[: len(batch)] == [0] * len(batch)
         plaintext_out.set_zero()
 
         ciphertext = sealapi.Ciphertext(ctx)
         encryptor.encrypt_zero(ctx.last_parms_id(), ciphertext)
         plaintext_out = sealapi.Plaintext()
         decryptor.decrypt(ciphertext, plaintext_out)
-        assert batchenc.decode_int64(plaintext_out)[: len(batch)] == 0
+        assert batchenc.decode_int64(plaintext_out)[: len(batch)] == [0] * len(batch)
         plaintext_out.set_zero()
 
     encryptor = sealapi.Encryptor(ctx, public_key)
