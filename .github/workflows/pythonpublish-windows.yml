@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: .github/workflows/scripts/install_req_windows.bat
       - name: Setup msbuild
-        uses: microsoft/setup-msbuild@v1.0.0
+        uses: microsoft/setup-msbuild@v1.0.2
       - name: Build and publish
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
