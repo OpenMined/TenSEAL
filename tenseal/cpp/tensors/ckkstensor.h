@@ -12,6 +12,7 @@ using namespace std;
 class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
                    public enable_shared_from_this<CKKSTensor> {
    public:
+    using EncryptedTensor<double, shared_ptr<CKKSTensor>>::decrypt;
     /**
      * Create a new CKKSTensor from an 1D vector.
      * @param[in] input vector.
@@ -24,7 +25,6 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
             new CKKSTensor(std::forward<Args>(args)...));
     }
 
-    PlainTensor<double> decrypt() const override;
     PlainTensor<double> decrypt(const shared_ptr<SecretKey>& sk) const override;
 
     shared_ptr<CKKSTensor> negate_inplace() override;
