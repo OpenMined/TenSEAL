@@ -16,10 +16,9 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
         this->_init_scale = ctx->global_scale();
     }
 
-    vector<double> plain_data = tensor.data();
-    for (int i = 0; i < plain_data.size(); i++)
-        _data.push_back(CKKSTensor::encrypt(ctx, this->_init_scale,
-                                            vector<double>({plain_data[i]})));
+    for (auto it = tensor.cbegin(); it != tensor.cend(); it++)
+        _data.push_back(
+            CKKSTensor::encrypt(ctx, this->_init_scale, vector<double>({*it})));
 }
 
 Ciphertext CKKSTensor::encrypt(const shared_ptr<TenSEALContext>& ctx,
@@ -40,17 +39,6 @@ Ciphertext CKKSTensor::encrypt(const shared_ptr<TenSEALContext>& ctx,
     ctx->encryptor->encrypt(plaintext, ciphertext);
 
     return ciphertext;
-}
-
-PlainTensor<double> CKKSTensor::decrypt() const {
-    if (this->tenseal_context()->decryptor == NULL) {
-        // this->context was loaded with public keys only
-        throw invalid_argument(
-            "the current context of the tensor doesn't hold a secret_key, "
-            "please provide one as argument");
-    }
-
-    return this->decrypt(this->tenseal_context()->secret_key());
 }
 
 PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {

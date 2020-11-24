@@ -65,16 +65,7 @@ Ciphertext CKKSVector::encrypt(shared_ptr<TenSEALContext> context, double scale,
 
     return ciphertext;
 }
-CKKSVector::plain_t CKKSVector::decrypt() const {
-    if (this->tenseal_context()->decryptor == NULL) {
-        // this->context was loaded with public keys only
-        throw invalid_argument(
-            "the current context of the vector doesn't hold a secret_key, "
-            "please provide one as argument");
-    }
 
-    return this->decrypt(this->tenseal_context()->secret_key());
-}
 CKKSVector::plain_t CKKSVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
     Decryptor decryptor =

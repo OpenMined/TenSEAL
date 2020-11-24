@@ -18,8 +18,8 @@ using namespace std;
  *
  * The integrator must override the following inherited methods, along with the
  *EncryptedVector pure methods:
- * * vector<plain_t> EncryptedTensor::decrypt() const = 0;
- * * vector<plain_t> EncryptedTensor::decrypt() = 0;
+ * * vector<plain_t> EncryptedTensor::decrypt(const shared_ptr<SecretKey>&)
+ *const = 0;
  * * encrypted_t negate_inplace();
  * * encrypted_t square_inplace();
  * * encrypted_t add_inplace(encrypted_t to_add);

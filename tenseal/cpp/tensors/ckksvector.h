@@ -19,6 +19,7 @@ class CKKSVector
    public:
     using encrypted_t = shared_ptr<CKKSVector>;
     using plain_t = PlainTensor<double>;
+    using EncryptedVector<double, shared_ptr<CKKSVector>, CKKSEncoder>::decrypt;
 
     template <typename... Args>
     static encrypted_t Create(Args&&... args) {
@@ -28,7 +29,6 @@ class CKKSVector
      * Decrypts and returns the plaintext representation of the encrypted vector
      *of real numbers using the secret-key.
      **/
-    plain_t decrypt() const override;
     plain_t decrypt(const shared_ptr<SecretKey>& sk) const override;
 
     /**

@@ -62,16 +62,6 @@ Ciphertext BFVVector::encrypt(shared_ptr<TenSEALContext> context,
     return ciphertext;
 }
 
-BFVVector::plain_t BFVVector::decrypt() const {
-    if (this->tenseal_context()->decryptor == NULL) {
-        // this->context was loaded with public keys only
-        throw invalid_argument(
-            "the current context of the vector doesn't hold a secret_key, "
-            "please provide one as argument");
-    }
-
-    return this->decrypt(this->tenseal_context()->secret_key());
-}
 BFVVector::plain_t BFVVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
     Decryptor decryptor =

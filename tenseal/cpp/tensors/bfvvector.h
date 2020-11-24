@@ -20,6 +20,8 @@ class BFVVector
    public:
     using encrypted_t = shared_ptr<BFVVector>;
     using plain_t = PlainTensor<int64_t>;
+    using EncryptedVector<int64_t, shared_ptr<BFVVector>,
+                          BatchEncoder>::decrypt;
 
     template <typename... Args>
     static encrypted_t Create(Args&&... args) {
@@ -31,7 +33,6 @@ class BFVVector
      * Decrypts and returns the plaintext representation of the encrypted vector
      *of integers using the secret-key.
      **/
-    plain_t decrypt() const override;
     plain_t decrypt(const shared_ptr<SecretKey>& sk) const override;
     /**
      * Compute the power of the BFVVector with minimal multiplication depth.
