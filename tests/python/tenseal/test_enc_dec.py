@@ -1,5 +1,7 @@
 import pytest
 import tenseal as ts
+import numpy as np
+
 
 PLAIN_VEC = [
     [0],
@@ -94,3 +96,16 @@ def test_ckks_empty_encryption(plain_vec):
     with pytest.raises(ValueError) as e:
         ckks_vec = ts.ckks_vector(context, plain_vec, scale)
     assert str(e.value) == "Attempting to encrypt an empty vector"
+
+
+def test_ckks_tensor_encryption_decryption():
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=COEFF_MOD_BIT_SIZES)
+    scale = pow(2, 40)
+    matrix = np.random.randn(4, 5)
+    plain_tensor = ts.plain_tensor(matrix.tolist())
+    ckks_vec = ts.ckks_tensor(context, plain_tensor, scale)
+    decrypted_vec = ckks_vec.decrypt()
+    # TODO: don't use the flattened version
+    assert _almost_equal(
+        decrypted_vec, matrix.flatten().tolist(), 1
+    ), "Decryption of vector is incorrect"
