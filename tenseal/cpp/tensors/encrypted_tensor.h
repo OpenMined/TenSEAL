@@ -27,7 +27,15 @@ class EncryptedTensor {
      * Decrypts and returns the plaintext representation of the encrypted tensor
      *of real numbers using the secret-key.
      **/
-    virtual PlainTensor<plain_data_t> decrypt() const = 0;
+    PlainTensor<plain_data_t> decrypt() const {
+        if (this->tenseal_context()->decryptor == nullptr) {
+            // this->context was loaded with public keys only
+            throw invalid_argument(
+                "the current context of the tensor doesn't hold a secret_key, "
+                "please provide one as argument");
+        }
+        return this->decrypt(this->tenseal_context()->secret_key());
+    };
     virtual PlainTensor<plain_data_t> decrypt(
         const shared_ptr<SecretKey>& sk) const = 0;
 

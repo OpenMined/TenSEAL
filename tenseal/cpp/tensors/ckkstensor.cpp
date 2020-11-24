@@ -41,17 +41,6 @@ Ciphertext CKKSTensor::encrypt(const shared_ptr<TenSEALContext>& ctx,
     return ciphertext;
 }
 
-PlainTensor<double> CKKSTensor::decrypt() const {
-    if (this->tenseal_context()->decryptor == NULL) {
-        // this->context was loaded with public keys only
-        throw invalid_argument(
-            "the current context of the tensor doesn't hold a secret_key, "
-            "please provide one as argument");
-    }
-
-    return this->decrypt(this->tenseal_context()->secret_key());
-}
-
 PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
     Decryptor decryptor =
