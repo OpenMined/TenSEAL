@@ -15,6 +15,8 @@ template <typename plain_t>
 class PlainTensor {
    public:
     using dtype = plain_t;
+    using iterator = typename vector<plain_t>::iterator;
+    using const_iterator = typename vector<plain_t>::const_iterator;
     /**
      * Create a new PlainTensor from an 1D vector.
      * @param[in] input vector.
@@ -188,6 +190,13 @@ class PlainTensor {
      * Casts the tensor to an 1D vector.
      */
     operator vector<plain_t>() const { return _data; }
+    /**
+     * Iterator utils
+     **/
+    inline iterator begin() noexcept { return _data.begin(); }
+    inline const_iterator cbegin() const noexcept { return _data.cbegin(); }
+    inline iterator end() noexcept { return _data.end(); }
+    inline const_iterator cend() const noexcept { return _data.cend(); }
     /**
      * Replicates the internal representation for <times> elements.
      */
