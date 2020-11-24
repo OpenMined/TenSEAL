@@ -16,9 +16,9 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
         this->_init_scale = ctx->global_scale();
     }
 
-    for (auto& item : tensor.data())
-        _data.push_back(CKKSTensor::encrypt(ctx, this->_init_scale,
-                                            vector<double>({item})));
+    for (auto it = tensor.cbegin(); it != tensor.cend(); it++)
+        _data.push_back(
+            CKKSTensor::encrypt(ctx, this->_init_scale, vector<double>({*it})));
 }
 
 Ciphertext CKKSTensor::encrypt(const shared_ptr<TenSEALContext>& ctx,
