@@ -25,7 +25,7 @@ void bind_evaluator(pybind11::module &m) {
      ***/
     py::class_<Evaluator, std::shared_ptr<Evaluator>>(m, "Evaluator",
                                                       py::module_local())
-        .def(py::init<std::shared_ptr<SEALContext>>())
+        .def(py::init<const SEALContext &>())
         .def("add_inplace", &Evaluator::add_inplace)
         .def("sub_inplace", &Evaluator::sub_inplace)
         .def("multiply_inplace",
@@ -201,31 +201,31 @@ void bind_evaluator(pybind11::module &m) {
      * "seal/valcheck.h" {
      ***/
     m.def("is_metadata_valid_for",
-          [](const Plaintext &in, std::shared_ptr<const SEALContext> ctx) {
+          [](const Plaintext &in, const SEALContext &ctx) {
               return is_metadata_valid_for(in, ctx);
           })
         .def("is_metadata_valid_for",
-             [](const Ciphertext &in, std::shared_ptr<const SEALContext> ctx) {
+             [](const Ciphertext &in, const SEALContext &ctx) {
                  return is_metadata_valid_for(in, ctx);
              })
         .def("is_metadata_valid_for",
-             [](const SecretKey &in, std::shared_ptr<const SEALContext> ctx) {
+             [](const SecretKey &in, const SEALContext &ctx) {
                  return is_metadata_valid_for(in, ctx);
              })
         .def("is_metadata_valid_for",
-             [](const PublicKey &in, std::shared_ptr<const SEALContext> ctx) {
+             [](const PublicKey &in, const SEALContext &ctx) {
                  return is_metadata_valid_for(in, ctx);
              })
         .def("is_metadata_valid_for",
-             [](const KSwitchKeys &in, std::shared_ptr<const SEALContext> ctx) {
+             [](const KSwitchKeys &in, const SEALContext &ctx) {
                  return is_metadata_valid_for(in, ctx);
              })
         .def("is_metadata_valid_for",
-             [](const RelinKeys &in, std::shared_ptr<const SEALContext> ctx) {
+             [](const RelinKeys &in, const SEALContext &ctx) {
                  return is_metadata_valid_for(in, ctx);
              })
         .def("is_metadata_valid_for",
-             [](const GaloisKeys &in, std::shared_ptr<const SEALContext> ctx) {
+             [](const GaloisKeys &in, const SEALContext &ctx) {
                  return is_metadata_valid_for(in, ctx);
              })
         .def("is_buffer_valid",
@@ -243,60 +243,46 @@ void bind_evaluator(pybind11::module &m) {
         .def("is_buffer_valid",
              py::overload_cast<const GaloisKeys &>(&is_buffer_valid))
         .def("is_data_valid_for",
-             py::overload_cast<const Plaintext &,
-                               std::shared_ptr<const SEALContext>>(
+             py::overload_cast<const Plaintext &, const SEALContext &>(
                  &is_data_valid_for))
         .def("is_data_valid_for",
-             py::overload_cast<const Ciphertext &,
-                               std::shared_ptr<const SEALContext>>(
+             py::overload_cast<const Ciphertext &, const SEALContext &>(
                  &is_data_valid_for))
         .def("is_data_valid_for",
-             py::overload_cast<const SecretKey &,
-                               std::shared_ptr<const SEALContext>>(
+             py::overload_cast<const SecretKey &, const SEALContext &>(
                  &is_data_valid_for))
         .def("is_data_valid_for",
-             py::overload_cast<const PublicKey &,
-                               std::shared_ptr<const SEALContext>>(
+             py::overload_cast<const PublicKey &, const SEALContext &>(
                  &is_data_valid_for))
         .def("is_data_valid_for",
-             py::overload_cast<const KSwitchKeys &,
-                               std::shared_ptr<const SEALContext>>(
+             py::overload_cast<const KSwitchKeys &, const SEALContext &>(
                  &is_data_valid_for))
         .def("is_data_valid_for",
-             py::overload_cast<const RelinKeys &,
-                               std::shared_ptr<const SEALContext>>(
+             py::overload_cast<const RelinKeys &, const SEALContext &>(
                  &is_data_valid_for))
         .def("is_data_valid_for",
-             py::overload_cast<const GaloisKeys &,
-                               std::shared_ptr<const SEALContext>>(
+             py::overload_cast<const GaloisKeys &, const SEALContext &>(
                  &is_data_valid_for))
         .def("is_valid_for",
-             py::overload_cast<const Plaintext &,
-                               std::shared_ptr<const SEALContext>>(
+             py::overload_cast<const Plaintext &, const SEALContext &>(
                  &is_valid_for))
         .def("is_valid_for",
-             py::overload_cast<const Ciphertext &,
-                               std::shared_ptr<const SEALContext>>(
+             py::overload_cast<const Ciphertext &, const SEALContext &>(
                  &is_valid_for))
         .def("is_valid_for",
-             py::overload_cast<const SecretKey &,
-                               std::shared_ptr<const SEALContext>>(
+             py::overload_cast<const SecretKey &, const SEALContext &>(
                  &is_valid_for))
         .def("is_valid_for",
-             py::overload_cast<const PublicKey &,
-                               std::shared_ptr<const SEALContext>>(
+             py::overload_cast<const PublicKey &, const SEALContext &>(
                  &is_valid_for))
         .def("is_valid_for",
-             py::overload_cast<const KSwitchKeys &,
-                               std::shared_ptr<const SEALContext>>(
+             py::overload_cast<const KSwitchKeys &, const SEALContext &>(
                  &is_valid_for))
         .def("is_valid_for",
-             py::overload_cast<const RelinKeys &,
-                               std::shared_ptr<const SEALContext>>(
+             py::overload_cast<const RelinKeys &, const SEALContext &>(
                  &is_valid_for))
         .def("is_valid_for",
-             py::overload_cast<const GaloisKeys &,
-                               std::shared_ptr<const SEALContext>>(
+             py::overload_cast<const GaloisKeys &, const SEALContext &>(
                  &is_valid_for));
     /***
      * } "seal/valcheck.h"

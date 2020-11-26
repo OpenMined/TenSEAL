@@ -41,9 +41,9 @@ void TenSEALContext::dispatcher_setup(optional<size_t> n_threads) {
 
 void TenSEALContext::base_setup(EncryptionParameters parms) {
     this->_parms = parms;
-    this->_context = SEALContext::Create(this->_parms);
+    this->_context = make_shared<SEALContext>(this->_parms);
 
-    this->evaluator = make_shared<Evaluator>(this->_context);
+    this->evaluator = make_shared<Evaluator>(*this->_context);
     this->encoder_factory = make_shared<TenSEALEncoder>(this->_context);
 }
 
@@ -52,9 +52,12 @@ void TenSEALContext::keys_setup(optional<PublicKey> public_key,
                                 bool generate_relin_keys,
                                 bool generate_galois_keys) {
     if (!public_key && !secret_key) {
-        KeyGenerator keygen = KeyGenerator(this->_context);
+        KeyGenerator keygen = KeyGenerator(*this->_context);
 
-        this->_public_key = make_shared<PublicKey>(keygen.public_key());
+        PublicKey pk;
+        keygen.create_public_key(pk);
+
+        this->_public_key = make_shared<PublicKey>(pk);
         this->_secret_key = make_shared<SecretKey>(keygen.secret_key());
     }
 
@@ -65,12 +68,12 @@ void TenSEALContext::keys_setup(optional<PublicKey> public_key,
         this->_secret_key = make_shared<SecretKey>(secret_key.value());
 
     this->encryptor =
-        make_shared<Encryptor>(this->_context, *this->_public_key);
+        make_shared<Encryptor>(*this->_context, *this->_public_key);
 
     if (!this->_secret_key) return;
 
     this->decryptor =
-        make_shared<Decryptor>(this->_context, *this->_secret_key);
+        make_shared<Decryptor>(*this->_context, *this->_secret_key);
 
     if (generate_relin_keys) {
         this->generate_relin_keys(*this->_secret_key);
@@ -86,12 +89,12 @@ shared_ptr<TenSEALContext> TenSEALContext::Create(
     vector<int> coeff_mod_bit_sizes, optional<size_t> n_threads) {
     EncryptionParameters parms;
     switch (scheme) {
-        case scheme_type::BFV:
+        case scheme_type::bfv:
             parms = create_bfv_parameters(poly_modulus_degree, plain_modulus,
                                           coeff_mod_bit_sizes);
             break;
 
-        case scheme_type::CKKS:
+        case scheme_type::ckks:
             parms = create_ckks_parameters(poly_modulus_degree,
                                            coeff_mod_bit_sizes);
             break;
@@ -170,14 +173,16 @@ void TenSEALContext::generate_galois_keys() {
 }
 
 void TenSEALContext::generate_galois_keys(const SecretKey& secret_key) {
-    KeyGenerator keygen = KeyGenerator(this->_context, secret_key);
+    KeyGenerator keygen = KeyGenerator(*this->_context, secret_key);
 
-    this->_galois_keys = make_shared<GaloisKeys>(keygen.galois_keys_local());
+    GaloisKeys gk;
+    keygen.create_galois_keys(gk);
+    this->_galois_keys = make_shared<GaloisKeys>(gk);
 }
 
 void TenSEALContext::generate_galois_keys(const std::string& bytes) {
     this->_galois_keys = make_shared<GaloisKeys>(
-        SEALDeserialize<GaloisKeys>(this->_context, bytes));
+        SEALDeserialize<GaloisKeys>(*this->_context, bytes));
 }
 
 void TenSEALContext::generate_relin_keys() {
@@ -188,13 +193,17 @@ void TenSEALContext::generate_relin_keys() {
 }
 
 void TenSEALContext::generate_relin_keys(const SecretKey& secret_key) {
-    KeyGenerator keygen = KeyGenerator(this->_context, secret_key);
-    this->_relin_keys = make_shared<RelinKeys>(keygen.relin_keys_local());
+    KeyGenerator keygen = KeyGenerator(*this->_context, secret_key);
+
+    RelinKeys rk;
+    keygen.create_relin_keys(rk);
+
+    this->_relin_keys = make_shared<RelinKeys>(rk);
 }
 
 void TenSEALContext::generate_relin_keys(const std::string& bytes) {
     this->_relin_keys = make_shared<RelinKeys>(
-        SEALDeserialize<RelinKeys>(this->_context, bytes));
+        SEALDeserialize<RelinKeys>(*this->_context, bytes));
 }
 
 void TenSEALContext::make_context_public(bool generate_galois_keys,
@@ -215,17 +224,14 @@ void TenSEALContext::make_context_public(bool generate_galois_keys,
         return;
     }
 
-    KeyGenerator keygen = KeyGenerator(this->_context, *this->_secret_key);
-
     // generate Galois Keys
     if (generate_galois_keys && this->_galois_keys == nullptr) {
-        this->_galois_keys =
-            make_shared<GaloisKeys>(keygen.galois_keys_local());
+        this->generate_galois_keys();
     }
 
     // generate Relinearization Keys
     if (generate_relin_keys && this->_relin_keys == nullptr) {
-        this->_relin_keys = make_shared<RelinKeys>(keygen.relin_keys_local());
+        this->generate_relin_keys();
     }
 }
 
@@ -305,7 +311,7 @@ void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
     }
 
     auto public_key = SEALDeserialize<PublicKey>(
-        this->_context, buffer.public_context().public_key());
+        *this->_context, buffer.public_context().public_key());
 
     if (!buffer.has_private_context()) {
         this->keys_setup(public_key);
@@ -319,7 +325,7 @@ void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
     }
 
     auto secret_key = SEALDeserialize<SecretKey>(
-        this->_context, buffer.private_context().secret_key());
+        *this->_context, buffer.private_context().secret_key());
     this->keys_setup(public_key, secret_key,
                      buffer.private_context().relin_keys_generated(),
                      buffer.private_context().galois_keys_generated());

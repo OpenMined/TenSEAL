@@ -20,67 +20,34 @@ namespace py = pybind11;
 
 void bind_encoder_decoder(pybind11::module &m) {
     /*******************
-     * "seal/intencoder.h" {
-     ***/
-    py::class_<IntegerEncoder>(m, "IntegerEncoder", py::module_local())
-        .def(py::init<std::shared_ptr<SEALContext>>())
-        .def("encode",
-             py::overload_cast<std::uint64_t>(&IntegerEncoder::encode))
-        .def("encode", py::overload_cast<std::uint64_t, Plaintext &>(
-                           &IntegerEncoder::encode))
-        .def("encode",
-             py::overload_cast<std::uint32_t>(&IntegerEncoder::encode))
-        .def("encode", py::overload_cast<std::uint32_t, Plaintext &>(
-                           &IntegerEncoder::encode))
-        .def("decode_uint32", &IntegerEncoder::decode_uint32)
-        .def("decode_uint64", &IntegerEncoder::decode_uint64)
-        .def("encode", py::overload_cast<std::int64_t>(&IntegerEncoder::encode))
-        .def("encode", py::overload_cast<std::int64_t, Plaintext &>(
-                           &IntegerEncoder::encode))
-        .def("encode", py::overload_cast<std::int32_t>(&IntegerEncoder::encode))
-        .def("encode", py::overload_cast<std::int32_t, Plaintext &>(
-                           &IntegerEncoder::encode))
-        .def("encode",
-             py::overload_cast<const BigUInt &>(&IntegerEncoder::encode))
-        .def("encode", py::overload_cast<const BigUInt &, Plaintext &>(
-                           &IntegerEncoder::encode))
-        .def("decode_int32", &IntegerEncoder::decode_int32)
-        .def("decode_int64", &IntegerEncoder::decode_int64)
-        .def("decode_biguint", &IntegerEncoder::decode_biguint)
-        .def("plain_modulus", &IntegerEncoder::plain_modulus);
-    /***
-     * } "seal/intencoder.h"
-     *******************/
-
-    /*******************
      * "seal/intarray.h" {
      ***/
-    using IntArray64 = IntArray<std::uint64_t>;
-    py::class_<IntArray64>(m, "IntArray", py::module_local())
+    using DynArray64 = DynArray<std::uint64_t>;
+    py::class_<DynArray64>(m, "DynArray", py::module_local())
         .def(py::init<>())
         .def(py::init<std::size_t>())
         .def(py::init<std::size_t, std::size_t>())
-        .def("at", py::overload_cast<std::size_t>(&IntArray64::at, py::const_),
+        .def("at", py::overload_cast<std::size_t>(&DynArray64::at, py::const_),
              py::return_value_policy::reference)
-        .def("at", py::overload_cast<std::size_t>(&IntArray64::at))
+        .def("at", py::overload_cast<std::size_t>(&DynArray64::at))
         .def("__getitem__", py::overload_cast<std::size_t>(
-                                &IntArray64::operator[], py::const_))
-        .def("empty", &IntArray64::empty)
-        .def("max_size", &IntArray64::max_size)
-        .def("size", &IntArray64::size)
-        .def("capacity", &IntArray64::capacity)
-        .def("release", &IntArray64::release)
-        .def("clear", &IntArray64::clear)
-        .def("reserve", &IntArray64::reserve)
-        .def("shrink_to_fit", &IntArray64::shrink_to_fit)
-        .def("resize", &IntArray64::resize)
+                                &DynArray64::operator[], py::const_))
+        .def("empty", &DynArray64::empty)
+        .def("max_size", &DynArray64::max_size)
+        .def("size", &DynArray64::size)
+        .def("capacity", &DynArray64::capacity)
+        .def("release", &DynArray64::release)
+        .def("clear", &DynArray64::clear)
+        .def("reserve", &DynArray64::reserve)
+        .def("shrink_to_fit", &DynArray64::shrink_to_fit)
+        .def("resize", &DynArray64::resize)
         .def("save",
-             [](const IntArray64 &a, std::string &path) {
+             [](const DynArray64 &a, std::string &path) {
                  std::ofstream out(path, std::ofstream::binary);
                  a.save(out);
                  out.close();
              })
-        .def("load", [](IntArray64 &a, std::string &path) {
+        .def("load", [](DynArray64 &a, std::string &path) {
             std::ifstream in(path, std::ifstream::binary);
             a.load(in);
             in.close();
@@ -93,15 +60,13 @@ void bind_encoder_decoder(pybind11::module &m) {
      * "seal/batchencoder.h" {
      ***/
     py::class_<BatchEncoder>(m, "BatchEncoder", py::module_local())
-        .def(py::init<std::shared_ptr<SEALContext>>())
+        .def(py::init<const SEALContext &>())
         .def("encode",
              py::overload_cast<const std::vector<std::uint64_t> &, Plaintext &>(
                  &BatchEncoder::encode))
         .def("encode",
              py::overload_cast<const std::vector<std::int64_t> &, Plaintext &>(
                  &BatchEncoder::encode))
-        .def("encode",
-             [](BatchEncoder &b, Plaintext &plain) { return b.encode(plain); })
         .def("decode_uint64",
              [](BatchEncoder &b, const Plaintext &plain) {
                  std::vector<std::uint64_t> destination;
@@ -114,8 +79,6 @@ void bind_encoder_decoder(pybind11::module &m) {
                  b.decode(plain, destination);
                  return destination;
              })
-        .def("decode",
-             [](BatchEncoder &b, Plaintext &plain) { return b.decode(plain); })
         .def("slot_count", &BatchEncoder::slot_count);
     /***
      * } "seal/batchencoder.h"
@@ -125,7 +88,7 @@ void bind_encoder_decoder(pybind11::module &m) {
      * "seal/ckks.h" {
      ***/
     py::class_<CKKSEncoder>(m, "CKKSEncoder", py::module_local())
-        .def(py::init<std::shared_ptr<SEALContext>>())
+        .def(py::init<const SEALContext &>())
         .def("slot_count", &CKKSEncoder::slot_count)
         .def("encode",
              [](CKKSEncoder &e, const std::vector<double> &values,

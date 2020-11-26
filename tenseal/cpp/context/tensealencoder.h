@@ -12,19 +12,21 @@
 namespace tenseal {
 
 using namespace seal;
+using namespace std;
 
 class TenSEALEncoder {
    public:
     TenSEALEncoder() = delete;
     TenSEALEncoder(TenSEALEncoder&) = delete;
-    TenSEALEncoder(std::shared_ptr<SEALContext> context) : _context(context){};
+    TenSEALEncoder(const shared_ptr<SEALContext>& context)
+        : _context(context){};
 
     template <typename T>
-    std::shared_ptr<T> get() {
-        const std::type_index& tidx = std::type_index(typeid(T));
+    shared_ptr<T> get() {
+        const type_index& tidx = type_index(typeid(T));
         if (_encoders.find(tidx) == _encoders.end()) return create<T>();
 
-        return std::any_cast<std::shared_ptr<T>>(_encoders[tidx]);
+        return any_cast<shared_ptr<T>>(_encoders[tidx]);
     }
 
     /*
@@ -32,14 +34,14 @@ class TenSEALEncoder {
     Integer/BatchEncoder or CKKSEncoder.
     */
     template <class T>
-    void encode(const std::vector<int64_t>& vec, Plaintext& pt) {
+    void encode(const vector<int64_t>& vec, Plaintext& pt) {
         auto encoder = this->get<T>();
         encoder->encode(vec, pt);
     }
 
     template <class CKKSEncoder>
-    void encode(const std::vector<double>& vec, Plaintext& pt,
-                std::optional<double> optscale = {}) {
+    void encode(const vector<double>& vec, Plaintext& pt,
+                optional<double> optscale = {}) {
         double scale = 1.0;
         if (optscale.has_value())
             scale = optscale.value();
@@ -51,8 +53,7 @@ class TenSEALEncoder {
     }
 
     template <class CKKSEncoder>
-    void encode(double value, Plaintext& pt,
-                std::optional<double> optscale = {}) {
+    void encode(double value, Plaintext& pt, optional<double> optscale = {}) {
         double scale = 1.0;
         if (optscale.has_value())
             scale = optscale.value();
@@ -86,41 +87,41 @@ class TenSEALEncoder {
     // Example: if using coeff_mod_bit_size of [60,40,40,60],
     // the global scale should be set for 2**40
     void global_scale(double scale) {
-        if (scale < 0) throw std::invalid_argument("invalid scale value");
+        if (scale < 0) throw invalid_argument("invalid scale value");
 
         this->_scale = scale;
     }
     double global_scale() {
         if (!this->_scale.has_value())
-            throw std::invalid_argument("no global scale");
+            throw invalid_argument("no global scale");
         return this->_scale.value();
     }
 
    private:
     // Can throw exception in case of invalid parameters
     template <typename T>
-    std::shared_ptr<T> create() {
-        const std::type_index& tidx = std::type_index(typeid(T));
+    shared_ptr<T> create() {
+        const type_index& tidx = type_index(typeid(T));
 
-        _encoders[tidx] = std::make_shared<T>(this->_context);
+        _encoders[tidx] = make_shared<T>(*this->_context);
 
-        return std::any_cast<std::shared_ptr<T>>(_encoders[tidx]);
+        return any_cast<shared_ptr<T>>(_encoders[tidx]);
     }
 
     /*
     Stores a map of available encoders.
     */
-    std::map<std::type_index, std::any> _encoders;
+    map<type_index, any> _encoders;
 
     /*
     Stores a shared_pointer to the SEAL Context.
     */
-    std::shared_ptr<SEALContext> _context;
+    shared_ptr<SEALContext> _context;
 
     /*
     Stores a global scale used across ciphertext encrypted using CKKS.
     */
-    std::optional<double> _scale;
+    optional<double> _scale;
 };
 
 }  // namespace tenseal

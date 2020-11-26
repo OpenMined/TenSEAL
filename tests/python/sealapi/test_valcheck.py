@@ -30,11 +30,20 @@ def test_valcheck(check):
 
     keygen = sealapi.KeyGenerator(ctx)
 
+    pk = sealapi.PublicKey()
+    keygen.create_public_key(pk)
+
+    rk = sealapi.RelinKeys()
+    keygen.create_relin_keys(rk)
+
+    gk = sealapi.GaloisKeys()
+    keygen.create_galois_keys(gk)
+
     for key in [
-        keygen.public_key(),
+        pk,
         keygen.secret_key(),
-        keygen.galois_keys_local(),
-        keygen.relin_keys_local(),
+        gk,
+        rk,
     ]:
         assert check(key, ctx) is True
         assert check(key, other_ctx) is False

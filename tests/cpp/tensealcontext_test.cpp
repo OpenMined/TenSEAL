@@ -17,13 +17,13 @@ TEST_F(TenSEALContextTest, TestCreateFail) {
         auto ctx = TenSEALContext::Create(scheme_type::none, 8192, 1032193, {}),
         std::exception);
     EXPECT_THROW(
-        auto ctx = TenSEALContext::Create(scheme_type::BFV, 8191, 1032193, {}),
+        auto ctx = TenSEALContext::Create(scheme_type::bfv, 8191, 1032193, {}),
         std::exception);
-    EXPECT_THROW(auto ctx = TenSEALContext::Create(scheme_type::CKKS, 8191, -1,
+    EXPECT_THROW(auto ctx = TenSEALContext::Create(scheme_type::ckks, 8191, -1,
                                                    {60, 40, 40, 60}),
                  std::exception);
     EXPECT_THROW(
-        auto ctx = TenSEALContext::Create(scheme_type::CKKS, 8192, 1032193, {}),
+        auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, 1032193, {}),
         std::exception);
 
     EXPECT_THROW(auto ctx = TenSEALContext::Create("invalid"), std::exception);
@@ -34,20 +34,20 @@ TEST_F(TenSEALContextTest, TestCreateFail) {
 
 TEST_F(TenSEALContextTest, TestSerialization) {
     auto ctx =
-        TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
     ctx->generate_galois_keys();
 
     auto buff = ctx->save();
     auto recreated_ctx = TenSEALContext::Create(buff);
 
     ASSERT_TRUE(recreated_ctx != nullptr);
-    auto &orig_pubkey = ctx->public_key()->data().int_array();
-    auto &serial_pubkey = recreated_ctx->public_key()->data().int_array();
+    auto &orig_pubkey = ctx->public_key()->data().dyn_array();
+    auto &serial_pubkey = recreated_ctx->public_key()->data().dyn_array();
     for (size_t idx = 0; idx < orig_pubkey.size(); ++idx) {
         EXPECT_EQ(orig_pubkey[idx], serial_pubkey[idx]);
     }
-    auto &orig_privkey = ctx->secret_key()->data().int_array();
-    auto &serial_privkey = recreated_ctx->secret_key()->data().int_array();
+    auto &orig_privkey = ctx->secret_key()->data().dyn_array();
+    auto &serial_privkey = recreated_ctx->secret_key()->data().dyn_array();
     for (size_t idx = 0; idx < orig_privkey.size(); ++idx) {
         EXPECT_EQ(orig_privkey[idx], serial_privkey[idx]);
     }
@@ -65,10 +65,10 @@ TEST_F(TenSEALContextTest, TestSerialization) {
 
 TEST_F(TenSEALContextTest, TestDispatcher) {
     auto ctx =
-        TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
     ASSERT_EQ(ctx->dispatcher_size(), get_concurrency());
 
-    ctx = TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60},
+    ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60},
                                  8);
     ASSERT_EQ(ctx->dispatcher_size(), 8);
 }
@@ -76,7 +76,7 @@ TEST_F(TenSEALContextTest, TestDispatcher) {
 TEST_P(TenSEALContextTest, TestCreateBFV) {
     bool should_serialize_first = GetParam();
 
-    auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
 
     if (should_serialize_first) {
         auto buff = ctx->save();
@@ -97,7 +97,7 @@ TEST_P(TenSEALContextTest, TestCreateBFV) {
 TEST_P(TenSEALContextTest, TestCreateBFVPublic) {
     bool should_serialize_first = GetParam();
 
-    auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
     ctx->make_context_public(false, false);
 
     if (should_serialize_first) {
@@ -119,7 +119,7 @@ TEST_P(TenSEALContextTest, TestCreateCKKS) {
     bool should_serialize_first = GetParam();
 
     auto ctx =
-        TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
 
     if (should_serialize_first) {
         auto buff = ctx->save();
@@ -140,7 +140,7 @@ TEST_P(TenSEALContextTest, TestCreateCKKSPublic) {
     bool should_serialize_first = GetParam();
 
     auto ctx =
-        TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
     ctx->make_context_public(false, false);
 
     if (should_serialize_first) {

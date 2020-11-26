@@ -33,7 +33,7 @@ Ciphertext CKKSTensor::encrypt(const shared_ptr<TenSEALContext>& ctx,
             "can't encrypt vectors of this size, please use a larger "
             "polynomial modulus degree.");
 
-    Ciphertext ciphertext(ctx->seal_context());
+    Ciphertext ciphertext(*ctx->seal_context());
     Plaintext plaintext;
     ctx->encode<CKKSEncoder>(data, plaintext, scale);
     ctx->encryptor->encrypt(plaintext, ciphertext);
@@ -44,7 +44,7 @@ Ciphertext CKKSTensor::encrypt(const shared_ptr<TenSEALContext>& ctx,
 PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
     Decryptor decryptor =
-        Decryptor(this->tenseal_context()->seal_context(), *sk);
+        Decryptor(*this->tenseal_context()->seal_context(), *sk);
 
     vector<double> result;
     vector<double> buff;

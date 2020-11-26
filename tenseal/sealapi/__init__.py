@@ -6,9 +6,6 @@ try:
 except ImportError:
     import tenseal.sealapi._sealapi_cpp
 
-## seal/biguint.h ##
-BigUInt = _sealapi_cpp.BigUInt
-
 ## seal/smallmodulus.h ##
 Modulus = _sealapi_cpp.Modulus
 
@@ -21,8 +18,13 @@ Plaintext = _sealapi_cpp.Plaintext
 
 ## seal/randomgen.h ##
 random_uint64 = _sealapi_cpp.random_uint64
-BlakePRNGFactory = _sealapi_cpp.BlakePRNGFactory
-BlakePRNG = _sealapi_cpp.BlakePRNG
+prng_seed_type = _sealapi_cpp.prng_seed_type
+prng_type = _sealapi_cpp.prng_type
+UniformRandomGeneratorInfo = _sealapi_cpp.UniformRandomGeneratorInfo
+Blake2xbPRNGFactory = _sealapi_cpp.Blake2xbPRNGFactory
+Blake2xbPRNG = _sealapi_cpp.Blake2xbPRNG
+Shake256PRNGFactory = _sealapi_cpp.Shake256PRNGFactory
+(Shake256PRNG,) = (_sealapi_cpp.Shake256PRNG,)
 RandomToStandardAdapter = _sealapi_cpp.RandomToStandardAdapter
 
 ## seal/encryptionparams.h ##
@@ -62,11 +64,8 @@ Decryptor = _sealapi_cpp.Decryptor
 ## seal/encryptor.h ##
 Encryptor = _sealapi_cpp.Encryptor
 
-## seal/intencoder.h ##
-IntegerEncoder = _sealapi_cpp.IntegerEncoder
-
 ## seal/intarray.h ##
-IntArray = _sealapi_cpp.IntArray
+DynArray = _sealapi_cpp.DynArray
 
 ## seal/batchencoder.h ##
 BatchEncoder = _sealapi_cpp.BatchEncoder

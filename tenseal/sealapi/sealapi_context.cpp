@@ -18,8 +18,8 @@ void bind_context(pybind11::module &m) {
      ***/
     py::enum_<scheme_type>(m, "SCHEME_TYPE", py::module_local())
         .value("NONE", scheme_type::none)
-        .value("BFV", scheme_type::BFV)
-        .value("CKKS", scheme_type::CKKS);
+        .value("BFV", scheme_type::bfv)
+        .value("CKKS", scheme_type::ckks);
 
     py::class_<EncryptionParameters>(m, "EncryptionParameters",
                                      py::module_local())
@@ -162,7 +162,8 @@ void bind_context(pybind11::module &m) {
         .def("galois_tool", &SEALContext::ContextData::galois_tool,
              py::return_value_policy::reference);
 
-    sealContext.def_static("Create", &SEALContext::Create)
+    sealContext
+        .def(py::init<const EncryptionParameters &, bool, sec_level_type>())
         .def("get_context_data", &SEALContext::get_context_data)
         .def("key_context_data", &SEALContext::key_context_data)
         .def("first_context_data", &SEALContext::first_context_data)

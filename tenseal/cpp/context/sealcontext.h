@@ -28,10 +28,10 @@ EncryptionParameters create_ckks_parameters(size_t poly_modulus_degree,
                                             vector<int> coeff_mod_bit_sizes);
 
 /*
-Returns a smart pointer to a SEALContext created with the provided encryption
+Returns a SEALContext created with the provided encryption
 parameters.
 */
-shared_ptr<seal::SEALContext> create_context(EncryptionParameters parms);
+SEALContext create_context(EncryptionParameters parms);
 
 }  // namespace tenseal
 

@@ -247,8 +247,17 @@ void bind_util_namespace(pybind11::module &m) {
         .def(py::init<int, const Modulus &, MemoryPoolHandle>(), py::arg(),
              py::arg(), py::arg() = MemoryManager::GetPool())
         .def("get_root", &NTTTables::get_root)
-        .def("get_from_root_powers", &NTTTables::get_from_root_powers)
-        .def("get_from_inv_root_powers", &NTTTables::get_from_inv_root_powers)
+        .def("get_from_root_powers",
+             py::overload_cast<>(&NTTTables::get_from_root_powers, py::const_))
+        .def("get_from_root_powers",
+             py::overload_cast<std::size_t>(&NTTTables::get_from_root_powers,
+                                            py::const_))
+        .def("get_from_inv_root_powers",
+             py::overload_cast<>(&NTTTables::get_from_inv_root_powers,
+                                 py::const_))
+        .def("get_from_inv_root_powers",
+             py::overload_cast<std::size_t>(
+                 &NTTTables::get_from_inv_root_powers, py::const_))
         .def("modulus", &NTTTables::modulus)
         .def("coeff_count_power", &NTTTables::coeff_count_power)
         .def("coeff_count", &NTTTables::coeff_count);
@@ -485,12 +494,12 @@ void bind_util_namespace(pybind11::module &m) {
     /*******************
      * "util/hestdparms.h" {
      ***/
-    m.def("SEAL_HE_STD_PARMS_128_TC", &SEAL_HE_STD_PARMS_128_TC)
-        .def("SEAL_HE_STD_PARMS_192_TC", &SEAL_HE_STD_PARMS_192_TC)
-        .def("SEAL_HE_STD_PARMS_256_TC", &SEAL_HE_STD_PARMS_256_TC)
-        .def("SEAL_HE_STD_PARMS_128_TQ", &SEAL_HE_STD_PARMS_128_TQ)
-        .def("SEAL_HE_STD_PARMS_192_TQ", &SEAL_HE_STD_PARMS_192_TQ)
-        .def("SEAL_HE_STD_PARMS_256_TQ", &SEAL_HE_STD_PARMS_256_TQ);
+    m.def("seal_he_std_parms_128_tc", &seal_he_std_parms_128_tc)
+        .def("seal_he_std_parms_192_tc", &seal_he_std_parms_192_tc)
+        .def("seal_he_std_parms_256_tc", &seal_he_std_parms_256_tc)
+        .def("seal_he_std_parms_128_tq", &seal_he_std_parms_128_tq)
+        .def("seal_he_std_parms_192_tq", &seal_he_std_parms_192_tq)
+        .def("seal_he_std_parms_256_tq", &seal_he_std_parms_256_tq);
     /***
      * } "util/hestdparms.h"
      *******************/

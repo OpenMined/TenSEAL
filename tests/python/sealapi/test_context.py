@@ -54,7 +54,7 @@ def test_encryptionparams_scheme_specific():
     testcase.set_plain_modulus(sealapi.Modulus(1023))
     assert testcase.plain_modulus().value() == 1023
 
-    testcase.set_random_generator(sealapi.BlakePRNGFactory())
+    testcase.set_random_generator(sealapi.Blake2xbPRNGFactory())
     generator = testcase.random_generator().create()
     assert generator.generate() != generator.generate()
 
@@ -112,7 +112,7 @@ def test_encryptionparams_scheme_settings(scheme):
 def test_context_failure(scheme, sec_level):
     parms = sealapi.EncryptionParameters(scheme)
 
-    sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
+    sealctx = sealapi.SEALContext(parms, True, sec_level)
     assert sealctx.parameters_set() is False
 
 
@@ -198,12 +198,12 @@ def test_context_scheme_bfv_sanity(sec_level):
 
     coeff = sealapi.CoeffModulus.Create(poly_modulus_degree, [32, 32])
     parms.set_coeff_modulus(coeff)
-    sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
+    sealctx = sealapi.SEALContext(parms, True, sec_level)
     assert sealctx.parameters_set() is True
 
     coeff = sealapi.CoeffModulus.BFVDefault(poly_modulus_degree, sec_level)
     parms.set_coeff_modulus(coeff)
-    sealctx = sealapi.SEALContext.Create(parms, True, sec_level)
+    sealctx = sealapi.SEALContext(parms, True, sec_level)
     context_asserts(sealctx, sec_level, sealapi.SCHEME_TYPE.BFV)
 
 
@@ -219,7 +219,7 @@ def test_context_scheme_ckks_sanity(sec_level):
 
     coeff = sealapi.CoeffModulus.Create(poly_modulus_degree, [60, 40, 40, 60])
     parms.set_coeff_modulus(coeff)
-    sealctx = sealapi.SEALContext.Create(parms, True, sealapi.SEC_LEVEL_TYPE.TC128)
+    sealctx = sealapi.SEALContext(parms, True, sealapi.SEC_LEVEL_TYPE.TC128)
     assert sealctx.parameters_set() is True
 
     context_asserts(sealctx, sec_level, sealapi.SCHEME_TYPE.CKKS)

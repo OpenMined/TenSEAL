@@ -363,17 +363,16 @@ def test_evaluator_relin(scheme, ctx, left, right):
 
 
 def test_evaluator_mod_switch():
-    scheme = sealapi.SCHEME_TYPE.BFV
-    parms = sealapi.EncryptionParameters(scheme)
-    parms.set_poly_modulus_degree(128)
-    parms.set_plain_modulus(1 << 6)
-    coeff = sealapi.CoeffModulus.Create(128, [30, 30, 30])
-    parms.set_coeff_modulus(coeff)
-    ctx = sealapi.SEALContext.Create(parms, True, sealapi.SEC_LEVEL_TYPE.NONE)
+    poly_modulus_degree = 8192
+    plain_modulus = 1032193
 
-    intenc = sealapi.IntegerEncoder(ctx)
+    ctx = helper_context_bfv(poly_modulus_degree, plain_modulus)
+
+    batchenc = sealapi.BatchEncoder(ctx)
     keygen = sealapi.KeyGenerator(ctx)
-    public_key = keygen.public_key()
+
+    public_key = sealapi.PublicKey()
+    keygen.create_public_key(public_key)
     secret_key = keygen.secret_key()
 
     decryptor = sealapi.Decryptor(ctx, secret_key)
@@ -382,8 +381,10 @@ def test_evaluator_mod_switch():
     evaluator = sealapi.Evaluator(ctx)
 
     # cphertext mod switch to next
-    expected_value = 1234
-    plain = intenc.encode(expected_value)
+    expected_value = [1, 2, 3, 4, 5]
+    plain = sealapi.Plaintext()
+    batchenc.encode(expected_value, plain)
+
     out = sealapi.Plaintext()
     enc = sealapi.Ciphertext(ctx)
 
@@ -394,10 +395,13 @@ def test_evaluator_mod_switch():
     after = decryptor.invariant_noise_budget(enc)
     assert before > after
     decryptor.decrypt(enc, out)
-    assert intenc.decode_int64(out) == expected_value
+    assert batchenc.decode_int64(out)[: len(expected_value)] == expected_value
 
     # ciphertext mod switch to next
-    plain = intenc.encode(expected_value)
+    expected_value = [1, 2, 3, 4, 5]
+    plain = sealapi.Plaintext()
+    batchenc.encode(expected_value, plain)
+
     out = sealapi.Plaintext()
     enc = sealapi.Ciphertext(ctx)
     cout = sealapi.Ciphertext(ctx)
@@ -409,11 +413,14 @@ def test_evaluator_mod_switch():
     after = decryptor.invariant_noise_budget(cout)
     assert before > after
     decryptor.decrypt(cout, out)
-    assert intenc.decode_int64(out) == expected_value
+    assert batchenc.decode_int64(out)[: len(expected_value)] == expected_value
 
     # cphertext mod switch to inplace
     parms_id = ctx.last_parms_id()
-    plain = intenc.encode(expected_value)
+    expected_value = [1, 2, 3, 4, 5]
+    plain = sealapi.Plaintext()
+    batchenc.encode(expected_value, plain)
+
     out = sealapi.Plaintext()
     enc = sealapi.Ciphertext(ctx)
     cout = sealapi.Ciphertext(ctx)
@@ -425,12 +432,15 @@ def test_evaluator_mod_switch():
     after = decryptor.invariant_noise_budget(enc)
     assert before > after
     decryptor.decrypt(enc, out)
-    assert intenc.decode_int64(out) == expected_value
+    assert batchenc.decode_int64(out)[: len(expected_value)] == expected_value
     assert enc.parms_id() == parms_id
 
     # ciphertext mod switch to
     parms_id = ctx.last_parms_id()
-    plain = intenc.encode(expected_value)
+    expected_value = [1, 2, 3, 4, 5]
+    plain = sealapi.Plaintext()
+    batchenc.encode(expected_value, plain)
+
     out = sealapi.Plaintext()
     enc = sealapi.Ciphertext(ctx)
     cout = sealapi.Ciphertext(ctx)
@@ -442,7 +452,7 @@ def test_evaluator_mod_switch():
     after = decryptor.invariant_noise_budget(cout)
     assert before > after
     decryptor.decrypt(cout, out)
-    assert intenc.decode_int64(out) == expected_value
+    assert batchenc.decode_int64(out)[: len(expected_value)] == expected_value
     assert cout.parms_id() == parms_id
 
     pol_str = "1x^3 + 1x^1 + 3"
@@ -610,12 +620,14 @@ def test_evaluator_galois():
     parms.set_plain_modulus(257)
     coeff = sealapi.CoeffModulus.Create(8, [40, 40])
     parms.set_coeff_modulus(coeff)
-    ctx = sealapi.SEALContext.Create(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
+    ctx = sealapi.SEALContext(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
 
     keygen = sealapi.KeyGenerator(ctx)
-    public_key = keygen.public_key()
+    public_key = sealapi.PublicKey()
+    keygen.create_public_key(public_key)
     secret_key = keygen.secret_key()
-    galois_keys = keygen.galois_keys_local([1, 3, 5])
+    galois_keys = sealapi.GaloisKeys()
+    keygen.create_galois_keys([1, 3, 5], galois_keys)
 
     decryptor = sealapi.Decryptor(ctx, secret_key)
     encryptor = sealapi.Encryptor(ctx, public_key)
@@ -642,13 +654,16 @@ def test_evaluator_rotate_bfv():
 
     coeff = sealapi.CoeffModulus.Create(8, [40, 40])
     parms.set_coeff_modulus(coeff)
-    ctx = sealapi.SEALContext.Create(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
+    ctx = sealapi.SEALContext(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
 
     keygen = sealapi.KeyGenerator(ctx)
-    galois_keys = keygen.galois_keys_local()
+    galois_keys = sealapi.GaloisKeys()
+    keygen.create_galois_keys(galois_keys)
+    public_key = sealapi.PublicKey()
+    keygen.create_public_key(public_key)
 
     decryptor = sealapi.Decryptor(ctx, keygen.secret_key())
-    encryptor = sealapi.Encryptor(ctx, keygen.public_key())
+    encryptor = sealapi.Encryptor(ctx, public_key)
 
     evaluator = sealapi.Evaluator(ctx)
     encoder = sealapi.BatchEncoder(ctx)
@@ -708,15 +723,18 @@ def test_evaluator_rotate_vector():
 
     coeff = sealapi.CoeffModulus.Create(poly_modulus, [40, 40, 40, 40])
     parms.set_coeff_modulus(coeff)
-    ctx = sealapi.SEALContext.Create(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
+    ctx = sealapi.SEALContext(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
 
     ctx = helper_context_ckks()
 
     keygen = sealapi.KeyGenerator(ctx)
-    galois_keys = keygen.galois_keys_local()
+    galois_keys = sealapi.GaloisKeys()
+    keygen.create_galois_keys(galois_keys)
 
+    pk = sealapi.PublicKey()
+    keygen.create_public_key(pk)
     decryptor = sealapi.Decryptor(ctx, keygen.secret_key())
-    encryptor = sealapi.Encryptor(ctx, keygen.public_key())
+    encryptor = sealapi.Encryptor(ctx, pk)
 
     evaluator = sealapi.Evaluator(ctx)
     encoder = sealapi.CKKSEncoder(ctx)
@@ -765,15 +783,18 @@ def test_evaluator_conjugate():
 
     coeff = sealapi.CoeffModulus.Create(poly_modulus, [40, 40, 40, 40])
     parms.set_coeff_modulus(coeff)
-    ctx = sealapi.SEALContext.Create(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
+    ctx = sealapi.SEALContext(parms, False, sealapi.SEC_LEVEL_TYPE.NONE)
 
     ctx = helper_context_ckks()
 
     keygen = sealapi.KeyGenerator(ctx)
-    galois_keys = keygen.galois_keys_local()
+    galois_keys = sealapi.GaloisKeys()
+    keygen.create_galois_keys(galois_keys)
 
+    pk = sealapi.PublicKey()
+    keygen.create_public_key(pk)
     decryptor = sealapi.Decryptor(ctx, keygen.secret_key())
-    encryptor = sealapi.Encryptor(ctx, keygen.public_key())
+    encryptor = sealapi.Encryptor(ctx, pk)
 
     evaluator = sealapi.Evaluator(ctx)
     encoder = sealapi.CKKSEncoder(ctx)

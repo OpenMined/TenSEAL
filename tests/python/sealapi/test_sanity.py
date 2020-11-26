@@ -6,170 +6,9 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils import *
 
 
-def test_biguint_sanity():
-    testcase = sealapi.BigUInt()
-    assert testcase.is_zero()
-
-    testcase = sealapi.BigUInt(16)
-    assert testcase.bit_count() == 16
-
-    testcase = sealapi.BigUInt("123A")
-    assert testcase == 0x123A
-
-    testcase = sealapi.BigUInt(16, "123B")
-    assert testcase.bit_count() == 16
-    assert testcase == 0x123B
-
-    testcase = sealapi.BigUInt(16, 45)
-    assert testcase.bit_count() == 16
-    assert testcase == 45
-
-    testcase = sealapi.BigUInt(128, 456)
-    testcase2 = sealapi.BigUInt(testcase)
-    assert testcase2.bit_count() == 128
-    assert testcase2 == 456
-
-    testcase = sealapi.BigUInt(8, 23)
-    assert testcase.bit_count() == 8
-    assert testcase.byte_count() == 1
-
-    testcase = sealapi.BigUInt(128, 34)
-    assert testcase.uint64_count() == 2
-    assert testcase.significant_bit_count() == 6
-    assert testcase.to_double() == 34
-    assert testcase.to_string() == "22"  # hex string
-    assert testcase.to_dec_string() == "34"
-    assert testcase.data() == 34
-    assert not testcase.is_zero()
-    testcase.set_zero()
-    assert testcase.is_zero()
-
-    testcase = sealapi.BigUInt(128)
-    assert testcase.bit_count() == 128
-    testcase.resize(16)
-    assert testcase.bit_count() == 16
-
-    def save_load(path):
-        testcase = sealapi.BigUInt(16, "123B")
-        testcase.save(path)
-
-        save_test = sealapi.BigUInt()
-        save_test.load(path)
-
-        assert save_test.bit_count() == 16
-        assert save_test == 0x123B
-
-    tmp_file(save_load)
-
-
-def test_biguint_ops():
-    numerator = 555555555555555555
-    denominator = 77777777777
-    num = sealapi.BigUInt(128, numerator)
-    den = sealapi.BigUInt(128, denominator)
-    rem = sealapi.BigUInt(128)
-
-    assert sealapi.BigUInt.of(7).bit_count() == 3
-    assert num.divrem(den, rem) == int(numerator / denominator)
-    assert rem == numerator % denominator
-
-    def expected_modinv(a, m):
-        a = a % m
-        for x in range(1, m):
-            if (a * x) % m == 1:
-                return x
-        return 1
-
-    value = 66
-    modulus = 101
-    testcase = sealapi.BigUInt(128, value)
-    assert testcase.modinv(sealapi.BigUInt(128, modulus)) == expected_modinv(value, modulus)
-    assert testcase.trymodinv(sealapi.BigUInt(128, modulus), sealapi.BigUInt(128)) is True
-    assert testcase.trymodinv(sealapi.BigUInt(128, 99), sealapi.BigUInt(128)) is False
-
-    testcase = sealapi.BigUInt(128, 34)
-
-    testcase = sealapi.BigUInt(128, 555)
-    testcase2 = sealapi.BigUInt(2, 10)
-    testcase.duplicate_to(testcase2)
-    assert testcase2.bit_count() == 128
-    assert testcase2 == 555
-
-    testcase = sealapi.BigUInt(128, 777)
-    testcase2 = sealapi.BigUInt(2, 10)
-    testcase2.duplicate_from(testcase)
-    assert testcase2.bit_count() == 128
-    assert testcase2 == 777
-
-
-def test_biguint_operators():
-    left = sealapi.BigUInt(32, 27)
-    right = sealapi.BigUInt(32, 13)
-    assert left - right == 14
-    assert left - 13 == 14
-    assert left + right == 40
-    assert left + 13 == 40
-    assert left * right == 351
-    assert left * 13 == 351
-    assert left / right == 2
-    assert left / 13 == 2
-
-    left = sealapi.BigUInt(32, 555)
-    right = sealapi.BigUInt(32, 777)
-    assert left & right == 555 & 777
-    assert left & 777 == 555 & 777
-    assert left | right == 555 | 777
-    assert left | 777 == 555 | 777
-    assert right > left
-    assert right > 555
-    assert right >= left
-    assert right >= 555
-    assert left < right
-    assert left < 777
-    assert left <= right
-    assert left <= 777
-    assert left != right
-    assert left >> 2 == 555 >> 2
-
-    left = sealapi.BigUInt(32, 27)
-    right = sealapi.BigUInt(32, 13)
-    left -= right
-    assert left == 14
-
-    left = sealapi.BigUInt(32, 27)
-    left -= 13
-    assert left == 14
-
-    left = sealapi.BigUInt(32, 27)
-    right = sealapi.BigUInt(32, 13)
-    left += right
-    assert left == 40
-
-    left = sealapi.BigUInt(32, 27)
-    left += 13
-    assert left == 40
-
-    left = sealapi.BigUInt(32, 27)
-    right = sealapi.BigUInt(32, 13)
-    left *= right
-    assert left == 351
-
-    left = sealapi.BigUInt(32, 27)
-    left *= 13
-    assert left == 351
-
-    left = sealapi.BigUInt(32, 27)
-    right = sealapi.BigUInt(32, 13)
-    left /= right
-    assert left == 2
-
-    left = sealapi.BigUInt(32, 27)
-    left /= 13
-    assert left == 2
-
-
 @pytest.mark.parametrize(
-    "compr_type", [sealapi.COMPR_MODE_TYPE.NONE, sealapi.COMPR_MODE_TYPE.DEFLATE]
+    "compr_type",
+    [sealapi.COMPR_MODE_TYPE.NONE, sealapi.COMPR_MODE_TYPE.ZLIB, sealapi.COMPR_MODE_TYPE.ZSTD],
 )
 def test_serialization_compression(compr_type):
     assert sealapi.Serialization.IsSupportedComprMode(compr_type) is True
@@ -178,13 +17,14 @@ def test_serialization_compression(compr_type):
 
 def test_serialization_sanity():
     assert int(sealapi.COMPR_MODE_TYPE.NONE) == 0
-    assert int(sealapi.COMPR_MODE_TYPE.DEFLATE) == 1
+    assert int(sealapi.COMPR_MODE_TYPE.ZLIB) == 1
+    assert int(sealapi.COMPR_MODE_TYPE.ZSTD) == 2
 
     header = sealapi.Serialization.SEALHeader()
     assert header.magic == 0xA15E
     assert header.header_size == 0x10
     assert header.version_major == 3
-    assert header.version_minor == 0x5
+    assert header.version_minor == 0x6
     assert header.compr_mode == sealapi.COMPR_MODE_TYPE.NONE
     assert header.size == 0
     assert header.reserved == 0
@@ -195,15 +35,15 @@ def test_serialization_sanity():
     assert sealapi.Serialization.IsValidHeader(header) is True
 
     header = sealapi.Serialization.SEALHeader()
-    header.compr_mode = sealapi.COMPR_MODE_TYPE.DEFLATE
+    header.compr_mode = sealapi.COMPR_MODE_TYPE.ZLIB
 
     def save_load(path):
         sealapi.Serialization.SaveHeader(header, path)
         save_test = sealapi.Serialization.SEALHeader()
         sealapi.Serialization.LoadHeader(path, save_test, True)
-        assert save_test.compr_mode == sealapi.COMPR_MODE_TYPE.DEFLATE
+        assert save_test.compr_mode == sealapi.COMPR_MODE_TYPE.ZLIB
         sealapi.Serialization.LoadHeader(path, save_test, False)
-        assert save_test.compr_mode == sealapi.COMPR_MODE_TYPE.DEFLATE
+        assert save_test.compr_mode == sealapi.COMPR_MODE_TYPE.ZLIB
 
     tmp_file(save_load)
 
@@ -211,9 +51,12 @@ def test_serialization_sanity():
 @pytest.mark.parametrize(
     "factory",
     [
-        sealapi.BlakePRNGFactory.DefaultFactory(),
-        sealapi.BlakePRNGFactory(),
-        sealapi.BlakePRNGFactory([sealapi.random_uint64() for i in range(8)]),
+        sealapi.Blake2xbPRNGFactory.DefaultFactory(),
+        sealapi.Blake2xbPRNGFactory(),
+        sealapi.Blake2xbPRNGFactory([sealapi.random_uint64() for i in range(8)]),
+        sealapi.Shake256PRNGFactory.DefaultFactory(),
+        sealapi.Shake256PRNGFactory(),
+        sealapi.Shake256PRNGFactory([sealapi.random_uint64() for i in range(8)]),
     ],
 )
 def test_randomgen(factory):
@@ -235,7 +78,7 @@ def test_randomgen(factory):
 
 def test_intarray():
     testcase = sealapi.Plaintext("3x^3 + 1x^1 + 3")
-    int_arr = testcase.int_array()
+    int_arr = testcase.dyn_array()
 
     assert int_arr[0] == 3
     assert int_arr.at(3) == 3
@@ -246,7 +89,7 @@ def test_intarray():
 
     def save_load(path):
         int_arr.save(path)
-        save_test = sealapi.IntArray()
+        save_test = sealapi.DynArray()
         save_test.load(path)
         assert save_test[0] == 3
 
@@ -303,7 +146,7 @@ def test_plaintext():
     assert testcase.capacity() == 200
     testcase.shrink_to_fit()
     assert testcase.capacity() == 4
-    assert testcase.int_array()[3] == 0x7FF
+    assert testcase.dyn_array()[3] == 0x7FF
     assert testcase.data(3) == 0x7FF
     assert testcase.parms_id() == [0, 0, 0, 0]
     assert testcase.scale == 1.0
@@ -359,7 +202,10 @@ def test_ciphertext(testcase, scheme, ctx):
     ciphertext = sealapi.Ciphertext(ctx)
     plaintext = helper_encode(scheme, ctx, testcase)
 
-    encryptor = sealapi.Encryptor(ctx, keygen.public_key())
+    pk = sealapi.PublicKey()
+    keygen.create_public_key(pk)
+
+    encryptor = sealapi.Encryptor(ctx, pk)
     decryptor = sealapi.Decryptor(ctx, keygen.secret_key())
 
     encryptor.encrypt(plaintext, ciphertext)
@@ -369,7 +215,7 @@ def test_ciphertext(testcase, scheme, ctx):
     assert ciphertext.coeff_modulus_size() == coeff_mod_count - 1
 
     assert ciphertext.poly_modulus_degree() == poly_modulus_degree
-    assert ciphertext.int_array().size() > 0
+    assert ciphertext.dyn_array().size() > 0
     assert ciphertext.size() == 2
     assert ciphertext.size_capacity() == 2
     assert ciphertext.is_transparent() is False

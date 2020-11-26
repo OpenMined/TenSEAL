@@ -32,7 +32,7 @@ TEST_P(CKKSVectorTest, TestCreateCKKS) {
     bool should_serialize_first = GetParam();
 
     auto ctx =
-        TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
     auto l = CKKSVector::Create(ctx, std::vector<double>{1, 2, 3}, 1);
@@ -46,7 +46,7 @@ TEST_P(CKKSVectorTest, TestCreateCKKS) {
 
 TEST_F(CKKSVectorTest, TestCreateCKKSFail) {
     auto ctx =
-        TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
     EXPECT_THROW(
@@ -58,7 +58,7 @@ TEST_P(CKKSVectorTest, TestCKKSAdd) {
     bool should_serialize_first = GetParam();
 
     auto ctx =
-        TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
     ctx->global_scale(std::pow(2, 40));
@@ -97,7 +97,7 @@ TEST_P(CKKSVectorTest, TestCKKSMul) {
     bool should_serialize_first = GetParam();
 
     auto ctx =
-        TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
     ctx->global_scale(std::pow(2, 40));
@@ -132,7 +132,7 @@ TEST_P(CKKSVectorTest, TestCKKSMulMany) {
     bool should_serialize_first = GetParam();
 
     auto ctx =
-        TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
     ctx->global_scale(std::pow(2, 40));
@@ -160,7 +160,7 @@ TEST_P(CKKSVectorTest, TestCKKSMulNoRelin) {
     bool should_serialize_first = GetParam();
 
     auto ctx =
-        TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
     ctx->global_scale(std::pow(2, 40));
@@ -188,7 +188,7 @@ TEST_P(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
     bool should_serialize_first = GetParam();
 
     auto ctx =
-        TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
     ctx->generate_galois_keys();
@@ -216,7 +216,7 @@ TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
     bool should_serialize_first = GetParam();
 
     auto ctx =
-        TenSEALContext::Create(scheme_type::CKKS, 8192, -1, {60, 40, 40, 60});
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
     ASSERT_TRUE(ctx != nullptr);
 
     ctx->generate_galois_keys();
@@ -239,7 +239,7 @@ TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
 }
 
 TEST_P(CKKSVectorTest, TestEmptyPlaintext) {
-    auto ctx = TenSEALContext::Create(scheme_type::BFV, 8192, 1032193, {});
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
     EXPECT_THROW(CKKSVector::Create(ctx, std::vector<double>({})),

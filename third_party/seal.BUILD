@@ -23,8 +23,8 @@ cmake_external(
         "make",
         "make install",
     ],
-    out_include_dir = "include/SEAL-3.5",
-    static_libraries = ["libseal-3.5.a"],
+    out_include_dir = "include/SEAL-3.6",
+    static_libraries = ["libseal-3.6.a"],
     visibility = ["//visibility:public"],
 )
 
@@ -44,8 +44,8 @@ cmake_external(
     install_prefix = "native/src",
     lib_source = ":src",
     make_commands = ["make"],
-    out_include_dir = "include/SEAL-3.5",
-    static_libraries = ["libseal-3.5.a"],
+    out_include_dir = "include/SEAL-3.6",
+    static_libraries = ["libseal-3.6.a"],
     visibility = ["//visibility:public"],
 )
 

@@ -53,7 +53,7 @@ Ciphertext BFVVector::encrypt(shared_ptr<TenSEALContext> context,
             "can't encrypt vectors of this size, please use a larger "
             "polynomial modulus degree.");
 
-    Ciphertext ciphertext(context->seal_context());
+    Ciphertext ciphertext(*context->seal_context());
     Plaintext plaintext;
     pt.replicate(slot_count);
     context->encode<BatchEncoder>(pt.data(), plaintext);
@@ -65,7 +65,7 @@ Ciphertext BFVVector::encrypt(shared_ptr<TenSEALContext> context,
 BFVVector::plain_t BFVVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
     Decryptor decryptor =
-        Decryptor(this->tenseal_context()->seal_context(), *sk);
+        Decryptor(*this->tenseal_context()->seal_context(), *sk);
 
     vector<int64_t> result;
 
@@ -308,7 +308,7 @@ void BFVVector::load_proto(const BFVVectorProto& vec) {
     }
     this->_size = vec.size();
     this->_ciphertext = SEALDeserialize<Ciphertext>(
-        this->tenseal_context()->seal_context(), vec.ciphertext());
+        *this->tenseal_context()->seal_context(), vec.ciphertext());
 }
 
 void BFVVector::load_context_proto(const TenSEALContextProto& ctx) {
