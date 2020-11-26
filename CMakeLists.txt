@@ -12,9 +12,6 @@ include_directories(third_party/SEAL/native/src)
 # Third party
 # ##############################################################################
 if(WIN32)
-  # For windows we should build SEAL using Microsoft Visual Studio then link the
-  # library
-  message(${CMAKE_CXX_FLAGS_RELEASE})
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 

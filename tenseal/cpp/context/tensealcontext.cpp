@@ -44,7 +44,7 @@ void TenSEALContext::base_setup(EncryptionParameters parms) {
     this->_context = make_shared<SEALContext>(this->_parms);
 
     this->evaluator = make_shared<Evaluator>(*this->_context);
-    this->encoder_factory = make_shared<TenSEALEncoder>(*this->_context);
+    this->encoder_factory = make_shared<TenSEALEncoder>(this->_context);
 }
 
 void TenSEALContext::keys_setup(optional<PublicKey> public_key,
