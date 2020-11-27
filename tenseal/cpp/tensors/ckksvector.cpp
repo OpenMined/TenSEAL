@@ -450,10 +450,6 @@ void CKKSVector::load_proto(const CKKSVectorProto& vec) {
     this->_init_scale = vec.scale();
 }
 
-void CKKSVector::load_context_proto(const TenSEALContextProto& ctx) {
-    this->link_tenseal_context(TenSEALContext::Create(ctx));
-}
-
 CKKSVectorProto CKKSVector::save_proto() const {
     CKKSVectorProto buffer;
 
