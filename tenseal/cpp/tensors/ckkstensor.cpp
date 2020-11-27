@@ -79,7 +79,7 @@ shared_ptr<CKKSTensor> CKKSTensor::add_inplace(
     // TODO implement broadcasting
     if (this->_shape != to_add->_shape) {
         // TODO provide a better message (what are the shapes)
-        throw invalid_argument("Operands doesn't have the same shape");
+        throw invalid_argument("Operands don't have the same shape");
     }
 
     size_t n_jobs = this->tenseal_context()->dispatcher_size();
