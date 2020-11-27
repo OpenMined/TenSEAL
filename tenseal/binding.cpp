@@ -445,7 +445,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("decrypt",
              [](shared_ptr<CKKSTensor> obj, const shared_ptr<SecretKey> &sk) {
                  return obj->decrypt(sk).data();
-             });
+             })
+        .def("add_", py::overload_cast<const shared_ptr<CKKSTensor>&>(&CKKSTensor::add_inplace));
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")

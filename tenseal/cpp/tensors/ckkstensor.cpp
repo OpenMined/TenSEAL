@@ -76,7 +76,37 @@ shared_ptr<CKKSTensor> CKKSTensor::power_inplace(unsigned int power) {
 
 shared_ptr<CKKSTensor> CKKSTensor::add_inplace(
     const shared_ptr<CKKSTensor>& to_add) {
-    // TODO
+    // TODO implement broadcasting
+    if (this->_shape != to_add->_shape) {
+        // TODO provide a better message (what are the shapes)
+        throw invalid_argument("Operands doesn't have the same shape");
+    }
+
+    size_t n_jobs = this->tenseal_context()->dispatcher_size();
+
+    auto worker_func = [&](vector<Ciphertext>* dst, vector<Ciphertext>* src,
+                           size_t start, size_t end) -> bool {
+        for (size_t i = start; i < end; i++) {
+            this->tenseal_context()->evaluator->add_inplace((*dst)[i], (*src)[i]);
+        }
+        return true;
+    };
+
+    if (n_jobs == 1) {
+        worker_func(&this->_data, &to_add->_data, 0, this->_data.size());
+    } else {
+        size_t batch_size = (this->_data.size() + n_jobs - 1) / n_jobs;
+        vector<future<bool>> futures;
+        for (size_t i = 0; i < n_jobs; i++) {
+            futures.push_back(
+                this->tenseal_context()->dispatcher()->enqueue_task(
+                    worker_func, &this->_data, &to_add->_data, i * batch_size,
+                    std::min((i + 1) * batch_size, this->_data.size())));
+        }
+        // waiting
+        for (size_t i = 0; i < futures.size(); i++) futures[i].get();
+    }
+
     return shared_from_this();
 }
 
