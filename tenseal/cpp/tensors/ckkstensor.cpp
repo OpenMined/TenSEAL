@@ -87,7 +87,8 @@ shared_ptr<CKKSTensor> CKKSTensor::add_inplace(
     auto worker_func = [&](vector<Ciphertext>* dst, vector<Ciphertext>* src,
                            size_t start, size_t end) -> bool {
         for (size_t i = start; i < end; i++) {
-            this->tenseal_context()->evaluator->add_inplace((*dst)[i], (*src)[i]);
+            this->tenseal_context()->evaluator->add_inplace((*dst)[i],
+                                                            (*src)[i]);
         }
         return true;
     };
