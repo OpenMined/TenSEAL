@@ -311,10 +311,6 @@ void BFVVector::load_proto(const BFVVectorProto& vec) {
         *this->tenseal_context()->seal_context(), vec.ciphertext());
 }
 
-void BFVVector::load_context_proto(const TenSEALContextProto& ctx) {
-    this->link_tenseal_context(TenSEALContext::Create(ctx));
-}
-
 BFVVectorProto BFVVector::save_proto() const {
     BFVVectorProto buffer;
 

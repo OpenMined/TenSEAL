@@ -48,9 +48,29 @@ def recreate_ckks(vec):
     return ts.ckks_vector_from(vec.context(), vec_proto)
 
 
+def recreate_ckks_tensor(vec):
+    vec_proto = vec.serialize()
+    return ts.ckks_tensor_from(vec.context(), vec_proto)
+
+
 def recreate_bfv(vec):
     vec_proto = vec.serialize()
     return ts.bfv_vector_from(vec.context(), vec_proto)
+
+
+@pytest.mark.parametrize(
+    "plain_vec", [[0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
+)
+@pytest.mark.parametrize(
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
+)
+def test_ckks_vector_sanity(plain_vec, precision, duplicate):
+    context = ckks_context()
+    orig = ts.ckks_vector(context, plain_vec)
+    ckks_tensor = duplicate(orig)
+    decrypted = ckks_tensor.decrypt()
+
+    assert _almost_equal(decrypted, plain_vec, precision), "Decryption of vector is incorrect"
 
 
 @pytest.mark.parametrize(
@@ -524,3 +544,19 @@ def test_mul_plain_inplace(vec1, vec2, duplicate):
     # Decryption
     decrypted_result = first_vec.decrypt()
     assert decrypted_result == expected, "Multiplication of vectors is incorrect."
+
+
+@pytest.mark.parametrize(
+    "plain_vec", [[0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
+)
+@pytest.mark.parametrize(
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks_tensor,],
+)
+def test_ckks_tensor_sanity(plain_vec, precision, duplicate):
+    context = ckks_context()
+    plain_tensor = ts.plain_tensor(plain_vec)
+    orig = ts.ckks_tensor(context, plain_tensor)
+    ckks_tensor = duplicate(orig)
+    decrypted = ckks_tensor.decrypt()
+
+    assert _almost_equal(decrypted, plain_vec, precision), "Decryption of tensor is incorrect"

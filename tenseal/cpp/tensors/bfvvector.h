@@ -130,7 +130,6 @@ class BFVVector
     BFVVectorProto save_proto() const;
 
     void prepare_context(const shared_ptr<TenSEALContext>& ctx);
-    void load_context_proto(const TenSEALContextProto& buffer);
 };
 
 }  // namespace tenseal

@@ -140,8 +140,6 @@ class CKKSVector
 
     void load_proto(const CKKSVectorProto& buffer);
     CKKSVectorProto save_proto() const;
-
-    void load_context_proto(const TenSEALContextProto& buffer);
 };
 
 }  // namespace tenseal
