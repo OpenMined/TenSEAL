@@ -50,7 +50,7 @@ def recreate_ckks(vec):
 
 def recreate_ckks_tensor(vec):
     vec_proto = vec.serialize()
-    return ts.ckks_tensor(vec.context(), vec_proto)
+    return ts.ckks_tensor_from(vec.context(), vec_proto)
 
 
 def recreate_bfv(vec):
