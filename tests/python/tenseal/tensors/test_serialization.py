@@ -62,7 +62,7 @@ def recreate_bfv(vec):
     "plain_vec", [[0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
 )
 @pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks_tensor,],
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
 )
 def test_ckks_vector_sanity(plain_vec, precision, duplicate):
     context = ckks_context()
@@ -554,7 +554,8 @@ def test_mul_plain_inplace(vec1, vec2, duplicate):
 )
 def test_ckks_tensor_sanity(plain_vec, precision, duplicate):
     context = ckks_context()
-    orig = ts.ckks_tensor(context, plain_vec)
+    plain_tensor = ts.plain_tensor(plain_vec)
+    orig = ts.ckks_tensor(context, plain_tensor)
     ckks_tensor = duplicate(orig)
     decrypted = ckks_tensor.decrypt()
 
