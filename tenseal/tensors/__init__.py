@@ -148,4 +148,28 @@ def ckks_tensor(context, tensor, scale=None):
     )
 
 
-__all__ = ["bfv_vector", "bfv_vector_from", "ckks_vector", "ckks_vector_from", "ckks_tensor"]
+def ckks_tensor_from(context, data):
+    """
+    Constructor method for the CKKSTensor object from a serialized protobuffer.
+    Args:
+        context: a TenSEALContext object, holding the encryption parameters and keys.
+        data: the serialized protobuffer.
+    Returns:
+        CKKSTensor object.
+    """
+    if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, bytes):
+        return _ts_cpp.CKKSTensor(context, data)
+
+    raise TypeError(
+        "Invalid CKKS input types context: {} and vector: {}".format(type(context), type(data))
+    )
+
+
+__all__ = [
+    "bfv_vector",
+    "bfv_vector_from",
+    "ckks_vector",
+    "ckks_vector_from",
+    "ckks_tensor",
+    "ckks_tensor_from",
+]
