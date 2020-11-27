@@ -21,6 +21,12 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
             CKKSTensor::encrypt(ctx, this->_init_scale, vector<double>({*it})));
 }
 
+CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
+                       const string& tensor) {
+    this->link_tenseal_context(ctx);
+    this->load(tensor);
+}
+
 CKKSTensor::CKKSTensor(const TenSEALContextProto& ctx,
                        const CKKSTensorProto& tensor) {
     this->load_context_proto(ctx);
