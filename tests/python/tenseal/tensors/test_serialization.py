@@ -68,7 +68,7 @@ def test_ckks_vector_sanity(plain_vec, precision, duplicate):
     context = ckks_context()
     orig = ts.ckks_vector(context, plain_vec)
     ckks_tensor = duplicate(orig)
-    decrypted = ckks_vector.decrypt()
+    decrypted = ckks_tensor.decrypt()
 
     assert _almost_equal(decrypted, plain_vec, precision), "Decryption of vector is incorrect"
 
