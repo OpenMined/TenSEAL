@@ -193,10 +193,10 @@ void CKKSTensor::load_proto(const CKKSTensorProto& tensor_proto) {
     for (int idx = 0; idx < tensor_proto.strides_size(); ++idx) {
         this->_strides.push_back(tensor_proto.strides(idx));
     }
-    for (int idx = 0; idx < tensor_proto.ciphertext_size(); ++idx)
+    for (int idx = 0; idx < tensor_proto.ciphertexts_size(); ++idx)
         this->_data.push_back(SEALDeserialize<Ciphertext>(
             *this->tenseal_context()->seal_context(),
-            tensor_proto.ciphertext(idx)));
+            tensor_proto.ciphertexts(idx)));
     this->_init_scale = tensor_proto.scale();
 }
 
@@ -204,7 +204,7 @@ CKKSTensorProto CKKSTensor::save_proto() const {
     CKKSTensorProto buffer;
 
     for (auto& ct : this->_data) {
-        buffer.add_ciphertext(SEALSerialize<Ciphertext>(ct));
+        buffer.add_ciphertexts(SEALSerialize<Ciphertext>(ct));
     }
     for (auto& dim : this->_shape) {
         buffer.add_shape(dim);
