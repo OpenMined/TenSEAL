@@ -84,24 +84,23 @@ shared_ptr<CKKSTensor> CKKSTensor::add_inplace(
 
     size_t n_jobs = this->tenseal_context()->dispatcher_size();
 
-    auto worker_func = [&](vector<Ciphertext>* dst, vector<Ciphertext>* src,
-                           size_t start, size_t end) -> bool {
+    auto worker_func = [&](size_t start, size_t end) -> bool {
         for (size_t i = start; i < end; i++) {
-            this->tenseal_context()->evaluator->add_inplace((*dst)[i],
-                                                            (*src)[i]);
+            this->tenseal_context()->evaluator->add_inplace(this->_data[i],
+                                                            to_add->_data[i]);
         }
         return true;
     };
 
     if (n_jobs == 1) {
-        worker_func(&this->_data, &to_add->_data, 0, this->_data.size());
+        worker_func(0, this->_data.size());
     } else {
         size_t batch_size = (this->_data.size() + n_jobs - 1) / n_jobs;
         vector<future<bool>> futures;
         for (size_t i = 0; i < n_jobs; i++) {
             futures.push_back(
                 this->tenseal_context()->dispatcher()->enqueue_task(
-                    worker_func, &this->_data, &to_add->_data, i * batch_size,
+                    worker_func, i * batch_size,
                     std::min((i + 1) * batch_size, this->_data.size())));
         }
         // waiting
