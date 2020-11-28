@@ -237,7 +237,7 @@ class PlainTensor {
      * Return the actual vector representation.
      */
     template <size_t dims>
-    auto tolist() {
+    auto tolist() const {
         auto shaped_vector = NestedVector<plain_t, dims>::Generate();
         tolist_for_dim(shaped_vector, 0, 0);
         return shaped_vector;
@@ -245,7 +245,7 @@ class PlainTensor {
     /**
      * Return the vector representation batched by an axis.
      */
-    auto batch(size_t dim) {
+    auto batch(size_t dim) const {
         size_t batch_size = this->_shape[dim];
         size_t batch_count = this->_data.size() / batch_size;
 
@@ -288,7 +288,7 @@ class PlainTensor {
      * Helpers for generating to list representation
      * */
     template <typename T>
-    void tolist_for_dim(vector<T>& data, size_t dim, size_t off) {
+    void tolist_for_dim(vector<T>& data, size_t dim, size_t off) const {
         if (dim >= this->_shape.size())
             throw invalid_argument("invalid dimension");
 
@@ -299,7 +299,7 @@ class PlainTensor {
             tolist_for_dim(data[idx], dim + 1, new_off);
         }
     }
-    void tolist_for_dim(vector<plain_t>& data, size_t dim, size_t off) {
+    void tolist_for_dim(vector<plain_t>& data, size_t dim, size_t off) const {
         if (dim != this->_shape.size() - 1) {
             throw invalid_argument("invalid dimension");
         }

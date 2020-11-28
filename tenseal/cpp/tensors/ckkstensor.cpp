@@ -7,8 +7,10 @@ using namespace std;
 
 CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
                        const PlainTensor<double>& tensor,
-                       std::optional<double> scale)
-    : _shape(tensor.shape()), _strides(tensor.strides()) {
+                       std::optional<double> scale, bool batch)
+    : _shape(tensor.shape()),
+      _strides(tensor.strides()),
+      _batching_enabled(batch) {
     this->link_tenseal_context(ctx);
     if (scale.has_value()) {
         this->_init_scale = scale.value();
@@ -16,9 +18,16 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
         this->_init_scale = ctx->global_scale();
     }
 
-    for (auto it = tensor.cbegin(); it != tensor.cend(); it++)
-        _data.push_back(
-            CKKSTensor::encrypt(ctx, this->_init_scale, vector<double>({*it})));
+    if (batch) {
+        auto data = tensor.batch(0);
+        for (auto it = data.cbegin(); it != data.cend(); it++)
+            _data.push_back(CKKSTensor::encrypt(ctx, this->_init_scale, *it));
+
+    } else {
+        for (auto it = tensor.cbegin(); it != tensor.cend(); it++)
+            _data.push_back(CKKSTensor::encrypt(ctx, this->_init_scale,
+                                                vector<double>({*it})));
+    }
 }
 
 CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
