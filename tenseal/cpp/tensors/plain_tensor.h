@@ -77,6 +77,26 @@ class PlainTensor {
             throw invalid_argument("tensor with mismatched shape");
     }
     /**
+     * Create a new PlainTensor from a batched tensor.
+     * @param[in] input matrix.
+     * @param[in] original shape.
+     * @param[in] batching axis.
+     */
+    PlainTensor(const vector<vector<plain_t>>& data,
+                const vector<size_t>& shape, size_t dim)
+        : _shape(shape), _strides(generate_strides(shape)) {
+        if (data[0].size() != shape[dim])
+            throw invalid_argument("invalid dimension shape");
+
+        _data.resize(data.size() * data[0].size());
+
+        for (size_t batch_idx = 0; batch_idx < data.size(); ++batch_idx) {
+            for (size_t idx = 0; idx < data[batch_idx].size(); ++idx) {
+                _data[idx * data.size() + batch_idx] = data[batch_idx][idx];
+            }
+        }
+    }
+    /**
      * Returns the element at position {idx1, idx2, ..., idxn} in the current
      * shape
      * @param[in] desired position from the tensor.

@@ -229,5 +229,22 @@ TEST_F(PlainTensorTest, TestBatch3D) {
     ASSERT_THAT(out[1], ElementsAreArray({2.2, 8.8}));
 }
 
+TEST_F(PlainTensorTest, TestUnbatch) {
+    vector<double> data = {1.1, 2.2, 3.3, 4.4,   5.5,   6.6,
+                           7.7, 8.8, 9.9, 10.10, 11.11, 12.12};
+    PlainTensor<double> tensor(data, {
+                                         2,
+                                         3,
+                                         2,
+                                     });
+
+    auto out = tensor.batch(0);
+
+    PlainTensor<double> unbatch(out, {2, 3, 2}, 0);
+
+    ASSERT_THAT(unbatch.shape(), ElementsAreArray({2, 3, 2}));
+    ASSERT_THAT(unbatch.data(), ElementsAreArray(data));
+}
+
 }  // namespace
 }  // namespace tenseal
