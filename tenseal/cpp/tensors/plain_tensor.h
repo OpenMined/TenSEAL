@@ -237,6 +237,7 @@ class PlainTensor {
         for (size_t i = 0; i < times - init_size; i++) {
             _data.push_back(_data[i % init_size]);
         }
+        _shape = {_data.size()};
     }
 
    private:
