@@ -6,6 +6,19 @@ namespace tenseal {
 using namespace seal;
 using namespace std;
 
+inline vector<size_t> generate_strides(const vector<size_t>& shape) {
+    vector<size_t> strides;
+
+    size_t current_stride = 1;
+    for (auto it = shape.rbegin(); it != shape.rend(); ++it) {
+        strides.push_back(current_stride);
+        current_stride *= *it;
+    }
+
+    std::reverse(begin(strides), end(strides));
+
+    return strides;
+}
 /**
  * PlainTensor<plain_t> interface - A generic API for plain tensor operations.
  * @param plain_t: root plaintext datatype for representing data(double, int64
@@ -41,12 +54,24 @@ class PlainTensor {
         }
 
         _shape = {H, W};
-        _strides = {W, 1};
+        _strides = generate_strides(_shape);
         _data.reserve(H * W);
 
         for (auto& vec : data) {
             _data.insert(_data.end(), vec.begin(), vec.end());
         }
+    }
+    /**
+     * Create a new PlainTensor from an ND vector.
+     * @param[in] input vector.
+     * @param[in] input shape.
+     */
+    PlainTensor(const vector<plain_t>& data, const vector<size_t>& shape)
+        : _data(data), _shape(shape), _strides(generate_strides(shape)) {
+        size_t expected_size = 1;
+        for (auto& d : shape) expected_size *= d;
+        if (data.size() != expected_size)
+            throw invalid_argument("tensor with mismatched shape");
     }
     /**
      * Returns the element at position {idx1, idx2, ..., idxn} in the current
@@ -201,6 +226,9 @@ class PlainTensor {
      * Replicates the internal representation for <times> elements.
      */
     void replicate(size_t times) {
+        if (_shape.size() != 1)
+            throw invalid_argument("can't replicate d-dimensional vectors");
+
         if (_data.empty()) {
             throw invalid_argument("can't replicate an empty vector");
         }
