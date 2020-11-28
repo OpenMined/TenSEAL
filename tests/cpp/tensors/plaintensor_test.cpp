@@ -103,7 +103,7 @@ TEST_F(PlainTensorTest, TestReplicate) {
     vector<double> data = {1.1, 2.2, 3.3, 4.4};
     PlainTensor<double> tensor(data);
 
-    tensor.replicate(12);
+    tensor.replicate(8);
 
     ASSERT_THAT(tensor.data(), ElementsAreArray({
                                    1.1,
@@ -114,12 +114,46 @@ TEST_F(PlainTensorTest, TestReplicate) {
                                    2.2,
                                    3.3,
                                    4.4,
-                                   1.1,
-                                   2.2,
-                                   3.3,
-                                   4.4,
                                }));
-    ASSERT_THAT(tensor.shape(), ElementsAreArray({12}));
+    ASSERT_THAT(tensor.shape(), ElementsAreArray({8}));
+}
+
+TEST_F(PlainTensorTest, TestToList) {
+    vector<double> data = {1.1, 2.2, 3.3, 4.4, 5.5, 6.6};
+    PlainTensor<double> tensor(data, {2, 3});
+
+    auto out = tensor.tolist<2>();
+
+    size_t H = out.size();
+    size_t W = out[0].size();
+
+    ASSERT_EQ(H, 2);
+    ASSERT_EQ(W, 3);
+
+    for (size_t idx = 0; idx < H; ++idx)
+        for (size_t jdx = 0; jdx < W; ++jdx)
+            ASSERT_EQ(out[idx][jdx], data[idx * W + jdx]);
+}
+
+TEST_F(PlainTensorTest, TestToList3D) {
+    vector<double> data = {1.1, 2.2, 3.3, 4.4, 5.5, 6.6};
+    PlainTensor<double> tensor(data, {2, 3, 1});
+
+    auto out = tensor.tolist<3>();
+
+    size_t H = out.size();
+    size_t W = out[0].size();
+    size_t D = out[0][0].size();
+
+    ASSERT_EQ(H, 2);
+    ASSERT_EQ(W, 3);
+    ASSERT_EQ(D, 1);
+
+    for (size_t idx = 0; idx < H; ++idx)
+        for (size_t jdx = 0; jdx < W; ++jdx)
+            for (size_t ddx = 0; ddx < D; ++ddx)
+                ASSERT_EQ(out[idx][jdx][ddx],
+                          data[idx * W * D + jdx * D + ddx]);
 }
 
 }  // namespace
