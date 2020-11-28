@@ -156,5 +156,78 @@ TEST_F(PlainTensorTest, TestToList3D) {
                           data[idx * W * D + jdx * D + ddx]);
 }
 
+TEST_F(PlainTensorTest, TestBatch) {
+    vector<double> data = {1.1, 2.2, 3.3, 4.4, 5.5, 6.6};
+    PlainTensor<double> tensor(data, {2, 3});
+
+    auto out = tensor.batch(0);
+
+    size_t cnt = out.size();
+    size_t size = out[0].size();
+
+    ASSERT_EQ(cnt, 3);
+    ASSERT_EQ(size, 2);
+
+    ASSERT_THAT(out[0], ElementsAreArray({1.1, 4.4}));
+    ASSERT_THAT(out[1], ElementsAreArray({2.2, 5.5}));
+    ASSERT_THAT(out[2], ElementsAreArray({3.3, 6.6}));
+
+    out = tensor.batch(1);
+
+    cnt = out.size();
+    size = out[0].size();
+
+    ASSERT_EQ(cnt, 2);
+    ASSERT_EQ(size, 3);
+
+    ASSERT_THAT(out[0], ElementsAreArray({1.1, 3.3, 5.5}));
+    ASSERT_THAT(out[1], ElementsAreArray({2.2, 4.4, 6.6}));
+}
+
+TEST_F(PlainTensorTest, TestBatch3D) {
+    vector<double> data = {1.1, 2.2, 3.3, 4.4,   5.5,   6.6,
+                           7.7, 8.8, 9.9, 10.10, 11.11, 12.12};
+    PlainTensor<double> tensor(data, {
+                                         2,
+                                         3,
+                                         2,
+                                     });
+
+    auto out = tensor.batch(0);
+
+    size_t cnt = out.size();
+    size_t size = out[0].size();
+
+    ASSERT_EQ(cnt, 6);
+    ASSERT_EQ(size, 2);
+
+    ASSERT_THAT(out[0], ElementsAreArray({1.1, 7.7}));
+    ASSERT_THAT(out[1], ElementsAreArray({2.2, 8.8}));
+
+    out = tensor.batch(1);
+
+    cnt = out.size();
+    size = out[0].size();
+
+    ASSERT_EQ(cnt, 4);
+    ASSERT_EQ(size, 3);
+
+    ASSERT_THAT(out[0], ElementsAreArray({1.1, 5.5, 9.9}));
+    ASSERT_THAT(out[1], ElementsAreArray({2.2, 6.6, 10.10}));
+    ASSERT_THAT(out[2], ElementsAreArray({3.3, 7.7, 11.11}));
+    ASSERT_THAT(out[3], ElementsAreArray({4.4, 8.8, 12.12}));
+
+    out = tensor.batch(2);
+
+    cnt = out.size();
+    size = out[0].size();
+
+    ASSERT_EQ(cnt, 6);
+    ASSERT_EQ(size, 2);
+
+    ASSERT_THAT(out[0], ElementsAreArray({1.1, 7.7}));
+    ASSERT_THAT(out[1], ElementsAreArray({2.2, 8.8}));
+}
+
 }  // namespace
 }  // namespace tenseal

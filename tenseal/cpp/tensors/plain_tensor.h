@@ -215,6 +215,14 @@ class PlainTensor {
      */
     size_t empty() const { return _data.empty(); }
     /**
+     * Returns the number of dimensions.
+     */
+    constexpr size_t dimensions() {
+        if (_shape.size() == 2) return 2;
+
+        return 1;
+    }
+    /**
      * Casts the tensor to an 1D vector.
      */
     operator vector<plain_t>() const { return _data; }
@@ -233,6 +241,25 @@ class PlainTensor {
         auto shaped_vector = NestedVector<plain_t, dims>::Generate();
         tolist_for_dim(shaped_vector, 0, 0);
         return shaped_vector;
+    }
+    /**
+     * Return the vector representation batched by an axis.
+     */
+    auto batch(size_t dim) {
+        size_t batch_size = this->_shape[dim];
+        size_t batch_count = this->_data.size() / batch_size;
+
+        vector<vector<plain_t>> batches;
+
+        for (size_t idx = 0; idx < batch_count; ++idx) {
+            batches.push_back(vector<plain_t>());
+        }
+
+        for (size_t idx = 0; idx < _data.size(); ++idx) {
+            batches[idx % batch_count].push_back(_data[idx]);
+        }
+
+        return batches;
     }
     /**
      * Replicates the internal representation for <times> elements.
