@@ -98,7 +98,6 @@ PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
         vector<double> result;
         result.reserve(this->_data.size());
 
-        fprintf(stderr, "data size %ld\n", this->_data.size());
         for (size_t i = 0; i < this->_data.size(); i++) {
             vector<double> buff;
             decryptor.decrypt(this->_data[i], plaintext);

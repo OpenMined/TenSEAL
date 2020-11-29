@@ -251,10 +251,7 @@ class PlainTensor {
         size_t batch_count = this->_data.size() / batch_size;
 
         vector<vector<plain_t>> batches;
-
-        for (size_t idx = 0; idx < batch_count; ++idx) {
-            batches.push_back(vector<plain_t>());
-        }
+        batches.resize(batch_count);
 
         for (size_t idx = 0; idx < _data.size(); ++idx) {
             batches[idx % batch_count].push_back(_data[idx]);
