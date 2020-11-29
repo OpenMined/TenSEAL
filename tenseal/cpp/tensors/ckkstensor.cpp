@@ -8,9 +8,7 @@ using namespace std;
 CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
                        const PlainTensor<double>& tensor,
                        std::optional<double> scale, bool batch)
-    : _shape(tensor.shape()),
-      _strides(tensor.strides()),
-      _batching_enabled(batch) {
+    : _shape(tensor.shape()), _strides(tensor.strides()) {
     this->link_tenseal_context(ctx);
     if (scale.has_value()) {
         this->_init_scale = scale.value();
@@ -18,8 +16,10 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
         this->_init_scale = ctx->global_scale();
     }
 
-    if (_batching_enabled) {
+    if (batch) {
+        _batch_size = _shape[0];
         auto data = tensor.batch(0);
+
         for (auto it = data.cbegin(); it != data.cend(); it++)
             _data.push_back(CKKSTensor::encrypt(ctx, this->_init_scale, *it));
 
@@ -81,7 +81,7 @@ PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
     Decryptor decryptor =
         Decryptor(*this->tenseal_context()->seal_context(), *sk);
 
-    if (_batching_enabled) {
+    if (_batch_size) {
         vector<vector<double>> result;
         result.reserve(this->_data.size());
 
@@ -90,7 +90,7 @@ PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
             decryptor.decrypt(this->_data[i], plaintext);
             this->tenseal_context()->decode<CKKSEncoder>(plaintext, buff);
             result.push_back(
-                vector<double>(buff.begin(), buff.begin() + _shape[0]));
+                vector<double>(buff.begin(), buff.begin() + *_batch_size));
         }
         return PlainTensor<double>(/*batched_tensor=*/result,
                                    /*original_shape=*/_shape, /*batch_axis=*/0);
@@ -222,7 +222,8 @@ void CKKSTensor::load_proto(const CKKSTensorProto& tensor_proto) {
             *this->tenseal_context()->seal_context(),
             tensor_proto.ciphertexts(idx)));
     this->_init_scale = tensor_proto.scale();
-    this->_batching_enabled = tensor_proto.batching_enabled();
+    if (tensor_proto.has_batch_size)
+        this->_batch_size = tensor_proto.batch_size();
 }
 
 CKKSTensorProto CKKSTensor::save_proto() const {
@@ -238,7 +239,7 @@ CKKSTensorProto CKKSTensor::save_proto() const {
         buffer.add_strides(stride);
     }
     buffer.set_scale(this->_init_scale);
-    buffer.set_batching_enabled(this->_batching_enabled);
+    if (this->_batch_size) buffer.set_batch_size(this->_batch_size);
 
     return buffer;
 }
