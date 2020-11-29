@@ -233,14 +233,6 @@ class PlainTensor {
      */
     size_t empty() const { return _data.empty(); }
     /**
-     * Returns the number of dimensions.
-     */
-    constexpr size_t dimensions() {
-        if (_shape.size() == 2) return 2;
-
-        return 1;
-    }
-    /**
      * Casts the tensor to an 1D vector.
      */
     operator vector<plain_t>() const { return _data; }
