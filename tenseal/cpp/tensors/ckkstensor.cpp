@@ -222,7 +222,7 @@ void CKKSTensor::load_proto(const CKKSTensorProto& tensor_proto) {
             *this->tenseal_context()->seal_context(),
             tensor_proto.ciphertexts(idx)));
     this->_init_scale = tensor_proto.scale();
-    if (tensor_proto.has_batch_size)
+    if (tensor_proto.batch_size())
         this->_batch_size = tensor_proto.batch_size();
 }
 
@@ -239,7 +239,7 @@ CKKSTensorProto CKKSTensor::save_proto() const {
         buffer.add_strides(stride);
     }
     buffer.set_scale(this->_init_scale);
-    if (this->_batch_size) buffer.set_batch_size(this->_batch_size);
+    if (this->_batch_size) buffer.set_batch_size(*this->_batch_size);
 
     return buffer;
 }
