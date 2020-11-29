@@ -165,6 +165,22 @@ def ckks_tensor_from(context, data):
     )
 
 
+def tolist(plain_tensor):
+    """
+    Converts a plain tensor to a Python list.
+    Args:
+        plain_tensor: PlainTensor object.
+    Returns:
+        Python list.
+    """
+    if not isinstance(plain_tensor, _ts_cpp.PlainTensorDouble):
+        raise TypeError("Invalid plain tensor type {}".format(type(plain_tensor)))
+
+    import numpy as np
+
+    return np.array(plain_tensor.data()).reshape(plain_tensor.shape()).tolist()
+
+
 __all__ = [
     "bfv_vector",
     "bfv_vector_from",
@@ -172,4 +188,5 @@ __all__ = [
     "ckks_vector_from",
     "ckks_tensor",
     "ckks_tensor_from",
+    "tolist",
 ]

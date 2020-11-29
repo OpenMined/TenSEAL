@@ -79,10 +79,11 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     vector<size_t> _shape;
     vector<size_t> _strides;
     double _init_scale;
+    optional<size_t> _batch_size;
 
     CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
                const PlainTensor<double>& tensor,
-               std::optional<double> scale = {});
+               std::optional<double> scale = {}, bool batch = true);
     CKKSTensor(const TenSEALContextProto& ctx, const CKKSTensorProto& tensor);
     CKKSTensor(const shared_ptr<TenSEALContext>& ctx, const string& vec);
     CKKSTensor(const shared_ptr<TenSEALContext>& ctx,

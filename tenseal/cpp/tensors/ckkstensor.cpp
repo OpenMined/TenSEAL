@@ -7,7 +7,7 @@ using namespace std;
 
 CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
                        const PlainTensor<double>& tensor,
-                       std::optional<double> scale)
+                       std::optional<double> scale, bool batch)
     : _shape(tensor.shape()), _strides(tensor.strides()) {
     this->link_tenseal_context(ctx);
     if (scale.has_value()) {
@@ -16,9 +16,18 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
         this->_init_scale = ctx->global_scale();
     }
 
-    for (auto it = tensor.cbegin(); it != tensor.cend(); it++)
-        _data.push_back(
-            CKKSTensor::encrypt(ctx, this->_init_scale, vector<double>({*it})));
+    if (batch) {
+        _batch_size = _shape[0];
+        auto data = tensor.batch(0);
+
+        for (auto it = data.cbegin(); it != data.cend(); it++)
+            _data.push_back(CKKSTensor::encrypt(ctx, this->_init_scale, *it));
+
+    } else {
+        for (auto it = tensor.cbegin(); it != tensor.cend(); it++)
+            _data.push_back(CKKSTensor::encrypt(ctx, this->_init_scale,
+                                                vector<double>({*it})));
+    }
 }
 
 CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
@@ -72,17 +81,32 @@ PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
     Decryptor decryptor =
         Decryptor(*this->tenseal_context()->seal_context(), *sk);
 
-    vector<double> result;
-    vector<double> buff;
-    result.reserve(this->_data.size());
+    if (_batch_size) {
+        vector<vector<double>> result;
+        result.reserve(this->_data.size());
 
-    for (size_t i = 0; i < this->_data.size(); i++) {
-        decryptor.decrypt(this->_data[i], plaintext);
-        this->tenseal_context()->decode<CKKSEncoder>(plaintext, buff);
-        result.push_back(buff[0]);
+        for (size_t i = 0; i < this->_data.size(); i++) {
+            vector<double> buff;
+            decryptor.decrypt(this->_data[i], plaintext);
+            this->tenseal_context()->decode<CKKSEncoder>(plaintext, buff);
+            result.push_back(
+                vector<double>(buff.begin(), buff.begin() + *_batch_size));
+        }
+        return PlainTensor<double>(/*batched_tensor=*/result,
+                                   /*original_shape=*/_shape, /*batch_axis=*/0);
+    } else {
+        vector<double> result;
+        result.reserve(this->_data.size());
+
+        for (size_t i = 0; i < this->_data.size(); i++) {
+            vector<double> buff;
+            decryptor.decrypt(this->_data[i], plaintext);
+            this->tenseal_context()->decode<CKKSEncoder>(plaintext, buff);
+            result.push_back(buff[0]);
+        }
+
+        return PlainTensor<double>(result, /*original_shape=*/_shape);
     }
-
-    return result;
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::negate_inplace() {
@@ -198,6 +222,8 @@ void CKKSTensor::load_proto(const CKKSTensorProto& tensor_proto) {
             *this->tenseal_context()->seal_context(),
             tensor_proto.ciphertexts(idx)));
     this->_init_scale = tensor_proto.scale();
+    if (tensor_proto.batch_size())
+        this->_batch_size = tensor_proto.batch_size();
 }
 
 CKKSTensorProto CKKSTensor::save_proto() const {
@@ -213,6 +239,7 @@ CKKSTensorProto CKKSTensor::save_proto() const {
         buffer.add_strides(stride);
     }
     buffer.set_scale(this->_init_scale);
+    if (this->_batch_size) buffer.set_batch_size(*this->_batch_size);
 
     return buffer;
 }

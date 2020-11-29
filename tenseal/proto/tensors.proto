@@ -29,4 +29,6 @@ message CKKSTensorProto {
     repeated bytes ciphertexts = 3;
     // Scale value
     double scale = 4;
+    // Optional batch size. Exists only if batching is enabled
+    uint32 batch_size = 5;
 };

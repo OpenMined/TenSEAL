@@ -14,6 +14,7 @@ from tenseal.tensors import (
     ckks_tensor,
     ckks_tensor_from,
     plain_tensor,
+    tolist,
 )
 from tenseal.version import __version__
 
@@ -100,5 +101,7 @@ __all__ = [
     "context",
     "context_from",
     "im2col_encoding",
+    "plain_tensor",
+    "tolist",
     "__version__",
 ]
