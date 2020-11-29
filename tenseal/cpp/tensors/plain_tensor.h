@@ -36,7 +36,7 @@ class PlainTensor {
      * @param[in] input vector.
      */
     PlainTensor(const vector<plain_t>& data)
-        : _data(data), _shape({data.size()}), _strides({1}) {}
+        : _data(data), _shape({data.size()}) {}
     /**
      * Create a new PlainTensor from a 2D vector.
      * @param[in] input matrix.
@@ -55,7 +55,6 @@ class PlainTensor {
         }
 
         _shape = {H, W};
-        _strides = generate_strides(_shape);
         _data.reserve(H * W);
 
         for (auto& vec : data) {
@@ -68,7 +67,7 @@ class PlainTensor {
      * @param[in] input shape.
      */
     PlainTensor(const vector<plain_t>& data, const vector<size_t>& shape)
-        : _data(data), _shape(shape), _strides(generate_strides(shape)) {
+        : _data(data), _shape(shape) {
         size_t expected_size = 1;
         for (auto& d : shape) expected_size *= d;
         if (data.size() != expected_size)
@@ -82,7 +81,7 @@ class PlainTensor {
      */
     PlainTensor(const vector<vector<plain_t>>& data,
                 const vector<size_t>& shape, size_t dim)
-        : _shape(shape), _strides(generate_strides(shape)) {
+        : _shape(shape) {
         if (data[0].size() != shape[dim])
             throw invalid_argument("invalid dimension shape");
 
@@ -100,13 +99,14 @@ class PlainTensor {
      * @param[in] desired position from the tensor.
      */
     plain_t at(const vector<size_t>& index) const {
-        if (_strides.size() != index.size())
+        if (_shape.size() != index.size())
             throw invalid_argument(
                 "tensor cannot be viewed in the requested format");
 
+        auto strides = generate_strides(_shape);
         size_t tensor_idx = 0;
         for (size_t d = 0; d < index.size(); ++d)
-            tensor_idx += index[d] * _strides[d];
+            tensor_idx += index[d] * strides[d];
 
         return _data[tensor_idx];
     }
@@ -114,7 +114,10 @@ class PlainTensor {
      * Returns iterator to row.
      * @param[in] desired row.
      */
-    auto row(size_t idx) const { return _data.begin() + idx * _strides[0]; }
+    auto row(size_t idx) const {
+        auto strides = generate_strides(_shape);
+        return _data.begin() + idx * strides[0];
+    }
 
     /*
     Returns the k-th diagonal of a matrix. Positive values of k represent upper
@@ -223,7 +226,7 @@ class PlainTensor {
     /**
      * Returns the current strides of the tensor.
      */
-    vector<size_t> strides() const { return _strides; }
+    vector<size_t> strides() const { return generate_strides(_shape); }
     /**
      * Returns the size of the first dimension of the tensor.
      */
@@ -280,7 +283,6 @@ class PlainTensor {
    private:
     vector<plain_t> _data;
     vector<size_t> _shape;
-    vector<size_t> _strides;
 };
 
 }  // namespace tenseal
