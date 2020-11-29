@@ -1,8 +1,6 @@
 #ifndef TENSEAL_TENSOR_PLAIN_TENSOR_H
 #define TENSEAL_TENSOR_PLAIN_TENSOR_H
 
-#include "tenseal/cpp/utils/nested_vector.h"
-
 namespace tenseal {
 
 using namespace seal;
@@ -254,15 +252,6 @@ class PlainTensor {
     inline iterator end() noexcept { return _data.end(); }
     inline const_iterator cend() const noexcept { return _data.cend(); }
     /**
-     * Return the actual vector representation.
-     */
-    template <size_t dims>
-    auto tolist() const {
-        auto shaped_vector = NestedVector<plain_t, dims>::Generate();
-        tolist_for_dim(shaped_vector, 0, 0);
-        return shaped_vector;
-    }
-    /**
      * Return the vector representation batched by an axis.
      */
     auto batch(size_t dim) const {
@@ -303,30 +292,6 @@ class PlainTensor {
     vector<plain_t> _data;
     vector<size_t> _shape;
     vector<size_t> _strides;
-
-    /*
-     * Helpers for generating to list representation
-     * */
-    template <typename T>
-    void tolist_for_dim(vector<T>& data, size_t dim, size_t off) const {
-        if (dim >= this->_shape.size())
-            throw invalid_argument("invalid dimension");
-
-        data.resize(this->_shape[dim]);
-
-        for (size_t idx = 0; idx < data.size(); ++idx) {
-            size_t new_off = off + idx * _strides[dim];
-            tolist_for_dim(data[idx], dim + 1, new_off);
-        }
-    }
-    void tolist_for_dim(vector<plain_t>& data, size_t dim, size_t off) const {
-        if (dim != this->_shape.size() - 1) {
-            throw invalid_argument("invalid dimension");
-        }
-
-        data = vector<plain_t>(_data.begin() + off,
-                               _data.begin() + off + this->_shape[dim]);
-    }
 };
 
 }  // namespace tenseal

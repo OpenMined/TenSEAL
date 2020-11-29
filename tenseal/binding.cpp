@@ -445,10 +445,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                 return CKKSTensor::Create(ctx, data);
             }))
         .def("decrypt",
-             [](shared_ptr<CKKSTensor> obj) { return obj->decrypt().data(); })
+             [](shared_ptr<CKKSTensor> obj) { return obj->decrypt(); })
         .def("decrypt",
              [](shared_ptr<CKKSTensor> obj, const shared_ptr<SecretKey> &sk) {
-                 return obj->decrypt(sk).data();
+                 return obj->decrypt(sk);
              })
         .def("context",
              [](shared_ptr<CKKSTensor> obj) { return obj->tenseal_context(); })
