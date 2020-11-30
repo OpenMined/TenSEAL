@@ -468,18 +468,18 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                               &CKKSTensor::mul_plain, py::const_))
         .def("mul_plain", py::overload_cast<const PlainTensor<double> &>(
                               &CKKSTensor::mul_plain, py::const_))
-        .def("add_plain_", py::overload_cast<const double &>(
-                              &CKKSTensor::add_plain_inplace))
+        .def("add_plain_",
+             py::overload_cast<const double &>(&CKKSTensor::add_plain_inplace))
         .def("add_plain_", py::overload_cast<const PlainTensor<double> &>(
-                              &CKKSTensor::add_plain_inplace))
-        .def("sub_plain_", py::overload_cast<const double &>(
-                              &CKKSTensor::sub_plain_inplace))
+                               &CKKSTensor::add_plain_inplace))
+        .def("sub_plain_",
+             py::overload_cast<const double &>(&CKKSTensor::sub_plain_inplace))
         .def("sub_plain_", py::overload_cast<const PlainTensor<double> &>(
-                              &CKKSTensor::sub_plain_inplace))
-        .def("mul_plain_", py::overload_cast<const double &>(
-                              &CKKSTensor::mul_plain_inplace))
+                               &CKKSTensor::sub_plain_inplace))
+        .def("mul_plain_",
+             py::overload_cast<const double &>(&CKKSTensor::mul_plain_inplace))
         .def("mul_plain_", py::overload_cast<const PlainTensor<double> &>(
-                              &CKKSTensor::mul_plain_inplace))
+                               &CKKSTensor::mul_plain_inplace))
         // python arithmetic
         .def("__add__", &CKKSTensor::add)
         .def("__add__", py::overload_cast<const double &>(
@@ -491,10 +491,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__radd__", py::overload_cast<const PlainTensor<double> &>(
                              &CKKSTensor::add_plain, py::const_))
         .def("__iadd__", &CKKSTensor::add_inplace)
-        .def("__iadd__", py::overload_cast<const double &>(
-                            &CKKSTensor::add_plain_inplace))
+        .def("__iadd__",
+             py::overload_cast<const double &>(&CKKSTensor::add_plain_inplace))
         .def("__iadd__", py::overload_cast<const PlainTensor<double> &>(
-                            &CKKSTensor::add_plain_inplace))
+                             &CKKSTensor::add_plain_inplace))
         .def("__mul__", &CKKSTensor::mul)
         .def("__mul__", py::overload_cast<const double &>(
                             &CKKSTensor::mul_plain, py::const_))
@@ -505,10 +505,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__rmul__", py::overload_cast<const PlainTensor<double> &>(
                              &CKKSTensor::mul_plain, py::const_))
         .def("__imul__", &CKKSTensor::mul_inplace)
-        .def("__imul__", py::overload_cast<const double &>(
-                            &CKKSTensor::mul_plain_inplace))
+        .def("__imul__",
+             py::overload_cast<const double &>(&CKKSTensor::mul_plain_inplace))
         .def("__imul__", py::overload_cast<const PlainTensor<double> &>(
-                            &CKKSTensor::mul_plain_inplace))
+                             &CKKSTensor::mul_plain_inplace))
         .def("__sub__", &CKKSTensor::sub)
         .def("__sub__", py::overload_cast<const double &>(
                             &CKKSTensor::sub_plain, py::const_))
@@ -537,10 +537,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                  return vec;
              })
         .def("__isub__", &CKKSTensor::sub_inplace)
-        .def("__isub__", py::overload_cast<const double &>(
-                            &CKKSTensor::sub_plain_inplace))
+        .def("__isub__",
+             py::overload_cast<const double &>(&CKKSTensor::sub_plain_inplace))
         .def("__isub__", py::overload_cast<const PlainTensor<double> &>(
-                            &CKKSTensor::sub_plain_inplace))
+                             &CKKSTensor::sub_plain_inplace))
         .def("context",
              [](shared_ptr<CKKSTensor> obj) { return obj->tenseal_context(); })
         .def("serialize",
