@@ -117,10 +117,10 @@ shared_ptr<CKKSTensor> CKKSTensor::negate_inplace() {
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::square_inplace() {
-    for (auto& ct : this->_data)
+    for (auto& ct : _data)
         this->tenseal_context()->evaluator->square_inplace(ct);
-    this->auto_relin();
-    this->auto_rescale();
+    this->auto_relin(_data);
+    this->auto_rescale(_data);
     return shared_from_this();
 }
 
