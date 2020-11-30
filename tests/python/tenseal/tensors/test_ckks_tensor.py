@@ -42,24 +42,52 @@ def precision():
 
 
 @pytest.mark.parametrize(
-    "data, axis", [(ts.plain_tensor([0]), 0), (ts.plain_tensor([1, 2, 3, 4, 5, 6, 7, 8]), 0),],
+    "data, axis",
+    [
+        (ts.plain_tensor([0]), 0),
+        (ts.plain_tensor([i for i in range(8)]), 0),
+        (ts.plain_tensor([i for i in range(6)], shape=[2, 3]), 0),
+        (ts.plain_tensor([i for i in range(6)], shape=[2, 3]), 1),
+        (ts.plain_tensor([i for i in range(30)], shape=[2, 3, 5]), 0),
+        (ts.plain_tensor([i for i in range(30)], shape=[2, 3, 5]), 1),
+        (ts.plain_tensor([i for i in range(30)], shape=[2, 3, 5]), 2),
+        (ts.plain_tensor([i for i in range(210)], shape=[2, 3, 5, 7]), 0),
+        (ts.plain_tensor([i for i in range(210)], shape=[2, 3, 5, 7]), 3),
+    ],
 )
 @pytest.mark.parametrize("batch", [True, False])
 def test_sum(context, data, batch, axis, precision):
     context.generate_galois_keys()
     tensor = ts.ckks_tensor(context, data, batch=batch)
-    result = tensor.sum(axis)
+
+    if batch and axis:
+        with pytest.raises(ValueError) as e:
+            result = tensor.sum(axis)
+        return
 
     orig = ts.tolist(data)
-    expected = [np.sum(orig, axis).tolist()]
+    np_orig = np.array(orig).reshape(data.shape())
+    expected = [np.sum(np_orig, axis).tolist()]
 
     # Decryption
     plain_ts = result.decrypt()
     decrypted_result = ts.tolist(plain_ts)
+    print(axis, np_orig, expected)
     assert _almost_equal(decrypted_result, expected, precision), "Sum of tensor is incorrect."
     assert _almost_equal(
         ts.tolist(tensor.decrypt()), orig, precision
     ), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "data", [(ts.plain_tensor([i for i in range(8)], shape=[2, 2, 2])),],
+)
+@pytest.mark.parametrize("batch", [True, False])
+def test_sum_fail(context, data, batch, precision):
+    context.generate_galois_keys()
+    tensor = ts.ckks_tensor(context, data, batch=batch)
+    with pytest.raises(ValueError) as e:
+        result = tensor.sum(1000)
 
 
 def test_size(context):

@@ -19,6 +19,7 @@ void bind_plain_tensor(py::module &m, const std::string &name) {
     py::class_<type>(m, class_name.c_str(), py::module_local())
         .def(py::init<const vector<plain_t> &>())
         .def(py::init<const vector<vector<plain_t>> &>())
+        .def(py::init<const vector<plain_t> &, const vector<size_t> &>())
         .def("at", &type::at)
         .def("get_diagonal", &type::get_diagonal)
         .def("horizontal_scan", &type::horizontal_scan)
@@ -27,6 +28,7 @@ void bind_plain_tensor(py::module &m, const std::string &name) {
         .def("shape", &type::shape)
         .def("strides", &type::strides)
         .def("size", &type::size)
+        .def("batch", &type::batch)
         .def("__len__", &type::size)
         .def("empty", &type::empty)
         .def("replicate", &type::replicate);

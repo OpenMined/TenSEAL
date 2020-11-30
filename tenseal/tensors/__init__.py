@@ -8,21 +8,23 @@ except ImportError:
     import tenseal._tenseal_cpp as _ts_cpp
 
 
-def plain_tensor(data, shape=None, stride=None, dtype="float"):
+def plain_tensor(data, shape=None, dtype="float"):
     """Constructor method for the PlainTensor object.
     Args:
         data:
         shape:
-        stride:
         dtype:
     Returns:
         PlainTensor object.
     """
     # just create a plaintensor using python lists for now
-    if dtype == "float":
-        return _ts_cpp.PlainTensorDouble(data)
-    else:
+    if dtype != "float":
         raise ValueError("Invalid dtype")
+
+    if shape is None:
+        return _ts_cpp.PlainTensorDouble(data)
+
+    return _ts_cpp.PlainTensorDouble(data, shape)
 
 
 def bfv_vector(context, data):

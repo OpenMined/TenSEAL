@@ -189,7 +189,37 @@ shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace(const double& to_mul) {
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
-    // TODO
+    if (axis >= _shape.size()) throw invalid_argument("invalid axis");
+    if (_batch_size) {
+        if (axis != 0) throw invalid_argument("unsupported argument");
+
+        for (size_t idx = 0; idx < _data.size(); ++idx) {
+            sum_vector(this->tenseal_context(), _data[idx], *_batch_size);
+        }
+        _batch_size = {};
+    } else {
+        auto shape_volume = std::accumulate(_shape.begin(), _shape.end(), 1,
+                                            std::multiplies<size_t>());
+        auto jump = shape_volume / _shape[axis];
+
+        std::vector<Ciphertext> new_data;
+        new_data.resize(jump);
+
+        for (size_t off = 0; off < jump; ++off) {
+            Ciphertext ct(*tenseal_context()->seal_context());
+            tenseal_context()->encryptor->encrypt_zero(ct);
+            ct.scale() = _init_scale;
+
+            for (size_t idx = off; idx < _data.size(); idx += jump) {
+                tenseal_context()->evaluator->add_inplace(ct, _data[idx]);
+            }
+            new_data[off] = ct;
+        }
+
+        _data = new_data;
+    }
+
+    _shape.erase(_shape.begin() + axis);
     return shared_from_this();
 }
 
@@ -202,6 +232,7 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
 void CKKSTensor::clear() {
     this->_shape = vector<size_t>();
     this->_data = vector<Ciphertext>();
+    this->_batch_size = optional<double>();
     this->_init_scale = 0;
 }
 
