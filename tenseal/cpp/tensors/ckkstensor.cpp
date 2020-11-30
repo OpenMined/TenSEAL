@@ -198,6 +198,8 @@ shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
     if (_batch_size && axis == 0) return sum_batch_inplace();
 
     auto new_shape = _shape;
+    auto new_len = _data.size() / _shape[axis];
+
     // remove the summation axis
     new_shape.erase(new_shape.begin() + axis);
 
@@ -209,18 +211,8 @@ shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
         axis--;
     }
 
-    auto new_len = _data.size() / _shape[axis];
-
-    std::vector<Ciphertext> new_data;
-    new_data.resize(new_len);
-
-    for (size_t off = 0; off < new_len; ++off) {
-        Ciphertext ct(*tenseal_context()->seal_context());
-        tenseal_context()->encryptor->encrypt_zero(ct);
-        ct.scale() = _init_scale;
-
-        new_data[off] = ct;
-    }
+    std::vector<Ciphertext> new_data(new_len);
+    vector<vector<Ciphertext>> batches(new_len);
 
     auto old_strides = generate_strides(working_shape);
     auto new_strides = generate_strides(new_shape);
@@ -233,8 +225,11 @@ shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
         for (size_t pidx = 0; pidx < pos.size(); ++pidx)
             new_idx += new_strides[pidx] * pos[pidx];
 
-        tenseal_context()->evaluator->add_inplace(new_data[new_idx],
-                                                  _data[idx]);
+        batches[new_idx].push_back(_data[idx]);
+    }
+
+    for (size_t idx = 0; idx < new_len; ++idx) {
+        tenseal_context()->evaluator->add_many(batches[idx], new_data[idx]);
     }
 
     if (_batch_size) {
