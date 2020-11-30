@@ -141,10 +141,15 @@ TEST_F(CKKSTensorTest, TestCKKSSumBatching) {
         PlainTensor(vector<double>({1, 2, 3, 4, 5, 6}), vector<size_t>({2, 3}));
     auto l = CKKSTensor::Create(ctx, data, std::pow(2, 40), true);
 
-    l->sum_inplace(0);
-    ASSERT_THAT(l->shape(), ElementsAreArray({3}));
-    auto decr = l->decrypt();
+    auto res = l->sum(0);
+    ASSERT_THAT(res->shape(), ElementsAreArray({3}));
+    auto decr = res->decrypt();
     ASSERT_TRUE(are_close(decr.data(), {5, 7, 9}));
+
+    res = l->sum(1);
+    ASSERT_THAT(res->shape(), ElementsAreArray({2}));
+    decr = res->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {6, 15}));
 }
 
 TEST_F(CKKSTensorTest, TestCreateCKKSFail) {

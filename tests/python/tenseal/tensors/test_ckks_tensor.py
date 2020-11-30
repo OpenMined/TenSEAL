@@ -74,16 +74,43 @@ def test_sum(context, data, batch, axis, precision):
     context.generate_galois_keys()
     tensor = ts.ckks_tensor(context, data, batch=batch)
 
-    if batch and axis:
-        with pytest.raises(ValueError) as e:
-            result = tensor.sum(axis)
-        return
+    result = tensor.sum(axis)
 
     orig = ts.tolist(data)
     np_orig = np.array(orig).reshape(data.shape())
     expected = np.sum(np_orig, axis).tolist()
 
     result = tensor.sum(axis)
+
+    # Decryption
+    plain_ts = result.decrypt()
+    decrypted_result = ts.tolist(plain_ts)
+
+    assert _almost_equal(decrypted_result, expected, precision), "Sum of tensor is incorrect."
+    assert _almost_equal(
+        ts.tolist(tensor.decrypt()), orig, precision
+    ), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        (ts.plain_tensor([0])),
+        (ts.plain_tensor([i for i in range(8)])),
+        (ts.plain_tensor([i for i in range(6)], shape=[2, 3])),
+        (ts.plain_tensor([i for i in range(30)], shape=[2, 3, 5])),
+        (ts.plain_tensor([i for i in range(210)], shape=[2, 3, 5, 7])),
+    ],
+)
+def test_sum_batch(context, data, precision):
+    context.generate_galois_keys()
+    tensor = ts.ckks_tensor(context, data, batch=True)
+
+    orig = ts.tolist(data)
+    np_orig = np.array(orig).reshape(data.shape())
+    expected = np.sum(np_orig, 0).tolist()
+
+    result = tensor.sum_batch()
 
     # Decryption
     plain_ts = result.decrypt()

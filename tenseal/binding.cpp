@@ -454,6 +454,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             }))
         .def("sum", &CKKSTensor::sum, py::arg("axis") = 0)
         .def("sum_", &CKKSTensor::sum_inplace, py::arg("axis") = 0)
+        .def("sum_batch", &CKKSTensor::sum_batch)
+        .def("sum_batch_", &CKKSTensor::sum_batch_inplace)
         .def("neg", &CKKSTensor::negate)
         .def("neg_", &CKKSTensor::negate_inplace)
         .def("square", &CKKSTensor::square)
