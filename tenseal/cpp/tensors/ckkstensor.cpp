@@ -111,7 +111,8 @@ PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::negate_inplace() {
-    // TODO
+    for (auto& ct : _data)
+        this->tenseal_context()->evaluator->negate_inplace(ct);
     return shared_from_this();
 }
 

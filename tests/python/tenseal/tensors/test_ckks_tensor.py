@@ -110,3 +110,31 @@ def test_size(context):
     for size in range(1, 10):
         vec = ts.ckks_tensor(context, ts.plain_tensor([1] * size))
         assert vec.shape() == [size], "Size of encrypted tensor is incorrect."
+
+
+@pytest.mark.parametrize(
+    "plain",
+    [ts.plain_tensor([0]), ts.plain_tensor([1, 2, 3]), ts.plain_tensor([1, 2, 3, 4], [2, 2]),],
+)
+def test_negate(context, plain, precision):
+    tensor = ts.ckks_tensor(context, plain)
+
+    expected = np.negative(ts.tolist(plain))
+
+    result = -tensor
+    decrypted_result = ts.tolist(result.decrypt())
+    assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
+
+
+@pytest.mark.parametrize(
+    "plain",
+    [ts.plain_tensor([0]), ts.plain_tensor([1, 2, 3]), ts.plain_tensor([1, 2, 3, 4], [2, 2]),],
+)
+def test_negate_inplace(context, plain, precision):
+    tensor = ts.ckks_tensor(context, plain)
+
+    expected = np.negative(ts.tolist(plain))
+
+    tensor.neg_()
+    decrypted_result = ts.tolist(tensor.decrypt())
+    assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"

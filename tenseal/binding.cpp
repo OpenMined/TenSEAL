@@ -454,6 +454,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             }))
         .def("sum", &CKKSTensor::sum, py::arg("axis") = 0)
         .def("sum_", &CKKSTensor::sum_inplace, py::arg("axis") = 0)
+        .def("neg", &CKKSTensor::negate)
+        .def("neg_", &CKKSTensor::negate_inplace)
         .def("decrypt",
              [](shared_ptr<CKKSTensor> obj) { return obj->decrypt(); })
         .def("decrypt",
@@ -470,7 +472,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__deepcopy__", [](const shared_ptr<CKKSTensor> &obj,
                                 py::dict) { return obj->deepcopy(); })
         .def("shape", &CKKSTensor::shape)
-        .def("scale", &CKKSTensor::scale);
+        .def("scale", &CKKSTensor::scale)
+
+        // python arithmetic
+        .def("__neg__", &CKKSTensor::negate);
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")
