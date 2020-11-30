@@ -9,6 +9,8 @@ cc_test(
         "tensealcontext_test.cpp",
         "tensors/bfvvector_test.cpp",
         "tensors/ckksvector_test.cpp",
+        "tensors/ckkstensor_test.cpp",
+        "tensors/plaintensor_test.cpp",
     ],
     copts = TENSEAL_DEFAULT_COPTS,
     includes = TENSEAL_DEFAULT_INCLUDES,

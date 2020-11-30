@@ -3,6 +3,7 @@
 
 #include "tenseal/cpp/tensors/encrypted_tensor.h"
 #include "tenseal/cpp/tensors/plain_tensor.h"
+#include "tenseal/proto/tensors.pb.h"
 
 namespace tenseal {
 
@@ -68,20 +69,35 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     shared_ptr<CKKSTensor> copy() const override;
     shared_ptr<CKKSTensor> deepcopy() const override;
 
+    vector<Ciphertext> data() const;
+    vector<size_t> shape() const;
+    vector<size_t> strides() const;
+    double scale() const;
+
    private:
     vector<Ciphertext> _data;
     vector<size_t> _shape;
     vector<size_t> _strides;
     double _init_scale;
+    optional<size_t> _batch_size;
 
     CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
                const PlainTensor<double>& tensor,
-               std::optional<double> scale = {});
+               std::optional<double> scale = {}, bool batch = true);
+    CKKSTensor(const TenSEALContextProto& ctx, const CKKSTensorProto& tensor);
+    CKKSTensor(const shared_ptr<TenSEALContext>& ctx, const string& vec);
+    CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
+               const CKKSTensorProto& tensor);
+    CKKSTensor(const shared_ptr<const CKKSTensor>& vec);
 
     static Ciphertext encrypt(const shared_ptr<TenSEALContext>& ctx,
                               const double scale, const vector<double>& data);
     static Ciphertext encrypt(const shared_ptr<TenSEALContext>& ctx,
                               const double scale, const double data);
+
+    void load_proto(const CKKSTensorProto& buffer);
+    CKKSTensorProto save_proto() const;
+    void clear();
 };
 
 }  // namespace tenseal

@@ -440,14 +440,28 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                          const PlainTensor<double> &tensor) {
             return CKKSTensor::Create(ctx, tensor);
         }))
+        .def(py::init(
+            [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
+                return CKKSTensor::Create(ctx, data);
+            }))
         .def("decrypt",
-             [](shared_ptr<CKKSTensor> obj) { return obj->decrypt().data(); })
+             [](shared_ptr<CKKSTensor> obj) { return obj->decrypt(); })
         .def("decrypt",
              [](shared_ptr<CKKSTensor> obj, const shared_ptr<SecretKey> &sk) {
-                 return obj->decrypt(sk).data();
+                 return obj->decrypt(sk);
              })
         .def("add_", py::overload_cast<const shared_ptr<CKKSTensor> &>(
-                         &CKKSTensor::add_inplace));
+                         &CKKSTensor::add_inplace))
+        .def("context",
+             [](shared_ptr<CKKSTensor> obj) { return obj->tenseal_context(); })
+        .def("serialize",
+             [](shared_ptr<CKKSTensor> &obj) { return py::bytes(obj->save()); })
+        .def("copy", &CKKSTensor::deepcopy)
+        .def("__copy__",
+             [](shared_ptr<CKKSTensor> &obj) { return obj->deepcopy(); })
+        .def("__deepcopy__", [](const shared_ptr<CKKSTensor> &obj, py::dict) {
+            return obj->deepcopy();
+        });
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")

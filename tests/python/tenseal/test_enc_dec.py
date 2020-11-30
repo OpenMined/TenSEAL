@@ -104,8 +104,12 @@ def test_ckks_tensor_encryption_decryption():
     matrix = np.random.randn(4, 5)
     plain_tensor = ts.plain_tensor(matrix.tolist())
     ckks_vec = ts.ckks_tensor(context, plain_tensor, scale)
-    decrypted_vec = ckks_vec.decrypt()
-    # TODO: don't use the flattened version
-    assert _almost_equal(
-        decrypted_vec, matrix.flatten().tolist(), 1
-    ), "Decryption of vector is incorrect"
+    decrypted_vec = ts.tolist(ckks_vec.decrypt())
+
+    assert len(decrypted_vec) == len(matrix)
+    for idx in range(len(decrypted_vec)):
+        row = decrypted_vec[idx]
+        assert isinstance(row, list)
+        assert len(row) == len(matrix[0])
+
+        assert _almost_equal(row, matrix[idx], 1), "Decryption of vector is incorrect"

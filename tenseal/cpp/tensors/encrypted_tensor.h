@@ -160,6 +160,9 @@ class EncryptedTensor {
     void link_tenseal_context(shared_ptr<TenSEALContext> ctx) {
         this->_context = ctx;
     };
+    void load_context_proto(const TenSEALContextProto& ctx) {
+        this->link_tenseal_context(TenSEALContext::Create(ctx));
+    }
 
     virtual ~EncryptedTensor(){};
 

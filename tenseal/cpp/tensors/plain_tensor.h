@@ -6,6 +6,20 @@ namespace tenseal {
 using namespace seal;
 using namespace std;
 
+inline vector<size_t> generate_strides(const vector<size_t>& shape) {
+    vector<size_t> strides;
+
+    size_t current_stride = 1;
+    for (auto it = shape.rbegin(); it != shape.rend(); ++it) {
+        strides.push_back(current_stride);
+        current_stride *= *it;
+    }
+
+    std::reverse(begin(strides), end(strides));
+
+    return strides;
+}
+
 /**
  * PlainTensor<plain_t> interface - A generic API for plain tensor operations.
  * @param plain_t: root plaintext datatype for representing data(double, int64
@@ -22,7 +36,7 @@ class PlainTensor {
      * @param[in] input vector.
      */
     PlainTensor(const vector<plain_t>& data)
-        : _data(data), _shape({data.size()}), _strides({1}) {}
+        : _data(data), _shape({data.size()}) {}
     /**
      * Create a new PlainTensor from a 2D vector.
      * @param[in] input matrix.
@@ -41,11 +55,42 @@ class PlainTensor {
         }
 
         _shape = {H, W};
-        _strides = {W, 1};
         _data.reserve(H * W);
 
         for (auto& vec : data) {
             _data.insert(_data.end(), vec.begin(), vec.end());
+        }
+    }
+    /**
+     * Create a new PlainTensor from an ND vector.
+     * @param[in] input vector.
+     * @param[in] input shape.
+     */
+    PlainTensor(const vector<plain_t>& data, const vector<size_t>& shape)
+        : _data(data), _shape(shape) {
+        size_t expected_size = 1;
+        for (auto& d : shape) expected_size *= d;
+        if (data.size() != expected_size)
+            throw invalid_argument("tensor with mismatched shape");
+    }
+    /**
+     * Create a new PlainTensor from a batched tensor.
+     * @param[in] input matrix.
+     * @param[in] original shape.
+     * @param[in] batching axis.
+     */
+    PlainTensor(const vector<vector<plain_t>>& data,
+                const vector<size_t>& shape, size_t dim)
+        : _shape(shape) {
+        if (data[0].size() != shape[dim])
+            throw invalid_argument("invalid dimension shape");
+
+        _data.resize(data.size() * data[0].size());
+
+        for (size_t batch_idx = 0; batch_idx < data.size(); ++batch_idx) {
+            for (size_t idx = 0; idx < data[batch_idx].size(); ++idx) {
+                _data[idx * data.size() + batch_idx] = data[batch_idx][idx];
+            }
         }
     }
     /**
@@ -54,13 +99,14 @@ class PlainTensor {
      * @param[in] desired position from the tensor.
      */
     plain_t at(const vector<size_t>& index) const {
-        if (_strides.size() != index.size())
+        if (_shape.size() != index.size())
             throw invalid_argument(
                 "tensor cannot be viewed in the requested format");
 
+        auto strides = generate_strides(_shape);
         size_t tensor_idx = 0;
         for (size_t d = 0; d < index.size(); ++d)
-            tensor_idx += index[d] * _strides[d];
+            tensor_idx += index[d] * strides[d];
 
         return _data[tensor_idx];
     }
@@ -68,7 +114,10 @@ class PlainTensor {
      * Returns iterator to row.
      * @param[in] desired row.
      */
-    auto row(size_t idx) const { return _data.begin() + idx * _strides[0]; }
+    auto row(size_t idx) const {
+        auto strides = generate_strides(_shape);
+        return _data.begin() + idx * strides[0];
+    }
 
     /*
     Returns the k-th diagonal of a matrix. Positive values of k represent upper
@@ -177,7 +226,7 @@ class PlainTensor {
     /**
      * Returns the current strides of the tensor.
      */
-    vector<size_t> strides() const { return _strides; }
+    vector<size_t> strides() const { return generate_strides(_shape); }
     /**
      * Returns the size of the first dimension of the tensor.
      */
@@ -198,9 +247,28 @@ class PlainTensor {
     inline iterator end() noexcept { return _data.end(); }
     inline const_iterator cend() const noexcept { return _data.cend(); }
     /**
+     * Return the vector representation batched by an axis.
+     */
+    auto batch(size_t dim) const {
+        size_t batch_size = this->_shape[dim];
+        size_t batch_count = this->_data.size() / batch_size;
+
+        vector<vector<plain_t>> batches;
+        batches.resize(batch_count);
+
+        for (size_t idx = 0; idx < _data.size(); ++idx) {
+            batches[idx % batch_count].push_back(_data[idx]);
+        }
+
+        return batches;
+    }
+    /**
      * Replicates the internal representation for <times> elements.
      */
     void replicate(size_t times) {
+        if (_shape.size() != 1)
+            throw invalid_argument("can't replicate d-dimensional vectors");
+
         if (_data.empty()) {
             throw invalid_argument("can't replicate an empty vector");
         }
@@ -209,12 +277,12 @@ class PlainTensor {
         for (size_t i = 0; i < times - init_size; i++) {
             _data.push_back(_data[i % init_size]);
         }
+        _shape = {_data.size()};
     }
 
    private:
     vector<plain_t> _data;
     vector<size_t> _shape;
-    vector<size_t> _strides;
 };
 
 }  // namespace tenseal

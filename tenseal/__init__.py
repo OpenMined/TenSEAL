@@ -12,7 +12,9 @@ from tenseal.tensors import (
     ckks_vector,
     ckks_vector_from,
     ckks_tensor,
+    ckks_tensor_from,
     plain_tensor,
+    tolist,
 )
 from tenseal.version import __version__
 
@@ -26,6 +28,7 @@ GaloisKeys = _ts_cpp.GaloisKeys
 # Vectors
 BFVVector = _ts_cpp.BFVVector
 CKKSVector = _ts_cpp.CKKSVector
+CKKSTensor = _ts_cpp.CKKSTensor
 
 # utils
 im2col_encoding = _ts_cpp.im2col_encoding
@@ -93,8 +96,12 @@ __all__ = [
     "bfv_vector_from",
     "ckks_vector",
     "ckks_vector_from",
+    "ckks_tensor",
+    "ckks_tensor_from",
     "context",
     "context_from",
     "im2col_encoding",
+    "plain_tensor",
+    "tolist",
     "__version__",
 ]
