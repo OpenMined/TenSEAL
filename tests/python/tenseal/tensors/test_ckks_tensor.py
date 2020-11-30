@@ -9,13 +9,24 @@ from skimage.util.shape import view_as_windows
 import tenseal as ts
 
 
+def _almost_equal_number(v1, v2, m_pow_ten):
+    upper_bound = pow(10, -m_pow_ten)
+
+    return abs(v1 - v2) <= upper_bound
+
+
 def _almost_equal(vec1, vec2, m_pow_ten):
+    if not isinstance(vec1, list):
+        return _almost_equal_number(vec1, vec2, m_pow_ten)
+
     if len(vec1) != len(vec2):
         return False
 
-    upper_bound = pow(10, -m_pow_ten)
     for v1, v2 in zip(vec1, vec2):
-        if abs(v1 - v2) > upper_bound:
+        if isinstance(v1, list):
+            if not _almost_equal(v1, v2, m_pow_ten):
+                return False
+        elif not _almost_equal_number(v1, v2, m_pow_ten):
             return False
     return True
 
@@ -48,14 +59,17 @@ def precision():
         (ts.plain_tensor([i for i in range(8)]), 0),
         (ts.plain_tensor([i for i in range(6)], shape=[2, 3]), 0),
         (ts.plain_tensor([i for i in range(6)], shape=[2, 3]), 1),
+        (ts.plain_tensor([i for i in range(8)], shape=[2, 2, 2]), 1),
         (ts.plain_tensor([i for i in range(30)], shape=[2, 3, 5]), 0),
         (ts.plain_tensor([i for i in range(30)], shape=[2, 3, 5]), 1),
         (ts.plain_tensor([i for i in range(30)], shape=[2, 3, 5]), 2),
         (ts.plain_tensor([i for i in range(210)], shape=[2, 3, 5, 7]), 0),
+        (ts.plain_tensor([i for i in range(210)], shape=[2, 3, 5, 7]), 1),
+        (ts.plain_tensor([i for i in range(210)], shape=[2, 3, 5, 7]), 2),
         (ts.plain_tensor([i for i in range(210)], shape=[2, 3, 5, 7]), 3),
     ],
 )
-@pytest.mark.parametrize("batch", [True, False])
+@pytest.mark.parametrize("batch", [False, True])
 def test_sum(context, data, batch, axis, precision):
     context.generate_galois_keys()
     tensor = ts.ckks_tensor(context, data, batch=batch)
@@ -67,12 +81,14 @@ def test_sum(context, data, batch, axis, precision):
 
     orig = ts.tolist(data)
     np_orig = np.array(orig).reshape(data.shape())
-    expected = [np.sum(np_orig, axis).tolist()]
+    expected = np.sum(np_orig, axis).tolist()
+
+    result = tensor.sum(axis)
 
     # Decryption
     plain_ts = result.decrypt()
     decrypted_result = ts.tolist(plain_ts)
-    print(axis, np_orig, expected)
+
     assert _almost_equal(decrypted_result, expected, precision), "Sum of tensor is incorrect."
     assert _almost_equal(
         ts.tolist(tensor.decrypt()), orig, precision

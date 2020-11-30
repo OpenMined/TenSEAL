@@ -77,6 +77,9 @@ TEST_F(PlainTensorTest, TestTensorAccess) {
     ASSERT_EQ(tensor.at({0, 0, 0}), 1.1);
     ASSERT_EQ(tensor.at({1, 0, 0}), 5.5);
     ASSERT_EQ(tensor.at({1, 1, 1}), 8.8);
+    ASSERT_THAT(tensor.position(0), ElementsAre(0, 0, 0));
+    ASSERT_THAT(tensor.position(1), ElementsAre(0, 0, 1));
+    ASSERT_THAT(tensor.position(3), ElementsAre(0, 1, 1));
     ASSERT_THAT(*tensor.row(1), 5.5);
     ASSERT_EQ(tensor.size(), 2);
     ASSERT_EQ(tensor.empty(), false);
@@ -142,8 +145,8 @@ TEST_F(PlainTensorTest, TestBatch) {
     ASSERT_EQ(cnt, 2);
     ASSERT_EQ(size, 3);
 
-    ASSERT_THAT(out[0], ElementsAreArray({1.1, 3.3, 5.5}));
-    ASSERT_THAT(out[1], ElementsAreArray({2.2, 4.4, 6.6}));
+    ASSERT_THAT(out[0], ElementsAreArray({1.1, 2.2, 3.3}));
+    ASSERT_THAT(out[1], ElementsAreArray({4.4, 5.5, 6.6}));
 }
 
 TEST_F(PlainTensorTest, TestBatch3D) {
@@ -174,10 +177,10 @@ TEST_F(PlainTensorTest, TestBatch3D) {
     ASSERT_EQ(cnt, 4);
     ASSERT_EQ(size, 3);
 
-    ASSERT_THAT(out[0], ElementsAreArray({1.1, 5.5, 9.9}));
-    ASSERT_THAT(out[1], ElementsAreArray({2.2, 6.6, 10.10}));
-    ASSERT_THAT(out[2], ElementsAreArray({3.3, 7.7, 11.11}));
-    ASSERT_THAT(out[3], ElementsAreArray({4.4, 8.8, 12.12}));
+    ASSERT_THAT(out[0], ElementsAreArray({1.1, 3.3, 5.5}));
+    ASSERT_THAT(out[1], ElementsAreArray({2.2, 4.4, 6.6}));
+    ASSERT_THAT(out[2], ElementsAreArray({7.7, 9.9, 11.11}));
+    ASSERT_THAT(out[3], ElementsAreArray({8.8, 10.10, 12.12}));
 
     out = tensor.batch(2);
 
@@ -187,8 +190,8 @@ TEST_F(PlainTensorTest, TestBatch3D) {
     ASSERT_EQ(cnt, 6);
     ASSERT_EQ(size, 2);
 
-    ASSERT_THAT(out[0], ElementsAreArray({1.1, 7.7}));
-    ASSERT_THAT(out[1], ElementsAreArray({2.2, 8.8}));
+    ASSERT_THAT(out[0], ElementsAreArray({1.1, 2.2}));
+    ASSERT_THAT(out[1], ElementsAreArray({3.3, 4.4}));
 }
 
 TEST_F(PlainTensorTest, TestUnbatch) {

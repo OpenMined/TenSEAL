@@ -190,6 +190,10 @@ shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace(const double& to_mul) {
 
 shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
     if (axis >= _shape.size()) throw invalid_argument("invalid axis");
+
+    auto new_shape = _shape;
+    new_shape.erase(new_shape.begin() + axis);
+
     if (_batch_size) {
         if (axis != 0) throw invalid_argument("unsupported argument");
 
@@ -198,28 +202,37 @@ shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
         }
         _batch_size = {};
     } else {
-        auto shape_volume = std::accumulate(_shape.begin(), _shape.end(), 1,
-                                            std::multiplies<size_t>());
-        auto jump = shape_volume / _shape[axis];
+        auto new_len = _data.size() / _shape[axis];
 
         std::vector<Ciphertext> new_data;
-        new_data.resize(jump);
+        new_data.resize(new_len);
 
-        for (size_t off = 0; off < jump; ++off) {
+        for (size_t off = 0; off < new_len; ++off) {
             Ciphertext ct(*tenseal_context()->seal_context());
             tenseal_context()->encryptor->encrypt_zero(ct);
             ct.scale() = _init_scale;
 
-            for (size_t idx = off; idx < _data.size(); idx += jump) {
-                tenseal_context()->evaluator->add_inplace(ct, _data[idx]);
-            }
             new_data[off] = ct;
         }
 
+        auto old_strides = generate_strides(_shape);
+        auto new_strides = generate_strides(new_shape);
+
+        for (size_t idx = 0; idx < _data.size(); ++idx) {
+            auto pos = position_from_strides(old_strides, idx);
+            pos.erase(pos.begin() + axis);
+
+            size_t new_idx = 0;
+            for (size_t pidx = 0; pidx < pos.size(); ++pidx)
+                new_idx += new_strides[pidx] * pos[pidx];
+
+            tenseal_context()->evaluator->add_inplace(new_data[new_idx],
+                                                      _data[idx]);
+        }
         _data = new_data;
     }
 
-    _shape.erase(_shape.begin() + axis);
+    _shape = new_shape;
     return shared_from_this();
 }
 

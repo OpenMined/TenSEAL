@@ -20,6 +20,18 @@ inline vector<size_t> generate_strides(const vector<size_t>& shape) {
     return strides;
 }
 
+inline vector<size_t> position_from_strides(const vector<size_t>& strides,
+                                            size_t val) {
+    vector<size_t> result;
+
+    for (auto& stride : strides) {
+        result.push_back(val / stride);
+        val = val % stride;
+    }
+
+    return result;
+}
+
 /**
  * PlainTensor<plain_t> interface - A generic API for plain tensor operations.
  * @param plain_t: root plaintext datatype for representing data(double, int64
@@ -109,6 +121,14 @@ class PlainTensor {
             tensor_idx += index[d] * strides[d];
 
         return _data[tensor_idx];
+    }
+    /**
+     * Converts integer to position.
+     * @param[in] .
+     */
+    vector<size_t> position(size_t val) const {
+        auto strides = generate_strides(_shape);
+        return position_from_strides(strides, val);
     }
     /**
      * Returns iterator to row.
@@ -250,15 +270,33 @@ class PlainTensor {
      * Return the vector representation batched by an axis.
      */
     auto batch(size_t dim) const {
+        if (dim >= this->_shape.size())
+            throw invalid_argument("invalid dimension for batching");
+
         size_t batch_size = this->_shape[dim];
         size_t batch_count = this->_data.size() / batch_size;
 
         vector<vector<plain_t>> batches;
         batches.resize(batch_count);
 
+        auto new_shape = _shape;
+        new_shape.erase(new_shape.begin() + dim);
+        auto new_strides = generate_strides(new_shape);
+
         for (size_t idx = 0; idx < _data.size(); ++idx) {
-            batches[idx % batch_count].push_back(_data[idx]);
+            auto pos = position(idx);
+            pos.erase(pos.begin() + dim);
+
+            size_t new_idx = 0;
+            for (size_t pidx = 0; pidx < pos.size(); ++pidx)
+                new_idx += new_strides[pidx] * pos[pidx];
+
+            batches[new_idx].push_back(_data[idx]);
         }
+
+        for (const auto& it : batches)
+            if (it.size() != batch_size)
+                throw logic_error("logical error in generating batches");
 
         return batches;
     }
