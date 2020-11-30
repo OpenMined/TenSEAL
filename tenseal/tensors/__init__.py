@@ -122,7 +122,7 @@ def ckks_vector_from(context, data):
     )
 
 
-def ckks_tensor(context, tensor, scale=None, batch=True):
+def ckks_tensor(context, tensor, scale=None, batch=False):
     """Constructor method for the CKKSTensor object, which can store a list
     of float numbers in encrypted form, using the CKKS homomorphic encryption
     scheme.
