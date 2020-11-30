@@ -95,6 +95,13 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     static Ciphertext encrypt(const shared_ptr<TenSEALContext>& ctx,
                               const double scale, const double data);
 
+    shared_ptr<CKKSTensor> op_inplace(
+        const shared_ptr<CKKSTensor>& operand, unsigned int op);
+    shared_ptr<CKKSTensor> op_plain_inplace(
+        const PlainTensor<double>& operand, unsigned int op);
+    shared_ptr<CKKSTensor> op_plain_inplace(
+        const double& operand, unsigned int op);
+
     void load_proto(const CKKSTensorProto& buffer);
     CKKSTensorProto save_proto() const;
     void clear();
