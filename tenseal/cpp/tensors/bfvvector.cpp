@@ -187,7 +187,7 @@ shared_ptr<BFVVector> BFVVector::dot_product_plain_inplace(
     return shared_from_this();
 }
 
-shared_ptr<BFVVector> BFVVector::sum_inplace() {
+shared_ptr<BFVVector> BFVVector::sum_inplace(size_t /*axis=0*/) {
     sum_vector(this->tenseal_context(), this->_ciphertext, this->size());
     this->_size = 1;
     return shared_from_this();

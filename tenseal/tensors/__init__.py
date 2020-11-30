@@ -120,7 +120,7 @@ def ckks_vector_from(context, data):
     )
 
 
-def ckks_tensor(context, tensor, scale=None):
+def ckks_tensor(context, tensor, scale=None, batch=True):
     """Constructor method for the CKKSTensor object, which can store a list
     of float numbers in encrypted form, using the CKKS homomorphic encryption
     scheme.
@@ -133,19 +133,19 @@ def ckks_tensor(context, tensor, scale=None):
     Returns:
         CKKSTensor object.
     """
-    if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(
+    if not isinstance(context, _ts_cpp.TenSEALContext) or not isinstance(
         tensor, _ts_cpp.PlainTensorDouble
     ):
-        if scale is None:
-            return _ts_cpp.CKKSTensor(context, tensor)
-        else:
-            return _ts_cpp.CKKSTensor(context, tensor, scale)
-
-    raise TypeError(
-        "Invalid CKKSTensor input types context: {} and vector: {}".format(
-            type(context), type(tensor)
+        raise TypeError(
+            "Invalid CKKSTensor input types context: {} and vector: {}".format(
+                type(context), type(tensor)
+            )
         )
-    )
+
+    if scale is None:
+        return _ts_cpp.CKKSTensor(context, tensor, batch)
+    else:
+        return _ts_cpp.CKKSTensor(context, tensor, scale, batch)
 
 
 def ckks_tensor_from(context, data):

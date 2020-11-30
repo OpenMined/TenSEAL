@@ -198,7 +198,7 @@ shared_ptr<CKKSVector> CKKSVector::dot_product_plain_inplace(
     return shared_from_this();
 }
 
-shared_ptr<CKKSVector> CKKSVector::sum_inplace() {
+shared_ptr<CKKSVector> CKKSVector::sum_inplace(size_t /*axis = 0*/) {
     sum_vector(this->tenseal_context(), this->_ciphertext, this->size());
     this->_size = 1;
     return shared_from_this();

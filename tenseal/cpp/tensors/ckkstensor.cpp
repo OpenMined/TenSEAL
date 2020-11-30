@@ -8,7 +8,7 @@ using namespace std;
 CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
                        const PlainTensor<double>& tensor,
                        std::optional<double> scale, bool batch)
-    : _shape(tensor.shape()), _strides(tensor.strides()) {
+    : _shape(tensor.shape()) {
     this->link_tenseal_context(ctx);
     if (scale.has_value()) {
         this->_init_scale = scale.value();
@@ -52,8 +52,8 @@ CKKSTensor::CKKSTensor(const shared_ptr<const CKKSTensor>& tensor) {
     this->link_tenseal_context(tensor->tenseal_context());
     this->_init_scale = tensor->scale();
     this->_shape = tensor->shape();
-    this->_strides = tensor->strides();
     this->_data = tensor->data();
+    this->_batch_size = tensor->_batch_size;
 }
 
 Ciphertext CKKSTensor::encrypt(const shared_ptr<TenSEALContext>& ctx,
@@ -92,6 +92,7 @@ PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
             result.push_back(
                 vector<double>(buff.begin(), buff.begin() + *_batch_size));
         }
+
         return PlainTensor<double>(/*batched_tensor=*/result,
                                    /*original_shape=*/_shape, /*batch_axis=*/0);
     } else {
@@ -200,7 +201,6 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
 
 void CKKSTensor::clear() {
     this->_shape = vector<size_t>();
-    this->_strides = vector<size_t>();
     this->_data = vector<Ciphertext>();
     this->_init_scale = 0;
 }
@@ -213,9 +213,6 @@ void CKKSTensor::load_proto(const CKKSTensorProto& tensor_proto) {
 
     for (int idx = 0; idx < tensor_proto.shape_size(); ++idx) {
         this->_shape.push_back(tensor_proto.shape(idx));
-    }
-    for (int idx = 0; idx < tensor_proto.strides_size(); ++idx) {
-        this->_strides.push_back(tensor_proto.strides(idx));
     }
     for (int idx = 0; idx < tensor_proto.ciphertexts_size(); ++idx)
         this->_data.push_back(SEALDeserialize<Ciphertext>(
@@ -234,9 +231,6 @@ CKKSTensorProto CKKSTensor::save_proto() const {
     }
     for (auto& dim : this->_shape) {
         buffer.add_shape(dim);
-    }
-    for (auto& stride : this->_strides) {
-        buffer.add_strides(stride);
     }
     buffer.set_scale(this->_init_scale);
     if (this->_batch_size) buffer.set_batch_size(*this->_batch_size);
@@ -278,6 +272,5 @@ shared_ptr<CKKSTensor> CKKSTensor::deepcopy() const {
 
 vector<Ciphertext> CKKSTensor::data() const { return _data; }
 vector<size_t> CKKSTensor::shape() const { return _shape; }
-vector<size_t> CKKSTensor::strides() const { return _strides; }
 double CKKSTensor::scale() const { return _init_scale; }
 }  // namespace tenseal

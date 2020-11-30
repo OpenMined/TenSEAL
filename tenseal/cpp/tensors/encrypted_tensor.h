@@ -123,8 +123,10 @@ class EncryptedTensor {
     };
     virtual encrypted_t dot_product_plain_inplace(
         const PlainTensor<plain_data_t>& to_mul) = 0;
-    encrypted_t sum() const { return this->copy()->sum_inplace(); };
-    virtual encrypted_t sum_inplace() = 0;
+    encrypted_t sum(size_t axis = 0) const {
+        return this->copy()->sum_inplace(axis);
+    };
+    virtual encrypted_t sum_inplace(size_t axis) = 0;
     /**
      * Polynomial evaluation with `this` as variable.
      * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
