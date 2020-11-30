@@ -69,6 +69,28 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     vector<size_t> shape() const;
     double scale() const;
 
+    /**
+     * Relinearize the ciphertexts if the context has automatic relinearization
+     *enabled.
+     **/
+    void auto_relin() {
+        if (!this->tenseal_context()->auto_relin()) return;
+        for (auto& ct : this->_data)
+            this->tenseal_context()->evaluator->relinearize_inplace(
+                ct, *this->tenseal_context()->relin_keys());
+    }
+    /**
+     * Rescale the ciphertexts, if the context has automatic rescaling enabled.
+     **/
+    void auto_rescale() {
+        if (!this->tenseal_context()->auto_rescale()) return;
+
+        for (auto& ct : this->_data) {
+            this->tenseal_context()->evaluator->rescale_to_next_inplace(ct);
+            ct.scale() = this->scale();
+        }
+    }
+
    private:
     vector<Ciphertext> _data;
     vector<size_t> _shape;

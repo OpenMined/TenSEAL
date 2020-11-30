@@ -138,3 +138,32 @@ def test_negate_inplace(context, plain, precision):
     tensor.neg_()
     decrypted_result = ts.tolist(tensor.decrypt())
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
+
+
+@pytest.mark.parametrize(
+    "plain",
+    [ts.plain_tensor([0]), ts.plain_tensor([1, 2, 3]), ts.plain_tensor([1, 2, 3, 4], [2, 2]),],
+)
+def test_square(context, plain, precision):
+    tensor = ts.ckks_tensor(context, plain)
+    expected = np.square(ts.tolist(plain))
+
+    result = tensor.square()
+    decrypted_result = ts.tolist(result.decrypt())
+    assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
+    assert _almost_equal(
+        ts.tolist(tensor.decrypt()), ts.tolist(plain), precision
+    ), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "plain",
+    [ts.plain_tensor([0]), ts.plain_tensor([1, 2, 3]), ts.plain_tensor([1, 2, 3, 4], [2, 2]),],
+)
+def test_square_inplace(context, plain, precision):
+    tensor = ts.ckks_tensor(context, plain)
+    expected = np.square(ts.tolist(plain))
+
+    tensor.square_()
+    decrypted_result = ts.tolist(tensor.decrypt())
+    assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"

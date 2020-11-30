@@ -456,6 +456,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("sum_", &CKKSTensor::sum_inplace, py::arg("axis") = 0)
         .def("neg", &CKKSTensor::negate)
         .def("neg_", &CKKSTensor::negate_inplace)
+        .def("square", &CKKSTensor::square)
+        .def("square_", &CKKSTensor::square_inplace)
         .def("decrypt",
              [](shared_ptr<CKKSTensor> obj) { return obj->decrypt(); })
         .def("decrypt",
