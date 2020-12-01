@@ -1,9 +1,5 @@
 #include "tenseal/cpp/tensors/ckkstensor.h"
 
-#define OP_ADD 0
-#define OP_SUB 1
-#define OP_MUL 2
-
 namespace tenseal {
 
 using namespace seal;
@@ -129,7 +125,7 @@ shared_ptr<CKKSTensor> CKKSTensor::power_inplace(unsigned int power) {
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::op_inplace(
-    const shared_ptr<CKKSTensor>& operand, uint op) {
+    const shared_ptr<CKKSTensor>& operand, OP op) {
     // TODO implement broadcasting
     if (this->_shape != operand->_shape) {
         // TODO provide a better message (what are the shapes)
@@ -142,14 +138,14 @@ shared_ptr<CKKSTensor> CKKSTensor::op_inplace(
         for (size_t i = start; i < end; i++) {
             // TODO auto_mod_switch
             switch (op) {
-                case OP_ADD:
+                case OP::ADD:
                     this->tenseal_context()->evaluator->add_inplace(
                         this->_data[i], operand->_data[i]);
                     break;
-                case OP_SUB:
+                case OP::SUB:
                     this->tenseal_context()->evaluator->sub_inplace(
                         this->_data[i], operand->_data[i]);
-                case OP_MUL:
+                case OP::MUL:
                     this->tenseal_context()->evaluator->multiply_inplace(
                         this->_data[i], operand->_data[i]);
                     // TODO: auto_relin auto_rescale
@@ -181,7 +177,7 @@ shared_ptr<CKKSTensor> CKKSTensor::op_inplace(
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(
-    const PlainTensor<double>& operand, uint op) {
+    const PlainTensor<double>& operand, OP op) {
     // TODO implement broadcasting
     // TODO batched ops
     if (this->_shape != operand.shape()) {
@@ -199,14 +195,14 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(
                 operand_data[i], plaintext, this->_init_scale);
             // TODO auto_mod_switch
             switch (op) {
-                case OP_ADD:
+                case OP::ADD:
                     this->tenseal_context()->evaluator->add_plain_inplace(
                         this->_data[i], plaintext);
                     break;
-                case OP_SUB:
+                case OP::SUB:
                     this->tenseal_context()->evaluator->sub_plain_inplace(
                         this->_data[i], plaintext);
-                case OP_MUL:
+                case OP::MUL:
                     this->tenseal_context()->evaluator->multiply_plain_inplace(
                         this->_data[i], plaintext);
                     // TODO: auto_relin auto_rescale
@@ -238,7 +234,7 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(const double& operand,
-                                                    uint op) {
+                                                    OP op) {
     size_t n_jobs = this->tenseal_context()->dispatcher_size();
     Plaintext plaintext;
     this->tenseal_context()->encode<CKKSEncoder>(operand, plaintext,
@@ -248,14 +244,14 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(const double& operand,
         for (size_t i = start; i < end; i++) {
             // TODO auto_mod_switch
             switch (op) {
-                case OP_ADD:
+                case OP::ADD:
                     this->tenseal_context()->evaluator->add_plain_inplace(
                         this->_data[i], plaintext);
                     break;
-                case OP_SUB:
+                case OP::SUB:
                     this->tenseal_context()->evaluator->sub_plain_inplace(
                         this->_data[i], plaintext);
-                case OP_MUL:
+                case OP::MUL:
                     this->tenseal_context()->evaluator->multiply_plain_inplace(
                         this->_data[i], plaintext);
                     // TODO: auto_relin auto_rescale
@@ -288,17 +284,17 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(const double& operand,
 
 shared_ptr<CKKSTensor> CKKSTensor::add_inplace(
     const shared_ptr<CKKSTensor>& to_add) {
-    return this->op_inplace(to_add, OP_ADD);
+    return this->op_inplace(to_add, OP::ADD);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::sub_inplace(
     const shared_ptr<CKKSTensor>& to_sub) {
-    return this->op_inplace(to_sub, OP_SUB);
+    return this->op_inplace(to_sub, OP::SUB);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::mul_inplace(
     const shared_ptr<CKKSTensor>& to_mul) {
-    return this->op_inplace(to_mul, OP_MUL);
+    return this->op_inplace(to_mul, OP::MUL);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::dot_product_inplace(
@@ -309,17 +305,17 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_product_inplace(
 
 shared_ptr<CKKSTensor> CKKSTensor::add_plain_inplace(
     const PlainTensor<double>& to_add) {
-    return this->op_plain_inplace(to_add, OP_ADD);
+    return this->op_plain_inplace(to_add, OP::ADD);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::sub_plain_inplace(
     const PlainTensor<double>& to_sub) {
-    return this->op_plain_inplace(to_sub, OP_SUB);
+    return this->op_plain_inplace(to_sub, OP::SUB);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace(
     const PlainTensor<double>& to_mul) {
-    return this->op_plain_inplace(to_mul, OP_MUL);
+    return this->op_plain_inplace(to_mul, OP::MUL);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::dot_product_plain_inplace(
@@ -329,15 +325,15 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_product_plain_inplace(
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::add_plain_inplace(const double& to_add) {
-    return this->op_plain_inplace(to_add, OP_ADD);
+    return this->op_plain_inplace(to_add, OP::ADD);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::sub_plain_inplace(const double& to_sub) {
-    return this->op_plain_inplace(to_sub, OP_SUB);
+    return this->op_plain_inplace(to_sub, OP::SUB);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace(const double& to_mul) {
-    return this->op_plain_inplace(to_mul, OP_MUL);
+    return this->op_plain_inplace(to_mul, OP::MUL);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
