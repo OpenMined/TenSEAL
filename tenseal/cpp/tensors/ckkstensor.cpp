@@ -129,8 +129,8 @@ shared_ptr<CKKSTensor> CKKSTensor::power_inplace(unsigned int power) {
     return shared_from_this();
 }
 
-template <typename Other>
-void CKKSTensor::perform_op(seal::Ciphertext& ct, Other other, OP op) {
+void CKKSTensor::perform_op(seal::Ciphertext& ct, seal::Ciphertext other,
+                            OP op) {
     this->auto_same_mod(other, ct);
     switch (op) {
         case OP::ADD:
@@ -140,6 +140,26 @@ void CKKSTensor::perform_op(seal::Ciphertext& ct, Other other, OP op) {
             this->tenseal_context()->evaluator->sub_inplace(ct, other);
         case OP::MUL:
             this->tenseal_context()->evaluator->multiply_inplace(ct, other);
+            this->auto_relin(ct);
+            this->auto_rescale(ct);
+            break;
+        default:
+            throw invalid_argument("operation not defined");
+    }
+}
+
+void CKKSTensor::perform_plain_op(seal::Ciphertext& ct, seal::Plaintext other,
+                                  OP op) {
+    this->auto_same_mod(other, ct);
+    switch (op) {
+        case OP::ADD:
+            this->tenseal_context()->evaluator->add_plain_inplace(ct, other);
+            break;
+        case OP::SUB:
+            this->tenseal_context()->evaluator->sub_plain_inplace(ct, other);
+        case OP::MUL:
+            this->tenseal_context()->evaluator->multiply_plain_inplace(ct,
+                                                                       other);
             this->auto_relin(ct);
             this->auto_rescale(ct);
             break;
@@ -200,7 +220,7 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(
         for (size_t i = start; i < end; i++) {
             this->tenseal_context()->encode<CKKSEncoder>(
                 operand_data[i], plaintext, this->_init_scale);
-            this->perform_op(this->_data[i], plaintext, op);
+            this->perform_plain_op(this->_data[i], plaintext, op);
         }
         return true;
     };
@@ -232,7 +252,7 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(const double& operand,
 
     auto worker_func = [&](size_t start, size_t end) -> bool {
         for (size_t i = start; i < end; i++) {
-            this->perform_op(this->_data[i], plaintext, op);
+            this->perform_plain_op(this->_data[i], plaintext, op);
         }
         return true;
     };
