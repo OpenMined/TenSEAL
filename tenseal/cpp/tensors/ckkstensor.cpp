@@ -248,7 +248,16 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(
                     std::min((i + 1) * batch_size, this->_data.size())));
         }
         // waiting
-        for (size_t i = 0; i < futures.size(); i++) futures[i].get();
+        std::optional<std::exception> fail;
+        for (size_t i = 0; i < futures.size(); i++) {
+            try {
+                futures[i].get();
+            } catch (std::exception& e) {
+                fail = e;
+            }
+        }
+
+        if (fail) throw invalid_argument(fail.value().what());
     }
 
     return shared_from_this();
@@ -280,7 +289,16 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(const double& operand,
                     std::min((i + 1) * batch_size, this->_data.size())));
         }
         // waiting
-        for (size_t i = 0; i < futures.size(); i++) futures[i].get();
+        std::optional<std::exception> fail;
+        for (size_t i = 0; i < futures.size(); i++) {
+            try {
+                futures[i].get();
+            } catch (std::exception& e) {
+                fail = e;
+            }
+        }
+
+        if (fail) throw invalid_argument(fail.value().what());
     }
 
     return shared_from_this();
