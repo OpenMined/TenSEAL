@@ -138,6 +138,7 @@ void CKKSTensor::perform_op(seal::Ciphertext& ct, seal::Ciphertext other,
             break;
         case OP::SUB:
             this->tenseal_context()->evaluator->sub_inplace(ct, other);
+            break;
         case OP::MUL:
             this->tenseal_context()->evaluator->multiply_inplace(ct, other);
             this->auto_relin(ct);
@@ -157,6 +158,7 @@ void CKKSTensor::perform_plain_op(seal::Ciphertext& ct, seal::Plaintext other,
             break;
         case OP::SUB:
             this->tenseal_context()->evaluator->sub_plain_inplace(ct, other);
+            break;
         case OP::MUL:
             this->tenseal_context()->evaluator->multiply_plain_inplace(ct,
                                                                        other);
