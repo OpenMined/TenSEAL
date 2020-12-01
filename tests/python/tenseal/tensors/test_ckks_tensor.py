@@ -208,7 +208,7 @@ def test_square_inplace(context, plain, precision):
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
 
 
-@pytest.mark.parametrize("shape", SHAPES[0:5])
+@pytest.mark.parametrize("shape", SHAPES)
 @pytest.mark.parametrize("plain", [True, False])
 @pytest.mark.parametrize("op", ["add", "sub", "mul"])
 def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
@@ -273,7 +273,7 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
     assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
 
 
-@pytest.mark.parametrize("shape", SHAPES[0:5])
+@pytest.mark.parametrize("shape", SHAPES)
 @pytest.mark.parametrize("op", ["add", "sub", "mul"])
 def test_add_sub_mul_scalar(context, shape, op):
     r_t = np.random.randn(*shape)
