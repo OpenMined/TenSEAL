@@ -8,21 +8,23 @@ except ImportError:
     import tenseal._tenseal_cpp as _ts_cpp
 
 
-def plain_tensor(data, shape=None, stride=None, dtype="float"):
+def plain_tensor(data, shape=None, dtype="float"):
     """Constructor method for the PlainTensor object.
     Args:
         data:
         shape:
-        stride:
         dtype:
     Returns:
         PlainTensor object.
     """
     # just create a plaintensor using python lists for now
-    if dtype == "float":
-        return _ts_cpp.PlainTensorDouble(data)
-    else:
+    if dtype != "float":
         raise ValueError("Invalid dtype")
+
+    if shape is None:
+        return _ts_cpp.PlainTensorDouble(data)
+
+    return _ts_cpp.PlainTensorDouble(data, shape)
 
 
 def bfv_vector(context, data):
@@ -120,7 +122,7 @@ def ckks_vector_from(context, data):
     )
 
 
-def ckks_tensor(context, tensor, scale=None):
+def ckks_tensor(context, tensor, scale=None, batch=False):
     """Constructor method for the CKKSTensor object, which can store a list
     of float numbers in encrypted form, using the CKKS homomorphic encryption
     scheme.
@@ -133,19 +135,19 @@ def ckks_tensor(context, tensor, scale=None):
     Returns:
         CKKSTensor object.
     """
-    if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(
+    if not isinstance(context, _ts_cpp.TenSEALContext) or not isinstance(
         tensor, _ts_cpp.PlainTensorDouble
     ):
-        if scale is None:
-            return _ts_cpp.CKKSTensor(context, tensor)
-        else:
-            return _ts_cpp.CKKSTensor(context, tensor, scale)
-
-    raise TypeError(
-        "Invalid CKKSTensor input types context: {} and vector: {}".format(
-            type(context), type(tensor)
+        raise TypeError(
+            "Invalid CKKSTensor input types context: {} and vector: {}".format(
+                type(context), type(tensor)
+            )
         )
-    )
+
+    if scale is None:
+        return _ts_cpp.CKKSTensor(context, tensor, batch)
+    else:
+        return _ts_cpp.CKKSTensor(context, tensor, scale, batch)
 
 
 def ckks_tensor_from(context, data):

@@ -182,7 +182,7 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
                                                                     pt_diag);
 
                 if (this->_ciphertext.parms_id() != pt_diag.parms_id()) {
-                    this->set_to_same_mod(pt_diag);
+                    this->set_to_same_mod(pt_diag, _ciphertext);
                 }
                 this->tenseal_context()->evaluator->multiply_plain(
                     this->_ciphertext, pt_diag, ct);
@@ -228,70 +228,6 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
         return result;
     }
 
-    /**
-     * Relinearize the ciphertext if the context has automatic relinearization
-     *enabled.
-     **/
-    void auto_relin() {
-        if (!this->tenseal_context()->auto_relin()) return;
-        this->tenseal_context()->evaluator->relinearize_inplace(
-            this->_ciphertext, *this->tenseal_context()->relin_keys());
-    }
-    /**
-     * Rescale the ciphertext, if the context has automatic rescaling enabled.
-     **/
-    void auto_rescale() {
-        if (!this->tenseal_context()->auto_rescale()) return;
-
-        this->tenseal_context()->evaluator->rescale_to_next_inplace(
-            this->_ciphertext);
-        this->_ciphertext.scale() = this->scale();
-    }
-    /**
-     * Apply modulus switching to the ciphertext (or plaintext) having the
-     *higher modulus.
-     **/
-    template <typename Other>
-    void auto_same_mod(Other& other) {
-        if (!this->tenseal_context()->auto_mod_switch() ||
-            this->_ciphertext.parms_id() == other.parms_id()) {
-            return;
-        }
-
-        return this->set_to_same_mod(other);
-    }
-
-    /*
-    Apply modulus switching to the ciphertext (or plaintext) having the higher
-    modulus.
-    */
-    template <typename T>
-    void set_to_same_mod(T& other) {
-        auto get_chain_index = [&](const auto& obj) -> size_t {
-            auto ctx_data =
-                this->tenseal_context()->seal_context()->get_context_data(
-                    obj.parms_id());
-            if (ctx_data == nullptr) {
-                throw runtime_error(
-                    "SEAL: couldn't find context_data from params_id");
-            }
-            return ctx_data->chain_index();
-        };
-
-        size_t ct_idx = get_chain_index(this->_ciphertext);
-        size_t other_idx = get_chain_index(other);
-
-        if (ct_idx == other_idx) return;
-
-        if (ct_idx > other_idx) {
-            this->tenseal_context()->evaluator->mod_switch_to_inplace(
-                this->_ciphertext, other.parms_id());
-        } else {
-            this->tenseal_context()->evaluator->mod_switch_to_inplace(
-                other, this->_ciphertext.parms_id());
-        }
-    }
-    virtual double scale() const = 0;
     virtual ~EncryptedVector(){};
 
    protected:

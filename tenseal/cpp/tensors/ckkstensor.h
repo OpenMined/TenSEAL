@@ -54,11 +54,11 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     shared_ptr<CKKSTensor> dot_product_plain_inplace(
         const PlainTensor<double>& to_mul) override;
 
-    shared_ptr<CKKSTensor> sum_inplace() {
-        // default axis=0
-        return this->sum_inplace(0);
+    shared_ptr<CKKSTensor> sum_inplace(size_t axis = 0) override;
+    shared_ptr<CKKSTensor> sum_batch() {
+        return this->copy()->sum_batch_inplace();
     }
-    shared_ptr<CKKSTensor> sum_inplace(size_t axis = 0);
+    shared_ptr<CKKSTensor> sum_batch_inplace();
 
     shared_ptr<CKKSTensor> polyval_inplace(
         const vector<double>& coefficients) override;
@@ -71,13 +71,11 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
 
     vector<Ciphertext> data() const;
     vector<size_t> shape() const;
-    vector<size_t> strides() const;
-    double scale() const;
+    double scale() const override;
 
    private:
     vector<Ciphertext> _data;
     vector<size_t> _shape;
-    vector<size_t> _strides;
     double _init_scale;
     optional<size_t> _batch_size;
 

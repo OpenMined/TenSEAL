@@ -123,8 +123,10 @@ class EncryptedTensor {
     };
     virtual encrypted_t dot_product_plain_inplace(
         const PlainTensor<plain_data_t>& to_mul) = 0;
-    encrypted_t sum() const { return this->copy()->sum_inplace(); };
-    virtual encrypted_t sum_inplace() = 0;
+    encrypted_t sum(size_t axis = 0) const {
+        return this->copy()->sum_inplace(axis);
+    };
+    virtual encrypted_t sum_inplace(size_t axis) = 0;
     /**
      * Polynomial evaluation with `this` as variable.
      * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
@@ -163,7 +165,90 @@ class EncryptedTensor {
     void load_context_proto(const TenSEALContextProto& ctx) {
         this->link_tenseal_context(TenSEALContext::Create(ctx));
     }
+    /**
+     * Relinearize the ciphertext if the context has automatic relinearization
+     *enabled.
+     **/
+    void auto_relin(Ciphertext& ct) {
+        if (!this->tenseal_context()->auto_relin()) return;
+        this->tenseal_context()->evaluator->relinearize_inplace(
+            ct, *this->tenseal_context()->relin_keys());
+    }
+    void auto_relin(vector<Ciphertext>& cts) {
+        if (!this->tenseal_context()->auto_relin()) return;
+        for (auto& ct : cts) auto_relin(ct);
+    }
+    /**
+     * Rescale the ciphertext, if the context has automatic rescaling enabled.
+     **/
+    void auto_rescale(Ciphertext& ct) {
+        if (!this->tenseal_context()->auto_rescale()) return;
 
+        this->tenseal_context()->evaluator->rescale_to_next_inplace(ct);
+        ct.scale() = this->scale();
+    }
+    void auto_rescale(vector<Ciphertext>& cts) {
+        if (!this->tenseal_context()->auto_rescale()) return;
+
+        for (auto& ct : cts) auto_rescale(ct);
+    }
+    virtual double scale() const = 0;
+    /**
+     * Apply modulus switching to the ciphertext (or plaintext) having the
+     *higher modulus.
+     **/
+    template <typename Other>
+    void auto_same_mod(Other& other, Ciphertext& ct) {
+        if (!this->tenseal_context()->auto_mod_switch() ||
+            ct.parms_id() == other.parms_id()) {
+            return;
+        }
+
+        return this->set_to_same_mod(other, ct);
+    }
+    template <typename Other>
+    void auto_same_mod(Other& other, vector<Ciphertext>& cts) {
+        if (!this->tenseal_context()->auto_mod_switch()) return;
+
+        for (auto& ct : cts) {
+            if (ct.parms_id() == other.parms_id()) {
+                continue;
+            }
+
+            this->set_to_same_mod(other, ct);
+        }
+    }
+
+    /*
+    Apply modulus switching to the ciphertext (or plaintext) having the higher
+    modulus.
+    */
+    template <typename T>
+    void set_to_same_mod(T& other, Ciphertext& ct) {
+        auto get_chain_index = [&](const auto& obj) -> size_t {
+            auto ctx_data =
+                this->tenseal_context()->seal_context()->get_context_data(
+                    obj.parms_id());
+            if (ctx_data == nullptr) {
+                throw runtime_error(
+                    "SEAL: couldn't find context_data from params_id");
+            }
+            return ctx_data->chain_index();
+        };
+
+        size_t ct_idx = get_chain_index(ct);
+        size_t other_idx = get_chain_index(other);
+
+        if (ct_idx == other_idx) return;
+
+        if (ct_idx > other_idx) {
+            this->tenseal_context()->evaluator->mod_switch_to_inplace(
+                ct, other.parms_id());
+        } else {
+            this->tenseal_context()->evaluator->mod_switch_to_inplace(
+                other, ct.parms_id());
+        }
+    }
     virtual ~EncryptedTensor(){};
 
    protected:

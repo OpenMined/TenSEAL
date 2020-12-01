@@ -98,12 +98,14 @@ def test_ckks_empty_encryption(plain_vec):
     assert str(e.value) == "Attempting to encrypt an empty vector"
 
 
-def test_ckks_tensor_encryption_decryption():
+@pytest.mark.parametrize("batch", [False, True])
+def test_ckks_tensor_encryption_decryption(batch):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=COEFF_MOD_BIT_SIZES)
     scale = pow(2, 40)
     matrix = np.random.randn(4, 5)
     plain_tensor = ts.plain_tensor(matrix.tolist())
-    ckks_vec = ts.ckks_tensor(context, plain_tensor, scale)
+
+    ckks_vec = ts.ckks_tensor(context, plain_tensor, scale, batch)
     decrypted_vec = ts.tolist(ckks_vec.decrypt())
 
     assert len(decrypted_vec) == len(matrix)

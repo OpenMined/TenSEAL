@@ -19,6 +19,7 @@ void bind_plain_tensor(py::module &m, const std::string &name) {
     py::class_<type>(m, class_name.c_str(), py::module_local())
         .def(py::init<const vector<plain_t> &>())
         .def(py::init<const vector<vector<plain_t>> &>())
+        .def(py::init<const vector<plain_t> &, const vector<size_t> &>())
         .def("at", &type::at)
         .def("get_diagonal", &type::get_diagonal)
         .def("horizontal_scan", &type::horizontal_scan)
@@ -27,6 +28,8 @@ void bind_plain_tensor(py::module &m, const std::string &name) {
         .def("shape", &type::shape)
         .def("strides", &type::strides)
         .def("size", &type::size)
+        .def("batch", &type::batch)
+        .def("__len__", &type::size)
         .def("empty", &type::empty)
         .def("replicate", &type::replicate);
 }
@@ -278,8 +281,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->dot_product_plain_inplace(other);
              })
-        .def("sum", &CKKSVector::sum)
-        .def("sum_", &CKKSVector::sum_inplace)
+        .def("sum", &CKKSVector::sum, py::arg("axis") = 0)
+        .def("sum_", &CKKSVector::sum_inplace, py::arg("axis") = 0)
         .def(
             "matmul",
             [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
@@ -433,17 +436,30 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
     py::class_<CKKSTensor, std::shared_ptr<CKKSTensor>>(m, "CKKSTensor",
                                                         py::module_local())
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
-                         const PlainTensor<double> &tensor, double scale) {
-            return CKKSTensor::Create(ctx, tensor, scale);
-        }))
+                         const PlainTensor<double> &tensor, double scale,
+                         bool batch) {
+                 return CKKSTensor::Create(ctx, tensor, scale, batch);
+             }),
+             py::arg("ctx"), py::arg("tensor"), py::arg("scale"),
+             py::arg("batch") = true)
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
-                         const PlainTensor<double> &tensor) {
-            return CKKSTensor::Create(ctx, tensor);
-        }))
+                         const PlainTensor<double> &tensor, bool batch) {
+                 return CKKSTensor::Create(ctx, tensor, optional<double>(),
+                                           batch);
+             }),
+             py::arg("ctx"), py::arg("tensor"), py::arg("batch") = true)
         .def(py::init(
             [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
                 return CKKSTensor::Create(ctx, data);
             }))
+        .def("sum", &CKKSTensor::sum, py::arg("axis") = 0)
+        .def("sum_", &CKKSTensor::sum_inplace, py::arg("axis") = 0)
+        .def("sum_batch", &CKKSTensor::sum_batch)
+        .def("sum_batch_", &CKKSTensor::sum_batch_inplace)
+        .def("neg", &CKKSTensor::negate)
+        .def("neg_", &CKKSTensor::negate_inplace)
+        .def("square", &CKKSTensor::square)
+        .def("square_", &CKKSTensor::square_inplace)
         .def("decrypt",
              [](shared_ptr<CKKSTensor> obj) { return obj->decrypt(); })
         .def("decrypt",
@@ -457,9 +473,13 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("copy", &CKKSTensor::deepcopy)
         .def("__copy__",
              [](shared_ptr<CKKSTensor> &obj) { return obj->deepcopy(); })
-        .def("__deepcopy__", [](const shared_ptr<CKKSTensor> &obj, py::dict) {
-            return obj->deepcopy();
-        });
+        .def("__deepcopy__", [](const shared_ptr<CKKSTensor> &obj,
+                                py::dict) { return obj->deepcopy(); })
+        .def("shape", &CKKSTensor::shape)
+        .def("scale", &CKKSTensor::scale)
+
+        // python arithmetic
+        .def("__neg__", &CKKSTensor::negate);
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")
