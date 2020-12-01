@@ -557,6 +557,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              py::overload_cast<const double &>(&CKKSTensor::sub_plain_inplace))
         .def("__isub__", py::overload_cast<const PlainTensor<double> &>(
                              &CKKSTensor::sub_plain_inplace))
+        .def("__neg__", &CKKSTensor::negate)
         .def("context",
              [](shared_ptr<CKKSTensor> obj) { return obj->tenseal_context(); })
         .def("serialize",
@@ -567,10 +568,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__deepcopy__", [](const shared_ptr<CKKSTensor> &obj,
                                 py::dict) { return obj->deepcopy(); })
         .def("shape", &CKKSTensor::shape)
-        .def("scale", &CKKSTensor::scale)
-
-        // python arithmetic
-        .def("__neg__", &CKKSTensor::negate);
+        .def("scale", &CKKSTensor::scale);
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")

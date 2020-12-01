@@ -10,8 +10,6 @@ namespace tenseal {
 using namespace seal;
 using namespace std;
 
-enum class OP { ADD, SUB, MUL };
-
 class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
                    public enable_shared_from_this<CKKSTensor> {
    public:
@@ -95,6 +93,7 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     static Ciphertext encrypt(const shared_ptr<TenSEALContext>& ctx,
                               const double scale, const double data);
 
+    enum class OP { ADD, SUB, MUL };
     shared_ptr<CKKSTensor> op_inplace(const shared_ptr<CKKSTensor>& operand,
                                       OP op);
     shared_ptr<CKKSTensor> op_plain_inplace(const PlainTensor<double>& operand,
