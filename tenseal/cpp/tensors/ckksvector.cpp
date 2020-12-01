@@ -118,9 +118,9 @@ shared_ptr<CKKSVector> CKKSVector::negate_inplace() {
 }
 
 shared_ptr<CKKSVector> CKKSVector::square_inplace() {
-    this->tenseal_context()->evaluator->square_inplace(this->_ciphertext);
-    this->auto_relin();
-    this->auto_rescale();
+    this->tenseal_context()->evaluator->square_inplace(_ciphertext);
+    this->auto_relin(_ciphertext);
+    this->auto_rescale(_ciphertext);
 
     return shared_from_this();
 }
@@ -135,7 +135,7 @@ shared_ptr<CKKSVector> CKKSVector::add_inplace(
     }
 
     to_add = this->broadcast_or_throw(to_add);
-    this->auto_same_mod(to_add->_ciphertext);
+    this->auto_same_mod(to_add->_ciphertext, _ciphertext);
 
     this->tenseal_context()->evaluator->add_inplace(this->_ciphertext,
                                                     to_add->_ciphertext);
@@ -153,7 +153,7 @@ shared_ptr<CKKSVector> CKKSVector::sub_inplace(
     }
 
     to_sub = this->broadcast_or_throw(to_sub);
-    this->auto_same_mod(to_sub->_ciphertext);
+    this->auto_same_mod(to_sub->_ciphertext, _ciphertext);
 
     this->tenseal_context()->evaluator->sub_inplace(this->_ciphertext,
                                                     to_sub->_ciphertext);
@@ -171,13 +171,13 @@ shared_ptr<CKKSVector> CKKSVector::mul_inplace(
     }
 
     to_mul = this->broadcast_or_throw(to_mul);
-    this->auto_same_mod(to_mul->_ciphertext);
+    this->auto_same_mod(to_mul->_ciphertext, _ciphertext);
 
     this->tenseal_context()->evaluator->multiply_inplace(this->_ciphertext,
                                                          to_mul->_ciphertext);
 
-    this->auto_relin();
-    this->auto_rescale();
+    this->auto_relin(_ciphertext);
+    this->auto_rescale(_ciphertext);
 
     return shared_from_this();
 }
@@ -198,7 +198,7 @@ shared_ptr<CKKSVector> CKKSVector::dot_product_plain_inplace(
     return shared_from_this();
 }
 
-shared_ptr<CKKSVector> CKKSVector::sum_inplace() {
+shared_ptr<CKKSVector> CKKSVector::sum_inplace(size_t /*axis = 0*/) {
     sum_vector(this->tenseal_context(), this->_ciphertext, this->size());
     this->_size = 1;
     return shared_from_this();
@@ -220,7 +220,7 @@ shared_ptr<CKKSVector> CKKSVector::_add_plain_inplace(const T& to_add) {
     Plaintext plaintext;
     this->tenseal_context()->encode<CKKSEncoder>(to_add, plaintext,
                                                  this->_init_scale);
-    this->auto_same_mod(plaintext);
+    this->auto_same_mod(plaintext, _ciphertext);
     this->tenseal_context()->evaluator->add_plain_inplace(this->_ciphertext,
                                                           plaintext);
     return shared_from_this();
@@ -243,7 +243,7 @@ shared_ptr<CKKSVector> CKKSVector::_sub_plain_inplace(const T& to_sub) {
     this->tenseal_context()->encode<CKKSEncoder>(to_sub, plaintext,
                                                  this->_init_scale);
 
-    this->auto_same_mod(plaintext);
+    this->auto_same_mod(plaintext, _ciphertext);
     this->tenseal_context()->evaluator->sub_plain_inplace(this->_ciphertext,
                                                           plaintext);
 
@@ -268,7 +268,7 @@ shared_ptr<CKKSVector> CKKSVector::_mul_plain_inplace(const T& to_mul) {
     this->tenseal_context()->encode<CKKSEncoder>(to_mul, plaintext,
                                                  this->_init_scale);
 
-    this->auto_same_mod(plaintext);
+    this->auto_same_mod(plaintext, _ciphertext);
     try {
         this->tenseal_context()->evaluator->multiply_plain_inplace(
             this->_ciphertext, plaintext);
@@ -283,7 +283,7 @@ shared_ptr<CKKSVector> CKKSVector::_mul_plain_inplace(const T& to_mul) {
         }
     }
 
-    this->auto_rescale();
+    this->auto_rescale(_ciphertext);
 
     return this->copy();
 }
@@ -293,7 +293,7 @@ shared_ptr<CKKSVector> CKKSVector::matmul_plain_inplace(
     this->_ciphertext = this->diagonal_ct_vector_matmul(matrix, n_jobs);
 
     this->_size = matrix.shape()[1];
-    this->auto_rescale();
+    this->auto_rescale(_ciphertext);
 
     return shared_from_this();
 }

@@ -23,12 +23,10 @@ message CKKSVectorProto {
 message CKKSTensorProto {
     // The shape of the encrypted tensor
     repeated uint32 shape = 1;
-    // The strides of the encrypted tensor
-    repeated uint32 strides = 2;
     // The serialized ciphertexts
-    repeated bytes ciphertexts = 3;
+    repeated bytes ciphertexts = 2;
     // Scale value
-    double scale = 4;
+    double scale = 3;
     // Optional batch size. Exists only if batching is enabled
-    uint32 batch_size = 5;
+    uint32 batch_size = 4;
 };

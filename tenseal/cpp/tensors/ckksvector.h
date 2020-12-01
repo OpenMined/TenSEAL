@@ -54,7 +54,7 @@ class CKKSVector
     encrypted_t mul_inplace(const encrypted_t& to_mul) override;
     encrypted_t dot_product_inplace(const encrypted_t& to_mul) override;
     encrypted_t dot_product_plain_inplace(const plain_t& to_mul) override;
-    encrypted_t sum_inplace() override;
+    encrypted_t sum_inplace(size_t axis = 0) override;
 
     /**
      * Plain evaluation function operates on an encrypted vector and plaintext
