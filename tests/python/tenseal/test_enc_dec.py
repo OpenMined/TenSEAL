@@ -99,7 +99,7 @@ def test_ckks_empty_encryption(plain_vec):
 
 
 @pytest.mark.parametrize("batch", [False, True])
-def test_ckks_tensor_encryption_decryption(batch):
+def test_ckks_tensor_encryption_decryption_matrix(batch):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=COEFF_MOD_BIT_SIZES)
     scale = pow(2, 40)
     matrix = np.random.randn(4, 5)
@@ -115,3 +115,20 @@ def test_ckks_tensor_encryption_decryption(batch):
         assert len(row) == len(matrix[0])
 
         assert _almost_equal(row, matrix[idx], 1), "Decryption of vector is incorrect"
+
+
+@pytest.mark.parametrize("batch", [False, True])
+@pytest.mark.parametrize(
+    "shape", [[1], [2], [10], [2, 2], [3, 5], [2, 3, 4], [2, 3, 4, 5], [2, 3, 4, 5, 6],]
+)
+def test_ckks_tensor_encryption_decryption(batch, shape):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=COEFF_MOD_BIT_SIZES)
+    scale = pow(2, 40)
+    tensor = np.random.randn(*shape)
+    plain_tensor = ts.plain_tensor(tensor.flatten().tolist(), shape=shape)
+
+    ckks_vec = ts.ckks_tensor(context, plain_tensor, scale, batch)
+    decrypted_vec = ts.tolist(ckks_vec.decrypt())
+
+    assert np.array(decrypted_vec).shape == tensor.shape
+    assert np.allclose(tensor, decrypted_vec, rtol=0, atol=0.001)

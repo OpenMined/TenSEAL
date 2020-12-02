@@ -9,6 +9,18 @@ from skimage.util.shape import view_as_windows
 import tenseal as ts
 
 
+SHAPES = [
+    [1],
+    [2],
+    [10],
+    [2, 2],
+    [3, 5],
+    [2, 3, 4],
+    [2, 3, 4, 5],
+    [2, 3, 4, 5, 6],
+]
+
+
 def _almost_equal_number(v1, v2, m_pow_ten):
     upper_bound = pow(10, -m_pow_ten)
 
@@ -194,3 +206,115 @@ def test_square_inplace(context, plain, precision):
     tensor.square_()
     decrypted_result = ts.tolist(tensor.decrypt())
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
+
+
+@pytest.mark.parametrize("shape", SHAPES)
+@pytest.mark.parametrize("plain", [True, False])
+@pytest.mark.parametrize("op", ["add", "sub", "mul"])
+def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
+    r_t = np.random.randn(*shape)
+    l_t = np.random.randn(*shape)
+    r_pt = ts.plain_tensor(r_t.flatten().tolist(), shape)
+    l_pt = ts.plain_tensor(l_t.flatten().tolist(), shape)
+    right = ts.ckks_tensor(context, r_pt)
+    if plain:
+        left = l_pt
+    else:
+        left = ts.ckks_tensor(context, l_pt)
+
+    if op == "add":
+        expected_result = r_t + l_t
+    elif op == "sub":
+        expected_result = r_t - l_t
+    elif op == "mul":
+        expected_result = r_t * l_t
+
+    ## non-inplace
+    if op == "add":
+        result = right + left
+    elif op == "sub":
+        result = right - left
+    elif op == "mul":
+        result = right * left
+
+    np_result = np.array(ts.tolist(result.decrypt()))
+    assert np_result.shape == expected_result.shape
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    # right didn't change
+    right_result = np.array(ts.tolist(right.decrypt()))
+    assert np.allclose(right_result, r_t, rtol=0, atol=0.01)
+    # left didn't change
+    if plain:
+        left_result = l_t
+    else:
+        left_result = np.array(ts.tolist(left.decrypt()))
+    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+
+    # inplace
+    if op == "add":
+        right += left
+    elif op == "sub":
+        right -= left
+    elif op == "mul":
+        right *= left
+
+    np_result = np.array(ts.tolist(result.decrypt()))
+    assert np_result.shape == expected_result.shape
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    # right didn't change
+    right_result = np.array(ts.tolist(right.decrypt()))
+    assert right_result.shape == expected_result.shape
+    assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
+    # left didn't change
+    if plain:
+        left_result = l_t
+    else:
+        left_result = np.array(ts.tolist(left.decrypt()))
+    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+
+
+@pytest.mark.parametrize("shape", SHAPES)
+@pytest.mark.parametrize("op", ["add", "sub", "mul"])
+def test_add_sub_mul_scalar(context, shape, op):
+    r_t = np.random.randn(*shape)
+    r_pt = ts.plain_tensor(r_t.flatten().tolist(), shape)
+    right = ts.ckks_tensor(context, r_pt)
+    left = np.random.randn(1)[0]
+
+    if op == "add":
+        expected_result = r_t + left
+    elif op == "sub":
+        expected_result = r_t - left
+    elif op == "mul":
+        expected_result = r_t * left
+
+    ## non-inplace
+    if op == "add":
+        result = right + left
+    elif op == "sub":
+        result = right - left
+    elif op == "mul":
+        result = right * left
+
+    np_result = np.array(ts.tolist(result.decrypt()))
+    assert np_result.shape == expected_result.shape
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    # right didn't change
+    right_result = np.array(ts.tolist(right.decrypt()))
+    assert np.allclose(right_result, r_t, rtol=0, atol=0.01)
+
+    # inplace
+    if op == "add":
+        right += left
+    elif op == "sub":
+        right -= left
+    elif op == "mul":
+        right *= left
+
+    np_result = np.array(ts.tolist(result.decrypt()))
+    assert np_result.shape == expected_result.shape
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    # right didn't change
+    right_result = np.array(ts.tolist(right.decrypt()))
+    assert right_result.shape == expected_result.shape
+    assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)

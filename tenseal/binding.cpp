@@ -466,6 +466,98 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              [](shared_ptr<CKKSTensor> obj, const shared_ptr<SecretKey> &sk) {
                  return obj->decrypt(sk);
              })
+        .def("add", &CKKSTensor::add)
+        .def("add_", &CKKSTensor::add_inplace)
+        .def("sub", &CKKSTensor::sub)
+        .def("sub_", &CKKSTensor::sub_inplace)
+        .def("mul", &CKKSTensor::mul)
+        .def("mul_", &CKKSTensor::mul_inplace)
+        .def("add_plain", py::overload_cast<const double &>(
+                              &CKKSTensor::add_plain, py::const_))
+        .def("add_plain", py::overload_cast<const PlainTensor<double> &>(
+                              &CKKSTensor::add_plain, py::const_))
+        .def("sub_plain", py::overload_cast<const double &>(
+                              &CKKSTensor::sub_plain, py::const_))
+        .def("sub_plain", py::overload_cast<const PlainTensor<double> &>(
+                              &CKKSTensor::sub_plain, py::const_))
+        .def("mul_plain", py::overload_cast<const double &>(
+                              &CKKSTensor::mul_plain, py::const_))
+        .def("mul_plain", py::overload_cast<const PlainTensor<double> &>(
+                              &CKKSTensor::mul_plain, py::const_))
+        .def("add_plain_",
+             py::overload_cast<const double &>(&CKKSTensor::add_plain_inplace))
+        .def("add_plain_", py::overload_cast<const PlainTensor<double> &>(
+                               &CKKSTensor::add_plain_inplace))
+        .def("sub_plain_",
+             py::overload_cast<const double &>(&CKKSTensor::sub_plain_inplace))
+        .def("sub_plain_", py::overload_cast<const PlainTensor<double> &>(
+                               &CKKSTensor::sub_plain_inplace))
+        .def("mul_plain_",
+             py::overload_cast<const double &>(&CKKSTensor::mul_plain_inplace))
+        .def("mul_plain_", py::overload_cast<const PlainTensor<double> &>(
+                               &CKKSTensor::mul_plain_inplace))
+        // python arithmetic
+        .def("__add__", &CKKSTensor::add)
+        .def("__add__", py::overload_cast<const double &>(
+                            &CKKSTensor::add_plain, py::const_))
+        .def("__add__", py::overload_cast<const PlainTensor<double> &>(
+                            &CKKSTensor::add_plain, py::const_))
+        .def("__radd__", py::overload_cast<const double &>(
+                             &CKKSTensor::add_plain, py::const_))
+        .def("__radd__", py::overload_cast<const PlainTensor<double> &>(
+                             &CKKSTensor::add_plain, py::const_))
+        .def("__iadd__", &CKKSTensor::add_inplace)
+        .def("__iadd__",
+             py::overload_cast<const double &>(&CKKSTensor::add_plain_inplace))
+        .def("__iadd__", py::overload_cast<const PlainTensor<double> &>(
+                             &CKKSTensor::add_plain_inplace))
+        .def("__mul__", &CKKSTensor::mul)
+        .def("__mul__", py::overload_cast<const double &>(
+                            &CKKSTensor::mul_plain, py::const_))
+        .def("__mul__", py::overload_cast<const PlainTensor<double> &>(
+                            &CKKSTensor::mul_plain, py::const_))
+        .def("__rmul__", py::overload_cast<const double &>(
+                             &CKKSTensor::mul_plain, py::const_))
+        .def("__rmul__", py::overload_cast<const PlainTensor<double> &>(
+                             &CKKSTensor::mul_plain, py::const_))
+        .def("__imul__", &CKKSTensor::mul_inplace)
+        .def("__imul__",
+             py::overload_cast<const double &>(&CKKSTensor::mul_plain_inplace))
+        .def("__imul__", py::overload_cast<const PlainTensor<double> &>(
+                             &CKKSTensor::mul_plain_inplace))
+        .def("__sub__", &CKKSTensor::sub)
+        .def("__sub__", py::overload_cast<const double &>(
+                            &CKKSTensor::sub_plain, py::const_))
+        .def("__sub__", py::overload_cast<const PlainTensor<double> &>(
+                            &CKKSTensor::sub_plain, py::const_))
+        /*
+        Since subtraction operation is anticommutative, right subtraction
+        operator need to negate the vector then do an addition with left
+        operand.
+        */
+        .def("__rsub__",
+             [](shared_ptr<CKKSTensor> other, const double left_operand) {
+                 // vec should be a copy so it might be safe to do inplace
+                 auto vec = other->copy();
+                 vec->negate_inplace();
+                 vec->add_plain_inplace(left_operand);
+                 return vec;
+             })
+        .def("__rsub__",
+             [](shared_ptr<CKKSTensor> other,
+                const vector<double> &left_operand) {
+                 // vec should be a copy so it might be safe to do inplace
+                 auto vec = other->copy();
+                 vec->negate_inplace();
+                 vec->add_plain_inplace(left_operand);
+                 return vec;
+             })
+        .def("__isub__", &CKKSTensor::sub_inplace)
+        .def("__isub__",
+             py::overload_cast<const double &>(&CKKSTensor::sub_plain_inplace))
+        .def("__isub__", py::overload_cast<const PlainTensor<double> &>(
+                             &CKKSTensor::sub_plain_inplace))
+        .def("__neg__", &CKKSTensor::negate)
         .def("context",
              [](shared_ptr<CKKSTensor> obj) { return obj->tenseal_context(); })
         .def("serialize",
@@ -476,10 +568,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__deepcopy__", [](const shared_ptr<CKKSTensor> &obj,
                                 py::dict) { return obj->deepcopy(); })
         .def("shape", &CKKSTensor::shape)
-        .def("scale", &CKKSTensor::scale)
-
-        // python arithmetic
-        .def("__neg__", &CKKSTensor::negate);
+        .def("scale", &CKKSTensor::scale);
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")

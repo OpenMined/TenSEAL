@@ -129,22 +129,194 @@ shared_ptr<CKKSTensor> CKKSTensor::power_inplace(unsigned int power) {
     return shared_from_this();
 }
 
+void CKKSTensor::perform_op(seal::Ciphertext& ct, seal::Ciphertext other,
+                            OP op) {
+    this->auto_same_mod(other, ct);
+    switch (op) {
+        case OP::ADD:
+            this->tenseal_context()->evaluator->add_inplace(ct, other);
+            break;
+        case OP::SUB:
+            this->tenseal_context()->evaluator->sub_inplace(ct, other);
+            break;
+        case OP::MUL:
+            this->tenseal_context()->evaluator->multiply_inplace(ct, other);
+            this->auto_relin(ct);
+            this->auto_rescale(ct);
+            break;
+        default:
+            throw invalid_argument("operation not defined");
+    }
+}
+
+void CKKSTensor::perform_plain_op(seal::Ciphertext& ct, seal::Plaintext other,
+                                  OP op) {
+    this->auto_same_mod(other, ct);
+    switch (op) {
+        case OP::ADD:
+            this->tenseal_context()->evaluator->add_plain_inplace(ct, other);
+            break;
+        case OP::SUB:
+            this->tenseal_context()->evaluator->sub_plain_inplace(ct, other);
+            break;
+        case OP::MUL:
+            this->tenseal_context()->evaluator->multiply_plain_inplace(ct,
+                                                                       other);
+            this->auto_relin(ct);
+            this->auto_rescale(ct);
+            break;
+        default:
+            throw invalid_argument("operation not defined");
+    }
+}
+
+shared_ptr<CKKSTensor> CKKSTensor::op_inplace(
+    const shared_ptr<CKKSTensor>& operand, OP op) {
+    // TODO implement broadcasting
+    if (this->_shape != operand->_shape) {
+        // TODO provide a better message (what are the shapes)
+        throw invalid_argument("Operands don't have the same shape");
+    }
+
+    size_t n_jobs = this->tenseal_context()->dispatcher_size();
+
+    auto worker_func = [&](size_t start, size_t end) -> bool {
+        for (size_t i = start; i < end; i++) {
+            this->perform_op(this->_data[i], operand->_data[i], op);
+        }
+        return true;
+    };
+
+    if (n_jobs == 1) {
+        worker_func(0, this->_data.size());
+    } else {
+        size_t batch_size = (this->_data.size() + n_jobs - 1) / n_jobs;
+        vector<future<bool>> futures;
+        for (size_t i = 0; i < n_jobs; i++) {
+            futures.push_back(
+                this->tenseal_context()->dispatcher()->enqueue_task(
+                    worker_func, i * batch_size,
+                    std::min((i + 1) * batch_size, this->_data.size())));
+        }
+        // waiting
+        std::optional<std::exception> fail;
+        for (size_t i = 0; i < futures.size(); i++) {
+            try {
+                futures[i].get();
+            } catch (std::exception& e) {
+                fail = e;
+            }
+        }
+
+        if (fail) throw invalid_argument(fail.value().what());
+    }
+
+    return shared_from_this();
+}
+
+shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(
+    const PlainTensor<double>& operand, OP op) {
+    // TODO implement broadcasting
+    // TODO batched ops
+    if (this->_shape != operand.shape()) {
+        // TODO provide a better message (what are the shapes)
+        throw invalid_argument("Operands don't have the same shape");
+    }
+
+    size_t n_jobs = this->tenseal_context()->dispatcher_size();
+    auto operand_data = operand.data();
+
+    auto worker_func = [&](size_t start, size_t end) -> bool {
+        Plaintext plaintext;
+        for (size_t i = start; i < end; i++) {
+            this->tenseal_context()->encode<CKKSEncoder>(
+                operand_data[i], plaintext, this->_init_scale);
+            this->perform_plain_op(this->_data[i], plaintext, op);
+        }
+        return true;
+    };
+
+    if (n_jobs == 1) {
+        worker_func(0, this->_data.size());
+    } else {
+        size_t batch_size = (this->_data.size() + n_jobs - 1) / n_jobs;
+        vector<future<bool>> futures;
+        for (size_t i = 0; i < n_jobs; i++) {
+            futures.push_back(
+                this->tenseal_context()->dispatcher()->enqueue_task(
+                    worker_func, i * batch_size,
+                    std::min((i + 1) * batch_size, this->_data.size())));
+        }
+        // waiting
+        std::optional<std::exception> fail;
+        for (size_t i = 0; i < futures.size(); i++) {
+            try {
+                futures[i].get();
+            } catch (std::exception& e) {
+                fail = e;
+            }
+        }
+
+        if (fail) throw invalid_argument(fail.value().what());
+    }
+
+    return shared_from_this();
+}
+
+shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(const double& operand,
+                                                    OP op) {
+    size_t n_jobs = this->tenseal_context()->dispatcher_size();
+    Plaintext plaintext;
+    this->tenseal_context()->encode<CKKSEncoder>(operand, plaintext,
+                                                 this->_init_scale);
+
+    auto worker_func = [&](size_t start, size_t end) -> bool {
+        for (size_t i = start; i < end; i++) {
+            this->perform_plain_op(this->_data[i], plaintext, op);
+        }
+        return true;
+    };
+
+    if (n_jobs == 1) {
+        worker_func(0, this->_data.size());
+    } else {
+        size_t batch_size = (this->_data.size() + n_jobs - 1) / n_jobs;
+        vector<future<bool>> futures;
+        for (size_t i = 0; i < n_jobs; i++) {
+            futures.push_back(
+                this->tenseal_context()->dispatcher()->enqueue_task(
+                    worker_func, i * batch_size,
+                    std::min((i + 1) * batch_size, this->_data.size())));
+        }
+        // waiting
+        std::optional<std::exception> fail;
+        for (size_t i = 0; i < futures.size(); i++) {
+            try {
+                futures[i].get();
+            } catch (std::exception& e) {
+                fail = e;
+            }
+        }
+
+        if (fail) throw invalid_argument(fail.value().what());
+    }
+
+    return shared_from_this();
+}
+
 shared_ptr<CKKSTensor> CKKSTensor::add_inplace(
     const shared_ptr<CKKSTensor>& to_add) {
-    // TODO
-    return shared_from_this();
+    return this->op_inplace(to_add, OP::ADD);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::sub_inplace(
     const shared_ptr<CKKSTensor>& to_sub) {
-    // TODO
-    return shared_from_this();
+    return this->op_inplace(to_sub, OP::SUB);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::mul_inplace(
     const shared_ptr<CKKSTensor>& to_mul) {
-    // TODO
-    return shared_from_this();
+    return this->op_inplace(to_mul, OP::MUL);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::dot_product_inplace(
@@ -155,20 +327,17 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_product_inplace(
 
 shared_ptr<CKKSTensor> CKKSTensor::add_plain_inplace(
     const PlainTensor<double>& to_add) {
-    // TODO
-    return shared_from_this();
+    return this->op_plain_inplace(to_add, OP::ADD);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::sub_plain_inplace(
     const PlainTensor<double>& to_sub) {
-    // TODO
-    return shared_from_this();
+    return this->op_plain_inplace(to_sub, OP::SUB);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace(
     const PlainTensor<double>& to_mul) {
-    // TODO
-    return shared_from_this();
+    return this->op_plain_inplace(to_mul, OP::MUL);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::dot_product_plain_inplace(
@@ -178,18 +347,15 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_product_plain_inplace(
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::add_plain_inplace(const double& to_add) {
-    // TODO
-    return shared_from_this();
+    return this->op_plain_inplace(to_add, OP::ADD);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::sub_plain_inplace(const double& to_sub) {
-    // TODO
-    return shared_from_this();
+    return this->op_plain_inplace(to_sub, OP::SUB);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace(const double& to_mul) {
-    // TODO
-    return shared_from_this();
+    return this->op_plain_inplace(to_mul, OP::MUL);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
