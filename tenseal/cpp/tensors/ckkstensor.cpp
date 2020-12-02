@@ -444,7 +444,52 @@ shared_ptr<CKKSTensor> CKKSTensor::sum_batch_inplace() {
 
 shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
     const vector<double>& coefficients) {
-    // TODO
+    if (coefficients.size() == 0) {
+        throw invalid_argument(
+            "the coefficients vector need to have at least one element");
+    }
+
+    int degree = static_cast<int>(coefficients.size()) - 1;
+    while (degree >= 0) {
+        if (coefficients[degree] == 0.0)
+            degree--;
+        else
+            break;
+    }
+
+    if (degree == -1) {
+        auto zeros = PlainTensor<double>::repeat_value(0, this->shape());
+        *this = CKKSTensor(this->tenseal_context(), zeros, this->_init_scale,
+                           _batch_size.has_value());
+        return shared_from_this();
+    }
+
+    // pre-compute squares of x
+    auto x = this->copy();
+
+    int max_square = static_cast<int>(floor(log2(degree)));
+    vector<shared_ptr<CKKSTensor>> x_squares;
+    x_squares.reserve(max_square + 1);
+    x_squares.push_back(x->copy());  // x
+    for (int i = 1; i <= max_square; i++) {
+        x->square_inplace();
+        x_squares.push_back(x->copy());  // x^(2^i)
+    }
+
+    auto cst_coeff =
+        PlainTensor<double>::repeat_value(coefficients[0], this->shape());
+    auto result =
+        CKKSTensor::Create(this->tenseal_context(), cst_coeff,
+                           this->_init_scale, _batch_size.has_value());
+
+    // coefficients[1] * x + ... + coefficients[degree] * x^(degree)
+    for (int i = 1; i <= degree; i++) {
+        if (coefficients[i] == 0.0) continue;
+        x = compute_polynomial_term(i, coefficients[i], x_squares);
+        result->add_inplace(x);
+    }
+
+    this->_data = result->data();
     return shared_from_this();
 }
 
