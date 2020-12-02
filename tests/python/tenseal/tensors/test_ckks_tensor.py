@@ -438,7 +438,7 @@ def test_dot_product(context, t1, t2, precision):
 
     result = tensor1.dot(tensor2)
 
-    expected = [sum([v1 * v2 for v1, v2 in zip(t1.data(), t2.data())])]
+    expected = sum([v1 * v2 for v1, v2 in zip(t1.data(), t2.data())])
 
     # Decryption
     decrypted_result = ts.tolist(result.decrypt())
@@ -471,7 +471,7 @@ def test_dot_product_inplace(context, t1, t2, precision):
 
     tensor1.dot_(tensor2)
 
-    expected = [sum([v1 * v2 for v1, v2 in zip(t1.data(), t2.data())])]
+    expected = sum([v1 * v2 for v1, v2 in zip(t1.data(), t2.data())])
 
     # Decryption
     decrypted_result = ts.tolist(tensor1.decrypt())
@@ -500,7 +500,7 @@ def test_dot_product_plain(context, t1, t2, precision):
 
     result = tensor1.dot(t2)
 
-    expected = [sum([v1 * v2 for v1, v2 in zip(t1.data(), t2.data())])]
+    expected = sum([v1 * v2 for v1, v2 in zip(t1.data(), t2.data())])
 
     # Decryption
     decrypted_result = ts.tolist(result.decrypt())
@@ -529,7 +529,7 @@ def test_dot_product_plain_inplace(context, t1, t2, precision):
 
     tensor1.dot_(t2)
 
-    expected = [sum([v1 * v2 for v1, v2 in zip(t1.data(), t2.data())])]
+    expected = sum([v1 * v2 for v1, v2 in zip(t1.data(), t2.data())])
 
     # Decryption
     decrypted_result = ts.tolist(tensor1.decrypt())
