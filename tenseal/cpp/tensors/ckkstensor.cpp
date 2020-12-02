@@ -125,7 +125,31 @@ shared_ptr<CKKSTensor> CKKSTensor::square_inplace() {
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::power_inplace(unsigned int power) {
-    // TODO
+    if (power == 0) {
+        auto ones = PlainTensor<double>::repeat_value(1, this->shape());
+        *this = CKKSTensor(this->tenseal_context(), ones, this->_init_scale,
+                           _batch_size.has_value());
+        return shared_from_this();
+    }
+
+    if (power == 1) {
+        return shared_from_this();
+    }
+
+    if (power == 2) {
+        this->square_inplace();
+        return shared_from_this();
+    }
+
+    int closest_power_of_2 = 1 << static_cast<int>(floor(log2(power)));
+    power -= closest_power_of_2;
+    if (power == 0) {
+        this->power_inplace(closest_power_of_2 / 2)->square_inplace();
+    } else {
+        auto closest_pow2_vector = this->power(closest_power_of_2);
+        this->power_inplace(power)->mul_inplace(closest_pow2_vector);
+    }
+
     return shared_from_this();
 }
 

@@ -452,6 +452,12 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
                 return CKKSTensor::Create(ctx, data);
             }))
+        .def("decrypt",
+             [](shared_ptr<CKKSTensor> obj) { return obj->decrypt(); })
+        .def("decrypt",
+             [](shared_ptr<CKKSTensor> obj, const shared_ptr<SecretKey> &sk) {
+                 return obj->decrypt(sk);
+             })
         .def("sum", &CKKSTensor::sum, py::arg("axis") = 0)
         .def("sum_", &CKKSTensor::sum_inplace, py::arg("axis") = 0)
         .def("sum_batch", &CKKSTensor::sum_batch)
@@ -460,12 +466,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("neg_", &CKKSTensor::negate_inplace)
         .def("square", &CKKSTensor::square)
         .def("square_", &CKKSTensor::square_inplace)
-        .def("decrypt",
-             [](shared_ptr<CKKSTensor> obj) { return obj->decrypt(); })
-        .def("decrypt",
-             [](shared_ptr<CKKSTensor> obj, const shared_ptr<SecretKey> &sk) {
-                 return obj->decrypt(sk);
-             })
+        .def("pow", &CKKSTensor::power)
+        .def("pow_", &CKKSTensor::power_inplace)
         .def("add", &CKKSTensor::add)
         .def("add_", &CKKSTensor::add_inplace)
         .def("sub", &CKKSTensor::sub)
@@ -558,6 +560,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__isub__", py::overload_cast<const PlainTensor<double> &>(
                              &CKKSTensor::sub_plain_inplace))
         .def("__neg__", &CKKSTensor::negate)
+        .def("__pow__", &CKKSTensor::power)
+        .def("__ipow__", &CKKSTensor::power_inplace)
         .def("context",
              [](shared_ptr<CKKSTensor> obj) { return obj->tenseal_context(); })
         .def("serialize",

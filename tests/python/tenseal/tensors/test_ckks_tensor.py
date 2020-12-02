@@ -318,3 +318,46 @@ def test_add_sub_mul_scalar(context, shape, op):
     right_result = np.array(ts.tolist(right.decrypt()))
     assert right_result.shape == expected_result.shape
     assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
+
+
+@pytest.mark.parametrize(
+    "plain,power",
+    [
+        (ts.plain_tensor([6]), 2),
+        (ts.plain_tensor([1, 2, 3]), 4),
+        (ts.plain_tensor([1, 2, 3, 4], [2, 2]), 6),
+    ],
+)
+def test_power(context, plain, power, precision):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 60])
+    context.global_scale = pow(2, 40)
+
+    tensor = ts.ckks_tensor(context, plain)
+    expected = np.array([np.power(v, power) for v in plain.data()]).reshape(plain.shape()).tolist()
+
+    new_tensor = tensor ** power
+    decrypted_result = ts.tolist(new_tensor.decrypt())
+    assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
+    assert _almost_equal(
+        ts.tolist(tensor.decrypt()), ts.tolist(plain), precision
+    ), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "plain,power",
+    [
+        (ts.plain_tensor([6]), 2),
+        (ts.plain_tensor([1, 2, 3]), 4),
+        (ts.plain_tensor([1, 2, 3, 4], [2, 2]), 6),
+    ],
+)
+def test_power_inplace(context, plain, power, precision):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 60])
+    context.global_scale = pow(2, 40)
+
+    tensor = ts.ckks_tensor(context, plain)
+    expected = np.array([np.power(v, power) for v in plain.data()]).reshape(plain.shape()).tolist()
+
+    tensor **= power
+    decrypted_result = ts.tolist(tensor.decrypt())
+    assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"

@@ -152,6 +152,22 @@ TEST_F(CKKSTensorTest, TestCKKSSumBatching) {
     ASSERT_TRUE(are_close(decr.data(), {6, 15}));
 }
 
+TEST_F(CKKSTensorTest, TestCKKSPower) {
+    auto ctx =
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    ASSERT_TRUE(ctx != nullptr);
+    ctx->generate_galois_keys();
+
+    auto data =
+        PlainTensor(vector<double>({1, 2, 3, 4, 5, 6}), vector<size_t>({2, 3}));
+    auto l = CKKSTensor::Create(ctx, data, std::pow(2, 40), true);
+
+    auto res = l->power(2);
+    ASSERT_THAT(res->shape(), ElementsAreArray({2, 3}));
+    auto decr = res->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {1, 4, 9, 16, 25, 36}));
+}
+
 TEST_F(CKKSTensorTest, TestCreateCKKSFail) {
     auto ctx =
         TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
