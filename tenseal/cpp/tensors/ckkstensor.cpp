@@ -440,7 +440,6 @@ shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
         // reinsert the batched axis
         new_shape.insert(new_shape.begin(), *_batch_size);
     }
-    if (new_shape.size() == 0) new_shape = {1};
 
     _data = new_data;
     _shape = new_shape;

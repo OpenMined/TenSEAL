@@ -125,7 +125,7 @@ TEST_F(CKKSTensorTest, TestCKKSSumNoBatching) {
     l = CKKSTensor::Create(ctx, data, std::pow(2, 40), false);
 
     l->sum_inplace();
-    ASSERT_THAT(l->shape(), ElementsAreArray({1}));
+    ASSERT_THAT(l->shape(), ElementsAreArray({}));
     decr = l->decrypt();
     ASSERT_TRUE(are_close(decr.data(), {21}));
 
