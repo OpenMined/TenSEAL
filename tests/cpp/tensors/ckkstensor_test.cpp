@@ -122,6 +122,14 @@ TEST_F(CKKSTensorTest, TestCKKSSumNoBatching) {
     decr = l->decrypt();
     ASSERT_TRUE(are_close(decr.data(), {6, 15}));
 
+    data = PlainTensor(vector<double>({1, 2, 3, 4, 5, 6}), vector<size_t>({6}));
+    l = CKKSTensor::Create(ctx, data, std::pow(2, 40), false);
+
+    l->sum_inplace();
+    ASSERT_THAT(l->shape(), ElementsAreArray({1}));
+    decr = l->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {21}));
+
     data = PlainTensor(vector<double>({1, 2, 3, 4, 5, 6, 7, 8}),
                        vector<size_t>({2, 2, 2}));
     l = CKKSTensor::Create(ctx, data, std::pow(2, 40), false);

@@ -184,8 +184,18 @@ void CKKSTensor::perform_plain_op(seal::Ciphertext& ct, seal::Plaintext other,
             this->tenseal_context()->evaluator->sub_plain_inplace(ct, other);
             break;
         case OP::MUL:
-            this->tenseal_context()->evaluator->multiply_plain_inplace(ct,
-                                                                       other);
+            try {
+                this->tenseal_context()->evaluator->multiply_plain_inplace(
+                    ct, other);
+            } catch (const std::logic_error& e) {
+                if (strcmp(e.what(), "result ciphertext is transparent") == 0) {
+                    // replace by encryption of zero
+                    this->tenseal_context()->encryptor->encrypt_zero(ct);
+                    ct.scale() = this->_init_scale;
+                } else {  // Something else, need to be forwarded
+                    throw;
+                }
+            }
             this->auto_relin(ct);
             this->auto_rescale(ct);
             break;
@@ -223,16 +233,16 @@ shared_ptr<CKKSTensor> CKKSTensor::op_inplace(
                     std::min((i + 1) * batch_size, this->_data.size())));
         }
         // waiting
-        std::optional<std::exception> fail;
+        optional<string> fail;
         for (size_t i = 0; i < futures.size(); i++) {
             try {
                 futures[i].get();
             } catch (std::exception& e) {
-                fail = e;
+                fail = e.what();
             }
         }
 
-        if (fail) throw invalid_argument(fail.value().what());
+        if (fail) throw invalid_argument(fail.value());
     }
 
     return shared_from_this();
@@ -272,16 +282,18 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(
                     std::min((i + 1) * batch_size, this->_data.size())));
         }
         // waiting
-        std::optional<std::exception> fail;
+        optional<string> fail;
         for (size_t i = 0; i < futures.size(); i++) {
             try {
                 futures[i].get();
             } catch (std::exception& e) {
-                fail = e;
+                fail = e.what();
             }
         }
 
-        if (fail) throw invalid_argument(fail.value().what());
+        if (fail) {
+            throw invalid_argument(fail.value());
+        }
     }
 
     return shared_from_this();
@@ -313,16 +325,16 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(const double& operand,
                     std::min((i + 1) * batch_size, this->_data.size())));
         }
         // waiting
-        std::optional<std::exception> fail;
+        std::optional<std::string> fail;
         for (size_t i = 0; i < futures.size(); i++) {
             try {
                 futures[i].get();
             } catch (std::exception& e) {
-                fail = e;
+                fail = e.what();
             }
         }
 
-        if (fail) throw invalid_argument(fail.value().what());
+        if (fail) throw invalid_argument(fail.value());
     }
 
     return shared_from_this();
@@ -345,7 +357,8 @@ shared_ptr<CKKSTensor> CKKSTensor::mul_inplace(
 
 shared_ptr<CKKSTensor> CKKSTensor::dot_product_inplace(
     const shared_ptr<CKKSTensor>& to_mul) {
-    // TODO
+    this->mul_inplace(to_mul);
+    for (auto& dim : _shape) this->sum_inplace();
     return shared_from_this();
 }
 
@@ -366,7 +379,8 @@ shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace(
 
 shared_ptr<CKKSTensor> CKKSTensor::dot_product_plain_inplace(
     const PlainTensor<double>& to_mul) {
-    // TODO
+    this->mul_plain_inplace(to_mul);
+    for (auto& dim : _shape) this->sum_inplace();
     return shared_from_this();
 }
 
@@ -426,6 +440,8 @@ shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
         // reinsert the batched axis
         new_shape.insert(new_shape.begin(), *_batch_size);
     }
+    if (new_shape.size() == 0) new_shape = {1};
+
     _data = new_data;
     _shape = new_shape;
     return shared_from_this();

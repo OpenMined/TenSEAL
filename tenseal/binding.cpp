@@ -500,6 +500,16 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                                &CKKSTensor::mul_plain_inplace))
         .def("polyval", &CKKSTensor::polyval)
         .def("polyval_", &CKKSTensor::polyval_inplace)
+        .def("dot", &CKKSTensor::dot_product)
+        .def("dot",
+             [](shared_ptr<CKKSTensor> obj, const PlainTensor<double> &other) {
+                 return obj->dot_product_plain(other);
+             })
+        .def("dot_", &CKKSTensor::dot_product_inplace)
+        .def("dot_",
+             [](shared_ptr<CKKSTensor> obj, const PlainTensor<double> &other) {
+                 return obj->dot_product_plain_inplace(other);
+             })
         // python arithmetic
         .def("__add__", &CKKSTensor::add)
         .def("__add__", py::overload_cast<const double &>(
