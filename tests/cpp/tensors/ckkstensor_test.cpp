@@ -13,7 +13,6 @@ bool are_close(const std::vector<double>& l, const std::vector<int64_t>& r) {
         return false;
     }
     for (size_t idx = 0; idx < l.size(); ++idx) {
-        fprintf(stderr, "data %lf %ld \n", l[idx], r[idx]);
         if (std::abs(l[idx] - r[idx]) > 0.5) return false;
     }
     return true;
