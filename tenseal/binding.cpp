@@ -272,15 +272,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         // because dot doesn't have a magic function like __add__
         // we prefer to overload it instead of having dot_plain functions
         .def("dot", &CKKSVector::dot_product)
-        .def("dot",
-             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
-                 return obj->dot_product_plain(other);
-             })
+        .def("dot", &CKKSVector::dot_product_plain)
         .def("dot_", &CKKSVector::dot_product_inplace)
-        .def("dot_",
-             [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
-                 return obj->dot_product_plain_inplace(other);
-             })
+        .def("dot_", &CKKSVector::dot_product_plain_inplace)
         .def("sum", &CKKSVector::sum, py::arg("axis") = 0)
         .def("sum_", &CKKSVector::sum_inplace, py::arg("axis") = 0)
         .def(
@@ -500,16 +494,6 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                                &CKKSTensor::mul_plain_inplace))
         .def("polyval", &CKKSTensor::polyval)
         .def("polyval_", &CKKSTensor::polyval_inplace)
-        .def("dot", &CKKSTensor::dot_product)
-        .def("dot",
-             [](shared_ptr<CKKSTensor> obj, const PlainTensor<double> &other) {
-                 return obj->dot_product_plain(other);
-             })
-        .def("dot_", &CKKSTensor::dot_product_inplace)
-        .def("dot_",
-             [](shared_ptr<CKKSTensor> obj, const PlainTensor<double> &other) {
-                 return obj->dot_product_plain_inplace(other);
-             })
         // python arithmetic
         .def("__add__", &CKKSTensor::add)
         .def("__add__", py::overload_cast<const double &>(

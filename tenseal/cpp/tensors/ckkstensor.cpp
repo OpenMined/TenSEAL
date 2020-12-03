@@ -357,8 +357,7 @@ shared_ptr<CKKSTensor> CKKSTensor::mul_inplace(
 
 shared_ptr<CKKSTensor> CKKSTensor::dot_product_inplace(
     const shared_ptr<CKKSTensor>& to_mul) {
-    this->mul_inplace(to_mul);
-    for (auto& dim : _shape) this->sum_inplace();
+    // TODO
     return shared_from_this();
 }
 
@@ -379,8 +378,7 @@ shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace(
 
 shared_ptr<CKKSTensor> CKKSTensor::dot_product_plain_inplace(
     const PlainTensor<double>& to_mul) {
-    this->mul_plain_inplace(to_mul);
-    for (auto& dim : _shape) this->sum_inplace();
+    // TODO
     return shared_from_this();
 }
 
