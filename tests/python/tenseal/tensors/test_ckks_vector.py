@@ -797,7 +797,7 @@ def test_dot_product_inplace(context, vec1, vec2, precision):
 def test_dot_product_plain(context, vec1, vec2, precision):
     context.generate_galois_keys()
     first_vec = ts.ckks_vector(context, vec1)
-    second_vec = vec2
+    second_vec = ts.plain_tensor(vec2)
     result = first_vec.dot(second_vec)
     expected = [sum([v1 * v2 for v1, v2 in zip(vec1, vec2)])]
 
@@ -831,7 +831,7 @@ def test_dot_product_plain(context, vec1, vec2, precision):
 def test_dot_product_plain_inplace(context, vec1, vec2, precision):
     context.generate_galois_keys()
     first_vec = ts.ckks_vector(context, vec1)
-    second_vec = vec2
+    second_vec = ts.plain_tensor(vec2)
     first_vec.dot_(second_vec)
     expected = [sum([v1 * v2 for v1, v2 in zip(vec1, vec2)])]
 
