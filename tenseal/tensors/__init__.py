@@ -29,8 +29,6 @@ def plain_tensor(data, shape=None, dtype="float"):
     if dtype != "float":
         raise ValueError("Invalid dtype")
 
-    print(type(data))
-
     if isinstance(data, list) and shape is None:
         return _ts_cpp.PlainTensorDouble(data)
 
