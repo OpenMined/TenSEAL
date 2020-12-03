@@ -318,6 +318,15 @@ class PlainTensor {
         _shape = {_data.size()};
     }
 
+    static PlainTensor<plain_t> repeat_value(plain_t value,
+                                             vector<size_t> shape) {
+        size_t size = 1;
+        for (auto& dim : shape) size *= dim;
+
+        vector<plain_t> repeated(size, value);
+        return PlainTensor<plain_t>(repeated, shape);
+    }
+
    private:
     vector<plain_t> _data;
     vector<size_t> _shape;

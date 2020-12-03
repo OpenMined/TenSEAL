@@ -125,7 +125,31 @@ shared_ptr<CKKSTensor> CKKSTensor::square_inplace() {
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::power_inplace(unsigned int power) {
-    // TODO
+    if (power == 0) {
+        auto ones = PlainTensor<double>::repeat_value(1, this->shape());
+        *this = CKKSTensor(this->tenseal_context(), ones, this->_init_scale,
+                           _batch_size.has_value());
+        return shared_from_this();
+    }
+
+    if (power == 1) {
+        return shared_from_this();
+    }
+
+    if (power == 2) {
+        this->square_inplace();
+        return shared_from_this();
+    }
+
+    int closest_power_of_2 = 1 << static_cast<int>(floor(log2(power)));
+    power -= closest_power_of_2;
+    if (power == 0) {
+        this->power_inplace(closest_power_of_2 / 2)->square_inplace();
+    } else {
+        auto closest_pow2_vector = this->power(closest_power_of_2);
+        this->power_inplace(power)->mul_inplace(closest_pow2_vector);
+    }
+
     return shared_from_this();
 }
 
@@ -160,8 +184,18 @@ void CKKSTensor::perform_plain_op(seal::Ciphertext& ct, seal::Plaintext other,
             this->tenseal_context()->evaluator->sub_plain_inplace(ct, other);
             break;
         case OP::MUL:
-            this->tenseal_context()->evaluator->multiply_plain_inplace(ct,
-                                                                       other);
+            try {
+                this->tenseal_context()->evaluator->multiply_plain_inplace(
+                    ct, other);
+            } catch (const std::logic_error& e) {
+                if (strcmp(e.what(), "result ciphertext is transparent") == 0) {
+                    // replace by encryption of zero
+                    this->tenseal_context()->encryptor->encrypt_zero(ct);
+                    ct.scale() = this->_init_scale;
+                } else {  // Something else, need to be forwarded
+                    throw;
+                }
+            }
             this->auto_relin(ct);
             this->auto_rescale(ct);
             break;
@@ -199,16 +233,16 @@ shared_ptr<CKKSTensor> CKKSTensor::op_inplace(
                     std::min((i + 1) * batch_size, this->_data.size())));
         }
         // waiting
-        std::optional<std::exception> fail;
+        optional<string> fail;
         for (size_t i = 0; i < futures.size(); i++) {
             try {
                 futures[i].get();
             } catch (std::exception& e) {
-                fail = e;
+                fail = e.what();
             }
         }
 
-        if (fail) throw invalid_argument(fail.value().what());
+        if (fail) throw invalid_argument(fail.value());
     }
 
     return shared_from_this();
@@ -248,16 +282,18 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(
                     std::min((i + 1) * batch_size, this->_data.size())));
         }
         // waiting
-        std::optional<std::exception> fail;
+        optional<string> fail;
         for (size_t i = 0; i < futures.size(); i++) {
             try {
                 futures[i].get();
             } catch (std::exception& e) {
-                fail = e;
+                fail = e.what();
             }
         }
 
-        if (fail) throw invalid_argument(fail.value().what());
+        if (fail) {
+            throw invalid_argument(fail.value());
+        }
     }
 
     return shared_from_this();
@@ -289,16 +325,16 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(const double& operand,
                     std::min((i + 1) * batch_size, this->_data.size())));
         }
         // waiting
-        std::optional<std::exception> fail;
+        std::optional<std::string> fail;
         for (size_t i = 0; i < futures.size(); i++) {
             try {
                 futures[i].get();
             } catch (std::exception& e) {
-                fail = e;
+                fail = e.what();
             }
         }
 
-        if (fail) throw invalid_argument(fail.value().what());
+        if (fail) throw invalid_argument(fail.value());
     }
 
     return shared_from_this();
@@ -402,6 +438,7 @@ shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
         // reinsert the batched axis
         new_shape.insert(new_shape.begin(), *_batch_size);
     }
+
     _data = new_data;
     _shape = new_shape;
     return shared_from_this();
@@ -420,7 +457,52 @@ shared_ptr<CKKSTensor> CKKSTensor::sum_batch_inplace() {
 
 shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
     const vector<double>& coefficients) {
-    // TODO
+    if (coefficients.size() == 0) {
+        throw invalid_argument(
+            "the coefficients vector need to have at least one element");
+    }
+
+    int degree = static_cast<int>(coefficients.size()) - 1;
+    while (degree >= 0) {
+        if (coefficients[degree] == 0.0)
+            degree--;
+        else
+            break;
+    }
+
+    if (degree == -1) {
+        auto zeros = PlainTensor<double>::repeat_value(0, this->shape());
+        *this = CKKSTensor(this->tenseal_context(), zeros, this->_init_scale,
+                           _batch_size.has_value());
+        return shared_from_this();
+    }
+
+    // pre-compute squares of x
+    auto x = this->copy();
+
+    int max_square = static_cast<int>(floor(log2(degree)));
+    vector<shared_ptr<CKKSTensor>> x_squares;
+    x_squares.reserve(max_square + 1);
+    x_squares.push_back(x->copy());  // x
+    for (int i = 1; i <= max_square; i++) {
+        x->square_inplace();
+        x_squares.push_back(x->copy());  // x^(2^i)
+    }
+
+    auto cst_coeff =
+        PlainTensor<double>::repeat_value(coefficients[0], this->shape());
+    auto result =
+        CKKSTensor::Create(this->tenseal_context(), cst_coeff,
+                           this->_init_scale, _batch_size.has_value());
+
+    // coefficients[1] * x + ... + coefficients[degree] * x^(degree)
+    for (int i = 1; i <= degree; i++) {
+        if (coefficients[i] == 0.0) continue;
+        x = compute_polynomial_term(i, coefficients[i], x_squares);
+        result->add_inplace(x);
+    }
+
+    this->_data = result->data();
     return shared_from_this();
 }
 

@@ -318,3 +318,103 @@ def test_add_sub_mul_scalar(context, shape, op):
     right_result = np.array(ts.tolist(right.decrypt()))
     assert right_result.shape == expected_result.shape
     assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
+
+
+@pytest.mark.parametrize(
+    "plain,power",
+    [
+        (ts.plain_tensor([6]), 0),
+        (ts.plain_tensor([6]), 2),
+        (ts.plain_tensor([1, 2, 3]), 4),
+        (ts.plain_tensor([1, 2, 3, 4], [2, 2]), 6),
+    ],
+)
+def test_power(context, plain, power, precision):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 60])
+    context.global_scale = pow(2, 40)
+
+    tensor = ts.ckks_tensor(context, plain)
+    expected = np.array([np.power(v, power) for v in plain.data()]).reshape(plain.shape()).tolist()
+
+    new_tensor = tensor ** power
+    decrypted_result = ts.tolist(new_tensor.decrypt())
+    assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
+    assert _almost_equal(
+        ts.tolist(tensor.decrypt()), ts.tolist(plain), precision
+    ), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "plain,power",
+    [
+        (ts.plain_tensor([6]), 2),
+        (ts.plain_tensor([1, 2, 3]), 4),
+        (ts.plain_tensor([1, 2, 3, 4], [2, 2]), 6),
+        (ts.plain_tensor([1, 2, 3, 4], [2, 2]), 0),
+    ],
+)
+def test_power_inplace(context, plain, power, precision):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 60])
+    context.global_scale = pow(2, 40)
+
+    tensor = ts.ckks_tensor(context, plain)
+    expected = np.array([np.power(v, power) for v in plain.data()]).reshape(plain.shape()).tolist()
+
+    tensor **= power
+    decrypted_result = ts.tolist(tensor.decrypt())
+    assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
+
+
+@pytest.mark.parametrize(
+    "data, polynom",
+    [
+        (ts.plain_tensor([1, 2, 3]), [0, 0, 0,]),
+        (ts.plain_tensor([1, 2, 3, 4], [2, 2]), [1, 1]),
+        (ts.plain_tensor([1, 2, 3, 4], [2, 2]), [1, 1, 1]),
+        (ts.plain_tensor([1, 2, 3, 4, 5, 6], [2, 3]), [3, 2, 4, 5]),
+    ],
+)
+def test_polynomial(context, data, polynom):
+    ct = ts.ckks_tensor(context, data)
+    expected = (
+        np.array([np.polyval(polynom[::-1], x) for x in data.data()]).reshape(data.shape()).tolist()
+    )
+    result = ct.polyval(polynom)
+
+    if len(polynom) >= 13:
+        precision = -1
+    else:
+        precision = 1
+
+    decrypted_result = ts.tolist(result.decrypt())
+    assert _almost_equal(
+        decrypted_result, expected, precision
+    ), "Polynomial evaluation is incorrect."
+
+
+@pytest.mark.parametrize(
+    "data, polynom",
+    [(ts.plain_tensor([1, 2, 3, 4]), [0, 1, 1]), (ts.plain_tensor([1, 2, 3, 4]), [0, 1, 0, 1]),],
+)
+def test_polynomial_modswitch_off(context, data, polynom):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
+    context.global_scale = 2 ** 40
+    context.auto_mod_switch = False
+
+    ct = ts.ckks_tensor(context, data)
+    with pytest.raises(ValueError) as e:
+        result = ct.polyval(polynom)
+
+
+@pytest.mark.parametrize(
+    "data, polynom",
+    [(ts.plain_tensor([1, 2, 3, 4]), [0, 1, 1]), (ts.plain_tensor([1, 2, 3, 4]), [0, 1, 0, 1]),],
+)
+def test_polynomial_rescale_off(context, data, polynom):
+    context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
+    context.global_scale = 2 ** 40
+    context.auto_rescale = False
+
+    ct = ts.ckks_tensor(context, data)
+    with pytest.raises(ValueError) as e:
+        result = ct.polyval(polynom)
