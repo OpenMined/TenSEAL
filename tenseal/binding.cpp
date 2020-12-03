@@ -584,7 +584,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__deepcopy__", [](const shared_ptr<CKKSTensor> &obj,
                                 py::dict) { return obj->deepcopy(); })
         .def("shape", &CKKSTensor::shape)
+        .def("data", &CKKSTensor::data)
         .def("scale", &CKKSTensor::scale);
+
+    py::class_<Ciphertext>(m, "Ciphertext", py::module_local());
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
         m, "TenSEALContext")
