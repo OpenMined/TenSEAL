@@ -3,10 +3,10 @@
 set -e
 
 apt update -y
-apt install git build-essential cmake automake libtool libtool-bin -y
+apt install curl git build-essential cmake automake libtool libtool-bin -y
 
-cd third_party/protobuf/ && \
-    git submodule update --init --recursive && \
+curl https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protobuf-cpp-3.14.0.tar.gz -L | tar xz -C /opt/ && \
+    cd /opt/protobuf-3.14.0 && \
     autoreconf --install && \
     ./configure CXXFLAGS=-fPIC && \
     make && make install && ldconfig && cd -
