@@ -9,6 +9,11 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+if(WIN32)
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+endif()
+
 include(cmake/seal.cmake)
 include(cmake/protobuf.cmake)
 include(cmake/pybind11.cmake)
