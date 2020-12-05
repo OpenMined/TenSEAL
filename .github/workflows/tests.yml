@@ -22,7 +22,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
-        run: .github/workflows/scripts/install_req_ubuntu.sh
+        run: sudo .github/workflows/scripts/install_req_ubuntu.sh
         if: ${{ matrix.os == 'ubuntu-latest' }}
       - name: Lint with flake8
         run: |
@@ -56,7 +56,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies Ubuntu
-        run: .github/workflows/scripts/install_req_ubuntu.sh
+        run: sudo .github/workflows/scripts/install_req_ubuntu.sh
         if: ${{ matrix.os == 'ubuntu-latest' }}
       - name: Install dependencies MacOS
         run: .github/workflows/scripts/install_req_macos.sh
@@ -97,7 +97,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies Ubuntu
-        run: .github/workflows/scripts/install_req_ubuntu.sh
+        run: sudo .github/workflows/scripts/install_req_ubuntu.sh
         if: ${{ matrix.os == 'ubuntu-latest' }}
       - name: Install dependencies MacOS
         run: .github/workflows/scripts/install_req_macos.sh
