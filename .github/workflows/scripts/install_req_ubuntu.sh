@@ -9,7 +9,7 @@ cd third_party/protobuf/ && \
     git submodule update --init --recursive && \
     autoreconf --install && \
     ./configure CXXFLAGS=-fPIC && \
-    make && sudo make install && cd -
+    make && sudo make install && sudo ldconfig && cd -
 
 if [ $? -ne 0 ]
 then
