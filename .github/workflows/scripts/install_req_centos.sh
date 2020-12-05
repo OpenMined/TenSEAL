@@ -7,9 +7,9 @@ curl https://github.com/Kitware/CMake/releases/download/v3.17.1/cmake-3.17.1-Lin
 echo "::add-path::/opt/cmake-3.17.1-Linux-x86_64/bin"
 
 # install latest protobuf release
-curl https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protobuf-cpp-3.13.0.tar.gz -L | tar xz -C /opt/
-pushd /opt/protobuf-3.13.0
-./configure
+curl https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protobuf-cpp-3.14.0.tar.gz -L | tar xz -C /opt/
+pushd /opt/protobuf-3.14.0
+./configure CXXFLAGS=-fPIC
 make
 make install
 ldconfig
