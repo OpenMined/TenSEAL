@@ -5,8 +5,9 @@ set -e
 sudo apt update -y
 sudo apt install curl git build-essential cmake automake libtool libtool-bin -y
 
-curl https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protobuf-cpp-3.14.0.tar.gz -L | tar xz -C /opt/ && \
-    cd /opt/protobuf-3.14.0 && \
+proto_version="3.14.0"
+curl https://github.com/protocolbuffers/protobuf/releases/download/v${proto_version}/protobuf-cpp-${proto_version}.tar.gz -L | tar xz -C /opt/ && \
+    cd /opt/protobuf-${proto_version} && \
     autoreconf --install && \
     ./configure CXXFLAGS=-fPIC && \
     make && sudo make install && sudo ldconfig && cd -
