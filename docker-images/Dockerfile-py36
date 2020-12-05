@@ -4,7 +4,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 COPY ./ ./TenSEAL
 WORKDIR /TenSEAL
-RUN .github/workflows/scripts/install_req_ubuntu.sh
+RUN .github/workflows/scripts/install_req_docker.sh
 RUN pip3 install .
 
 ENTRYPOINT [ "/bin/bash" ]
