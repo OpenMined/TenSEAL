@@ -21,7 +21,7 @@ jobs:
         with:
           submodules: true
       - name: Set target Python version PATH
-        run: echo "::add-path::/opt/python/${{ matrix.python-version }}/bin"
+        run: echo "/opt/python/${{ matrix.python-version }}/bin" >> $GITHUB_PATH
       - name: Install dependencies
         run: .github/workflows/scripts/install_req_centos.sh
       - name: Build and publish
