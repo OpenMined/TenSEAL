@@ -65,10 +65,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     py::class_<BFVVector, std::shared_ptr<BFVVector>>(m, "BFVVector",
                                                       py::module_local())
-        .def_property(
-            "id",
-            py::overload_cast<>(&BFVVector::id, py::const_),
-            py::overload_cast<uint64_t>(&BFVVector::id))
+        .def_property("id", py::overload_cast<>(&BFVVector::id, py::const_),
+                      py::overload_cast<uint64_t>(&BFVVector::id))
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<int64_t> &data) {
             return BFVVector::Create(ctx, data);
@@ -202,10 +200,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     py::class_<CKKSVector, std::shared_ptr<CKKSVector>>(m, "CKKSVector",
                                                         py::module_local())
-        .def_property(
-            "id",
-            py::overload_cast<>(&CKKSVector::id, py::const_),
-            py::overload_cast<uint64_t>(&CKKSVector::id))
+        .def_property("id", py::overload_cast<>(&CKKSVector::id, py::const_),
+                      py::overload_cast<uint64_t>(&CKKSVector::id))
         // specifying scale
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<double> &data, double scale) {
@@ -437,10 +433,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
 
     py::class_<CKKSTensor, std::shared_ptr<CKKSTensor>>(m, "CKKSTensor",
                                                         py::module_local())
-        .def_property(
-            "id",
-            py::overload_cast<>(&CKKSTensor::id, py::const_),
-            py::overload_cast<uint64_t>(&CKKSTensor::id))
+        .def_property("id", py::overload_cast<>(&CKKSTensor::id, py::const_),
+                      py::overload_cast<uint64_t>(&CKKSTensor::id))
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const PlainTensor<double> &tensor, double scale,
                          bool batch) {
@@ -600,10 +594,9 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             "auto_mod_switch",
             py::overload_cast<>(&TenSEALContext::auto_mod_switch, py::const_),
             py::overload_cast<bool>(&TenSEALContext::auto_mod_switch))
-        .def_property(
-            "id",
-            py::overload_cast<>(&TenSEALContext::id, py::const_),
-            py::overload_cast<uint64_t>(&TenSEALContext::id))
+        .def_property("id",
+                      py::overload_cast<>(&TenSEALContext::id, py::const_),
+                      py::overload_cast<uint64_t>(&TenSEALContext::id))
         .def("new",
              py::overload_cast<scheme_type, size_t, uint64_t, vector<int>,
                                optional<size_t>>(&TenSEALContext::Create),

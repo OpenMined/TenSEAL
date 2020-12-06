@@ -304,8 +304,8 @@ bool TenSEALContext::equals(
 }
 
 void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
-    this->base_setup(
-        buffer.id(), SEALDeserialize<EncryptionParameters>(buffer.encryption_parameters()));
+    this->base_setup(buffer.id(), SEALDeserialize<EncryptionParameters>(
+                                      buffer.encryption_parameters()));
     this->_auto_flags = buffer.public_context().auto_flags();
     if (buffer.public_context().scale() >= 0) {
         this->global_scale(buffer.public_context().scale());

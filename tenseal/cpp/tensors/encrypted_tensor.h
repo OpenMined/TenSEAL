@@ -250,8 +250,8 @@ class EncryptedTensor {
         }
     }
 
-    uint64_t id() const{return _id;}
-    void id(uint64_t new_id) {_id = new_id;}
+    uint64_t id() const { return _id; }
+    void id(uint64_t new_id) { _id = new_id; }
 
     virtual ~EncryptedTensor(){};
 

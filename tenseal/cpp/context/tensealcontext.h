@@ -249,8 +249,8 @@ class TenSEALContext {
     bool has_secret_key() const;
     bool has_relin_keys() const;
 
-    uint64_t id() const{return _id;}
-    void id(uint64_t new_id) {_id = new_id;}
+    uint64_t id() const { return _id; }
+    void id(uint64_t new_id) { _id = new_id; }
 
    private:
     EncryptionParameters _parms;
