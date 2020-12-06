@@ -35,4 +35,6 @@ message TenSEALContextProto {
     TenSEALPublicProto public_context = 2;
     // Optional private members
     TenSEALPrivateProto private_context = 3;
+    // ID
+    uint64 id = 4;
 }

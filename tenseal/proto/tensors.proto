@@ -7,6 +7,8 @@ message BFVVectorProto {
     uint32 size = 1;
     // The serialized ciphertext
     bytes ciphertext = 2;
+    // ID
+    uint64 id = 3;
 };
 
 //CKKSVector parameters
@@ -17,6 +19,8 @@ message CKKSVectorProto {
     bytes ciphertext = 2;
     // Scale value
     double scale = 3;
+    // ID
+    uint64 id = 4;
 };
 
 //CKKSTensor parameters
@@ -29,4 +33,6 @@ message CKKSTensorProto {
     double scale = 3;
     // Optional batch size. Exists only if batching is enabled
     uint32 batch_size = 4;
+    // ID
+    uint64 id = 5;
 };

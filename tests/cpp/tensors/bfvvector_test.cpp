@@ -24,6 +24,7 @@ TEST_P(BFVVectorTest, TestCreateBFV) {
     ASSERT_TRUE(ctx != nullptr);
 
     auto l = BFVVector::Create(ctx, vector<int64_t>({1, 2, 3}));
+    l->id(1234);
 
     if (should_serialize_first) {
         l = duplicate(l);
@@ -31,6 +32,7 @@ TEST_P(BFVVectorTest, TestCreateBFV) {
 
     ASSERT_EQ(l->size(), 3);
     ASSERT_EQ(l->ciphertext_size(), 2);
+    ASSERT_EQ(l->id(), 1234);
 }
 
 TEST_P(BFVVectorTest, TestBFVAdd) {

@@ -27,6 +27,14 @@ def recreate(ctx):
 
 
 @pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
+def test_context_id(duplicate):
+    orig_context = ctx()
+    orig_context.id = 1234
+    context = duplicate(orig_context)
+    assert context.id == 1234
+
+
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
 def test_context_recreation(duplicate):
     orig_context = ctx()
     context = duplicate(orig_context)

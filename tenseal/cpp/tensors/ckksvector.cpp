@@ -43,6 +43,7 @@ CKKSVector::CKKSVector(const shared_ptr<const CKKSVector>& vec) {
     this->_init_scale = vec->scale();
     this->_size = vec->size();
     this->_ciphertext = vec->ciphertext();
+    this->_id = vec->id();
 }
 
 Ciphertext CKKSVector::encrypt(shared_ptr<TenSEALContext> context, double scale,
@@ -448,6 +449,7 @@ void CKKSVector::load_proto(const CKKSVectorProto& vec) {
     this->_ciphertext = SEALDeserialize<Ciphertext>(
         *this->tenseal_context()->seal_context(), vec.ciphertext());
     this->_init_scale = vec.scale();
+    this->_id = vec.id();
 }
 
 CKKSVectorProto CKKSVector::save_proto() const {
@@ -456,6 +458,7 @@ CKKSVectorProto CKKSVector::save_proto() const {
     *buffer.mutable_ciphertext() = SEALSerialize<Ciphertext>(this->_ciphertext);
     buffer.set_size(static_cast<int>(this->_size));
     buffer.set_scale(this->_init_scale);
+    buffer.set_id(this->_id);
 
     return buffer;
 }

@@ -36,12 +36,14 @@ TEST_P(CKKSVectorTest, TestCreateCKKS) {
     ASSERT_TRUE(ctx != nullptr);
 
     auto l = CKKSVector::Create(ctx, std::vector<double>{1, 2, 3}, 1);
+    l->id(1234);
 
     if (should_serialize_first) {
         l = duplicate(l);
     }
 
     ASSERT_EQ(l->ciphertext_size(), 2);
+    ASSERT_EQ(l->id(), 1234);
 }
 
 TEST_F(CKKSVectorTest, TestCreateCKKSFail) {

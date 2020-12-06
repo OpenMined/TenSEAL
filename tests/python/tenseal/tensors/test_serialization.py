@@ -59,6 +59,17 @@ def recreate_bfv(vec):
 
 
 @pytest.mark.parametrize(
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
+)
+def test_ckks_vector_id(duplicate):
+    context = ckks_context()
+    orig = ts.ckks_vector(context, [1, 2, 3, 4])
+    orig.id = 1234
+    duplicated = duplicate(orig)
+    assert duplicated.id == 1234
+
+
+@pytest.mark.parametrize(
     "plain_vec", [[0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
 )
 @pytest.mark.parametrize(
@@ -275,6 +286,17 @@ def test_mul_without_global_scale(vec1, vec2, precision, duplicate):
         decrypted_result, expected, precision
     ), "Multiplication of vectors is incorrect."
     assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
+)
+def test_bfv_vector_id(duplicate):
+    context = bfv_context()
+    orig = ts.bfv_vector(context, [1, 2, 3, 4])
+    orig.id = 1234
+    duplicated = duplicate(orig)
+    assert duplicated.id == 1234
 
 
 @pytest.mark.parametrize(
@@ -560,3 +582,15 @@ def test_ckks_tensor_sanity(plain_vec, precision, duplicate):
     decrypted = ts.tolist(ckks_tensor.decrypt())
 
     assert _almost_equal(decrypted, plain_vec, precision), "Decryption of tensor is incorrect"
+
+
+@pytest.mark.parametrize(
+    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks_tensor,],
+)
+def test_ckks_tensor_id(duplicate):
+    context = ckks_context()
+    plain_tensor = ts.plain_tensor([1, 2, 3, 4])
+    orig = ts.ckks_tensor(context, plain_tensor)
+    orig.id = 1234
+    duplicated = duplicate(orig)
+    assert duplicated.id == 1234

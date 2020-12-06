@@ -249,6 +249,9 @@ class TenSEALContext {
     bool has_secret_key() const;
     bool has_relin_keys() const;
 
+    uint64_t id() const{return _id;}
+    void id(uint64_t new_id) {_id = new_id;}
+
    private:
     EncryptionParameters _parms;
     shared_ptr<SEALContext> _context;
@@ -260,6 +263,7 @@ class TenSEALContext {
 
     shared_ptr<sync::ThreadPool> _dispatcher;
     size_t _threads;
+    uint64_t _id;
 
     /**
      * Switches for automatic relinearization, rescaling, and modulus switching
@@ -278,7 +282,7 @@ class TenSEALContext {
     TenSEALContext(const TenSEALContextProto& proto,
                    optional<size_t> n_threads);
 
-    void base_setup(EncryptionParameters parms);
+    void base_setup(uint64_t id, EncryptionParameters parms);
     void dispatcher_setup(optional<size_t> n_threads);
     void keys_setup(optional<PublicKey> public_key = {},
                     optional<SecretKey> secret_key = {},

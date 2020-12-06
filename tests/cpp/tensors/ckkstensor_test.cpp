@@ -37,12 +37,14 @@ TEST_P(CKKSTensorTest, TestCreateCKKSNoBatching) {
 
     auto l = CKKSTensor::Create(ctx, std::vector<double>{1, 2, 3},
                                 std::pow(2, 40), false);
+    l->id(1234);
 
     if (should_serialize_first) {
         l = duplicate(l);
     }
 
     ASSERT_EQ(l->data().size(), 3);
+    ASSERT_EQ(l->id(), 1234);
 }
 
 TEST_P(CKKSTensorTest, TestDecryptCKKSNoBatching) {

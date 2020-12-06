@@ -13,7 +13,7 @@ using namespace std;
 TenSEALContext::TenSEALContext(EncryptionParameters parms,
                                optional<size_t> n_threads) {
     this->dispatcher_setup(n_threads);
-    this->base_setup(parms);
+    this->base_setup(0, parms);
     this->keys_setup();
 }
 
@@ -39,7 +39,8 @@ void TenSEALContext::dispatcher_setup(optional<size_t> n_threads) {
     this->_dispatcher = make_shared<sync::ThreadPool>(this->_threads);
 }
 
-void TenSEALContext::base_setup(EncryptionParameters parms) {
+void TenSEALContext::base_setup(uint64_t id, EncryptionParameters parms) {
+    this->_id = id;
     this->_parms = parms;
     this->_context = make_shared<SEALContext>(this->_parms);
 
@@ -304,7 +305,7 @@ bool TenSEALContext::equals(
 
 void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
     this->base_setup(
-        SEALDeserialize<EncryptionParameters>(buffer.encryption_parameters()));
+        buffer.id(), SEALDeserialize<EncryptionParameters>(buffer.encryption_parameters()));
     this->_auto_flags = buffer.public_context().auto_flags();
     if (buffer.public_context().scale() >= 0) {
         this->global_scale(buffer.public_context().scale());
@@ -335,6 +336,7 @@ TenSEALContextProto TenSEALContext::save_proto() const {
     TenSEALContextProto buffer;
     *buffer.mutable_encryption_parameters() =
         SEALSerialize<EncryptionParameters>(this->_parms);
+    buffer.set_id(_id);
 
     TenSEALPublicProto public_buffer;
     public_buffer.set_auto_flags(this->_auto_flags);

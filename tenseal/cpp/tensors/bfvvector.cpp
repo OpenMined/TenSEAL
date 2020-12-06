@@ -38,6 +38,7 @@ BFVVector::BFVVector(const TenSEALContextProto& ctx,
 BFVVector::BFVVector(const shared_ptr<const BFVVector>& vec) {
     this->prepare_context(vec->tenseal_context());
     this->_size = vec->size();
+    this->_id = vec->id();
     this->_ciphertext = vec->ciphertext();
 }
 
@@ -306,6 +307,7 @@ void BFVVector::load_proto(const BFVVectorProto& vec) {
     if (this->tenseal_context() == nullptr) {
         throw invalid_argument("context missing for deserialization");
     }
+    this->_id = vec.id();
     this->_size = vec.size();
     this->_ciphertext = SEALDeserialize<Ciphertext>(
         *this->tenseal_context()->seal_context(), vec.ciphertext());
@@ -314,6 +316,7 @@ void BFVVector::load_proto(const BFVVectorProto& vec) {
 BFVVectorProto BFVVector::save_proto() const {
     BFVVectorProto buffer;
 
+    buffer.set_id(this->_id);
     *buffer.mutable_ciphertext() = SEALSerialize<Ciphertext>(this->_ciphertext);
     buffer.set_size(static_cast<int>(this->_size));
 

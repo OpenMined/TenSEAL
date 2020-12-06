@@ -249,9 +249,14 @@ class EncryptedTensor {
                 other, ct.parms_id());
         }
     }
+
+    uint64_t id() const{return _id;}
+    void id(uint64_t new_id) {_id = new_id;}
+
     virtual ~EncryptedTensor(){};
 
    protected:
+    uint64_t _id = 0;
     shared_ptr<TenSEALContext> _context;
 
    private:

@@ -36,11 +36,14 @@ TEST_F(TenSEALContextTest, TestSerialization) {
     auto ctx =
         TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
     ctx->generate_galois_keys();
+    ctx->id(1234);
 
     auto buff = ctx->save();
     auto recreated_ctx = TenSEALContext::Create(buff);
 
     ASSERT_TRUE(recreated_ctx != nullptr);
+    ASSERT_EQ(recreated_ctx->id(), 1234);
+
     auto &orig_pubkey = ctx->public_key()->data().dyn_array();
     auto &serial_pubkey = recreated_ctx->public_key()->data().dyn_array();
     for (size_t idx = 0; idx < orig_pubkey.size(); ++idx) {

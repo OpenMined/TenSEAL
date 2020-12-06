@@ -54,6 +54,7 @@ CKKSTensor::CKKSTensor(const shared_ptr<const CKKSTensor>& tensor) {
     this->_shape = tensor->shape();
     this->_data = tensor->data();
     this->_batch_size = tensor->_batch_size;
+    this->_id = tensor->id();
 }
 
 Ciphertext CKKSTensor::encrypt(const shared_ptr<TenSEALContext>& ctx,
@@ -511,6 +512,7 @@ void CKKSTensor::clear() {
     this->_data = vector<Ciphertext>();
     this->_batch_size = optional<double>();
     this->_init_scale = 0;
+    this->_id = 0;
 }
 
 void CKKSTensor::load_proto(const CKKSTensorProto& tensor_proto) {
@@ -529,6 +531,7 @@ void CKKSTensor::load_proto(const CKKSTensorProto& tensor_proto) {
     this->_init_scale = tensor_proto.scale();
     if (tensor_proto.batch_size())
         this->_batch_size = tensor_proto.batch_size();
+    this->_id = tensor_proto.id();
 }
 
 CKKSTensorProto CKKSTensor::save_proto() const {
@@ -542,6 +545,7 @@ CKKSTensorProto CKKSTensor::save_proto() const {
     }
     buffer.set_scale(this->_init_scale);
     if (this->_batch_size) buffer.set_batch_size(*this->_batch_size);
+    buffer.set_id(this->_id);
 
     return buffer;
 }
