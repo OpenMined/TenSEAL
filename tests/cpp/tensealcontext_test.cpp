@@ -156,6 +156,17 @@ TEST_P(TenSEALContextTest, TestCreateCKKSPublic) {
     ASSERT_FALSE(ctx->is_private());
 }
 
+TEST_F(TenSEALContextTest, TestContextRegressionMakePublicCrash) {
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {40, 21, 21, 21, 21, 21, 21, 40});
+    ctx->global_scale(std::pow(2, 21));
+    ctx->generate_galois_keys();
+
+    auto dup = ctx->copy();
+    dup->make_context_public(false, false);
+    dup->save();
+}
+
 INSTANTIATE_TEST_CASE_P(TestContext, TenSEALContextTest,
                         ::testing::Values(false, true));
 
