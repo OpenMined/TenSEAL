@@ -7,10 +7,25 @@ from tenseal.tensors.abstract_tensor import AbstractTensor
 
 class CKKSTensor(AbstractTensor):
     def __init__(self, context=None, tensor=None, scale=None, batch=False, data=None):
+        """Constructor method for the CKKSTensor object, which can store an n-dimensional
+        float tensor in encrypted form, using the CKKS homomorphic encryption scheme.
+
+        Args:
+            context: a Context object, holding the encryption parameters and keys.
+            tensor: a PlainTensorDouble holding data to be encrypted.
+            scale: the scale to be used to encode vector values. CKKSTensor will use the global_scale provided by the context if it's set to None.
+            batch: 
+            data:
+
+        Returns:
+            CKKSTensor object.
+        """
+        # wrapping
         if data is not None:
             self.data = data
+        # constructing a new object
         else:
-            if not isinstance(context, ts._ts_cpp.TenSEALContext) or not isinstance(
+            if not isinstance(context, ts.Context) or not isinstance(
                 tensor, ts._ts_cpp.PlainTensorDouble
             ):
                 raise TypeError(
@@ -20,9 +35,9 @@ class CKKSTensor(AbstractTensor):
                 )
 
             if scale is None:
-                self.data = ts._ts_cpp.CKKSTensor(context, tensor, batch)
+                self.data = ts._ts_cpp.CKKSTensor(context.data, tensor, batch)
             else:
-                self.data = ts._ts_cpp.CKKSTensor(context, tensor, scale, batch)
+                self.data = ts._ts_cpp.CKKSTensor(context.data, tensor, scale, batch)
 
     def add(self, other):
         if isinstance(other, (int, float)):
