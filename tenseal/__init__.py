@@ -5,7 +5,7 @@ try:
     import _tenseal_cpp as _ts_cpp
 except ImportError:
     import tenseal._tenseal_cpp as _ts_cpp
-from tenseal.tensors import CKKSTensor
+from tenseal.tensors import CKKSTensor, PlainTensor
 # TODO: remove keys constructor from public API
 from tenseal.context import Context, PublicKey, SecretKey, GaloisKeys, RelinKeys
 from tenseal.version import __version__
@@ -31,23 +31,8 @@ def context_from(data, n_threads=None):
     return Context.load(data, n_threads)
 
 
-def plain_tensor(data, shape=None, dtype="float"):
-    """Constructor method for the PlainTensor object.
-    Args:
-        data:
-        shape:
-        dtype:
-    Returns:
-        PlainTensor object.
-    """
-    # just create a plaintensor using python lists for now
-    if dtype != "float":
-        raise ValueError("Invalid dtype")
-
-    if shape is None:
-        return _ts_cpp.PlainTensorDouble(data)
-
-    return _ts_cpp.PlainTensorDouble(data, shape)
+def plain_tensor(*args, **kwargs):
+    return PlainTensor(*args, **kwargs)
 
 
 def bfv_vector(context, data):
