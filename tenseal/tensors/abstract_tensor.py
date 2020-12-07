@@ -55,8 +55,8 @@ class AbstractTensor(ABC):
     def _decrypt(self, secret_key=None):
         if secret_key is None:
             return self.data.decrypt()
-        elif isinstance(secret_key, ts.context.SecretKey):
-            return self.data.decrypt(secret_key)
+        elif isinstance(secret_key, ts.SecretKey):
+            return self.data.decrypt(secret_key.data)
         else:
             raise TypeError(f"incorrect type: {type(secret_key)} != SecretKey")
 

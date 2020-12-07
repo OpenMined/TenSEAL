@@ -172,7 +172,7 @@ class Context:
         if secret_key is None:
             self.data.generate_galois_keys()
         elif isinstance(secret_key, SecretKey):
-            self.data.generate_galois_keys(secret_key)
+            self.data.generate_galois_keys(secret_key.data)
         else:
             raise TypeError(f"incorrect type: {type(secret_key)} != SecretKey")
 
@@ -186,7 +186,7 @@ class Context:
         if secret_key is None:
             self.data.generate_relin_keys()
         elif isinstance(secret_key, SecretKey):
-            self.data.generate_relin_keys(secret_key)
+            self.data.generate_relin_keys(secret_key.data)
         else:
             raise TypeError(f"incorrect type: {type(secret_key)} != SecretKey")
 
