@@ -100,7 +100,7 @@ class AbstractTensor(ABC):
 
     def __rsub__(self, other):
         copy = self.copy()
-        copy.negate_()
+        copy.neg_()
         copy.add_(other)
         return copy
 
