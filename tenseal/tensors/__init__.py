@@ -2,7 +2,7 @@
 different homomorphic encryption schemes, allowing someone to use the right
 one for their specific use case.
 """
-from tenseal.tensors.ckks_tensor import CKKSTensor
-from tenseal.tensors.ckks_vector import CKKSVector
-from tenseal.tensors.bfv_vector import BFVVector
-from tenseal.tensors.plain_tensor import PlainTensor
+from tenseal.tensors.ckkstensor import CKKSTensor
+from tenseal.tensors.ckksvector import CKKSVector
+from tenseal.tensors.bfvvector import BFVVector
+from tenseal.tensors.plaintensor import PlainTensor

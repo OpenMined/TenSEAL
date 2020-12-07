@@ -8,7 +8,7 @@ except ImportError:
 from tenseal.tensors import CKKSTensor, CKKSVector, BFVVector, PlainTensor
 
 # TODO: remove keys constructor from public API
-from tenseal.context import Context, PublicKey, SecretKey, GaloisKeys, RelinKeys
+from tenseal.enc_context import Context, PublicKey, SecretKey, GaloisKeys, RelinKeys
 from tenseal.version import __version__
 
 
