@@ -557,6 +557,6 @@ def test_ckks_tensor_sanity(plain_vec, precision, duplicate):
     plain_tensor = ts.plain_tensor(plain_vec)
     orig = ts.ckks_tensor(context, plain_tensor)
     ckks_tensor = duplicate(orig)
-    decrypted = ts.tolist(ckks_tensor.decrypt())
+    decrypted = ckks_tensor.decrypt().tolist()
 
     assert _almost_equal(decrypted, plain_vec, precision), "Decryption of tensor is incorrect"

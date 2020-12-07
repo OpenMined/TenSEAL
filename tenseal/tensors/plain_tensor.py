@@ -78,3 +78,11 @@ class PlainTensor:
 
     def __len__(self):
         return len(self.data)
+
+    def tolist(self):
+        """
+        Converts a plain tensor to a Python list.
+        Returns:
+            Python list.
+        """
+        return np.array(self.raw).reshape(self.shape).tolist()

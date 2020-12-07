@@ -88,7 +88,7 @@ def test_sum(context, data, batch, axis, precision):
 
     result = tensor.sum(axis)
 
-    orig = ts.tolist(data)
+    orig = data.tolist()
     np_orig = np.array(orig).reshape(data.shape)
     expected = np.sum(np_orig, axis).tolist()
 
@@ -96,11 +96,11 @@ def test_sum(context, data, batch, axis, precision):
 
     # Decryption
     plain_ts = result.decrypt()
-    decrypted_result = ts.tolist(plain_ts)
+    decrypted_result = plain_ts.tolist()
 
     assert _almost_equal(decrypted_result, expected, precision), "Sum of tensor is incorrect."
     assert _almost_equal(
-        ts.tolist(tensor.decrypt()), orig, precision
+        tensor.decrypt().tolist(), orig, precision
     ), "Something went wrong in memory."
 
 
@@ -118,7 +118,7 @@ def test_sum_batch(context, data, precision):
     context.generate_galois_keys()
     tensor = ts.ckks_tensor(context, data, batch=True)
 
-    orig = ts.tolist(data)
+    orig = data.tolist()
     np_orig = np.array(orig).reshape(data.shape)
     expected = np.sum(np_orig, 0).tolist()
 
@@ -126,11 +126,11 @@ def test_sum_batch(context, data, precision):
 
     # Decryption
     plain_ts = result.decrypt()
-    decrypted_result = ts.tolist(plain_ts)
+    decrypted_result = plain_ts.tolist()
 
     assert _almost_equal(decrypted_result, expected, precision), "Sum of tensor is incorrect."
     assert _almost_equal(
-        ts.tolist(tensor.decrypt()), orig, precision
+        tensor.decrypt().tolist(), orig, precision
     ), "Something went wrong in memory."
 
 
@@ -158,10 +158,10 @@ def test_size(context):
 def test_negate(context, plain, precision):
     tensor = ts.ckks_tensor(context, plain)
 
-    expected = np.negative(ts.tolist(plain))
+    expected = np.negative(plain.tolist())
 
     result = -tensor
-    decrypted_result = ts.tolist(result.decrypt())
+    decrypted_result = result.decrypt().tolist()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
 
 
@@ -172,10 +172,10 @@ def test_negate(context, plain, precision):
 def test_negate_inplace(context, plain, precision):
     tensor = ts.ckks_tensor(context, plain)
 
-    expected = np.negative(ts.tolist(plain))
+    expected = np.negative(plain.tolist())
 
     tensor.neg_()
-    decrypted_result = ts.tolist(tensor.decrypt())
+    decrypted_result = tensor.decrypt().tolist()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
 
 
@@ -185,13 +185,13 @@ def test_negate_inplace(context, plain, precision):
 )
 def test_square(context, plain, precision):
     tensor = ts.ckks_tensor(context, plain)
-    expected = np.square(ts.tolist(plain))
+    expected = np.square(plain.tolist())
 
     result = tensor.square()
-    decrypted_result = ts.tolist(result.decrypt())
+    decrypted_result = result.decrypt().tolist()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
     assert _almost_equal(
-        ts.tolist(tensor.decrypt()), ts.tolist(plain), precision
+        tensor.decrypt().tolist(), plain.tolist(), precision
     ), "Something went wrong in memory."
 
 
@@ -201,10 +201,10 @@ def test_square(context, plain, precision):
 )
 def test_square_inplace(context, plain, precision):
     tensor = ts.ckks_tensor(context, plain)
-    expected = np.square(ts.tolist(plain))
+    expected = np.square(plain.tolist())
 
     tensor.square_()
-    decrypted_result = ts.tolist(tensor.decrypt())
+    decrypted_result = tensor.decrypt().tolist()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
 
 
@@ -237,17 +237,17 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
     elif op == "mul":
         result = right * left
 
-    np_result = np.array(ts.tolist(result.decrypt()))
+    np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
     assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
     # right didn't change
-    right_result = np.array(ts.tolist(right.decrypt()))
+    right_result = np.array(right.decrypt().tolist())
     assert np.allclose(right_result, r_t, rtol=0, atol=0.01)
     # left didn't change
     if plain:
         left_result = l_t
     else:
-        left_result = np.array(ts.tolist(left.decrypt()))
+        left_result = np.array(left.decrypt().tolist())
     assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
 
     # inplace
@@ -258,18 +258,18 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
     elif op == "mul":
         right *= left
 
-    np_result = np.array(ts.tolist(result.decrypt()))
+    np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
     assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
     # right didn't change
-    right_result = np.array(ts.tolist(right.decrypt()))
+    right_result = np.array(right.decrypt().tolist())
     assert right_result.shape == expected_result.shape
     assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
     # left didn't change
     if plain:
         left_result = l_t
     else:
-        left_result = np.array(ts.tolist(left.decrypt()))
+        left_result = np.array(left.decrypt().tolist())
     assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
 
 
@@ -296,11 +296,11 @@ def test_add_sub_mul_scalar(context, shape, op):
     elif op == "mul":
         result = right * left
 
-    np_result = np.array(ts.tolist(result.decrypt()))
+    np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
     assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
     # right didn't change
-    right_result = np.array(ts.tolist(right.decrypt()))
+    right_result = np.array(right.decrypt().tolist())
     assert np.allclose(right_result, r_t, rtol=0, atol=0.01)
 
     # inplace
@@ -311,11 +311,11 @@ def test_add_sub_mul_scalar(context, shape, op):
     elif op == "mul":
         right *= left
 
-    np_result = np.array(ts.tolist(result.decrypt()))
+    np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
     assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
     # right didn't change
-    right_result = np.array(ts.tolist(right.decrypt()))
+    right_result = np.array(right.decrypt().tolist())
     assert right_result.shape == expected_result.shape
     assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
 
@@ -337,10 +337,10 @@ def test_power(context, plain, power, precision):
     expected = np.array([np.power(v, power) for v in plain.raw]).reshape(plain.shape).tolist()
 
     new_tensor = tensor ** power
-    decrypted_result = ts.tolist(new_tensor.decrypt())
+    decrypted_result = new_tensor.decrypt().tolist()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
     assert _almost_equal(
-        ts.tolist(tensor.decrypt()), ts.tolist(plain), precision
+        tensor.decrypt().tolist(), plain.tolist(), precision
     ), "Something went wrong in memory."
 
 
@@ -361,7 +361,7 @@ def test_power_inplace(context, plain, power, precision):
     expected = np.array([np.power(v, power) for v in plain.raw]).reshape(plain.shape).tolist()
 
     tensor **= power
-    decrypted_result = ts.tolist(tensor.decrypt())
+    decrypted_result = tensor.decrypt().tolist()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
 
 
@@ -386,7 +386,7 @@ def test_polynomial(context, data, polynom):
     else:
         precision = 1
 
-    decrypted_result = ts.tolist(result.decrypt())
+    decrypted_result = result.decrypt().tolist()
     assert _almost_equal(
         decrypted_result, expected, precision
     ), "Polynomial evaluation is incorrect."
