@@ -73,8 +73,14 @@ class PlainTensor:
     def shape(self):
         return self.data.shape()
 
+    def strides(self):
+        return self.data.strides()
+
     def empty(self):
         return bool(self.data.empty())
+
+    def size(self):
+        return self.data.size()
 
     def __len__(self):
         return len(self.data)
@@ -86,3 +92,6 @@ class PlainTensor:
             Python list.
         """
         return np.array(self.raw).reshape(self.shape).tolist()
+
+    def batch(self, dim):
+        return self.data.batch(dim)
