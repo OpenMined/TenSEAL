@@ -6,7 +6,8 @@ try:
 except ImportError:
     import tenseal._tenseal_cpp as _ts_cpp
 from tenseal.tensors import CKKSTensor
-from tenseal.context import Context
+# TODO: remove keys constructor from public API
+from tenseal.context import Context, PublicKey, SecretKey, GaloisKeys, RelinKeys
 from tenseal.version import __version__
 
 
@@ -16,10 +17,6 @@ enc_matmul_encoding = _ts_cpp.enc_matmul_encoding
 
 # TODO: make these native python enum
 SCHEME_TYPE = _ts_cpp.SCHEME_TYPE
-PublicKey = _ts_cpp.PublicKey
-SecretKey = _ts_cpp.SecretKey
-RelinKeys = _ts_cpp.RelinKeys
-GaloisKeys = _ts_cpp.GaloisKeys
 
 # Vectors
 BFVVector = _ts_cpp.BFVVector
@@ -28,6 +25,7 @@ CKKSVector = _ts_cpp.CKKSVector
 
 def context(*args, **kwargs):
     return Context(*args, **kwargs)
+
 
 def context_from(data, n_threads=None):
     return Context.load(data, n_threads)

@@ -1,6 +1,43 @@
 """
 """
+from abc import ABC
 import tenseal as ts
+
+
+class Key(ABC):
+    def __init__(self, data):
+        self.data = data
+
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, value):
+        native_type = getattr(ts._ts_cpp, self.__class__.__name__)
+        if not isinstance(value, native_type):
+            raise TypeError(f"value must be of type {native_type}")
+        self._data = value
+
+    @classmethod
+    def _wrap(cls, data):
+        return cls(data)
+
+
+class SecretKey(Key):
+    pass
+
+
+class PublicKey(Key):
+    pass
+
+
+class GaloisKeys(Key):
+    pass
+
+
+class RelinKeys(Key):
+    pass
 
 
 class Context:
@@ -101,10 +138,77 @@ class Context:
     def _wrap(cls, data):
         return cls(data=data)
 
-    # TODO
-    # ctx.data.auto_mod_switch        ctx.data.generate_galois_keys(  ctx.data.has_secret_key(        ctx.data.relin_keys(
-    # ctx.data.auto_relin             ctx.data.generate_relin_keys(   ctx.data.is_private(            ctx.data.secret_key(
-    # ctx.data.auto_rescale           ctx.data.global_scale           ctx.data.is_public(             ctx.data.serialize(
-    # ctx.data.copy(                  ctx.data.has_galois_keys(       ctx.data.make_context_public(   
-    # ctx.data.deserialize(           ctx.data.has_public_key(        ctx.data.new(                   
-    # ctx.data.galois_keys(           ctx.data.has_relin_keys(        ctx.data.public_key(
+    @property
+    def auto_mod_switch(self):
+        return self.data.auto_mod_switch
+
+    @auto_mod_switch.setter
+    def auto_mod_switch(self, value):
+        self.data.auto_mod_switch = value
+
+    @property
+    def auto_relin(self):
+        return self.data.auto_relin
+
+    @auto_relin.setter
+    def auto_relin(self, value):
+        self.data.auto_relin = value
+
+    @property
+    def auto_rescale(self):
+        return self.data.auto_rescale
+
+    @auto_rescale.setter
+    def auto_rescale(self, value):
+        self.data.auto_rescale = value
+
+    def has_galois_keys(self):
+        return self.data.has_galois_keys()
+
+    def galois_keys(self):
+        return GaloisKeys(self.data.galois_keys())
+
+    def generate_galois_keys(self, secret_key=None):
+        if secret_key is None:
+            self.data.generate_galois_keys()
+        elif isinstance(secret_key, SecretKey):
+            self.data.generate_galois_keys(secret_key)
+        else:
+            raise TypeError(f"incorrect type: {type(secret_key)} != SecretKey")
+
+    def has_relin_keys(self):
+        return self.data.has_relin_keys()
+
+    def relin_keys(self):
+        return RelinKeys(self.data.relin_keys())
+
+    def generate_relin_keys(self, secret_key=None):
+        if secret_key is None:
+            self.data.generate_relin_keys()
+        elif isinstance(secret_key, SecretKey):
+            self.data.generate_relin_keys(secret_key)
+        else:
+            raise TypeError(f"incorrect type: {type(secret_key)} != SecretKey")
+
+    def has_secret_key(self):
+        return self.data.has_secret_key()
+
+    def secret_key(self):
+        return SecretKey(self.data.secret_key())
+
+    def has_public_key(self):
+        return self.data.has_public_key()
+
+    def public_key(self):
+        return PublicKey(self.data.public_key())
+
+    def is_private(self):
+        return self.data.is_private()
+
+    def is_public(self):
+        return self.data.is_public()
+
+    def make_context_public(self, generate_galois_keys=False, generate_relin_keys=False):
+        self.data.make_context_public(
+            generate_galois_keys=generate_galois_keys, generate_relin_keys=generate_relin_keys
+        )
