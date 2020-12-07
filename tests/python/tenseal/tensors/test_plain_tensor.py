@@ -56,7 +56,5 @@ def test_batch(data, axis):
     assert len(batch) == len(data.raw) / data.shape[axis]
     assert len(batch[0]) == data.shape[axis]
 
-    expected = np.array(data.raw).reshape(
-        int(len(data.raw) / data.shape[axis]), data.shape[axis]
-    )
+    expected = np.array(data.raw).reshape(int(len(data.raw) / data.shape[axis]), data.shape[axis])
     assert np.array(batch).any() == expected.any()
