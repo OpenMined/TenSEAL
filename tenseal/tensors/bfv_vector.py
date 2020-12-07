@@ -41,7 +41,12 @@ class BFVVector(AbstractTensor):
 
     @classmethod
     def pack_vectors(cls, vectors):
-        return cls(data=ts._ts_cpp.CKKSVector.pack_vectors(vectors))
+        to_pack = []
+        for v in vectors:
+            if not isinstance(v, cls):
+                raise TypeError("vectors to pack must be of type tenseal.BFVVector")
+            to_pack.append(v.data)
+        return cls(data=ts._ts_cpp.BFVVector.pack_vectors(to_pack))
 
     # TODO: remove this when Vectors start operating with PlainTensors
     @classmethod
