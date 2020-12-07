@@ -21,7 +21,6 @@ py_test(
     srcs_version = "PY3",
     deps = [
         "//tenseal:tenseal",
-        "//tenseal/tensors:tenseal_tensors",
         requirement("pytest"),
         requirement("numpy"),
         requirement("pytest-benchmark"),
