@@ -25,40 +25,43 @@ class CKKSTensor(AbstractTensor):
             self.data = data
         # constructing a new object
         else:
-            if not isinstance(context, ts.Context) or not isinstance(
-                tensor, ts._ts_cpp.PlainTensorDouble
-            ):
-                raise TypeError(
-                    "Invalid CKKSTensor input types context: {} and vector: {}".format(
-                        type(context), type(tensor)
-                    )
-                )
+            if not isinstance(context, ts.Context):
+                raise TypeError("context must be a tenseal.Context")
+            if not isinstance(tensor, ts.PlainTensor):
+                tensor = ts.plain_tensor(tensor, dtype="float")
+
+            tensor.dtype = "float"
 
             if scale is None:
-                self.data = ts._ts_cpp.CKKSTensor(context.data, tensor, batch)
+                self.data = ts._ts_cpp.CKKSTensor(context.data, tensor.data, batch)
             else:
-                self.data = ts._ts_cpp.CKKSTensor(context.data, tensor, scale, batch)
+                self.data = ts._ts_cpp.CKKSTensor(context.data, tensor.data, scale, batch)
+
+    def decrypt(self, secret_key=None):
+        return self._decrypt(secret_key=secret_key)
 
     def add(self, other):
         if isinstance(other, (int, float)):
             result = self.data + other
-        elif isinstance(other, list):
-            # TODO
-            pass
         elif isinstance(other, self.__class__):
             result = self.data + other.data
         else:
-            raise TypeError(f"can't add with object of type {type(other)}")
+            try:
+                to_add = ts.plain_tensor(other, dtype="float")
+            except TypeError:
+                raise TypeError(f"can't add with object of type {type(other)}")
+            result = self.data + to_add
+
         return self._wrap(result)
 
     def add_(self, other):
         if isinstance(other, (int, float)):
             self.data += other
-        elif isinstance(other, list):
-            # TODO
-            pass
         elif isinstance(other, self.__class__):
             self.data += other.data
         else:
-            raise TypeError(f"can't add with object of type {type(other)}")
-        return self
+            try:
+                to_add = ts.plain_tensor(other, dtype="float")
+            except TypeError:
+                raise TypeError(f"can't add with object of type {type(other)}")
+            self.data += to_add
