@@ -22,6 +22,7 @@ py_test(
     deps = [
         "//tenseal/sealapi:sealapi",
         "//tenseal:tenseal",
+        "//tenseal/tensors:tenseal_tensors",
         requirement("pytest"),
         requirement("numpy"),
     ],
