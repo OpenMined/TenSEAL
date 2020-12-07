@@ -54,7 +54,7 @@ class PlainTensor:
         if self.dtype == value:  # nothing to do
             return
         raw = self.raw
-        shape = self.shape()
+        shape = self.shape
         del self._data
         self._dtype = value
         if self.dtype == "float":
@@ -69,6 +69,7 @@ class PlainTensor:
     def at(self, index):
         return self.data.at(index)
 
+    @property
     def shape(self):
         return self.data.shape()
 

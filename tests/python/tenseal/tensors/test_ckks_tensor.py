@@ -89,7 +89,7 @@ def test_sum(context, data, batch, axis, precision):
     result = tensor.sum(axis)
 
     orig = ts.tolist(data)
-    np_orig = np.array(orig).reshape(data.shape())
+    np_orig = np.array(orig).reshape(data.shape)
     expected = np.sum(np_orig, axis).tolist()
 
     result = tensor.sum(axis)
@@ -119,7 +119,7 @@ def test_sum_batch(context, data, precision):
     tensor = ts.ckks_tensor(context, data, batch=True)
 
     orig = ts.tolist(data)
-    np_orig = np.array(orig).reshape(data.shape())
+    np_orig = np.array(orig).reshape(data.shape)
     expected = np.sum(np_orig, 0).tolist()
 
     result = tensor.sum_batch()
@@ -148,7 +148,7 @@ def test_sum_fail(context, data, batch, precision):
 def test_size(context):
     for size in range(1, 10):
         vec = ts.ckks_tensor(context, ts.plain_tensor([1] * size))
-        assert vec.shape() == [size], "Size of encrypted tensor is incorrect."
+        assert vec.shape == [size], "Size of encrypted tensor is incorrect."
 
 
 @pytest.mark.parametrize(
@@ -334,7 +334,7 @@ def test_power(context, plain, power, precision):
     context.global_scale = pow(2, 40)
 
     tensor = ts.ckks_tensor(context, plain)
-    expected = np.array([np.power(v, power) for v in plain.raw]).reshape(plain.shape()).tolist()
+    expected = np.array([np.power(v, power) for v in plain.raw]).reshape(plain.shape).tolist()
 
     new_tensor = tensor ** power
     decrypted_result = ts.tolist(new_tensor.decrypt())
@@ -358,7 +358,7 @@ def test_power_inplace(context, plain, power, precision):
     context.global_scale = pow(2, 40)
 
     tensor = ts.ckks_tensor(context, plain)
-    expected = np.array([np.power(v, power) for v in plain.raw]).reshape(plain.shape()).tolist()
+    expected = np.array([np.power(v, power) for v in plain.raw]).reshape(plain.shape).tolist()
 
     tensor **= power
     decrypted_result = ts.tolist(tensor.decrypt())
@@ -377,7 +377,7 @@ def test_power_inplace(context, plain, power, precision):
 def test_polynomial(context, data, polynom):
     ct = ts.ckks_tensor(context, data)
     expected = (
-        np.array([np.polyval(polynom[::-1], x) for x in data.raw]).reshape(data.shape()).tolist()
+        np.array([np.polyval(polynom[::-1], x) for x in data.raw]).reshape(data.shape).tolist()
     )
     result = ct.polyval(polynom)
 

@@ -23,6 +23,7 @@ class AbstractTensor(ABC):
     def context(self):
         return ts.Context._wrap(self.data.context())
 
+    @property
     def shape(self):
         return self.data.shape()
 

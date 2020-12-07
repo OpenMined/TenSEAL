@@ -12,7 +12,7 @@ class CKKSTensor(AbstractTensor):
 
         Args:
             context: a Context object, holding the encryption parameters and keys.
-            tensor: a PlainTensorDouble holding data to be encrypted.
+            tensor: a tensor holding data to be encrypted.
             scale: the scale to be used to encode vector values. CKKSTensor will use the global_scale provided by the context if it's set to None.
             batch: 
             data:

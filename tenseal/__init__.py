@@ -5,7 +5,7 @@ try:
     import _tenseal_cpp as _ts_cpp
 except ImportError:
     import tenseal._tenseal_cpp as _ts_cpp
-from tenseal.tensors import CKKSTensor, PlainTensor
+from tenseal.tensors import CKKSTensor, CKKSVector, PlainTensor
 
 # TODO: remove keys constructor from public API
 from tenseal.context import Context, PublicKey, SecretKey, GaloisKeys, RelinKeys
@@ -21,7 +21,6 @@ SCHEME_TYPE = _ts_cpp.SCHEME_TYPE
 
 # Vectors
 BFVVector = _ts_cpp.BFVVector
-CKKSVector = _ts_cpp.CKKSVector
 
 
 def context(*args, **kwargs):
@@ -74,61 +73,12 @@ def bfv_vector_from(context, data):
     )
 
 
-def ckks_vector(context, data, scale=None):
-    """Constructor method for the CKKSVector object, which can store a list
-    of float numbers in encrypted form, using the CKKS homomorphic encryption
-    scheme.
-    """
-    if scale is None:
-        """
-        Args:
-            context: a TenSEALContext object, holding the encryption parameters and keys.
-            data: a list of floats to be encrypted.
-        Returns:
-            CKKSVector object.
-        """
-        if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, list):
-            return _ts_cpp.CKKSVector(context, data)
-
-        raise TypeError(
-            "Invalid CKKS input types context: {} and vector: {}".format(type(context), type(data))
-        )
-    else:
-        """
-        Args:
-            context: a TenSEALContext object, holding the encryption parameters and keys.
-            data: a list of floats to be encrypted.
-            scale: the scale to be used to encode vector values.
-                CKKSVector will use the global_scale provided by the context if it's set to None.
-
-        Returns:
-            CKKSVector object.
-        """
-        if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, list):
-            return _ts_cpp.CKKSVector(context, data, scale)
-
-        raise TypeError(
-            "Invalid CKKS(scale) input types context: {} and vector: {}".format(
-                type(context), type(data)
-            )
-        )
+def ckks_vector(*args, **kwargs):
+    return CKKSVector(*args, **kwargs)
 
 
 def ckks_vector_from(context, data):
-    """
-    Constructor method for the CKKSVector object from a serialized protobuffer.
-    Args:
-        context: a TenSEALContext object, holding the encryption parameters and keys.
-        data: the serialized protobuffer.
-    Returns:
-        CKKSVector object.
-    """
-    if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, bytes):
-        return _ts_cpp.CKKSVector(context, data)
-
-    raise TypeError(
-        "Invalid CKKS input types context: {} and vector: {}".format(type(context), type(data))
-    )
+    return CKKSVector.load(context, data)
 
 
 def ckks_tensor(*args, **kwargs):
@@ -152,7 +102,7 @@ def tolist(plain_tensor):
 
     import numpy as np
 
-    return np.array(plain_tensor.raw).reshape(plain_tensor.shape()).tolist()
+    return np.array(plain_tensor.raw).reshape(plain_tensor.shape).tolist()
 
 
 __all__ = [
