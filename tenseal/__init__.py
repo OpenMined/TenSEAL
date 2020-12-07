@@ -5,22 +5,41 @@ try:
     import _tenseal_cpp as _ts_cpp
 except ImportError:
     import tenseal._tenseal_cpp as _ts_cpp
-from tenseal.tensors import CKKSTensor, CKKSVector, PlainTensor
+from tenseal.tensors import CKKSTensor, CKKSVector, BFVVector, PlainTensor
 
 # TODO: remove keys constructor from public API
 from tenseal.context import Context, PublicKey, SecretKey, GaloisKeys, RelinKeys
 from tenseal.version import __version__
 
 
-# TODO: should we also wrap those in Python?
-im2col_encoding = _ts_cpp.im2col_encoding
-enc_matmul_encoding = _ts_cpp.enc_matmul_encoding
-
 # TODO: make these native python enum
 SCHEME_TYPE = _ts_cpp.SCHEME_TYPE
 
-# Vectors
-BFVVector = _ts_cpp.BFVVector
+
+def im2col_encoding(context, tensor, kernel_n_rows, kernel_n_cols, stride):
+    if not isinstance(context, Context):
+        raise TypeError("context must be of type tenseal.Context")
+    if not isinstance(tensor, PlainTensor):
+        tensor = plain_tensor(tensor)
+        if len(tensor.shape) != 2:
+            raise ValueError("tensor must be a matrix")
+        matrix = tensor.tolist()
+
+    ckks_vec, windows_nb = _ts_cpp.im2col_encoding(
+        context.data, matrix, kernel_n_cols, kernel_n_rows, stride
+    )
+    return CKKSVector._wrap(ckks_vec), windows_nb
+
+
+def enc_matmul_encoding(context, tensor):
+    if not isinstance(context, Context):
+        raise TypeError("context must be of type tenseal.Context")
+    if not isinstance(tensor, PlainTensor):
+        tensor = plain_tensor(tensor)
+        if len(tensor.shape) != 2:
+            raise ValueError("tensor must be a matrix")
+        matrix = tensor.tolist()
+    return CKKSVector._wrap(_ts_cpp.enc_matmul_encoding(context.data, matrix))
 
 
 def context(*args, **kwargs):
@@ -35,42 +54,12 @@ def plain_tensor(*args, **kwargs):
     return PlainTensor(*args, **kwargs)
 
 
-def bfv_vector(context, data):
-    """Constructor method for the BFVVector object, which can store a list
-    of integers in encrypted form, using the BFV homomorphic encryption
-    scheme.
-
-    Args:
-        context: a TenSEALContext object, holding the encryption parameters and keys.
-        data: a list of integers to be encrypted.
-
-    Returns:
-        BFVVector object.
-    """
-    if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, list):
-        return _ts_cpp.BFVVector(context, data)
-
-    raise TypeError(
-        "Invalid BFV input types context: {} and vector: {}".format(type(context), type(data))
-    )
+def bfv_vector(*args, **kwargs):
+    return BFVVector(*args, **kwargs)
 
 
 def bfv_vector_from(context, data):
-    """Constructor method for the BFVVector object, from a serialized protobuffer.
-
-    Args:
-        context: a TenSEALContext object, holding the encryption parameters and keys.
-        data: serialized protobuffer.
-
-    Returns:
-        BFVVector object.
-    """
-    if isinstance(context, _ts_cpp.TenSEALContext) and isinstance(data, bytes):
-        return _ts_cpp.BFVVector(context, data)
-
-    raise TypeError(
-        "Invalid BFV input types context: {} and vector: {}".format(type(context), type(data))
-    )
+    return BFVVector.load(context, data)
 
 
 def ckks_vector(*args, **kwargs):

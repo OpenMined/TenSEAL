@@ -4,4 +4,5 @@ one for their specific use case.
 """
 from tenseal.tensors.ckks_tensor import CKKSTensor
 from tenseal.tensors.ckks_vector import CKKSVector
+from tenseal.tensors.bfv_vector import BFVVector
 from tenseal.tensors.plain_tensor import PlainTensor
