@@ -58,11 +58,9 @@ class PlainTensor:
         del self._data
         self._dtype = value
         if self.dtype == "float":
-            self._dtype = "float"
             data = [float(r) for r in raw]
             self.data = ts._ts_cpp.PlainTensorDouble(data, shape)
         elif self.dtype == "int":
-            self._dtype = "int"
             data = [int(r) for r in raw]
             self.data = ts._ts_cpp.PlainTensorInt64(data, shape)
 
