@@ -20,6 +20,12 @@ class AbstractTensor(ABC):
     def copy(self):
         return self.__init__(data=self.data.copy())
 
+    def context(self):
+        return ts.Context._wrap(self.data.context())
+
+    def shape(self):
+        return self.data.shape()
+
     @classmethod
     def load(cls, context, data):
         """
@@ -53,6 +59,20 @@ class AbstractTensor(ABC):
         else:
             raise TypeError(f"incorrect type: {type(secret_key)} != SecretKey")
 
+    @classmethod
+    def _get_operand(cls, other, dtype="float"):
+        if isinstance(other, (int, float)):
+            return other
+        elif isinstance(other, (cls, ts.PlainTensor)):
+            return other.data
+        else:
+            try:
+                other = ts.plain_tensor(other, dtype=dtype)
+                other = other.data
+            except TypeError:
+                raise TypeError(f"can't operate with object of type {type(other)}")
+            return other
+
     def __add__(self, other):
         return self.add(other)
 
@@ -61,3 +81,33 @@ class AbstractTensor(ABC):
 
     def __radd__(self, other):
         return self.add(other)
+
+    def __mul__(self, other):
+        return self.mul(other)
+
+    def __imul__(self, other):
+        return self.mul_(other)
+
+    def __rmul__(self, other):
+        return self.mul(other)
+
+    def __sub__(self, other):
+        return self.sub(other)
+
+    def __isub__(self, other):
+        return self.sub_(other)
+
+    def __rsub__(self, other):
+        copy = self.copy()
+        copy.negate_()
+        copy.add_(other)
+        return copy
+
+    def __pow__(self, power):
+        return self.pow(power)
+
+    def __ipow__(self, power):
+        return self.pow_(power)
+
+    def __neg__(self):
+        return self.neg()

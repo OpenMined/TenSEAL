@@ -5,7 +5,7 @@ import numpy as np
 
 
 class PlainTensor:
-    def __init__(self, tensor, dtype="float"):
+    def __init__(self, tensor, shape=None, dtype="float"):
         """Constructor method for the PlainTensor object.
         Args:
             tensor:
@@ -19,7 +19,7 @@ class PlainTensor:
             t = np.array(tensor, dtype=dtype)
         except:
             raise TypeError("input isn't a well structured tensor")
-        shape = t.shape
+        shape = t.shape if shape is None else shape
         data = t.flatten().tolist()
         if dtype == "float":
             self._dtype = "float"

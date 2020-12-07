@@ -37,31 +37,82 @@ class CKKSTensor(AbstractTensor):
             else:
                 self.data = ts._ts_cpp.CKKSTensor(context.data, tensor.data, scale, batch)
 
+    def scale(self):
+        return self.data.scale()
+
     def decrypt(self, secret_key=None):
-        return self._decrypt(secret_key=secret_key)
+        pt = self._decrypt(secret_key=secret_key)
+        return ts.PlainTensor(pt.data(), shape=pt.shape(), dtype="float")
 
     def add(self, other):
-        if isinstance(other, (int, float)):
-            result = self.data + other
-        elif isinstance(other, self.__class__):
-            result = self.data + other.data
-        else:
-            try:
-                to_add = ts.plain_tensor(other, dtype="float")
-            except TypeError:
-                raise TypeError(f"can't add with object of type {type(other)}")
-            result = self.data + to_add
-
+        other = self._get_operand(other, dtype="float")
+        result = self.data + other
         return self._wrap(result)
 
     def add_(self, other):
-        if isinstance(other, (int, float)):
-            self.data += other
-        elif isinstance(other, self.__class__):
-            self.data += other.data
-        else:
-            try:
-                to_add = ts.plain_tensor(other, dtype="float")
-            except TypeError:
-                raise TypeError(f"can't add with object of type {type(other)}")
-            self.data += to_add
+        other = self._get_operand(other, dtype="float")
+        self.data += other
+        return self
+
+    def mul(self, other):
+        other = self._get_operand(other, dtype="float")
+        result = self.data * other
+        return self._wrap(result)
+
+    def mul_(self, other):
+        other = self._get_operand(other, dtype="float")
+        self.data *= other
+        return self
+
+    def sub(self, other):
+        other = self._get_operand(other, dtype="float")
+        result = self.data - other
+        return self._wrap(result)
+
+    def sub_(self, other):
+        other = self._get_operand(other, dtype="float")
+        self.data -= other
+        return self
+
+    # TODO specific parameters
+    def neg(self, *args, **kwargs):
+        return self._wrap(self.data.neg(*args, **kwargs))
+
+    def neg_(self, *args, **kwargs):
+        self.data.neg_(*args, **kwargs)
+        return self
+
+    def sum(self, *args, **kwargs):
+        return self._wrap(self.data.sum(*args, **kwargs))
+
+    def sum_(self, *args, **kwargs):
+        self.data.sum_(*args, **kwargs)
+        return self
+
+    def sum_batch(self, *args, **kwargs):
+        return self._wrap(self.data.sum_batch(*args, **kwargs))
+
+    def sum_batch_(self, *args, **kwargs):
+        self.data.sum_batch_(*args, **kwargs)
+        return self
+
+    def square(self, *args, **kwargs):
+        return self._wrap(self.data.square(*args, **kwargs))
+
+    def square_(self, *args, **kwargs):
+        self.data.square_(*args, **kwargs)
+        return self
+
+    def pow(self, *args, **kwargs):
+        return self._wrap(self.data.pow(*args, **kwargs))
+
+    def pow_(self, *args, **kwargs):
+        self.data.pow_(*args, **kwargs)
+        return self
+
+    def polyval(self, *args, **kwargs):
+        return self._wrap(self.data.polyval(*args, **kwargs))
+
+    def polyval_(self, *args, **kwargs):
+        self.data.polyval_(*args, **kwargs)
+        return self

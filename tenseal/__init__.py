@@ -146,12 +146,12 @@ def tolist(plain_tensor):
     Returns:
         Python list.
     """
-    if not isinstance(plain_tensor, _ts_cpp.PlainTensorDouble):
+    if not isinstance(plain_tensor, PlainTensor):
         raise TypeError("Invalid plain tensor type {}".format(type(plain_tensor)))
 
     import numpy as np
 
-    return np.array(plain_tensor.data()).reshape(plain_tensor.shape()).tolist()
+    return np.array(plain_tensor.raw).reshape(plain_tensor.shape()).tolist()
 
 
 __all__ = [
