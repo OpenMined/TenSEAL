@@ -20,6 +20,9 @@ class AbstractTensor(ABC):
     def copy(self):
         return self._wrap(data=self.data.copy())
 
+    def __copy__(self):
+        return self.copy()
+
     def context(self):
         return ts.Context._wrap(self.data.context())
 

@@ -107,7 +107,10 @@ class Context:
         self._data = value
 
     def copy(self):
-        return self.__init__(data=self.data.copy())
+        return self._wrap(self.data.copy())
+
+    def __copy__(self):
+        return self.copy()
 
     @classmethod
     def load(cls, data, n_threads=None):
