@@ -111,3 +111,38 @@ class AbstractTensor(ABC):
 
     def __neg__(self):
         return self.neg()
+
+    def neg(self):
+        return self._wrap(self.data.neg())
+
+    def neg_(self):
+        self.data.neg_()
+        return self
+
+    def sum(self, axis=0):
+        return self._wrap(self.data.sum(axis))
+
+    def sum_(self, axis=0):
+        self.data.sum_(axis)
+        return self
+
+    def square(self):
+        return self._wrap(self.data.square())
+
+    def square_(self):
+        self.data.square_()
+        return self
+
+    def pow(self, power):
+        return self._wrap(self.data.pow(power))
+
+    def pow_(self, power):
+        self.data.pow_(power)
+        return self
+
+    def polyval(self, coefficients):
+        return self._wrap(self.data.polyval(coefficients))
+
+    def polyval_(self, coefficients):
+        self.data.polyval_(coefficients)
+        return self

@@ -74,45 +74,9 @@ class CKKSTensor(AbstractTensor):
         self.data -= other
         return self
 
-    # TODO specific parameters
-    def neg(self, *args, **kwargs):
-        return self._wrap(self.data.neg(*args, **kwargs))
+    def sum_batch(self):
+        return self._wrap(self.data.sum_batch())
 
-    def neg_(self, *args, **kwargs):
-        self.data.neg_(*args, **kwargs)
-        return self
-
-    def sum(self, *args, **kwargs):
-        return self._wrap(self.data.sum(*args, **kwargs))
-
-    def sum_(self, *args, **kwargs):
-        self.data.sum_(*args, **kwargs)
-        return self
-
-    def sum_batch(self, *args, **kwargs):
-        return self._wrap(self.data.sum_batch(*args, **kwargs))
-
-    def sum_batch_(self, *args, **kwargs):
-        self.data.sum_batch_(*args, **kwargs)
-        return self
-
-    def square(self, *args, **kwargs):
-        return self._wrap(self.data.square(*args, **kwargs))
-
-    def square_(self, *args, **kwargs):
-        self.data.square_(*args, **kwargs)
-        return self
-
-    def pow(self, *args, **kwargs):
-        return self._wrap(self.data.pow(*args, **kwargs))
-
-    def pow_(self, *args, **kwargs):
-        self.data.pow_(*args, **kwargs)
-        return self
-
-    def polyval(self, *args, **kwargs):
-        return self._wrap(self.data.polyval(*args, **kwargs))
-
-    def polyval_(self, *args, **kwargs):
-        self.data.polyval_(*args, **kwargs)
+    def sum_batch_(self):
+        self.data.sum_batch_()
         return self

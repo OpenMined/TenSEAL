@@ -6,6 +6,7 @@ try:
 except ImportError:
     import tenseal._tenseal_cpp as _ts_cpp
 from tenseal.tensors import CKKSTensor, PlainTensor
+
 # TODO: remove keys constructor from public API
 from tenseal.context import Context, PublicKey, SecretKey, GaloisKeys, RelinKeys
 from tenseal.version import __version__
