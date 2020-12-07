@@ -39,9 +39,41 @@ class PlainTensor:
         self._data = value
 
     @property
+    def raw(self):
+        return self.data.data()
+
+    @property
     def dtype(self):
         return self._dtype
 
     @dtype.setter
     def dtype(self, value):
-        raise RuntimeError("cannot convert dtype")
+        """Convert tensor data type."""
+        if value not in ("float", "int"):
+            raise ValueError("wrong dtype, must be either 'float' or 'int'")
+        if self.dtype == value:  # nothing to do
+            return
+        raw = self.raw
+        shape = self.shape()
+        del self._data
+        self._dtype = value
+        if self.dtype == "float":
+            self._dtype = "float"
+            data = [float(r) for r in raw]
+            self.data = ts._ts_cpp.PlainTensorDouble(data, shape)
+        elif self.dtype == "int":
+            self._dtype = "int"
+            data = [int(r) for r in raw]
+            self.data = ts._ts_cpp.PlainTensorInt64(data, shape)
+
+    def at(self, index):
+        return self.data.at(index)
+
+    def shape(self):
+        return self.data.shape()
+
+    def empty(self):
+        return bool(self.data.empty())
+
+    def __len__(self):
+        return len(self.data)
