@@ -42,7 +42,7 @@ class AbstractTensor(ABC):
         Returns:
             Tensor object.
         """
-        if isinstance(context, "ts.Context") and isinstance(data, bytes):
+        if isinstance(context, ts.Context) and isinstance(data, bytes):
             native_type = getattr(ts._ts_cpp, cls.__name__)
             return cls._wrap(native_type(context.data, data))
 
@@ -64,7 +64,7 @@ class AbstractTensor(ABC):
     ) -> Union[ts._ts_cpp.PlainTensorDouble, ts._ts_cpp.PlainTensorInt64, List[float], List[int]]:
         if secret_key is None:
             return self.data.decrypt()
-        elif isinstance(secret_key, ts.SecretKey):
+        elif isinstance(secret_key, ts.enc_context.SecretKey):
             return self.data.decrypt(secret_key.data)
         else:
             raise TypeError(f"incorrect type: {type(secret_key)} != SecretKey")

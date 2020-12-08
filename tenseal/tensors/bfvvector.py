@@ -6,7 +6,9 @@ from tenseal.tensors.abstract_tensor import AbstractTensor
 
 
 class BFVVector(AbstractTensor):
-    def __init__(self, context: "ts.Context" = None, vector=None, data: ts._ts_cpp.BFVVector = None):
+    def __init__(
+        self, context: "ts.Context" = None, vector=None, data: ts._ts_cpp.BFVVector = None
+    ):
         """Constructor method for the BFVVector object, which can store a vector of
         integers in encrypted form, using the BFV homomorphic encryption scheme.
 
