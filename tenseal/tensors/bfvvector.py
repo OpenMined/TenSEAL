@@ -1,19 +1,19 @@
+"""Vector of values encrypted using BFV.
 """
-"""
-
+from typing import List
 import tenseal as ts
 from tenseal.tensors.abstract_tensor import AbstractTensor
 
 
 class BFVVector(AbstractTensor):
-    def __init__(self, context=None, vector=None, data=None):
+    def __init__(self, context: ts.Context = None, vector=None, data: ts._ts_cpp.BFVVector = None):
         """Constructor method for the BFVVector object, which can store a vector of
-        intgers in encrypted form, using the BFV homomorphic encryption scheme.
+        integers in encrypted form, using the BFV homomorphic encryption scheme.
 
         Args:
             context: a Context object, holding the encryption parameters and keys.
-            vector: a vector holding data to be encrypted.
-            data: used if the vector doesn't need to be constructed, but rather use this objects internally.
+            vector (of int): a vector holding data to be encrypted.
+            data: A ts._ts_cpp.BFVVector to wrap. We won't construct a new object if it's passed.
 
         Returns:
             BFVVector object.
@@ -33,14 +33,14 @@ class BFVVector(AbstractTensor):
 
             self.data = ts._ts_cpp.BFVVector(context.data, vector)
 
-    def decrypt(self, secret_key=None):
+    def decrypt(self, secret_key: ts.enc_context.SecretKey = None) -> List[int]:
         return self._decrypt(secret_key=secret_key)
 
-    def size(self):
+    def size(self) -> int:
         return self.data.size()
 
     @classmethod
-    def pack_vectors(cls, vectors):
+    def pack_vectors(cls, vectors: List["BFVVector"]) -> "BFVVector":
         to_pack = []
         for v in vectors:
             if not isinstance(v, cls):
@@ -67,32 +67,32 @@ class BFVVector(AbstractTensor):
 
         return other
 
-    def add(self, other):
+    def add(self, other) -> "BFVVector":
         other = self._get_operand(other, dtype="int")
         result = self.data + other
         return self._wrap(result)
 
-    def add_(self, other):
+    def add_(self, other) -> "BFVVector":
         other = self._get_operand(other, dtype="int")
         self.data += other
         return self
 
-    def mul(self, other):
+    def mul(self, other) -> "BFVVector":
         other = self._get_operand(other, dtype="int")
         result = self.data * other
         return self._wrap(result)
 
-    def mul_(self, other):
+    def mul_(self, other) -> "BFVVector":
         other = self._get_operand(other, dtype="int")
         self.data *= other
         return self
 
-    def sub(self, other):
+    def sub(self, other) -> "BFVVector":
         other = self._get_operand(other, dtype="int")
         result = self.data - other
         return self._wrap(result)
 
-    def sub_(self, other):
+    def sub_(self, other) -> "BFVVector":
         other = self._get_operand(other, dtype="int")
         self.data -= other
         return self

@@ -1,6 +1,5 @@
-"""
-"""
-
+"""Abstract tensor class that implements common tensor methods"""
+from typing import List, Union
 import tenseal as ts
 from abc import ABC
 
@@ -8,10 +7,12 @@ from abc import ABC
 class AbstractTensor(ABC):
     @property
     def data(self):
+        """Get the wrapped low level tensor object"""
         return self._data
 
     @data.setter
     def data(self, value):
+        """Set the wrapped low level tensor object"""
         native_type = getattr(ts._ts_cpp, self.__class__.__name__)
         if not isinstance(value, native_type):
             raise TypeError(f"value must be of type {native_type}")
@@ -23,15 +24,16 @@ class AbstractTensor(ABC):
     def __copy__(self):
         return self.copy()
 
-    def context(self):
+    def context(self) -> ts.Context:
+        """Get the context linked to this tensor"""
         return ts.Context._wrap(self.data.context())
 
     @property
-    def shape(self):
+    def shape(self) -> List[int]:
         return self.data.shape()
 
     @classmethod
-    def load(cls, context, data):
+    def load(cls, context: ts.Context, data: bytes) -> "AbstractTensor":
         """
         Constructor method for the tensor object from a serialized protobuffer.
         Args:
@@ -48,14 +50,18 @@ class AbstractTensor(ABC):
             "Invalid input types context: {} and vector: {}".format(type(context), type(data))
         )
 
-    def serialize(self):
+    def serialize(self) -> bytes:
+        """Serialize the tensor into a stream of bytes"""
         return self.data.serialize()
 
     @classmethod
-    def _wrap(cls, data):
+    def _wrap(cls, data) -> "AbstractTensor":
+        """Return a new tensor object wrapping the low level tensor object"""
         return cls(data=data)
 
-    def _decrypt(self, secret_key=None):
+    def _decrypt(
+        self, secret_key: ts.enc_context.SecretKey = None
+    ) -> Union[ts._ts_cpp.PlainTensorDouble, ts._ts_cpp.PlainTensorInt64, List[float], List[int]]:
         if secret_key is None:
             return self.data.decrypt()
         elif isinstance(secret_key, ts.SecretKey):
@@ -64,7 +70,8 @@ class AbstractTensor(ABC):
             raise TypeError(f"incorrect type: {type(secret_key)} != SecretKey")
 
     @classmethod
-    def _get_operand(cls, other, dtype="float"):
+    def _get_operand(cls, other, dtype: str = "float") -> Union[int, float, "ts._ts_cpp.Tensor"]:
+        """Extract the appropriate operand the tensor can operate with"""
         if isinstance(other, (int, float)):
             return other
         elif isinstance(other, (cls, ts.PlainTensor)):
@@ -77,76 +84,79 @@ class AbstractTensor(ABC):
                 raise TypeError(f"can't operate with object of type {type(other)}")
             return other
 
-    def __add__(self, other):
+    def __add__(self, other) -> "AbstractTensor":
         return self.add(other)
 
-    def __iadd__(self, other):
+    def __iadd__(self, other) -> "AbstractTensor":
         return self.add_(other)
 
-    def __radd__(self, other):
+    def __radd__(self, other) -> "AbstractTensor":
         return self.add(other)
 
-    def __mul__(self, other):
+    def __mul__(self, other) -> "AbstractTensor":
         return self.mul(other)
 
-    def __imul__(self, other):
+    def __imul__(self, other) -> "AbstractTensor":
         return self.mul_(other)
 
-    def __rmul__(self, other):
+    def __rmul__(self, other) -> "AbstractTensor":
         return self.mul(other)
 
-    def __sub__(self, other):
+    def __sub__(self, other) -> "AbstractTensor":
         return self.sub(other)
 
-    def __isub__(self, other):
+    def __isub__(self, other) -> "AbstractTensor":
         return self.sub_(other)
 
-    def __rsub__(self, other):
+    def __rsub__(self, other) -> "AbstractTensor":
         copy = self.copy()
         copy.neg_()
         copy.add_(other)
         return copy
 
-    def __pow__(self, power):
+    def __pow__(self, power) -> "AbstractTensor":
         return self.pow(power)
 
-    def __ipow__(self, power):
+    def __ipow__(self, power) -> "AbstractTensor":
         return self.pow_(power)
 
-    def __neg__(self):
+    def __neg__(self) -> "AbstractTensor":
         return self.neg()
 
-    def neg(self):
+    def neg(self) -> "AbstractTensor":
         return self._wrap(self.data.neg())
 
-    def neg_(self):
+    def neg_(self) -> "AbstractTensor":
         self.data.neg_()
         return self
 
-    def sum(self, axis=0):
+    def sum(self, axis=0) -> "AbstractTensor":
         return self._wrap(self.data.sum(axis))
 
-    def sum_(self, axis=0):
+    def sum_(self, axis=0) -> "AbstractTensor":
         self.data.sum_(axis)
         return self
 
-    def square(self):
+    def square(self) -> "AbstractTensor":
         return self._wrap(self.data.square())
 
-    def square_(self):
+    def square_(self) -> "AbstractTensor":
         self.data.square_()
         return self
 
-    def pow(self, power):
+    def pow(self, power) -> "AbstractTensor":
         return self._wrap(self.data.pow(power))
 
-    def pow_(self, power):
+    def pow_(self, power) -> "AbstractTensor":
         self.data.pow_(power)
         return self
 
-    def polyval(self, coefficients):
+    def polyval(self, coefficients: Union[List[float], List[int]]) -> "AbstractTensor":
+        """Evaluate polynomial
+        `coefficients[0] + coefficients[1] * self + .... coefficients[n] * self ^ n`
+        """
         return self._wrap(self.data.polyval(coefficients))
 
-    def polyval_(self, coefficients):
+    def polyval_(self, coefficients: Union[List[float], List[int]]) -> "AbstractTensor":
         self.data.polyval_(coefficients)
         return self

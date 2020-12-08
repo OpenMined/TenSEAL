@@ -1,20 +1,26 @@
+"""Vector of values encrypted using CKKS. Less flexible, but more efficient than CKKSTensor.
 """
-"""
-
+from typing import List
 import tenseal as ts
 from tenseal.tensors.abstract_tensor import AbstractTensor
 
 
 class CKKSVector(AbstractTensor):
-    def __init__(self, context=None, vector=None, scale=None, data=None):
+    def __init__(
+        self,
+        context: ts.Context = None,
+        vector=None,
+        scale: float = None,
+        data: ts._ts_cpp.CKKSVector = None,
+    ):
         """Constructor method for the CKKSVector object, which can store a vector of
         float numbers in encrypted form, using the CKKS homomorphic encryption scheme.
 
         Args:
             context: a Context object, holding the encryption parameters and keys.
-            vector: a vector holding data to be encrypted.
+            vector (of float): a vector holding data to be encrypted.
             scale: the scale to be used to encode vector values. CKKSTensor will use the global_scale provided by the context if it's set to None.
-            data: used if the vector doesn't need to be constructed, but rather use this objects internally.
+            data: A ts._ts_cpp.CKKSVector to wrap. We won't construct a new object if it's passed.
 
         Returns:
             CKKSVector object.
@@ -37,17 +43,17 @@ class CKKSVector(AbstractTensor):
             else:
                 self.data = ts._ts_cpp.CKKSVector(context.data, vector, scale)
 
-    def scale(self):
+    def scale(self) -> float:
         return self.data.scale()
 
-    def decrypt(self, secret_key=None):
+    def decrypt(self, secret_key: ts.enc_context.SecretKey = None) -> List[float]:
         return self._decrypt(secret_key=secret_key)
 
-    def size(self):
+    def size(self) -> int:
         return self.data.size()
 
     @classmethod
-    def pack_vectors(cls, vectors):
+    def pack_vectors(cls, vectors: List["CKKSVector"]) -> "CKKSVector":
         to_pack = []
         for v in vectors:
             if not isinstance(v, cls):
@@ -74,32 +80,32 @@ class CKKSVector(AbstractTensor):
 
         return other
 
-    def add(self, other):
+    def add(self, other) -> "CKKSVector":
         other = self._get_operand(other, dtype="float")
         result = self.data + other
         return self._wrap(result)
 
-    def add_(self, other):
+    def add_(self, other) -> "CKKSVector":
         other = self._get_operand(other, dtype="float")
         self.data += other
         return self
 
-    def mul(self, other):
+    def mul(self, other) -> "CKKSVector":
         other = self._get_operand(other, dtype="float")
         result = self.data * other
         return self._wrap(result)
 
-    def mul_(self, other):
+    def mul_(self, other) -> "CKKSVector":
         other = self._get_operand(other, dtype="float")
         self.data *= other
         return self
 
-    def sub(self, other):
+    def sub(self, other) -> "CKKSVector":
         other = self._get_operand(other, dtype="float")
         result = self.data - other
         return self._wrap(result)
 
-    def sub_(self, other):
+    def sub_(self, other) -> "CKKSVector":
         other = self._get_operand(other, dtype="float")
         self.data -= other
         return self
@@ -117,11 +123,11 @@ class CKKSVector(AbstractTensor):
             raise ValueError("can only operate with a vector")
         return other.data
 
-    def dot(self, other):
+    def dot(self, other) -> "CKKSVector":
         other = self._dot(other)
         return self._wrap(self.data.dot(other))
 
-    def dot_(self, other):
+    def dot_(self, other) -> "CKKSVector":
         other = self._dot(other)
         self.data.dot_(other)
         return self
@@ -138,32 +144,32 @@ class CKKSVector(AbstractTensor):
         other = other.tolist()
         return other
 
-    def mm(self, other, n_jobs=0):
+    def mm(self, other, n_jobs=0) -> "CKKSVector":
         other = self._mm(other)
         return self._wrap(self.data.mm(other, n_jobs))
 
-    def mm_(self, other, n_jobs=0):
+    def mm_(self, other, n_jobs=0) -> "CKKSVector":
         other = self._mm(other)
         self.data.mm_(other, n_jobs)
         return self
 
-    def matmul(self, *args, **kwargs):
+    def matmul(self, *args, **kwargs) -> "CKKSVector":
         return self.mm(*args, **kwargs)
 
-    def matmul_(self, *args, **kwargs):
+    def matmul_(self, *args, **kwargs) -> "CKKSVector":
         return self.mm_(*args, **kwargs)
 
-    def __matmul__(self, *args, **kwargs):
+    def __matmul__(self, *args, **kwargs) -> "CKKSVector":
         return self.mm(*args, **kwargs)
 
-    def __imatmul__(self, *args, **kwargs):
+    def __imatmul__(self, *args, **kwargs) -> "CKKSVector":
         return self.mm_(*args, **kwargs)
 
-    def conv2d_im2col(self, other, windows_nb):
+    def conv2d_im2col(self, other, windows_nb) -> "CKKSVector":
         other = self._mm(other)
         return self._wrap(self.data.conv2d_im2col(other, windows_nb))
 
-    def conv2d_im2col_(self, other, windows_nb):
+    def conv2d_im2col_(self, other, windows_nb) -> "CKKSVector":
         other = self._mm(other)
         self.data.conv2d_im2col_(other, windows_nb)
         return self
@@ -180,11 +186,11 @@ class CKKSVector(AbstractTensor):
         other = other.raw
         return other
 
-    def enc_matmul_plain(self, other, row_size):
+    def enc_matmul_plain(self, other, row_size) -> "CKKSVector":
         other = self._enc_matmul_plain(other)
         return self._wrap(self.data.enc_matmul_plain(other, row_size))
 
-    def enc_matmul_plain_(self, other, row_size):
+    def enc_matmul_plain_(self, other, row_size) -> "CKKSVector":
         other = self._enc_matmul_plain(other)
         self.data.enc_matmul_plain_(other, row_size)
         return self
