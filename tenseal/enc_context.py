@@ -1,9 +1,16 @@
 """The Context manages everything related to the encrypted computation, including keys, which
 optimization should be enabled, and how many threads should run for a parallel computation.
 """
+from enum import Enum
 from typing import List, Union
 from abc import ABC
 import tenseal as ts
+
+
+class SCHEME_TYPE(Enum):
+    NONE = ts._ts_cpp.SCHEME_TYPE.NONE
+    BFV = ts._ts_cpp.SCHEME_TYPE.BFV
+    CKKS = ts._ts_cpp.SCHEME_TYPE.CKKS
 
 
 class Key(ABC):
@@ -67,7 +74,7 @@ class RelinKeys(Key):
 class Context:
     def __init__(
         self,
-        scheme: ts.SCHEME_TYPE = None,
+        scheme: SCHEME_TYPE = None,
         poly_modulus_degree: int = None,
         plain_modulus: int = None,
         coeff_mod_bit_sizes: List[int] = None,
@@ -94,13 +101,13 @@ class Context:
             self.data = data
         # constructing a new object
         else:
-            if scheme == ts.SCHEME_TYPE.BFV:
+            if scheme == SCHEME_TYPE.BFV:
                 if plain_modulus is None:
                     raise ValueError("plain_modulus must be provided")
                 if coeff_mod_bit_sizes is None:
                     coeff_mod_bit_sizes = []
 
-            elif scheme == ts.SCHEME_TYPE.CKKS:
+            elif scheme == SCHEME_TYPE.CKKS:
                 # must be int, but the value doesn't matter for ckks
                 plain_modulus = 0
                 if coeff_mod_bit_sizes is None:
@@ -114,11 +121,11 @@ class Context:
             # We can't pass None here, everything should be set prior to this call
             if isinstance(n_threads, int) and n_threads > 0:
                 self.data = ts._ts_cpp.TenSEALContext.new(
-                    scheme, poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes, n_threads
+                    scheme.value, poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes, n_threads
                 )
 
             self.data = ts._ts_cpp.TenSEALContext.new(
-                scheme, poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes
+                scheme.value, poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes
             )
 
     @property
@@ -134,14 +141,14 @@ class Context:
             raise TypeError(f"value must be of type {native_type}")
         self._data = value
 
-    def copy(self) -> ts.Context:
+    def copy(self) -> "Context":
         return self._wrap(self.data.copy())
 
-    def __copy__(self) -> ts.Context:
+    def __copy__(self) -> "Context":
         return self.copy()
 
     @classmethod
-    def load(cls, data: bytes, n_threads: int = None) -> ts.Context:
+    def load(cls, data: bytes, n_threads: int = None) -> "Context":
         """Construct a context from a serialized buffer.
 
         Args:
@@ -168,7 +175,7 @@ class Context:
         self.data.global_scale = value
 
     @classmethod
-    def _wrap(cls, data: ts._ts_cpp.TenSEALContext) -> ts.Context:
+    def _wrap(cls, data: ts._ts_cpp.TenSEALContext) -> "Context":
         """Return a new Context object wrapping the low level TenSEALContext object"""
         return cls(data=data)
 

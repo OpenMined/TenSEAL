@@ -8,7 +8,7 @@ from tenseal.tensors.abstract_tensor import AbstractTensor
 class CKKSTensor(AbstractTensor):
     def __init__(
         self,
-        context: ts.Context = None,
+        context: "ts.Context" = None,
         tensor=None,
         scale: float = None,
         batch: bool = False,
@@ -47,7 +47,7 @@ class CKKSTensor(AbstractTensor):
     def scale(self) -> float:
         return self.data.scale()
 
-    def decrypt(self, secret_key: ts.enc_context.SecretKey = None) -> ts.PlainTensor:
+    def decrypt(self, secret_key: "ts.enc_context.SecretKey" = None) -> "ts.PlainTensor":
         pt = self._decrypt(secret_key=secret_key)
         return ts.PlainTensor(pt.data(), shape=pt.shape(), dtype="float")
 

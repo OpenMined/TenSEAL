@@ -24,7 +24,7 @@ class AbstractTensor(ABC):
     def __copy__(self):
         return self.copy()
 
-    def context(self) -> ts.Context:
+    def context(self) -> "ts.Context":
         """Get the context linked to this tensor"""
         return ts.Context._wrap(self.data.context())
 
@@ -33,7 +33,7 @@ class AbstractTensor(ABC):
         return self.data.shape()
 
     @classmethod
-    def load(cls, context: ts.Context, data: bytes) -> "AbstractTensor":
+    def load(cls, context: "ts.Context", data: bytes) -> "AbstractTensor":
         """
         Constructor method for the tensor object from a serialized protobuffer.
         Args:
@@ -42,7 +42,7 @@ class AbstractTensor(ABC):
         Returns:
             Tensor object.
         """
-        if isinstance(context, ts.Context) and isinstance(data, bytes):
+        if isinstance(context, "ts.Context") and isinstance(data, bytes):
             native_type = getattr(ts._ts_cpp, cls.__name__)
             return cls._wrap(native_type(context.data, data))
 
@@ -60,7 +60,7 @@ class AbstractTensor(ABC):
         return cls(data=data)
 
     def _decrypt(
-        self, secret_key: ts.enc_context.SecretKey = None
+        self, secret_key: "ts.enc_context.SecretKey" = None
     ) -> Union[ts._ts_cpp.PlainTensorDouble, ts._ts_cpp.PlainTensorInt64, List[float], List[int]]:
         if secret_key is None:
             return self.data.decrypt()

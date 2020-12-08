@@ -8,7 +8,7 @@ from tenseal.tensors.abstract_tensor import AbstractTensor
 class CKKSVector(AbstractTensor):
     def __init__(
         self,
-        context: ts.Context = None,
+        context: "ts.Context" = None,
         vector=None,
         scale: float = None,
         data: ts._ts_cpp.CKKSVector = None,
@@ -46,7 +46,7 @@ class CKKSVector(AbstractTensor):
     def scale(self) -> float:
         return self.data.scale()
 
-    def decrypt(self, secret_key: ts.enc_context.SecretKey = None) -> List[float]:
+    def decrypt(self, secret_key: "ts.enc_context.SecretKey" = None) -> List[float]:
         return self._decrypt(secret_key=secret_key)
 
     def size(self) -> int:

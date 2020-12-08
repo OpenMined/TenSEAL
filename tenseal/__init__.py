@@ -7,12 +7,8 @@ except ImportError:
     import tenseal._tenseal_cpp as _ts_cpp
 from tenseal.tensors import CKKSTensor, CKKSVector, BFVVector, PlainTensor
 
-from tenseal.enc_context import Context
+from tenseal.enc_context import Context, SCHEME_TYPE
 from tenseal.version import __version__
-
-
-# TODO: make these native python enum
-SCHEME_TYPE = _ts_cpp.SCHEME_TYPE
 
 
 def im2col_encoding(
