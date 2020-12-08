@@ -4,8 +4,7 @@ load("@rules_foreign_cc//:workspace_definitions.bzl", "rules_foreign_cc_dependen
 
 load("@pybind11_bazel//:python_configure.bzl", "python_configure")
 load("@rules_python//python:repositories.bzl", "py_repositories")
-load("@rules_python_external//:repositories.bzl", "rules_python_external_dependencies")
-load("@rules_python_external//:defs.bzl", "pip_install")
+load("@rules_python//python:pip.bzl", "pip_install")
 
 def tenseal_deps():
     if "com_google_googletest" not in native.existing_rules():
@@ -45,7 +44,6 @@ def tenseal_deps():
     python_configure(name = "local_config_python", python_version = "3")
 
     # Install pip requirements for Python tests.
-    rules_python_external_dependencies()
     pip_install(
         name = "org_openmined_tenseal_python_deps",
         requirements = "@org_openmined_tenseal//:requirements_dev.txt",

@@ -1,5 +1,6 @@
 import pytest
 import tenseal as ts
+from tenseal.enc_context import GaloisKeys, RelinKeys
 
 
 def test_context_creation():
@@ -21,7 +22,7 @@ def test_generate_galois_keys():
     context.make_context_public(generate_galois_keys=False, generate_relin_keys=False)
 
     context.generate_galois_keys(secret_key)
-    assert isinstance(context.galois_keys(), ts.GaloisKeys), "Galois keys should be set"
+    assert isinstance(context.galois_keys(), GaloisKeys), "Galois keys should be set"
 
 
 def test_generate_relin_keys():
@@ -30,7 +31,7 @@ def test_generate_relin_keys():
     context.make_context_public(generate_galois_keys=False, generate_relin_keys=False)
 
     context.generate_relin_keys(secret_key)
-    assert isinstance(context.relin_keys(), ts.RelinKeys), "Relin keys should be set"
+    assert isinstance(context.relin_keys(), RelinKeys), "Relin keys should be set"
 
 
 def test_global_scale():

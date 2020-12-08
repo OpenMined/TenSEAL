@@ -106,7 +106,7 @@ def test_ckks_tensor_encryption_decryption_matrix(batch):
     plain_tensor = ts.plain_tensor(matrix.tolist())
 
     ckks_vec = ts.ckks_tensor(context, plain_tensor, scale, batch)
-    decrypted_vec = ts.tolist(ckks_vec.decrypt())
+    decrypted_vec = ckks_vec.decrypt().tolist()
 
     assert len(decrypted_vec) == len(matrix)
     for idx in range(len(decrypted_vec)):
@@ -128,7 +128,7 @@ def test_ckks_tensor_encryption_decryption(batch, shape):
     plain_tensor = ts.plain_tensor(tensor.flatten().tolist(), shape=shape)
 
     ckks_vec = ts.ckks_tensor(context, plain_tensor, scale, batch)
-    decrypted_vec = ts.tolist(ckks_vec.decrypt())
+    decrypted_vec = ckks_vec.decrypt().tolist()
 
     assert np.array(decrypted_vec).shape == tensor.shape
     assert np.allclose(tensor, decrypted_vec, rtol=0, atol=0.001)
