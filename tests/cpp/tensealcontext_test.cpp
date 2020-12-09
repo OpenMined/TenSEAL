@@ -156,6 +156,24 @@ TEST_P(TenSEALContextTest, TestCreateCKKSPublic) {
     ASSERT_FALSE(ctx->is_private());
 }
 
+TEST_F(TenSEALContextTest, TestContextRegressionRecreateGaloisCrash) {
+    EncryptionParameters parameters(scheme_type::ckks);
+    parameters.set_poly_modulus_degree(8192);
+    parameters.set_coeff_modulus(
+        CoeffModulus::Create(8192, {40, 21, 21, 21, 21, 21, 21, 40}));
+
+    auto ctx = SEALContext(parameters);
+    auto keygen = KeyGenerator(ctx);
+    auto sk = SecretKey(keygen.secret_key());
+
+    GaloisKeys gk;
+    keygen.create_galois_keys(gk);
+
+    auto serial = SEALSerialize<GaloisKeys>(gk);
+    auto new_gk = SEALDeserialize<GaloisKeys>(ctx, serial);
+    SEALSerialize<GaloisKeys>(new_gk);
+}
+
 INSTANTIATE_TEST_CASE_P(TestContext, TenSEALContextTest,
                         ::testing::Values(false, true));
 
