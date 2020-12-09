@@ -160,7 +160,7 @@ TEST_F(TenSEALContextTest, TestContextRegressionRecreateGaloisCrash) {
     EncryptionParameters parameters(scheme_type::ckks);
     parameters.set_poly_modulus_degree(8192);
     parameters.set_coeff_modulus(
-         CoeffModulus::Create(8192, {40, 21, 21, 21, 21, 21, 21, 40}));
+        CoeffModulus::Create(8192, {40, 21, 21, 21, 21, 21, 21, 40}));
 
     auto ctx = SEALContext(parameters);
     auto keygen = KeyGenerator(ctx);
