@@ -1,6 +1,7 @@
 import pytest
 import copy
 import tenseal as ts
+from tenseal.enc_context import GaloisKeys, RelinKeys
 
 from tests.python.tenseal.utils import *
 
@@ -50,13 +51,13 @@ def test_generate_galois_keys(duplicate):
     orig_context.generate_galois_keys()
 
     context = duplicate(orig_context)
-    assert isinstance(context.galois_keys(), ts.GaloisKeys), "Galois keys should be set"
+    assert isinstance(context.galois_keys(), GaloisKeys), "Galois keys should be set"
 
     orig_public_context = ctx()
     orig_public_context.make_context_public(generate_galois_keys=True, generate_relin_keys=False)
     context = duplicate(orig_public_context)
 
-    assert isinstance(context.galois_keys(), ts.GaloisKeys), "Galois keys should be set"
+    assert isinstance(context.galois_keys(), GaloisKeys), "Galois keys should be set"
 
     orig_context = ctx()
     context = duplicate(orig_context)
@@ -71,17 +72,17 @@ def test_generate_relin_keys(duplicate):
     # by default, Relin keys will be generated on context creation
     orig_context = ctx()
     context = duplicate(orig_context)
-    assert isinstance(context.relin_keys(), ts.RelinKeys), "Relin keys should be set"
+    assert isinstance(context.relin_keys(), RelinKeys), "Relin keys should be set"
 
     orig_public_context = ctx()
     orig_public_context.make_context_public(generate_galois_keys=False, generate_relin_keys=False)
     context = duplicate(orig_public_context)
-    assert isinstance(context.relin_keys(), ts.RelinKeys), "Relin keys should be set"
+    assert isinstance(context.relin_keys(), RelinKeys), "Relin keys should be set"
 
     orig_public_context = ctx()
     orig_public_context.make_context_public(generate_galois_keys=False, generate_relin_keys=True)
     context = duplicate(orig_public_context)
-    assert isinstance(context.relin_keys(), ts.RelinKeys), "Relin keys should be set"
+    assert isinstance(context.relin_keys(), RelinKeys), "Relin keys should be set"
 
 
 @pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
@@ -89,8 +90,8 @@ def test_generate_galois_relin_keys(duplicate):
     orig_public_context = ctx()
     orig_public_context.make_context_public(generate_galois_keys=True, generate_relin_keys=True)
     context = duplicate(orig_public_context)
-    assert isinstance(context.relin_keys(), ts.RelinKeys), "Relin keys should be set"
-    assert isinstance(context.galois_keys(), ts.GaloisKeys), "Galois keys should be set"
+    assert isinstance(context.relin_keys(), RelinKeys), "Relin keys should be set"
+    assert isinstance(context.galois_keys(), GaloisKeys), "Galois keys should be set"
 
     orig_context = ctx()
     context = duplicate(orig_context)
@@ -192,8 +193,8 @@ def test_sanity_keys_regeneration(duplicate, vec1, vec2):
     precision = 1
 
     context = duplicate(orig_context)
-    assert isinstance(context.relin_keys(), ts.RelinKeys), "Relin keys should be set"
-    assert isinstance(context.galois_keys(), ts.GaloisKeys), "Galois keys should be set"
+    assert isinstance(context.relin_keys(), RelinKeys), "Relin keys should be set"
+    assert isinstance(context.galois_keys(), GaloisKeys), "Galois keys should be set"
 
     first_vec = ts.ckks_vector(context, vec1)
     second_vec = ts.ckks_vector(context, vec2)

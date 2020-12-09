@@ -25,8 +25,8 @@ def test_sanity(data, shape):
 
     strides = list(reversed(strides))
 
-    assert tensor.data() == data
-    assert tensor.shape() == shape
+    assert tensor.raw == data
+    assert tensor.shape == shape
     assert tensor.size() == shape[0]
     assert len(tensor) == shape[0]
     assert tensor.empty() == False
@@ -53,10 +53,8 @@ def test_sanity(data, shape):
 def test_batch(data, axis):
     batch = data.batch(axis)
 
-    assert len(batch) == len(data.data()) / data.shape()[axis]
-    assert len(batch[0]) == data.shape()[axis]
+    assert len(batch) == len(data.raw) / data.shape[axis]
+    assert len(batch[0]) == data.shape[axis]
 
-    expected = np.array(data.data()).reshape(
-        int(len(data.data()) / data.shape()[axis]), data.shape()[axis]
-    )
+    expected = np.array(data.raw).reshape(int(len(data.raw) / data.shape[axis]), data.shape[axis])
     assert np.array(batch).any() == expected.any()
