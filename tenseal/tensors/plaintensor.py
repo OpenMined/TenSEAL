@@ -100,3 +100,7 @@ class PlainTensor:
     def batch(self, dim: int) -> List[List[Union[int, float]]]:
         "Returns a list of batches constructed from dimension `dim`"
         return self.data.batch(dim)
+
+    def reshape(self, shape: List[int]):
+        "Changes the internal representation to a new shape"
+        return self.data.reshape(shape)
