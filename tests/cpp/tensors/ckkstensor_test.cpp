@@ -201,6 +201,66 @@ TEST_F(CKKSTensorTest, TestCreateCKKSFail) {
         std::exception);
 }
 
+TEST_F(CKKSTensorTest, TestCKKSReshapeNoBatching) {
+    auto ctx =
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    ASSERT_TRUE(ctx != nullptr);
+    ctx->generate_galois_keys();
+
+    auto data =
+        PlainTensor(vector<double>({1, 2, 3, 4, 5, 6, 7, 8}), vector<size_t>({2, 2, 2}));
+    auto l = CKKSTensor::Create(ctx, data, std::pow(2, 40), false);
+
+    auto decr = l->decrypt();
+    ASSERT_THAT(decr.shape(), ElementsAreArray({2, 2, 2}));
+    ASSERT_TRUE(are_close(decr.data(), {1,2,3,4,5,6,7,8}));
+
+    l->reshape({4,2});
+    ASSERT_THAT(l->shape(), ElementsAreArray({4, 2}));
+    ASSERT_THAT(l->original_shape(), ElementsAreArray({4, 2}));
+    decr = l->decrypt();
+    ASSERT_THAT(decr.shape(), ElementsAreArray({4, 2}));
+    ASSERT_TRUE(are_close(decr.data(), {1,2,3,4,5,6,7,8}));
+
+    l->reshape({2,2,2});
+    ASSERT_THAT(l->shape(), ElementsAreArray({2,2, 2}));
+    ASSERT_THAT(l->original_shape(), ElementsAreArray({2,2, 2}));
+    decr = l->decrypt();
+    ASSERT_THAT(decr.shape(), ElementsAreArray({2,2,2}));
+    ASSERT_TRUE(are_close(decr.data(), {1,2,3,4,5,6,7,8}));
+}
+
+TEST_F(CKKSTensorTest, TestCKKSReshapeBatching) {
+    auto ctx =
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    ASSERT_TRUE(ctx != nullptr);
+    ctx->generate_galois_keys();
+
+    auto data =
+        PlainTensor(vector<double>({1, 2, 3, 4, 5, 6, 7, 8}), vector<size_t>({2, 2, 2}));
+    auto l = CKKSTensor::Create(ctx, data, std::pow(2, 40), true);
+
+    ASSERT_THAT(l->shape(), ElementsAreArray({2,2}));
+    ASSERT_THAT(l->original_shape(), ElementsAreArray({2, 2,2}));
+    auto decr = l->decrypt();
+    ASSERT_THAT(decr.shape(), ElementsAreArray({2, 2, 2}));
+    ASSERT_TRUE(are_close(decr.data(), {1,2,3,4,5,6,7,8}));
+
+    l->reshape({4});
+    ASSERT_THAT(l->shape(), ElementsAreArray({4}));
+    ASSERT_THAT(l->original_shape(), ElementsAreArray({2, 4}));
+    decr = l->decrypt();
+    ASSERT_THAT(decr.shape(), ElementsAreArray({2, 4}));
+    ASSERT_TRUE(are_close(decr.data(), {1,2,3,4,5,6,7,8}));
+
+    l->reshape({2,2});
+    ASSERT_THAT(l->shape(), ElementsAreArray({2,2}));
+    ASSERT_THAT(l->original_shape(), ElementsAreArray({2,2,2}));
+    decr = l->decrypt();
+    ASSERT_THAT(decr.shape(), ElementsAreArray({2,2,2}));
+    ASSERT_TRUE(are_close(decr.data(), {1,2,3,4,5,6,7,8}));
+}
+
 TEST_P(CKKSTensorTest, TestEmptyPlaintext) {
     auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
