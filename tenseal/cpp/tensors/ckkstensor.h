@@ -71,11 +71,12 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
 
     vector<Ciphertext> data() const;
     vector<size_t> shape() const;
+    void reshape(const vector<size_t>& new_shape);
+    vector<size_t> original_shape() const;
     double scale() const override;
 
    private:
-    vector<Ciphertext> _data;
-    vector<size_t> _shape;
+    TensorStorage<Ciphertext> _data;
     double _init_scale;
     optional<size_t> _batch_size;
 

@@ -155,7 +155,7 @@ TEST_F(CKKSTensorTest, TestCKKSSumBatching) {
     ASSERT_TRUE(are_close(decr.data(), {5, 7, 9}));
 
     res = l->sum(1);
-    ASSERT_THAT(res->shape(), ElementsAreArray({2}));
+    ASSERT_THAT(res->original_shape(), ElementsAreArray({2}));
     decr = res->decrypt();
     ASSERT_TRUE(are_close(decr.data(), {6, 15}));
 }
@@ -171,7 +171,7 @@ TEST_F(CKKSTensorTest, TestCKKSPower) {
     auto l = CKKSTensor::Create(ctx, data, std::pow(2, 40), true);
 
     auto res = l->power(2);
-    ASSERT_THAT(res->shape(), ElementsAreArray({2, 3}));
+    ASSERT_THAT(res->original_shape(), ElementsAreArray({2, 3}));
     auto decr = res->decrypt();
     ASSERT_TRUE(are_close(decr.data(), {1, 4, 9, 16, 25, 36}));
 }
@@ -186,7 +186,7 @@ TEST_F(CKKSTensorTest, TestCKKSTensorPolyval) {
     auto l = CKKSTensor::Create(ctx, data, std::pow(2, 40), true);
 
     auto res = l->polyval({1, 1, 1});
-    ASSERT_THAT(res->shape(), ElementsAreArray({2, 3}));
+    ASSERT_THAT(res->original_shape(), ElementsAreArray({2, 3}));
     auto decr = res->decrypt();
     ASSERT_TRUE(are_close(decr.data(), {3, 7, 13, 21, 31, 43}));
 }

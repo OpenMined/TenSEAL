@@ -55,6 +55,7 @@ class TensorStorage {
     using dtype = plain_t;
     using iterator = typename vector<plain_t>::iterator;
     using const_iterator = typename vector<plain_t>::const_iterator;
+    TensorStorage() = default;
     /**
      * Create a new TensorStorage from an 1D vector.
      * @param[in] input vector.
@@ -128,7 +129,31 @@ class TensorStorage {
      * shape
      * @param[in] desired position from the tensor.
      */
+    plain_t& ref_at(const vector<size_t>& index) {
+        return _data[position(index)];
+    }
     plain_t at(const vector<size_t>& index) const {
+        return _data[position(index)];
+    }
+    plain_t& flat_ref_at(size_t index) {
+        if (index >= _data.size()) throw invalid_argument("index too big");
+
+        return _data[index];
+    }
+    plain_t flat_at(size_t index) const {
+        if (index >= _data.size()) throw invalid_argument("index too big");
+
+        return _data[index];
+    }
+    /**
+     * Converts integer to position.
+     * @param[in] .
+     */
+    vector<size_t> position(size_t val) const {
+        auto strides = generate_strides(_shape);
+        return position_from_strides(strides, val);
+    }
+    size_t position(const vector<size_t>& index) const {
         if (_shape.size() != index.size())
             throw invalid_argument(
                 "tensor cannot be viewed in the requested format");
@@ -141,15 +166,7 @@ class TensorStorage {
             tensor_idx += index[d] * strides[d];
         }
 
-        return _data[tensor_idx];
-    }
-    /**
-     * Converts integer to position.
-     * @param[in] .
-     */
-    vector<size_t> position(size_t val) const {
-        auto strides = generate_strides(_shape);
-        return position_from_strides(strides, val);
+        return tensor_idx;
     }
     /**
      * Returns iterator to row.
@@ -200,6 +217,10 @@ class TensorStorage {
      * Returns the size of the first dimension of the tensor.
      */
     size_t size() const { return _shape[0]; }
+    size_t flat_size() const {
+        return std::accumulate(_shape.begin(), _shape.end(), 1,
+                               std::multiplies<size_t>());
+    }
     /**
      * Checks if the tensor is empty.
      */
