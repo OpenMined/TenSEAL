@@ -264,13 +264,6 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op, reshape_first):
     else:
         left = ts.ckks_tensor(context, l_pt)
 
-    if reshape_first:
-        shape, _ = reshape(False, shape)
-        r_pt.reshape(shape)
-        l_pt.reshape(shape)
-        right.reshape(shape)
-        left.reshape(shape)
-
     if op == "add":
         expected_result = r_t + l_t
     elif op == "sub":
@@ -285,6 +278,11 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op, reshape_first):
         result = right - left
     elif op == "mul":
         result = right * left
+
+    if reshape_first:
+        shape, _ = reshape(False, shape)
+        expected_result.reshape(shape)
+        result.reshape(shape)
 
     np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
