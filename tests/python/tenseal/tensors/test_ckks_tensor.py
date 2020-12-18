@@ -1,7 +1,6 @@
 import copy
 import pickle
 import math
-import random
 import pytest
 
 import numpy as np
@@ -71,7 +70,7 @@ def reshape(batched, shape):
         batch_size = new_shape[0]
         new_shape = new_shape[1:]
 
-    random.shuffle(new_shape)
+    new_shape = new_shape[-1:] + new_shape[:-1]
 
     full_shape = new_shape.copy()
     if batched:
@@ -264,6 +263,15 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op, reshape_first):
     else:
         left = ts.ckks_tensor(context, l_pt)
 
+    if reshape_first:
+        shape, _ = reshape(False, shape)
+        r_t = r_t.reshape(shape)
+        l_t = l_t.reshape(shape)
+        r_pt.reshape(shape)
+        l_pt.reshape(shape)
+        right.reshape(shape)
+        left.reshape(shape)
+
     if op == "add":
         expected_result = r_t + l_t
     elif op == "sub":
@@ -278,11 +286,6 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op, reshape_first):
         result = right - left
     elif op == "mul":
         result = right * left
-
-    if reshape_first:
-        shape, _ = reshape(False, shape)
-        expected_result.reshape(shape)
-        result.reshape(shape)
 
     np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
@@ -310,6 +313,7 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op, reshape_first):
     assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
     # right didn't change
     right_result = np.array(right.decrypt().tolist())
+
     assert right_result.shape == expected_result.shape
     assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
     # left didn't change
