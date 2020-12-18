@@ -207,27 +207,27 @@ TEST_F(CKKSTensorTest, TestCKKSReshapeNoBatching) {
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
-    auto data =
-        PlainTensor(vector<double>({1, 2, 3, 4, 5, 6, 7, 8}), vector<size_t>({2, 2, 2}));
+    auto data = PlainTensor(vector<double>({1, 2, 3, 4, 5, 6, 7, 8}),
+                            vector<size_t>({2, 2, 2}));
     auto l = CKKSTensor::Create(ctx, data, std::pow(2, 40), false);
 
     auto decr = l->decrypt();
     ASSERT_THAT(decr.shape(), ElementsAreArray({2, 2, 2}));
-    ASSERT_TRUE(are_close(decr.data(), {1,2,3,4,5,6,7,8}));
+    ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
 
-    l->reshape({4,2});
+    l->reshape({4, 2});
     ASSERT_THAT(l->shape(), ElementsAreArray({4, 2}));
     ASSERT_THAT(l->original_shape(), ElementsAreArray({4, 2}));
     decr = l->decrypt();
     ASSERT_THAT(decr.shape(), ElementsAreArray({4, 2}));
-    ASSERT_TRUE(are_close(decr.data(), {1,2,3,4,5,6,7,8}));
+    ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
 
-    l->reshape({2,2,2});
-    ASSERT_THAT(l->shape(), ElementsAreArray({2,2, 2}));
-    ASSERT_THAT(l->original_shape(), ElementsAreArray({2,2, 2}));
+    l->reshape({2, 2, 2});
+    ASSERT_THAT(l->shape(), ElementsAreArray({2, 2, 2}));
+    ASSERT_THAT(l->original_shape(), ElementsAreArray({2, 2, 2}));
     decr = l->decrypt();
-    ASSERT_THAT(decr.shape(), ElementsAreArray({2,2,2}));
-    ASSERT_TRUE(are_close(decr.data(), {1,2,3,4,5,6,7,8}));
+    ASSERT_THAT(decr.shape(), ElementsAreArray({2, 2, 2}));
+    ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
 }
 
 TEST_F(CKKSTensorTest, TestCKKSReshapeBatching) {
@@ -236,29 +236,29 @@ TEST_F(CKKSTensorTest, TestCKKSReshapeBatching) {
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
-    auto data =
-        PlainTensor(vector<double>({1, 2, 3, 4, 5, 6, 7, 8}), vector<size_t>({2, 2, 2}));
+    auto data = PlainTensor(vector<double>({1, 2, 3, 4, 5, 6, 7, 8}),
+                            vector<size_t>({2, 2, 2}));
     auto l = CKKSTensor::Create(ctx, data, std::pow(2, 40), true);
 
-    ASSERT_THAT(l->shape(), ElementsAreArray({2,2}));
-    ASSERT_THAT(l->original_shape(), ElementsAreArray({2, 2,2}));
+    ASSERT_THAT(l->shape(), ElementsAreArray({2, 2}));
+    ASSERT_THAT(l->original_shape(), ElementsAreArray({2, 2, 2}));
     auto decr = l->decrypt();
     ASSERT_THAT(decr.shape(), ElementsAreArray({2, 2, 2}));
-    ASSERT_TRUE(are_close(decr.data(), {1,2,3,4,5,6,7,8}));
+    ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
 
     l->reshape({4});
     ASSERT_THAT(l->shape(), ElementsAreArray({4}));
     ASSERT_THAT(l->original_shape(), ElementsAreArray({2, 4}));
     decr = l->decrypt();
     ASSERT_THAT(decr.shape(), ElementsAreArray({2, 4}));
-    ASSERT_TRUE(are_close(decr.data(), {1,2,3,4,5,6,7,8}));
+    ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
 
-    l->reshape({2,2});
-    ASSERT_THAT(l->shape(), ElementsAreArray({2,2}));
-    ASSERT_THAT(l->original_shape(), ElementsAreArray({2,2,2}));
+    l->reshape({2, 2});
+    ASSERT_THAT(l->shape(), ElementsAreArray({2, 2}));
+    ASSERT_THAT(l->original_shape(), ElementsAreArray({2, 2, 2}));
     decr = l->decrypt();
-    ASSERT_THAT(decr.shape(), ElementsAreArray({2,2,2}));
-    ASSERT_TRUE(are_close(decr.data(), {1,2,3,4,5,6,7,8}));
+    ASSERT_THAT(decr.shape(), ElementsAreArray({2, 2, 2}));
+    ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
 }
 
 TEST_P(CKKSTensorTest, TestEmptyPlaintext) {

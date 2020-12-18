@@ -23,12 +23,13 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
         enc_shape.erase(enc_shape.begin());
 
         for (auto it = data.cbegin(); it != data.cend(); it++)
-            enc_data.push_back(CKKSTensor::encrypt(ctx, this->_init_scale, *it));
+            enc_data.push_back(
+                CKKSTensor::encrypt(ctx, this->_init_scale, *it));
 
     } else {
         for (auto it = tensor.cbegin(); it != tensor.cend(); it++)
             enc_data.push_back(CKKSTensor::encrypt(ctx, this->_init_scale,
-                                                vector<double>({*it})));
+                                                   vector<double>({*it})));
     }
 
     _data = TensorStorage<Ciphertext>(enc_data, enc_shape);
@@ -91,7 +92,7 @@ PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
         vector<vector<double>> result;
         result.reserve(sz);
 
-        for (auto it = _data.cbegin(); it != _data.cend(); it++){
+        for (auto it = _data.cbegin(); it != _data.cend(); it++) {
             vector<double> buff;
             decryptor.decrypt(*it, plaintext);
             this->tenseal_context()->decode<CKKSEncoder>(plaintext, buff);
@@ -105,7 +106,7 @@ PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
         vector<double> result;
         result.reserve(sz);
 
-        for (auto it = _data.cbegin(); it != _data.cend(); it++){
+        for (auto it = _data.cbegin(); it != _data.cend(); it++) {
             vector<double> buff;
             decryptor.decrypt(*it, plaintext);
             this->tenseal_context()->decode<CKKSEncoder>(plaintext, buff);
@@ -123,7 +124,7 @@ shared_ptr<CKKSTensor> CKKSTensor::negate_inplace() {
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::square_inplace() {
-    for (auto& ct : _data){
+    for (auto& ct : _data) {
         this->tenseal_context()->evaluator->square_inplace(ct);
         this->auto_relin(ct);
         this->auto_rescale(ct);
@@ -223,7 +224,8 @@ shared_ptr<CKKSTensor> CKKSTensor::op_inplace(
 
     auto worker_func = [&](size_t start, size_t end) -> bool {
         for (size_t i = start; i < end; i++) {
-            this->perform_op(this->_data.flat_ref_at(i), operand->_data.flat_ref_at(i), op);
+            this->perform_op(this->_data.flat_ref_at(i),
+                             operand->_data.flat_ref_at(i), op);
         }
         return true;
     };
@@ -406,8 +408,7 @@ shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
 
     if (_batch_size && axis == 0) return sum_batch_inplace();
 
-    if(_batch_size)
-        axis--;
+    if (_batch_size) axis--;
 
     auto new_shape = shape();
     auto new_len = _data.flat_size() / shape()[axis];
@@ -444,7 +445,8 @@ shared_ptr<CKKSTensor> CKKSTensor::sum_batch_inplace() {
     if (!_batch_size) throw invalid_argument("unsupported operation");
 
     for (size_t idx = 0; idx < _data.flat_size(); ++idx) {
-        sum_vector(this->tenseal_context(), _data.flat_ref_at(idx), *_batch_size);
+        sum_vector(this->tenseal_context(), _data.flat_ref_at(idx),
+                   *_batch_size);
     }
 
     _batch_size = {};
@@ -467,7 +469,8 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
     }
 
     if (degree == -1) {
-        auto zeros = PlainTensor<double>::repeat_value(0, this->original_shape());
+        auto zeros =
+            PlainTensor<double>::repeat_value(0, this->original_shape());
         *this = CKKSTensor(this->tenseal_context(), zeros, this->_init_scale,
                            _batch_size.has_value());
         return shared_from_this();
@@ -485,8 +488,8 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
         x_squares.push_back(x->copy());  // x^(2^i)
     }
 
-    auto cst_coeff =
-        PlainTensor<double>::repeat_value(coefficients[0], this->original_shape());
+    auto cst_coeff = PlainTensor<double>::repeat_value(coefficients[0],
+                                                       this->original_shape());
     auto result =
         CKKSTensor::Create(this->tenseal_context(), cst_coeff,
                            this->_init_scale, _batch_size.has_value());
@@ -579,19 +582,17 @@ shared_ptr<CKKSTensor> CKKSTensor::deepcopy() const {
 
 vector<Ciphertext> CKKSTensor::data() const { return _data.data(); }
 vector<size_t> CKKSTensor::original_shape() const {
-    if(_batch_size){
+    if (_batch_size) {
         auto res = _data.shape();
         res.insert(res.begin(), *_batch_size);
         return res;
     }
 
-    return _data.shape(); 
+    return _data.shape();
 }
-vector<size_t> CKKSTensor::shape() const {
-    return _data.shape(); 
-}
+vector<size_t> CKKSTensor::shape() const { return _data.shape(); }
 
-void CKKSTensor::reshape(const vector<size_t>& new_shape){
+void CKKSTensor::reshape(const vector<size_t>& new_shape) {
     return _data.reshape(new_shape);
 }
 

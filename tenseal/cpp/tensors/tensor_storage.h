@@ -39,9 +39,7 @@ inline bool compatible_shapes(const vector<size_t>& lshape,
     size_t rprod = std::accumulate(rshape.begin(), rshape.end(), 1,
                                    std::multiplies<size_t>());
 
-    if (lprod != rprod) return false;
-
-    return true;
+    return lprod == rprod;
 }
 
 /**
