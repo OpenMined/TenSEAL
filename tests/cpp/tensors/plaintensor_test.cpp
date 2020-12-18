@@ -96,7 +96,7 @@ TEST_F(PlainTensorTest, TestTensorAccess) {
     ASSERT_EQ(tensor.size(), 4);
     ASSERT_EQ(tensor.empty(), false);
 
-    EXPECT_THROW(tensor.reshape({5,5}), std::exception);
+    EXPECT_THROW(tensor.reshape({5, 5}), std::exception);
 }
 
 TEST_F(PlainTensorTest, TestGetDiagonal) {
