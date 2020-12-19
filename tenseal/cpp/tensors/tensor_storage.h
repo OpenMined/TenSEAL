@@ -116,11 +116,16 @@ class TensorStorage {
             }
         }
     }
-    void reshape(const vector<size_t>& new_shape) {
+    TensorStorage<dtype_t> reshape(const vector<size_t>& new_shape) {
+        return this->copy().reshape_inplace(new_shape);
+    }
+
+    TensorStorage<dtype_t>& reshape_inplace(const vector<size_t>& new_shape) {
         if (!can_reshape(this->_shape, new_shape))
             throw invalid_argument("invalid reshape input");
 
         this->_shape = new_shape;
+        return *this;
     }
     /**
      * Returns the element at position {idx1, idx2, ..., idxn} in the current
@@ -292,6 +297,9 @@ class TensorStorage {
 
         vector<dtype_t> repeated(size, value);
         return TensorStorage<dtype_t>(repeated, shape);
+    }
+    TensorStorage<dtype_t> copy() {
+        return TensorStorage<dtype_t>(this->_data, this->_shape);
     }
 
    private:

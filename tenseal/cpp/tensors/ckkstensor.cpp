@@ -592,8 +592,13 @@ vector<size_t> CKKSTensor::shape_with_batch() const {
 }
 vector<size_t> CKKSTensor::shape() const { return _data.shape(); }
 
-void CKKSTensor::reshape(const vector<size_t>& new_shape) {
-    return _data.reshape(new_shape);
+shared_ptr<CKKSTensor> CKKSTensor::reshape(const vector<size_t>& new_shape) {
+    return this->copy()->reshape_inplace(new_shape);
+}
+shared_ptr<CKKSTensor> CKKSTensor::reshape_inplace(const vector<size_t>& new_shape) {
+    this->_data.reshape_inplace(new_shape);
+
+    return shared_from_this();
 }
 
 double CKKSTensor::scale() const { return _init_scale; }

@@ -46,10 +46,19 @@ class PlainTensor {
                 const vector<size_t>& shape, size_t dim)
         : _data(data, shape, dim) {}
     /**
+     * Create a new PlainTensor from an existing storage.
+     * @param[in] existing storage.
+     */
+    PlainTensor(const TensorStorage<plain_t>& data) : _data(data) {}
+    /**
      * Reshape the tensor
      * **/
-    void reshape(const vector<size_t>& new_shape) {
-        this->_data.reshape(new_shape);
+    PlainTensor<plain_t> reshape(const vector<size_t>& new_shape) {
+        return this->copy().reshape_inplace(new_shape);
+    }
+    PlainTensor<plain_t>& reshape_inplace(const vector<size_t>& new_shape) {
+        this->_data.reshape_inplace(new_shape);
+        return *this;
     }
     /**
      * Returns the element at position {idx1, idx2, ..., idxn} in the current
@@ -132,8 +141,8 @@ class PlainTensor {
                 vector<plain_t> window_vec(kernel_size, 0);
                 auto iter = window_vec.begin();
                 for (size_t k = 0; k < window_height; k++) {
-                    iter = copy(this->row(j + k) + i,
-                                this->row(j + k) + i + window_width, iter);
+                    iter = std::copy(this->row(j + k) + i,
+                                     this->row(j + k) + i + window_width, iter);
                 }
                 dst.push_back(window_vec);
             }
@@ -198,6 +207,7 @@ class PlainTensor {
         vector<plain_t> repeated(size, value);
         return PlainTensor<plain_t>(repeated, shape);
     }
+    PlainTensor<plain_t> copy() { return PlainTensor<plain_t>(this->_data); }
 
    private:
     TensorStorage<plain_t> _data;

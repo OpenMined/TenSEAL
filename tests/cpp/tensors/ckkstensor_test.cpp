@@ -215,19 +215,23 @@ TEST_F(CKKSTensorTest, TestCKKSReshapeNoBatching) {
     ASSERT_THAT(decr.shape(), ElementsAreArray({2, 2, 2}));
     ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
 
-    l->reshape({4, 2});
+    l->reshape_inplace({4, 2});
     ASSERT_THAT(l->shape(), ElementsAreArray({4, 2}));
     ASSERT_THAT(l->shape_with_batch(), ElementsAreArray({4, 2}));
     decr = l->decrypt();
     ASSERT_THAT(decr.shape(), ElementsAreArray({4, 2}));
     ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
 
-    l->reshape({2, 2, 2});
+    l->reshape_inplace({2, 2, 2});
     ASSERT_THAT(l->shape(), ElementsAreArray({2, 2, 2}));
     ASSERT_THAT(l->shape_with_batch(), ElementsAreArray({2, 2, 2}));
     decr = l->decrypt();
     ASSERT_THAT(decr.shape(), ElementsAreArray({2, 2, 2}));
     ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
+
+    auto newt = l->reshape({4, 2});
+    ASSERT_THAT(l->shape(), ElementsAreArray({2, 2, 2}));
+    ASSERT_THAT(newt->shape(), ElementsAreArray({4, 2}));
 }
 
 TEST_F(CKKSTensorTest, TestCKKSReshapeBatching) {
@@ -246,19 +250,23 @@ TEST_F(CKKSTensorTest, TestCKKSReshapeBatching) {
     ASSERT_THAT(decr.shape(), ElementsAreArray({2, 2, 2}));
     ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
 
-    l->reshape({4});
+    l->reshape_inplace({4});
     ASSERT_THAT(l->shape(), ElementsAreArray({4}));
     ASSERT_THAT(l->shape_with_batch(), ElementsAreArray({2, 4}));
     decr = l->decrypt();
     ASSERT_THAT(decr.shape(), ElementsAreArray({2, 4}));
     ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
 
-    l->reshape({2, 2});
+    l->reshape_inplace({2, 2});
     ASSERT_THAT(l->shape(), ElementsAreArray({2, 2}));
     ASSERT_THAT(l->shape_with_batch(), ElementsAreArray({2, 2, 2}));
     decr = l->decrypt();
     ASSERT_THAT(decr.shape(), ElementsAreArray({2, 2, 2}));
     ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
+
+    auto newt = l->reshape({4});
+    ASSERT_THAT(l->shape(), ElementsAreArray({2, 2}));
+    ASSERT_THAT(newt->shape(), ElementsAreArray({4}));
 }
 
 TEST_P(CKKSTensorTest, TestEmptyPlaintext) {
