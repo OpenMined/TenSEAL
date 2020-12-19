@@ -101,7 +101,8 @@ PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
         }
 
         return PlainTensor<double>(/*batched_tensor=*/result,
-                                   /*shape_with_batch=*/shape, /*batch_axis=*/0);
+                                   /*shape_with_batch=*/shape,
+                                   /*batch_axis=*/0);
     } else {
         vector<double> result;
         result.reserve(sz);
@@ -404,7 +405,8 @@ shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace(const double& to_mul) {
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
-    if (axis >= shape_with_batch().size()) throw invalid_argument("invalid axis");
+    if (axis >= shape_with_batch().size())
+        throw invalid_argument("invalid axis");
 
     if (_batch_size && axis == 0) return sum_batch_inplace();
 
@@ -488,8 +490,8 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
         x_squares.push_back(x->copy());  // x^(2^i)
     }
 
-    auto cst_coeff = PlainTensor<double>::repeat_value(coefficients[0],
-                                                       this->shape_with_batch());
+    auto cst_coeff = PlainTensor<double>::repeat_value(
+        coefficients[0], this->shape_with_batch());
     auto result =
         CKKSTensor::Create(this->tenseal_context(), cst_coeff,
                            this->_init_scale, _batch_size.has_value());
@@ -595,7 +597,8 @@ vector<size_t> CKKSTensor::shape() const { return _data.shape(); }
 shared_ptr<CKKSTensor> CKKSTensor::reshape(const vector<size_t>& new_shape) {
     return this->copy()->reshape_inplace(new_shape);
 }
-shared_ptr<CKKSTensor> CKKSTensor::reshape_inplace(const vector<size_t>& new_shape) {
+shared_ptr<CKKSTensor> CKKSTensor::reshape_inplace(
+    const vector<size_t>& new_shape) {
     this->_data.reshape_inplace(new_shape);
 
     return shared_from_this();
