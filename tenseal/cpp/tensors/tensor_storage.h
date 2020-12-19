@@ -32,39 +32,39 @@ inline vector<size_t> position_from_strides(const vector<size_t>& strides,
     return result;
 }
 
-inline bool compatible_shapes(const vector<size_t>& lshape,
-                              const vector<size_t>& rshape) {
-    size_t lprod = std::accumulate(lshape.begin(), lshape.end(), 1,
-                                   std::multiplies<size_t>());
-    size_t rprod = std::accumulate(rshape.begin(), rshape.end(), 1,
-                                   std::multiplies<size_t>());
+inline bool can_reshape(const vector<size_t>& old_shape,
+                        const vector<size_t>& new_shape) {
+    size_t oldprod = std::accumulate(old_shape.begin(), old_shape.end(), 1,
+                                     std::multiplies<size_t>());
+    size_t newprod = std::accumulate(new_shape.begin(), new_shape.end(), 1,
+                                     std::multiplies<size_t>());
 
-    return lprod == rprod;
+    return oldprod == newprod;
 }
 
 /**
- * TensorStorage<plain_t> interface - A generic API for plain tensor operations.
- * @param plain_t: root plaintext datatype for representing data(double, int64
+ * TensorStorage<dtype_t> interface - A generic API for plain tensor operations.
+ * @param dtype_t: root plaintext datatype for representing data(double, int64
  *etc).
  **/
-template <typename plain_t>
+template <typename dtype_t>
 class TensorStorage {
    public:
-    using dtype = plain_t;
-    using iterator = typename vector<plain_t>::iterator;
-    using const_iterator = typename vector<plain_t>::const_iterator;
+    using dtype = dtype_t;
+    using iterator = typename vector<dtype_t>::iterator;
+    using const_iterator = typename vector<dtype_t>::const_iterator;
     TensorStorage() = default;
     /**
      * Create a new TensorStorage from an 1D vector.
      * @param[in] input vector.
      */
-    TensorStorage(const vector<plain_t>& data)
+    TensorStorage(const vector<dtype_t>& data)
         : _data(data), _shape({data.size()}) {}
     /**
      * Create a new TensorStorage from a 2D vector.
      * @param[in] input matrix.
      */
-    TensorStorage(const vector<vector<plain_t>>& data) {
+    TensorStorage(const vector<vector<dtype_t>>& data) {
         size_t H = data.size();
         size_t W = data[0].size();
 
@@ -73,7 +73,7 @@ class TensorStorage {
         }
 
         if (any_of(data.begin(), data.end(),
-                   [&](const vector<plain_t>& i) { return i.size() != W; })) {
+                   [&](const vector<dtype_t>& i) { return i.size() != W; })) {
             throw invalid_argument("rows sizes are different");
         }
 
@@ -89,7 +89,7 @@ class TensorStorage {
      * @param[in] input vector.
      * @param[in] input shape.
      */
-    TensorStorage(const vector<plain_t>& data, const vector<size_t>& shape)
+    TensorStorage(const vector<dtype_t>& data, const vector<size_t>& shape)
         : _data(data), _shape(shape) {
         size_t expected_size = 1;
         for (auto& d : shape) expected_size *= d;
@@ -102,7 +102,7 @@ class TensorStorage {
      * @param[in] original shape.
      * @param[in] batching axis.
      */
-    TensorStorage(const vector<vector<plain_t>>& data,
+    TensorStorage(const vector<vector<dtype_t>>& data,
                   const vector<size_t>& shape, size_t dim)
         : _shape(shape) {
         if (data[0].size() != shape[dim])
@@ -117,7 +117,7 @@ class TensorStorage {
         }
     }
     void reshape(const vector<size_t>& new_shape) {
-        if (!compatible_shapes(this->_shape, new_shape))
+        if (!can_reshape(this->_shape, new_shape))
             throw invalid_argument("invalid reshape input");
 
         this->_shape = new_shape;
@@ -127,18 +127,18 @@ class TensorStorage {
      * shape
      * @param[in] desired position from the tensor.
      */
-    plain_t& ref_at(const vector<size_t>& index) {
+    dtype_t& ref_at(const vector<size_t>& index) {
         return _data[position(index)];
     }
-    plain_t at(const vector<size_t>& index) const {
+    dtype_t at(const vector<size_t>& index) const {
         return _data[position(index)];
     }
-    plain_t& flat_ref_at(size_t index) {
+    dtype_t& flat_ref_at(size_t index) {
         if (index >= _data.size()) throw invalid_argument("index too big");
 
         return _data[index];
     }
-    plain_t flat_at(size_t index) const {
+    dtype_t flat_at(size_t index) const {
         if (index >= _data.size()) throw invalid_argument("index too big");
 
         return _data[index];
@@ -188,7 +188,7 @@ class TensorStorage {
         size_t in_height = _shape[0];
         size_t in_width = _shape[1];
 
-        vector<plain_t> dst;
+        vector<dtype_t> dst;
         dst.resize(in_height * in_width);
 
         for (size_t i = 0; i < in_height; i++) {
@@ -202,7 +202,7 @@ class TensorStorage {
      * Returns a reference to the internal representation of the
      * tensor.
      */
-    const vector<plain_t>& data() const { return _data; }
+    const vector<dtype_t>& data() const { return _data; }
     /**
      * Returns the current shape of the tensor.
      */
@@ -226,7 +226,7 @@ class TensorStorage {
     /**
      * Casts the tensor to an 1D vector.
      */
-    operator vector<plain_t>() const { return _data; }
+    operator vector<dtype_t>() const { return _data; }
     /**
      * Iterator utils
      **/
@@ -244,7 +244,7 @@ class TensorStorage {
         size_t batch_size = this->_shape[dim];
         size_t batch_count = this->_data.size() / batch_size;
 
-        vector<vector<plain_t>> batches;
+        vector<vector<dtype_t>> batches;
         batches.resize(batch_count);
 
         auto new_shape = _shape;
@@ -285,17 +285,17 @@ class TensorStorage {
         }
         _shape = {_data.size()};
     }
-    static TensorStorage<plain_t> repeat_value(plain_t value,
+    static TensorStorage<dtype_t> repeat_value(dtype_t value,
                                                vector<size_t> shape) {
         size_t size = 1;
         for (auto& dim : shape) size *= dim;
 
-        vector<plain_t> repeated(size, value);
-        return TensorStorage<plain_t>(repeated, shape);
+        vector<dtype_t> repeated(size, value);
+        return TensorStorage<dtype_t>(repeated, shape);
     }
 
    private:
-    vector<plain_t> _data;
+    vector<dtype_t> _data;
     vector<size_t> _shape;
 };
 
