@@ -273,7 +273,7 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(
         Plaintext plaintext;
         for (size_t i = start; i < end; i++) {
             this->tenseal_context()->encode<CKKSEncoder>(
-                operand_data.at(i), plaintext, this->_init_scale);
+                operand_data[i], plaintext, this->_init_scale);
             this->perform_plain_op(this->_data.flat_ref_at(i), plaintext, op);
         }
         return true;
