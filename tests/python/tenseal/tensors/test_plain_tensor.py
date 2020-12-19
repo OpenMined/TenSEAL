@@ -46,7 +46,11 @@ def test_sanity(data, shape):
 def test_reshape(data, shape, reshape):
     tensor = ts.plain_tensor(data, shape)
 
-    tensor.reshape(reshape)
+    newt = tensor.reshape(reshape)
+    assert tensor.shape == shape
+    assert newt.shape == reshape
+
+    tensor.reshape_(reshape)
     assert tensor.shape == reshape
 
 

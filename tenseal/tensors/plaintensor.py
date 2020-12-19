@@ -102,5 +102,10 @@ class PlainTensor:
         return self.data.batch(dim)
 
     def reshape(self, shape: List[int]):
+        "Copies and changes the internal representation to a new tensor"
+        return PlainTensor(tensor=self.data.data(), shape=shape, dtype=self._dtype)
+
+    def reshape_(self, shape: List[int]):
         "Changes the internal representation to a new shape"
-        return self.data.reshape(shape)
+        self.data.reshape_(shape)
+        return self

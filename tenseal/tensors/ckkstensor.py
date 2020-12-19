@@ -90,5 +90,11 @@ class CKKSTensor(AbstractTensor):
         return self
 
     def reshape(self, shape: List[int]):
+        "Copies and changes the internal representation to a new tensor"
+        result = self.data.reshape(shape)
+        return self._wrap(result)
+
+    def reshape_(self, shape: List[int]):
         "Changes the internal representation to a new shape"
-        return self.data.reshape(shape)
+        self.data.reshape_(shape)
+        return self

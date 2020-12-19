@@ -79,6 +79,48 @@ def reshape(batched, shape):
 
 
 @pytest.mark.parametrize(
+    "data, new_shape",
+    [
+        # (ts.plain_tensor([0]), 0),
+        (ts.plain_tensor([i for i in range(8)]), [4, 2]),
+        (ts.plain_tensor([i for i in range(210)], shape=[2, 3, 5, 7]), [7, 15, 2]),
+    ],
+)
+def test_reshape_no_batching(context, data, new_shape):
+    tensor = ts.ckks_tensor(context, data, batch=False)
+
+    old_shape = tensor.shape
+    new_t = tensor.reshape(new_shape)
+
+    assert new_t.shape == new_shape
+    assert tensor.shape == old_shape
+
+    tensor.reshape_(new_shape)
+    assert tensor.shape == new_shape
+
+
+@pytest.mark.parametrize(
+    "data, new_shape",
+    [
+        # (ts.plain_tensor([0]), 0),
+        (ts.plain_tensor([i for i in range(8)], shape=[2, 2, 2]), [4]),
+        (ts.plain_tensor([i for i in range(210)], shape=[2, 3, 5, 7]), [7, 15]),
+    ],
+)
+def test_reshape_batching(context, data, new_shape):
+    tensor = ts.ckks_tensor(context, data, batch=True)
+
+    old_shape = tensor.shape
+    new_t = tensor.reshape(new_shape)
+
+    assert new_t.shape == new_shape
+    assert tensor.shape == old_shape
+
+    tensor.reshape_(new_shape)
+    assert tensor.shape == new_shape
+
+
+@pytest.mark.parametrize(
     "data, axis",
     [
         # (ts.plain_tensor([0]), 0),
@@ -105,8 +147,8 @@ def test_sum(context, data, batch, reshape_first, axis, precision):
     full_shape = data.shape
     if reshape_first:
         shape, full_shape = reshape(batch, shape)
-        tensor.reshape(shape)
-        data.reshape(full_shape)
+        tensor = tensor.reshape(shape)
+        data = data.reshape(full_shape)
 
     result = tensor.sum(axis)
 
@@ -143,8 +185,8 @@ def test_sum_batch(context, data, reshape_first, precision):
     full_shape = data.shape
     if reshape_first:
         shape, full_shape = reshape(True, shape)
-        tensor.reshape(shape)
-        data.reshape(full_shape)
+        tensor = tensor.reshape(shape)
+        data = data.reshape(full_shape)
 
     orig = data.tolist()
     np_orig = np.array(orig).reshape(full_shape)
@@ -189,8 +231,8 @@ def test_negate(context, plain, precision, reshape_first):
 
     if reshape_first:
         shape, _ = reshape(False, plain.shape)
-        tensor.reshape(shape)
-        plain.reshape(shape)
+        tensor = tensor.reshape(shape)
+        plain = plain.reshape(shape)
 
     expected = np.negative(plain.tolist())
 
@@ -224,8 +266,8 @@ def test_square(context, plain, precision, reshape_first):
 
     if reshape_first:
         shape, _ = reshape(False, plain.shape)
-        result.reshape(shape)
-        plain.reshape(shape)
+        result = result.reshape(shape)
+        plain = plain.reshape(shape)
     expected = np.square(plain.tolist())
 
     decrypted_result = result.decrypt().tolist()
@@ -267,10 +309,10 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op, reshape_first):
         shape, _ = reshape(False, shape)
         r_t = r_t.reshape(shape)
         l_t = l_t.reshape(shape)
-        r_pt.reshape(shape)
-        l_pt.reshape(shape)
-        right.reshape(shape)
-        left.reshape(shape)
+        r_pt = r_pt.reshape(shape)
+        l_pt = l_pt.reshape(shape)
+        right = right.reshape(shape)
+        left = left.reshape(shape)
 
     if op == "add":
         expected_result = r_t + l_t
@@ -432,13 +474,13 @@ def test_polynomial(context, data, polynom, reshape_first):
     shape = data.shape
     if reshape_first:
         shape, _ = reshape(False, shape)
-        data.reshape(shape)
+        data = data.reshape(shape)
 
     expected = (
         np.array([np.polyval(polynom[::-1], x) for x in data.raw]).reshape(data.shape).tolist()
     )
     result = ct.polyval(polynom)
-    result.reshape(shape)
+    result = result.reshape(shape)
 
     if len(polynom) >= 13:
         precision = -1
