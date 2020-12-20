@@ -63,6 +63,18 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     shared_ptr<CKKSTensor> polyval_inplace(
         const vector<double>& coefficients) override;
 
+    // TODO: redefine EncryptedTensor API to this and put non-inplace ops there
+    shared_ptr<CKKSTensor> dot(const shared_ptr<CKKSTensor> other);
+    shared_ptr<CKKSTensor> dot_inplace(const shared_ptr<CKKSTensor> other);
+    shared_ptr<CKKSTensor> dot_plain(const PlainTensor<double>& other);
+    shared_ptr<CKKSTensor> dot_plain_inplace(const PlainTensor<double>& other);
+
+    shared_ptr<CKKSTensor> matmul(const shared_ptr<CKKSTensor> other);
+    shared_ptr<CKKSTensor> matmul_inplace(const shared_ptr<CKKSTensor> other);
+    shared_ptr<CKKSTensor> matmul_plain(const PlainTensor<double>& other);
+    shared_ptr<CKKSTensor> matmul_plain_inplace(
+        const PlainTensor<double>& other);
+
     void load(const string& vec) override;
     string save() const override;
 

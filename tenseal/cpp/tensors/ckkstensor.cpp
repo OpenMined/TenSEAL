@@ -506,6 +506,67 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
     return shared_from_this();
 }
 
+shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
+    const shared_ptr<CKKSTensor> other) {
+    auto this_shape = this->shape();
+    auto other_shape = other->shape();
+
+    if (this_shape.size() == 1) {
+        if (other_shape.size() == 1) {  // 1D-1D
+            // inner product
+            this->mul_inplace(other);
+            this->sum_inplace();
+            return shared_from_this();
+        } else if (other_shape.size() == 2) {  // 1D-2D
+            // TODO: better implement broadcasting for mul first then would be
+            // implemented similar to 1D-1D
+        } else {
+            throw invalid_argument(
+                "don't support dot operations of more than 2 dimensions");
+        }
+    } else if (this_shape.size() == 2) {
+        if (other_shape.size() == 1) {  // 2D-1D
+            // TODO: better implement broadcasting for mul first then would be
+            // implemented similar to 1D-1D
+        } else if (other_shape.size() == 2) {  // 2D-2D
+            this->matmul_inplace(other);
+            return shared_from_this();
+        } else {
+            throw invalid_argument(
+                "don't support dot operations of more than 2 dimensions");
+        }
+    } else {
+        throw invalid_argument(
+            "don't support dot operations of more than 2 dimensions");
+    }
+}
+
+shared_ptr<CKKSTensor> CKKSTensor::dot_plain_inplace(
+    const PlainTensor<double>& other) {}
+
+shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
+    const shared_ptr<CKKSTensor> other) {
+    auto this_shape = this->shape();
+    auto other_shape = other->shape();
+
+    if (this_shape.size() != 2)
+        throw invalid_argument("this tensor isn't a matrix");
+    if (other_shape.size() != 2)
+        throw invalid_argument("operand tensor isn't a matrix");
+    if (this_shape[1] != other_shape[0])
+        throw invalid_argument("can't multiply matrices");  // put matrix shapes
+
+    vector<size_t> new_shape = vector({this_shape[0], other_shape[1]});
+    vector<Ciphertext> new_data;
+    new_data.reserve(new_shape[0] * new_shape[1]);
+    // TODO: do matmul now
+
+    return shared_from_this();
+}
+
+shared_ptr<CKKSTensor> CKKSTensor::matmul_plain_inplace(
+    const PlainTensor<double>& other) {}
+
 void CKKSTensor::clear() {
     this->_shape = vector<size_t>();
     this->_data = vector<Ciphertext>();
