@@ -268,13 +268,12 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(
     }
 
     size_t n_jobs = this->tenseal_context()->dispatcher_size();
-    auto operand_data = operand.data();
 
     auto worker_func = [&](size_t start, size_t end) -> bool {
         Plaintext plaintext;
         for (size_t i = start; i < end; i++) {
             this->tenseal_context()->encode<CKKSEncoder>(
-                operand_data[i], plaintext, this->_init_scale);
+                operand.flat_at(i), plaintext, this->_init_scale);
             this->perform_plain_op(this->_data.flat_ref_at(i), plaintext, op);
         }
         return true;
