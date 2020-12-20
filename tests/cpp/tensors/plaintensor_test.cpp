@@ -83,6 +83,24 @@ TEST_F(PlainTensorTest, TestTensorAccess) {
     ASSERT_THAT(*tensor.row(1), 5.5);
     ASSERT_EQ(tensor.size(), 2);
     ASSERT_EQ(tensor.empty(), false);
+
+    tensor.reshape_inplace({4, 2});
+    ASSERT_THAT(tensor.shape(), ElementsAreArray({4, 2}));
+    ASSERT_THAT(tensor.strides(), ElementsAreArray({2, 1}));
+    ASSERT_EQ(tensor.at({0, 0}), 1.1);
+    ASSERT_EQ(tensor.at({3, 0}), 7.7);
+    ASSERT_THAT(tensor.position(0), ElementsAre(0, 0));
+    ASSERT_THAT(tensor.position(1), ElementsAre(0, 1));
+    ASSERT_THAT(tensor.position(3), ElementsAre(1, 1));
+    ASSERT_THAT(*tensor.row(1), 3.3);
+    ASSERT_EQ(tensor.size(), 4);
+    ASSERT_EQ(tensor.empty(), false);
+
+    EXPECT_THROW(tensor.reshape({5, 5}), std::exception);
+
+    auto new_tensor = tensor.reshape({2, 2, 2});
+    ASSERT_THAT(tensor.shape(), ElementsAreArray({4, 2}));
+    ASSERT_THAT(new_tensor.shape(), ElementsAreArray({2, 2, 2}));
 }
 
 TEST_F(PlainTensorTest, TestGetDiagonal) {

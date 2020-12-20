@@ -34,6 +34,27 @@ def test_sanity(data, shape):
 
 
 @pytest.mark.parametrize(
+    "data, shape, reshape",
+    [
+        ([i for i in range(10)], [10], [2, 5]),
+        ([i for i in range(10)], [2, 5], [10]),
+        ([i for i in range(210)], [2, 3, 5, 7], [6, 5, 7]),
+        ([i for i in range(210)], [2, 3, 5, 7], [30, 7]),
+        ([i for i in range(210)], [2, 3, 5, 7], [210]),
+    ],
+)
+def test_reshape(data, shape, reshape):
+    tensor = ts.plain_tensor(data, shape)
+
+    newt = tensor.reshape(reshape)
+    assert tensor.shape == shape
+    assert newt.shape == reshape
+
+    tensor.reshape_(reshape)
+    assert tensor.shape == reshape
+
+
+@pytest.mark.parametrize(
     "data, axis",
     [
         (ts.plain_tensor([0]), 0),
