@@ -1,6 +1,7 @@
 """N-dimensional tensor storing value in encrypted form using CKKS.
 """
 
+from typing import List
 import tenseal as ts
 from tenseal.tensors.abstract_tensor import AbstractTensor
 
@@ -86,4 +87,14 @@ class CKKSTensor(AbstractTensor):
 
     def sum_batch_(self) -> "CKKSTensor":
         self.data.sum_batch_()
+        return self
+
+    def reshape(self, shape: List[int]):
+        "Copies and changes the internal representation to a new tensor"
+        result = self.data.reshape(shape)
+        return self._wrap(result)
+
+    def reshape_(self, shape: List[int]):
+        "Changes the internal representation to a new shape"
+        self.data.reshape_(shape)
         return self

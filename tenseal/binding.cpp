@@ -29,6 +29,8 @@ void bind_plain_tensor(py::module &m, const std::string &name) {
         .def("strides", &type::strides)
         .def("size", &type::size)
         .def("batch", &type::batch)
+        .def("reshape", &type::reshape)
+        .def("reshape_", &type::reshape_inplace)
         .def("__len__", &type::size)
         .def("empty", &type::empty)
         .def("replicate", &type::replicate);
@@ -568,6 +570,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__deepcopy__", [](const shared_ptr<CKKSTensor> &obj,
                                 py::dict) { return obj->deepcopy(); })
         .def("shape", &CKKSTensor::shape)
+        .def("reshape", &CKKSTensor::reshape)
+        .def("reshape_", &CKKSTensor::reshape_inplace)
         .def("scale", &CKKSTensor::scale);
 
     py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
