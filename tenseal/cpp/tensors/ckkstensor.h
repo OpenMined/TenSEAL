@@ -64,7 +64,7 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
         const vector<double>& coefficients) override;
 
     // TODO: redefine EncryptedTensor API to this and put non-inplace ops there
-    shared_ptr<CKKSTensor> dot(const shared_ptr<CKKSTensor> other){
+    shared_ptr<CKKSTensor> dot(const shared_ptr<CKKSTensor> other) {
         return this->copy()->dot_inplace(other);
     }
     shared_ptr<CKKSTensor> dot_inplace(const shared_ptr<CKKSTensor> other);
