@@ -575,7 +575,7 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
             this->perform_op(to_sum[j], other->_data.at({j, col}), OP::MUL);
         }
         Ciphertext acc(*this->tenseal_context()->seal_context(),
-                          to_sum[0].parms_id());
+                       to_sum[0].parms_id());
         evaluator->add_many(to_sum, acc);
         new_data.push_back(acc);
     }
