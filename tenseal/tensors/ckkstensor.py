@@ -82,6 +82,16 @@ class CKKSTensor(AbstractTensor):
         self.data -= other
         return self
 
+    def dot(self, other) -> "CKKSTensor":
+        other = self._get_operand(other, dtype="float")
+        result = self.data.dot(other)
+        return self._wrap(result)
+
+    def dot_(self, other) -> "CKKSTensor":
+        other = self._get_operand(other, dtype="float")
+        self.data.dot_(other)
+        return self
+
     def sum_batch(self) -> "CKKSTensor":
         return self._wrap(self.data.sum_batch())
 

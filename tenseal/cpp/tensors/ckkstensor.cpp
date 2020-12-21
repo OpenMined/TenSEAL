@@ -542,7 +542,11 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::dot_plain_inplace(
-    const PlainTensor<double>& other) {}
+    const PlainTensor<double>& other) {
+    // TODO
+    throw runtime_error("Not implemented yet");
+    return shared_from_this();
+}
 
 shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
     const shared_ptr<CKKSTensor> other) {
@@ -559,13 +563,33 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
     vector<size_t> new_shape = vector({this_shape[0], other_shape[1]});
     vector<Ciphertext> new_data;
     new_data.reserve(new_shape[0] * new_shape[1]);
-    // TODO: do matmul now
 
+    vector<Ciphertext> to_sum;
+    to_sum.resize(this_shape[1]);
+    for (size_t i = 0; i < new_shape[0] * new_shape[1]; i++) {
+        auto evaluator = this->tenseal_context()->evaluator;
+        size_t row = i / new_shape[0];
+        size_t col = i % new_shape[0];
+        Ciphertext acc(*this->tenseal_context()->seal_context());
+        for (size_t j = 0; j < this_shape[1]; j++) {
+            to_sum[j] = this->_data.at({row, j});
+            this->perform_op(to_sum[j], other->_data.at({j, col}), OP::MUL);
+        }
+        this->set_to_same_mod(acc, to_sum[0]);
+        evaluator->add_many(to_sum, acc);
+        new_data.push_back(acc);
+    }
+
+    this->_data = TensorStorage(new_data, new_shape);
     return shared_from_this();
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::matmul_plain_inplace(
-    const PlainTensor<double>& other) {}
+    const PlainTensor<double>& other) {
+    // TODO
+    throw runtime_error("Not implemented yet");
+    return shared_from_this();
+}
 
 void CKKSTensor::clear() {
     this->_data = TensorStorage<Ciphertext>();
