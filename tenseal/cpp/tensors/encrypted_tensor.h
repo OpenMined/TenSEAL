@@ -38,22 +38,17 @@ class EncryptedTensor {
     };
     virtual PlainTensor<plain_data_t> decrypt(
         const shared_ptr<SecretKey>& sk) const = 0;
+
     /**
      * Negates a EncryptedTensor<plain_data_t, encrypted_t>.
      **/
     encrypted_t negate() const { return this->copy()->negate_inplace(); };
-    encrypted_t negate_inplace() {
-        this->_check_operation_sanity();
-        return negate_inplace_impl();
-    };
+    virtual encrypted_t negate_inplace() = 0;
     /**
      * Compute the square of the EncryptedTensor<plain_data_t, encrypted_t>.
      **/
     encrypted_t square() const { return this->copy()->square_inplace(); };
-    encrypted_t square_inplace() {
-        this->_check_operation_sanity();
-        return square_inplace_impl();
-    };
+    virtual encrypted_t square_inplace() = 0;
     /**
      * Compute the power of the EncryptedTensor<plain_data_t, encrypted_t> with
      *minimal multiplication depth.
@@ -61,10 +56,7 @@ class EncryptedTensor {
     encrypted_t power(unsigned int power) const {
         return this->copy()->power_inplace(power);
     };
-    encrypted_t power_inplace(unsigned int power) {
-        this->_check_operation_sanity();
-        return power_inplace_impl(power);
-    };
+    virtual encrypted_t power_inplace(unsigned int power) = 0;
     /**
      * Encrypted evaluation function operates on two encrypted tensors and
      * returns a new EncryptedTensor<plain_data_t, encrypted_t>
@@ -75,31 +67,19 @@ class EncryptedTensor {
     encrypted_t add(const encrypted_t& to_add) const {
         return this->copy()->add_inplace(to_add);
     };
-    encrypted_t add_inplace(const encrypted_t& to_add) {
-        this->_check_operation_sanity();
-        return add_inplace_impl(to_add);
-    };
+    virtual encrypted_t add_inplace(const encrypted_t& to_add) = 0;
     encrypted_t sub(encrypted_t to_sub) const {
         return this->copy()->sub_inplace(to_sub);
     };
-    encrypted_t sub_inplace(const encrypted_t& to_sub) {
-        this->_check_operation_sanity();
-        return sub_inplace_impl(to_sub);
-    };
+    virtual encrypted_t sub_inplace(const encrypted_t& to_sub) = 0;
     encrypted_t mul(encrypted_t to_mul) const {
         return this->copy()->mul_inplace(to_mul);
     };
-    encrypted_t mul_inplace(const encrypted_t& to_mul) {
-        this->_check_operation_sanity();
-        return mul_inplace_impl(to_mul);
-    };
+    virtual encrypted_t mul_inplace(const encrypted_t& to_mul) = 0;
     encrypted_t dot_product(encrypted_t to_mul) const {
         return this->copy()->dot_product_inplace(to_mul);
     };
-    encrypted_t dot_product_inplace(const encrypted_t& to_mul) {
-        this->_check_operation_sanity();
-        return dot_product_inplace_impl(to_mul);
-    };
+    virtual encrypted_t dot_product_inplace(const encrypted_t& to_mul) = 0;
     /**
      * Plain evaluation function operates on an encrypted tensors and plaintext
      * tensors and returns a new EncryptedTensor<plain_data_t, encrypted_t>
@@ -113,14 +93,9 @@ class EncryptedTensor {
     encrypted_t add_plain(const PlainTensor<plain_data_t>& to_add) const {
         return this->copy()->add_plain_inplace(to_add);
     };
-    encrypted_t add_plain_inplace(const plain_data_t& to_add) {
-        this->_check_operation_sanity();
-        return add_plain_inplace_impl(to_add);
-    };
-    encrypted_t add_plain_inplace(const PlainTensor<plain_data_t>& to_add) {
-        this->_check_operation_sanity();
-        return add_plain_inplace_impl(to_add);
-    };
+    virtual encrypted_t add_plain_inplace(const plain_data_t& to_add) = 0;
+    virtual encrypted_t add_plain_inplace(
+        const PlainTensor<plain_data_t>& to_add) = 0;
 
     encrypted_t sub_plain(const plain_data_t& to_sub) const {
         return this->copy()->sub_plain_inplace(to_sub);
@@ -128,14 +103,9 @@ class EncryptedTensor {
     encrypted_t sub_plain(const PlainTensor<plain_data_t>& to_sub) const {
         return this->copy()->sub_plain_inplace(to_sub);
     };
-    encrypted_t sub_plain_inplace(const plain_data_t& to_sub) {
-        this->_check_operation_sanity();
-        return sub_plain_inplace_impl(to_sub);
-    };
-    encrypted_t sub_plain_inplace(const PlainTensor<plain_data_t>& to_sub) {
-        this->_check_operation_sanity();
-        return sub_plain_inplace_impl(to_sub);
-    };
+    virtual encrypted_t sub_plain_inplace(const plain_data_t& to_sub) = 0;
+    virtual encrypted_t sub_plain_inplace(
+        const PlainTensor<plain_data_t>& to_sub) = 0;
 
     encrypted_t mul_plain(const plain_data_t& to_mul) const {
         return this->copy()->mul_plain_inplace(to_mul);
@@ -143,31 +113,20 @@ class EncryptedTensor {
     encrypted_t mul_plain(const PlainTensor<plain_data_t>& to_mul) const {
         return this->copy()->mul_plain_inplace(to_mul);
     };
-    encrypted_t mul_plain_inplace(const plain_data_t& to_mul) {
-        this->_check_operation_sanity();
-        return mul_plain_inplace_impl(to_mul);
-    };
-    encrypted_t mul_plain_inplace(const PlainTensor<plain_data_t>& to_mul) {
-        this->_check_operation_sanity();
-        return mul_plain_inplace_impl(to_mul);
-    };
+    virtual encrypted_t mul_plain_inplace(const plain_data_t& to_mul) = 0;
+    virtual encrypted_t mul_plain_inplace(
+        const PlainTensor<plain_data_t>& to_mul) = 0;
 
     encrypted_t dot_product_plain(
         const PlainTensor<plain_data_t>& to_mul) const {
         return this->copy()->dot_product_plain_inplace(to_mul);
     };
-    encrypted_t dot_product_plain_inplace(
-        const PlainTensor<plain_data_t>& to_mul) {
-        this->_check_operation_sanity();
-        return dot_product_plain_inplace_impl(to_mul);
-    };
+    virtual encrypted_t dot_product_plain_inplace(
+        const PlainTensor<plain_data_t>& to_mul) = 0;
     encrypted_t sum(size_t axis = 0) const {
         return this->copy()->sum_inplace(axis);
     };
-    encrypted_t sum_inplace(size_t axis = 0) {
-        this->_check_operation_sanity();
-        return sum_inplace_impl(axis);
-    };
+    virtual encrypted_t sum_inplace(size_t axis) = 0;
     /**
      * Polynomial evaluation with `this` as variable.
      * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
@@ -176,10 +135,7 @@ class EncryptedTensor {
     encrypted_t polyval(const vector<double>& coefficients) const {
         return this->copy()->polyval_inplace(coefficients);
     };
-    encrypted_t polyval_inplace(const vector<double>& coefficients) {
-        this->_check_operation_sanity();
-        return polyval_inplace_impl(coefficients);
-    };
+    virtual encrypted_t polyval_inplace(const vector<double>& coefficients) = 0;
     /**
      * Load/Save the Tensor from/to a serialized protobuffer.
      **/
@@ -297,34 +253,6 @@ class EncryptedTensor {
 
    protected:
     shared_ptr<TenSEALContext> _context;
-    /**
-     * Sanity checks for the tensor
-     * */
-    virtual bool _check_operation_sanity() = 0;
-    /**
-     * Implementations for the operations
-     * **/
-    virtual encrypted_t negate_inplace_impl() = 0;
-    virtual encrypted_t square_inplace_impl() = 0;
-    virtual encrypted_t power_inplace_impl(unsigned int power) = 0;
-    virtual encrypted_t add_inplace_impl(const encrypted_t& to_add) = 0;
-    virtual encrypted_t sub_inplace_impl(const encrypted_t& to_sub) = 0;
-    virtual encrypted_t mul_inplace_impl(const encrypted_t& to_mul) = 0;
-    virtual encrypted_t dot_product_inplace_impl(const encrypted_t& to_mul) = 0;
-    virtual encrypted_t add_plain_inplace_impl(const plain_data_t& to_add) = 0;
-    virtual encrypted_t add_plain_inplace_impl(
-        const PlainTensor<plain_data_t>& to_add) = 0;
-    virtual encrypted_t sub_plain_inplace_impl(const plain_data_t& to_sub) = 0;
-    virtual encrypted_t sub_plain_inplace_impl(
-        const PlainTensor<plain_data_t>& to_sub) = 0;
-    virtual encrypted_t mul_plain_inplace_impl(const plain_data_t& to_mul) = 0;
-    virtual encrypted_t mul_plain_inplace_impl(
-        const PlainTensor<plain_data_t>& to_mul) = 0;
-    virtual encrypted_t dot_product_plain_inplace_impl(
-        const PlainTensor<plain_data_t>& to_mul) = 0;
-    virtual encrypted_t sum_inplace_impl(size_t axis) = 0;
-    virtual encrypted_t polyval_inplace_impl(
-        const vector<double>& coefficients) = 0;
 
    private:
 };

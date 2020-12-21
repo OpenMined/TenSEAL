@@ -30,6 +30,76 @@ class CKKSVector
      *of real numbers using the secret-key.
      **/
     plain_t decrypt(const shared_ptr<SecretKey>& sk) const override;
+
+    /**
+     * Compute the power of the CKKSVector with minimal multiplication depth.
+     **/
+    encrypted_t power_inplace(unsigned int power) override;
+    /**
+     * Negates a CKKSVector.
+     **/
+    encrypted_t negate_inplace() override;
+    /**
+     * Compute the square of the CKKSVector.
+     **/
+    encrypted_t square_inplace() override;
+    /**
+     * Encrypted evaluation function operates on two encrypted vectors and
+     * returns a new CKKSVector which is the result of either
+     *addition, substraction or multiplication in an element-wise fashion.
+     *in_place functions return a reference to the same object.
+     **/
+    encrypted_t add_inplace(const encrypted_t& to_add) override;
+    encrypted_t sub_inplace(const encrypted_t& to_sub) override;
+    encrypted_t mul_inplace(const encrypted_t& to_mul) override;
+    encrypted_t dot_product_inplace(const encrypted_t& to_mul) override;
+    encrypted_t dot_product_plain_inplace(const plain_t& to_mul) override;
+    encrypted_t sum_inplace(size_t axis = 0) override;
+
+    /**
+     * Plain evaluation function operates on an encrypted vector and plaintext
+     * vector of integers and returns a new CKKSVector which is the result of
+     * either addition, substraction or multiplication in an element-wise
+     *fashion. in_place functions return a reference to the same object.
+     **/
+    encrypted_t add_plain_inplace(const plain_t::dtype& to_add) override;
+    encrypted_t add_plain_inplace(const plain_t& to_add) override;
+    encrypted_t sub_plain_inplace(const plain_t::dtype& to_sub) override;
+    encrypted_t sub_plain_inplace(const plain_t& to_sub) override;
+    encrypted_t mul_plain_inplace(const plain_t::dtype& to_mul) override;
+    encrypted_t mul_plain_inplace(const plain_t& to_mul) override;
+
+    /**
+     * Encrypted Vector multiplication with plain matrix.
+     **/
+    encrypted_t matmul_plain_inplace(const plain_t& matrix,
+                                     size_t n_jobs = 0) override;
+
+    /**
+     * Encrypted Matrix multiplication with plain vector.
+     **/
+    encrypted_t enc_matmul_plain_inplace(const plain_t& plain_vec,
+                                         size_t row_size) override;
+
+    /**
+     * Polynomial evaluation with `this` as variable.
+     * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
+     *x^i
+     **/
+    encrypted_t polyval_inplace(const vector<double>& coefficients) override;
+
+    /*
+     * Image Block to Columns.
+     * The input matrix should be encoded in a vertical scan (column-major).
+     * The kernel vector should be padded with zeros to the next power of 2
+     */
+    encrypted_t conv2d_im2col_inplace(const plain_t& kernel,
+                                      const size_t windows_nb) override;
+    /**
+     * Replicate the first slot of a ciphertext n times. Requires a
+     *multiplication.
+     **/
+    encrypted_t replicate_first_slot_inplace(size_t n) override;
     /**
      * Load/Save the vector from/to a serialized protobuffer.
      **/
@@ -44,82 +114,6 @@ class CKKSVector
     encrypted_t deepcopy() const override;
 
     double scale() const override { return _init_scale; }
-
-   protected:
-    /**
-     * Compute the power of the CKKSVector with minimal multiplication depth.
-     **/
-    encrypted_t power_inplace_impl(unsigned int power) override;
-    /**
-     * Negates a CKKSVector.
-     **/
-    encrypted_t negate_inplace_impl() override;
-    /**
-     * Compute the square of the CKKSVector.
-     **/
-    encrypted_t square_inplace_impl() override;
-    /**
-     * Encrypted evaluation function operates on two encrypted vectors and
-     * returns a new CKKSVector which is the result of either
-     *addition, substraction or multiplication in an element-wise fashion.
-     *in_place functions return a reference to the same object.
-     **/
-    encrypted_t add_inplace_impl(const encrypted_t& to_add) override;
-    encrypted_t sub_inplace_impl(const encrypted_t& to_sub) override;
-    encrypted_t mul_inplace_impl(const encrypted_t& to_mul) override;
-    encrypted_t dot_product_inplace_impl(const encrypted_t& to_mul) override;
-    encrypted_t dot_product_plain_inplace_impl(const plain_t& to_mul) override;
-    encrypted_t sum_inplace_impl(size_t axis = 0) override;
-
-    /**
-     * Plain evaluation function operates on an encrypted vector and plaintext
-     * vector of integers and returns a new CKKSVector which is the result of
-     * either addition, substraction or multiplication in an element-wise
-     *fashion. in_place functions return a reference to the same object.
-     **/
-    encrypted_t add_plain_inplace_impl(const plain_t::dtype& to_add) override;
-    encrypted_t add_plain_inplace_impl(const plain_t& to_add) override;
-    encrypted_t sub_plain_inplace_impl(const plain_t::dtype& to_sub) override;
-    encrypted_t sub_plain_inplace_impl(const plain_t& to_sub) override;
-    encrypted_t mul_plain_inplace_impl(const plain_t::dtype& to_mul) override;
-    encrypted_t mul_plain_inplace_impl(const plain_t& to_mul) override;
-
-    /**
-     * Encrypted Vector multiplication with plain matrix.
-     **/
-    encrypted_t matmul_plain_inplace_impl(const plain_t& matrix,
-                                          size_t n_jobs = 0) override;
-
-    /**
-     * Encrypted Matrix multiplication with plain vector.
-     **/
-    encrypted_t enc_matmul_plain_inplace_impl(const plain_t& plain_vec,
-                                              size_t row_size) override;
-
-    /**
-     * Polynomial evaluation with `this` as variable.
-     * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
-     *x^i
-     **/
-    encrypted_t polyval_inplace_impl(
-        const vector<double>& coefficients) override;
-
-    /*
-     * Image Block to Columns.
-     * The input matrix should be encoded in a vertical scan (column-major).
-     * The kernel vector should be padded with zeros to the next power of 2
-     */
-    encrypted_t conv2d_im2col_inplace_impl(const plain_t& kernel,
-                                           const size_t windows_nb) override;
-    /**
-     * Replicate the first slot of a ciphertext n times. Requires a
-     *multiplication.
-     **/
-    encrypted_t replicate_first_slot_inplace_impl(size_t n) override;
-    /**
-     * Check tensor sanity
-     * **/
-    bool _check_operation_sanity() override;
 
    private:
     double _init_scale;

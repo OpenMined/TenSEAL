@@ -28,10 +28,40 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
 
     PlainTensor<double> decrypt(const shared_ptr<SecretKey>& sk) const override;
 
+    shared_ptr<CKKSTensor> negate_inplace() override;
+    shared_ptr<CKKSTensor> square_inplace() override;
+    shared_ptr<CKKSTensor> power_inplace(unsigned int power) override;
+
+    shared_ptr<CKKSTensor> add_inplace(
+        const shared_ptr<CKKSTensor>& to_add) override;
+    shared_ptr<CKKSTensor> sub_inplace(
+        const shared_ptr<CKKSTensor>& to_sub) override;
+    shared_ptr<CKKSTensor> mul_inplace(
+        const shared_ptr<CKKSTensor>& to_mul) override;
+    shared_ptr<CKKSTensor> dot_product_inplace(
+        const shared_ptr<CKKSTensor>& to_mul) override;
+
+    shared_ptr<CKKSTensor> add_plain_inplace(const double& to_add) override;
+    shared_ptr<CKKSTensor> sub_plain_inplace(const double& to_sub) override;
+    shared_ptr<CKKSTensor> mul_plain_inplace(const double& to_mul) override;
+
+    shared_ptr<CKKSTensor> add_plain_inplace(
+        const PlainTensor<double>& to_add) override;
+    shared_ptr<CKKSTensor> sub_plain_inplace(
+        const PlainTensor<double>& to_sub) override;
+    shared_ptr<CKKSTensor> mul_plain_inplace(
+        const PlainTensor<double>& to_mul) override;
+    shared_ptr<CKKSTensor> dot_product_plain_inplace(
+        const PlainTensor<double>& to_mul) override;
+
+    shared_ptr<CKKSTensor> sum_inplace(size_t axis = 0) override;
     shared_ptr<CKKSTensor> sum_batch() {
         return this->copy()->sum_batch_inplace();
     }
     shared_ptr<CKKSTensor> sum_batch_inplace();
+
+    shared_ptr<CKKSTensor> polyval_inplace(
+        const vector<double>& coefficients) override;
 
     void load(const string& vec) override;
     string save() const override;
@@ -45,44 +75,6 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     shared_ptr<CKKSTensor> reshape_inplace(const vector<size_t>& new_shape);
     vector<size_t> shape_with_batch() const;
     double scale() const override;
-
-   protected:
-    shared_ptr<CKKSTensor> negate_inplace_impl() override;
-    shared_ptr<CKKSTensor> square_inplace_impl() override;
-    shared_ptr<CKKSTensor> power_inplace_impl(unsigned int power) override;
-
-    shared_ptr<CKKSTensor> add_inplace_impl(
-        const shared_ptr<CKKSTensor>& to_add) override;
-    shared_ptr<CKKSTensor> sub_inplace_impl(
-        const shared_ptr<CKKSTensor>& to_sub) override;
-    shared_ptr<CKKSTensor> mul_inplace_impl(
-        const shared_ptr<CKKSTensor>& to_mul) override;
-    shared_ptr<CKKSTensor> dot_product_inplace_impl(
-        const shared_ptr<CKKSTensor>& to_mul) override;
-
-    shared_ptr<CKKSTensor> add_plain_inplace_impl(
-        const double& to_add) override;
-    shared_ptr<CKKSTensor> sub_plain_inplace_impl(
-        const double& to_sub) override;
-    shared_ptr<CKKSTensor> mul_plain_inplace_impl(
-        const double& to_mul) override;
-
-    shared_ptr<CKKSTensor> add_plain_inplace_impl(
-        const PlainTensor<double>& to_add) override;
-    shared_ptr<CKKSTensor> sub_plain_inplace_impl(
-        const PlainTensor<double>& to_sub) override;
-    shared_ptr<CKKSTensor> mul_plain_inplace_impl(
-        const PlainTensor<double>& to_mul) override;
-    shared_ptr<CKKSTensor> dot_product_plain_inplace_impl(
-        const PlainTensor<double>& to_mul) override;
-
-    shared_ptr<CKKSTensor> sum_inplace_impl(size_t axis = 0) override;
-    shared_ptr<CKKSTensor> polyval_inplace_impl(
-        const vector<double>& coefficients) override;
-    /**
-     * Check tensor sanity
-     * **/
-    bool _check_operation_sanity() override;
 
    private:
     TensorStorage<Ciphertext> _data;

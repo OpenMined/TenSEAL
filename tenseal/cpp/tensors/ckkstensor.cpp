@@ -118,13 +118,13 @@ PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
     }
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::negate_inplace_impl() {
+shared_ptr<CKKSTensor> CKKSTensor::negate_inplace() {
     for (auto& ct : _data)
         this->tenseal_context()->evaluator->negate_inplace(ct);
     return shared_from_this();
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::square_inplace_impl() {
+shared_ptr<CKKSTensor> CKKSTensor::square_inplace() {
     for (auto& ct : _data) {
         this->tenseal_context()->evaluator->square_inplace(ct);
         this->auto_relin(ct);
@@ -133,7 +133,7 @@ shared_ptr<CKKSTensor> CKKSTensor::square_inplace_impl() {
     return shared_from_this();
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::power_inplace_impl(unsigned int power) {
+shared_ptr<CKKSTensor> CKKSTensor::power_inplace(unsigned int power) {
     if (power == 0) {
         auto ones = PlainTensor<double>::repeat_value(1, this->shape());
         *this = CKKSTensor(this->tenseal_context(), ones, this->_init_scale,
@@ -146,17 +146,17 @@ shared_ptr<CKKSTensor> CKKSTensor::power_inplace_impl(unsigned int power) {
     }
 
     if (power == 2) {
-        this->square_inplace_impl();
+        this->square_inplace();
         return shared_from_this();
     }
 
     int closest_power_of_2 = 1 << static_cast<int>(floor(log2(power)));
     power -= closest_power_of_2;
     if (power == 0) {
-        this->power_inplace_impl(closest_power_of_2 / 2)->square_inplace_impl();
+        this->power_inplace(closest_power_of_2 / 2)->square_inplace();
     } else {
         auto closest_pow2_vector = this->power(closest_power_of_2);
-        this->power_inplace_impl(power)->mul_inplace_impl(closest_pow2_vector);
+        this->power_inplace(power)->mul_inplace(closest_pow2_vector);
     }
 
     return shared_from_this();
@@ -349,61 +349,61 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(const double& operand,
     return shared_from_this();
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::add_inplace_impl(
+shared_ptr<CKKSTensor> CKKSTensor::add_inplace(
     const shared_ptr<CKKSTensor>& to_add) {
     return this->op_inplace(to_add, OP::ADD);
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::sub_inplace_impl(
+shared_ptr<CKKSTensor> CKKSTensor::sub_inplace(
     const shared_ptr<CKKSTensor>& to_sub) {
     return this->op_inplace(to_sub, OP::SUB);
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::mul_inplace_impl(
+shared_ptr<CKKSTensor> CKKSTensor::mul_inplace(
     const shared_ptr<CKKSTensor>& to_mul) {
     return this->op_inplace(to_mul, OP::MUL);
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::dot_product_inplace_impl(
+shared_ptr<CKKSTensor> CKKSTensor::dot_product_inplace(
     const shared_ptr<CKKSTensor>& to_mul) {
     // TODO
     return shared_from_this();
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::add_plain_inplace_impl(
+shared_ptr<CKKSTensor> CKKSTensor::add_plain_inplace(
     const PlainTensor<double>& to_add) {
     return this->op_plain_inplace(to_add, OP::ADD);
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::sub_plain_inplace_impl(
+shared_ptr<CKKSTensor> CKKSTensor::sub_plain_inplace(
     const PlainTensor<double>& to_sub) {
     return this->op_plain_inplace(to_sub, OP::SUB);
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace_impl(
+shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace(
     const PlainTensor<double>& to_mul) {
     return this->op_plain_inplace(to_mul, OP::MUL);
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::dot_product_plain_inplace_impl(
+shared_ptr<CKKSTensor> CKKSTensor::dot_product_plain_inplace(
     const PlainTensor<double>& to_mul) {
     // TODO
     return shared_from_this();
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::add_plain_inplace_impl(const double& to_add) {
+shared_ptr<CKKSTensor> CKKSTensor::add_plain_inplace(const double& to_add) {
     return this->op_plain_inplace(to_add, OP::ADD);
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::sub_plain_inplace_impl(const double& to_sub) {
+shared_ptr<CKKSTensor> CKKSTensor::sub_plain_inplace(const double& to_sub) {
     return this->op_plain_inplace(to_sub, OP::SUB);
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace_impl(const double& to_mul) {
+shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace(const double& to_mul) {
     return this->op_plain_inplace(to_mul, OP::MUL);
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::sum_inplace_impl(size_t axis) {
+shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
     if (axis >= shape_with_batch().size())
         throw invalid_argument("invalid axis");
 
@@ -454,7 +454,7 @@ shared_ptr<CKKSTensor> CKKSTensor::sum_batch_inplace() {
     return shared_from_this();
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace_impl(
+shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
     const vector<double>& coefficients) {
     if (coefficients.size() == 0) {
         throw invalid_argument(
@@ -485,7 +485,7 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace_impl(
     x_squares.reserve(max_square + 1);
     x_squares.push_back(x->copy());  // x
     for (int i = 1; i <= max_square; i++) {
-        x->square_inplace_impl();
+        x->square_inplace();
         x_squares.push_back(x->copy());  // x^(2^i)
     }
 
@@ -499,7 +499,7 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace_impl(
     for (int i = 1; i <= degree; i++) {
         if (coefficients[i] == 0.0) continue;
         x = compute_polynomial_term(i, coefficients[i], x_squares);
-        result->add_inplace_impl(x);
+        result->add_inplace(x);
     }
 
     this->_data = TensorStorage<Ciphertext>(result->data(), result->shape());
@@ -604,9 +604,4 @@ shared_ptr<CKKSTensor> CKKSTensor::reshape_inplace(
 }
 
 double CKKSTensor::scale() const { return _init_scale; }
-
-bool CKKSTensor::_check_operation_sanity(){
-    return true;
-}
-
 }  // namespace tenseal
