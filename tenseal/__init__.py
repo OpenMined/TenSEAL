@@ -87,6 +87,11 @@ def bfv_vector_from(context: Context, data: bytes) -> BFVVector:
     return BFVVector.load(context, data)
 
 
+def lazy_bfv_vector_from(data: bytes) -> BFVVector:
+    """Load a BFVVector from a protocol buffer."""
+    return BFVVector.lazy_load(data)
+
+
 def ckks_vector(*args, **kwargs) -> CKKSVector:
     """Constructor function for tenseal.CKKSVector"""
     return CKKSVector(*args, **kwargs)
@@ -96,6 +101,11 @@ def ckks_vector_from(context: Context, data: bytes) -> CKKSVector:
     """Load a CKKSVector from a protocol buffer.
     Requires the context to be linked with."""
     return CKKSVector.load(context, data)
+
+
+def lazy_ckks_vector_from(data: bytes) -> CKKSVector:
+    """Load a CKKSVector from a protocol buffer."""
+    return CKKSVector.lazy_load(data)
 
 
 def ckks_tensor(*args, **kwargs) -> CKKSTensor:
@@ -109,13 +119,21 @@ def ckks_tensor_from(context: Context, data: bytes) -> CKKSTensor:
     return CKKSTensor.load(context, data)
 
 
+def lazy_ckks_tensor_from(data: bytes) -> CKKSTensor:
+    """Load a CKKSTensor from a protocol buffer"""
+    return CKKSTensor.lazy_load(data)
+
+
 __all__ = [
     "bfv_vector",
     "bfv_vector_from",
+    "lazy_bfv_vector_from",
     "ckks_vector",
     "ckks_vector_from",
+    "lazy_ckks_vector_from",
     "ckks_tensor",
     "ckks_tensor_from",
+    "lazy_ckks_tensor_from",
     "context",
     "context_from",
     "im2col_encoding",
