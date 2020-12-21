@@ -161,6 +161,10 @@ class EncryptedTensor {
      **/
     void link_tenseal_context(shared_ptr<TenSEALContext> ctx) {
         this->_context = ctx;
+        if (_lazy_buffer) {
+            this->load(*_lazy_buffer);
+            _lazy_buffer = {};
+        }
     };
     void load_context_proto(const TenSEALContextProto& ctx) {
         this->link_tenseal_context(TenSEALContext::Create(ctx));
@@ -253,6 +257,7 @@ class EncryptedTensor {
 
    protected:
     shared_ptr<TenSEALContext> _context;
+    optional<string> _lazy_buffer;
 
    private:
 };
