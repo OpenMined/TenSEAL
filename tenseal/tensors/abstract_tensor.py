@@ -30,7 +30,7 @@ class AbstractTensor(ABC):
 
     def link_context(self, ctx: "ts.Context"):
         """Set the context linked to this tensor"""
-        return self.data.link_context(ctx)
+        return self.data.link_context(ctx.data)
 
     @property
     def shape(self) -> List[int]:

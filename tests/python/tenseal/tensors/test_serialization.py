@@ -604,7 +604,7 @@ def test_ckks_tensor_sanity(plain_vec, precision, duplicate):
     assert _almost_equal(decrypted, plain_vec, precision), "Decryption of tensor is incorrect"
 
 
-def test_ckks_tensor_lazy_load():
+def test_ckks_tensor_lazy_load(precision):
     vec1 = [1, 2, 3, 4]
     vec2 = [1, 2, 3, 4]
 
