@@ -568,8 +568,8 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
     to_sum.resize(this_shape[1]);
     for (size_t i = 0; i < new_shape[0] * new_shape[1]; i++) {
         auto evaluator = this->tenseal_context()->evaluator;
-        size_t row = i / new_shape[0];
-        size_t col = i % new_shape[0];
+        size_t row = i / new_shape[1];
+        size_t col = i % new_shape[1];
         for (size_t j = 0; j < this_shape[1]; j++) {
             to_sum[j] = this->_data.at({row, j});
             this->perform_op(to_sum[j], other->_data.at({j, col}), OP::MUL);
