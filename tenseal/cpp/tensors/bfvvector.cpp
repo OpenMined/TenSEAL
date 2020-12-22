@@ -323,7 +323,7 @@ BFVVectorProto BFVVector::save_proto() const {
 }
 
 void BFVVector::load(const std::string& vec) {
-    if (this->_context == nullptr) {
+    if (!this->has_context()) {
         _lazy_buffer = vec;
         return;
     }

@@ -552,7 +552,7 @@ CKKSTensorProto CKKSTensor::save_proto() const {
 }
 
 void CKKSTensor::load(const std::string& tensor_str) {
-    if (this->_context == nullptr) {
+    if (!this->has_context()) {
         _lazy_buffer = tensor_str;
         return;
     }
