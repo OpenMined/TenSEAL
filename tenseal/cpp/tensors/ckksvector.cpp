@@ -26,6 +26,8 @@ CKKSVector::CKKSVector(const shared_ptr<TenSEALContext>& ctx,
     this->load(vec);
 }
 
+CKKSVector::CKKSVector(const string& vec) { this->load(vec); }
+
 CKKSVector::CKKSVector(const TenSEALContextProto& ctx,
                        const CKKSVectorProto& vec) {
     this->load_context_proto(ctx);
@@ -461,6 +463,11 @@ CKKSVectorProto CKKSVector::save_proto() const {
 }
 
 void CKKSVector::load(const std::string& vec) {
+    if (!this->has_context()) {
+        _lazy_buffer = vec;
+        return;
+    }
+
     CKKSVectorProto buffer;
     if (!buffer.ParseFromArray(vec.c_str(), static_cast<int>(vec.size()))) {
         throw invalid_argument("failed to parse CKKS stream");

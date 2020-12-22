@@ -249,5 +249,27 @@ TEST_P(CKKSVectorTest, TestEmptyPlaintext) {
 INSTANTIATE_TEST_CASE_P(TestCKKSVector, CKKSVectorTest,
                         ::testing::Values(false, true));
 
+TEST_F(CKKSVectorTest, TestCKKSLazyContext) {
+    auto ctx =
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    ASSERT_TRUE(ctx != nullptr);
+
+    ctx->global_scale(std::pow(2, 40));
+
+    auto l = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}));
+    auto r = CKKSVector::Create(ctx, std::vector<double>({3, 4, 4}));
+
+    auto buffer = l->save();
+    auto newl = CKKSVector::Create(buffer);
+
+    EXPECT_THROW(newl->add(r), std::exception);
+
+    newl->link_tenseal_context(ctx);
+    auto res = newl->add(r);
+
+    auto decr = res->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {4, 6, 7}));
+}
+
 }  // namespace
 }  // namespace tenseal

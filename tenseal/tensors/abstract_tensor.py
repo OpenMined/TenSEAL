@@ -28,6 +28,10 @@ class AbstractTensor(ABC):
         """Get the context linked to this tensor"""
         return ts.Context._wrap(self.data.context())
 
+    def link_context(self, ctx: "ts.Context"):
+        """Set the context linked to this tensor"""
+        return self.data.link_context(ctx.data)
+
     @property
     def shape(self) -> List[int]:
         return self.data.shape()
@@ -49,6 +53,21 @@ class AbstractTensor(ABC):
         raise TypeError(
             "Invalid input types context: {} and vector: {}".format(type(context), type(data))
         )
+
+    @classmethod
+    def lazy_load(cls, data: bytes) -> "AbstractTensor":
+        """
+        Constructor method for the tensor object from a serialized protobuffer, without a context.
+        Args:
+            data: the serialized protobuffer.
+        Returns:
+            Tensor object.
+        """
+        if isinstance(data, bytes):
+            native_type = getattr(ts._ts_cpp, cls.__name__)
+            return cls._wrap(native_type(data))
+
+        raise TypeError("Invalid input types vector: {}".format(type(data)))
 
     def serialize(self) -> bytes:
         """Serialize the tensor into a stream of bytes"""

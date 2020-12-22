@@ -75,6 +75,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
                 return BFVVector::Create(ctx, data);
             }))
+        .def(py::init(
+            [](const std::string &data) { return BFVVector::Create(data); }))
         .def("size", py::overload_cast<>(&BFVVector::size, py::const_))
         .def("decrypt",
              [](shared_ptr<BFVVector> obj) { return obj->decrypt().data(); })
@@ -144,8 +146,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
                  return obj->mul_plain_inplace(other);
              })
-        .def("context",
-             [](shared_ptr<BFVVector> obj) { return obj->tenseal_context(); })
+        .def("context", &BFVVector::tenseal_context)
+        .def("link_context", &BFVVector::link_tenseal_context)
         .def("serialize",
              [](shared_ptr<BFVVector> &obj) { return py::bytes(obj->save()); })
         .def("copy", &BFVVector::deepcopy)
@@ -214,6 +216,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
                 return CKKSVector::Create(ctx, data);
             }))
+        .def(py::init(
+            [](const std::string &data) { return CKKSVector::Create(data); }))
         .def("size", py::overload_cast<>(&CKKSVector::size, py::const_))
         .def("decrypt",
              [](shared_ptr<CKKSVector> obj) { return obj->decrypt().data(); })
@@ -415,8 +419,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                 return obj->matmul_plain_inplace(matrix, n_jobs);
             },
             py::arg("matrix"), py::arg("n_jobs") = 0)
-        .def("context",
-             [](shared_ptr<CKKSVector> obj) { return obj->tenseal_context(); })
+        .def("context", &CKKSVector::tenseal_context)
+        .def("link_context", &CKKSVector::link_tenseal_context)
         .def("serialize",
              [](shared_ptr<CKKSVector> obj) { return py::bytes(obj->save()); })
         .def("copy", &CKKSVector::deepcopy)
@@ -448,6 +452,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
                 return CKKSTensor::Create(ctx, data);
             }))
+        .def(py::init(
+            [](const std::string &data) { return CKKSTensor::Create(data); }))
         .def("decrypt",
              [](shared_ptr<CKKSTensor> obj) { return obj->decrypt(); })
         .def("decrypt",
@@ -560,8 +566,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__neg__", &CKKSTensor::negate)
         .def("__pow__", &CKKSTensor::power)
         .def("__ipow__", &CKKSTensor::power_inplace)
-        .def("context",
-             [](shared_ptr<CKKSTensor> obj) { return obj->tenseal_context(); })
+        .def("context", &CKKSTensor::tenseal_context)
+        .def("link_context", &CKKSTensor::link_tenseal_context)
         .def("serialize",
              [](shared_ptr<CKKSTensor> &obj) { return py::bytes(obj->save()); })
         .def("copy", &CKKSTensor::deepcopy)
