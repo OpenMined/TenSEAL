@@ -130,6 +130,7 @@ class CKKSVector
     CKKSVector(const shared_ptr<TenSEALContext>& ctx, const plain_t& vec,
                optional<double> scale = {});
     CKKSVector(const shared_ptr<TenSEALContext>& ctx, const string& vec);
+    CKKSVector(const string& vec);
     CKKSVector(const TenSEALContextProto& ctx, const CKKSVectorProto& vec);
     CKKSVector(const shared_ptr<TenSEALContext>& ctx,
                const CKKSVectorProto& vec);

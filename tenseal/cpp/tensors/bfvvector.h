@@ -120,6 +120,7 @@ class BFVVector
     BFVVector(const shared_ptr<TenSEALContext>& ctx, const plain_t& vec);
     BFVVector(const shared_ptr<const BFVVector>&);
     BFVVector(const shared_ptr<TenSEALContext>& ctx, const string& vec);
+    BFVVector(const string& vec);
     BFVVector(const TenSEALContextProto& ctx, const BFVVectorProto& vec);
     BFVVector(const shared_ptr<TenSEALContext>& ctx, const BFVVectorProto& vec);
 
