@@ -277,6 +277,29 @@ def test_mul_without_global_scale(vec1, vec2, precision, duplicate):
     assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
 
 
+def test_ckksvector_lazy_load(precision):
+    vec1 = [1, 2, 3, 4]
+    vec2 = [1, 2, 3, 4]
+
+    context = ckks_context()
+    first_vec = ts.ckks_vector(context, vec1)
+    second_vec = ts.ckks_vector(context, vec2)
+
+    buff = first_vec.serialize()
+    newvec = ts.lazy_ckks_vector_from(buff)
+    newvec.link_context(context)
+
+    result = newvec + second_vec
+    # Decryption
+    decrypted_result = result.decrypt()
+    assert _almost_equal(
+        decrypted_result, [2, 4, 6, 8], precision
+    ), "Addition of vectors is incorrect."
+    assert _almost_equal(
+        newvec.decrypt(), [1, 2, 3, 4], precision
+    ), "Something went wrong in memory."
+
+
 @pytest.mark.parametrize(
     "vec1, vec2", [([1], [1]), ([-1], [1]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
 )
@@ -546,6 +569,25 @@ def test_mul_plain_inplace(vec1, vec2, duplicate):
     assert decrypted_result == expected, "Multiplication of vectors is incorrect."
 
 
+def test_bfvvector_lazy_load():
+    vec1 = [1, 2, 3, 4]
+    vec2 = [1, 2, 3, 4]
+
+    context = bfv_context()
+    first_vec = ts.bfv_vector(context, vec1)
+    second_vec = ts.bfv_vector(context, vec2)
+
+    buff = first_vec.serialize()
+    newvec = ts.lazy_bfv_vector_from(buff)
+    newvec.link_context(context)
+
+    result = newvec + second_vec
+    # Decryption
+    decrypted_result = result.decrypt()
+    assert decrypted_result == [2, 4, 6, 8], "Addition of vectors is incorrect."
+    assert newvec.decrypt() == [1, 2, 3, 4], "Something went wrong in memory."
+
+
 @pytest.mark.parametrize(
     "plain_vec", [[0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
 )
@@ -560,3 +602,25 @@ def test_ckks_tensor_sanity(plain_vec, precision, duplicate):
     decrypted = ckks_tensor.decrypt().tolist()
 
     assert _almost_equal(decrypted, plain_vec, precision), "Decryption of tensor is incorrect"
+
+
+def test_ckks_tensor_lazy_load(precision):
+    vec1 = [1, 2, 3, 4]
+    vec2 = [1, 2, 3, 4]
+
+    context = ckks_context()
+    first_vec = ts.ckks_tensor(context, ts.plain_tensor(vec1))
+    second_vec = ts.ckks_tensor(context, ts.plain_tensor(vec2))
+
+    buff = first_vec.serialize()
+    newvec = ts.lazy_ckks_tensor_from(buff)
+    newvec.link_context(context)
+
+    result = newvec + second_vec
+    # Decryption
+    decrypted_result = result.decrypt().tolist()
+
+    assert _almost_equal(
+        decrypted_result, [2, 4, 6, 8], precision
+    ), "Decryption of tensor is incorrect"
+    assert _almost_equal(newvec.decrypt().tolist(), [1, 2, 3, 4], precision), "invalid new tensor"

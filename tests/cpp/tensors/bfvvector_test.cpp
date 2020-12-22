@@ -102,6 +102,25 @@ TEST_P(BFVVectorTest, TestEmptyPlaintext) {
                  std::exception);
 }
 
+TEST_F(BFVVectorTest, TestBFVLazyLoading) {
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
+    ASSERT_TRUE(ctx != nullptr);
+
+    auto l = BFVVector::Create(ctx, vector<int64_t>({1, 2, 3}));
+    auto r = BFVVector::Create(ctx, vector<int64_t>({2, 3, 4}));
+
+    auto buffer = l->save();
+    auto newl = BFVVector::Create(buffer);
+
+    EXPECT_THROW(newl->add(r), std::exception);
+
+    newl->link_tenseal_context(ctx);
+    auto res = newl->add(r);
+
+    auto decr = res->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({3, 5, 7}));
+}
+
 INSTANTIATE_TEST_CASE_P(TestBFVVector, BFVVectorTest,
                         ::testing::Values(false, true));
 

@@ -24,6 +24,8 @@ BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx, const string& vec) {
     this->load(vec);
 }
 
+BFVVector::BFVVector(const string& vec) { this->load(vec); }
+
 BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx,
                      const BFVVectorProto& vec) {
     this->prepare_context(ctx);
@@ -321,8 +323,9 @@ BFVVectorProto BFVVector::save_proto() const {
 }
 
 void BFVVector::load(const std::string& vec) {
-    if (this->tenseal_context() == nullptr) {
-        throw invalid_argument("context missing for deserialization");
+    if (!this->has_context()) {
+        _lazy_buffer = vec;
+        return;
     }
     BFVVectorProto buffer;
     if (!buffer.ParseFromArray(vec.c_str(), static_cast<int>(vec.size()))) {

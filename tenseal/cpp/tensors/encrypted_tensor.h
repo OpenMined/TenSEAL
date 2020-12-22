@@ -155,12 +155,19 @@ class EncryptedTensor {
         if (_context == nullptr) throw invalid_argument("missing context");
         return _context;
     };
-
+    /**
+     * Check if the context is linked
+     * **/
+    bool has_context() const { return _context != nullptr; };
     /**
      * Link to a TenSEAL context.
      **/
     void link_tenseal_context(shared_ptr<TenSEALContext> ctx) {
         this->_context = ctx;
+        if (_lazy_buffer) {
+            this->load(*_lazy_buffer);
+            _lazy_buffer = {};
+        }
     };
     void load_context_proto(const TenSEALContextProto& ctx) {
         this->link_tenseal_context(TenSEALContext::Create(ctx));
@@ -252,9 +259,10 @@ class EncryptedTensor {
     virtual ~EncryptedTensor(){};
 
    protected:
-    shared_ptr<TenSEALContext> _context;
+    optional<string> _lazy_buffer;
 
    private:
+    shared_ptr<TenSEALContext> _context;
 };
 
 }  // namespace tenseal

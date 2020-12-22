@@ -41,6 +41,8 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
     this->load(tensor);
 }
 
+CKKSTensor::CKKSTensor(const string& tensor) { this->load(tensor); }
+
 CKKSTensor::CKKSTensor(const TenSEALContextProto& ctx,
                        const CKKSTensorProto& tensor) {
     this->load_context_proto(ctx);
@@ -550,6 +552,11 @@ CKKSTensorProto CKKSTensor::save_proto() const {
 }
 
 void CKKSTensor::load(const std::string& tensor_str) {
+    if (!this->has_context()) {
+        _lazy_buffer = tensor_str;
+        return;
+    }
+
     CKKSTensorProto buffer;
     if (!buffer.ParseFromArray(tensor_str.c_str(),
                                static_cast<int>(tensor_str.size()))) {
