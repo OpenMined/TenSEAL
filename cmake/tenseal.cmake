@@ -27,9 +27,12 @@ set(SEALAPI_SOURCES
     ${SEALAPI_BASEDIR}/sealapi_util_namespace.cpp)
 pybind11_add_module(_sealapi_cpp ${SEALAPI_SOURCES})
 
+find_package(xtensor REQUIRED)
+target_include_directories(_tenseal_cpp PUBLIC ${xtensor_INCLUDE_DIRS})
+
 target_link_libraries(_sealapi_cpp PRIVATE seal)
-target_link_libraries(_tenseal_cpp PRIVATE seal)
-target_link_libraries(tenseal PRIVATE seal)
+target_link_libraries(_tenseal_cpp PRIVATE seal xtensor)
+target_link_libraries(tenseal PRIVATE seal xtensor)
 if(NOT WIN32)
   target_link_libraries(tenseal PRIVATE tenseal_proto)
   target_link_libraries(_tenseal_cpp PRIVATE tenseal_proto)
