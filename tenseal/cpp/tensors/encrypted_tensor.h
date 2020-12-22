@@ -158,9 +158,7 @@ class EncryptedTensor {
     /**
      * Check if the context is linked
      * **/
-    bool has_context() const {
-        return _context != nullptr;
-    };
+    bool has_context() const { return _context != nullptr; };
     /**
      * Link to a TenSEAL context.
      **/
