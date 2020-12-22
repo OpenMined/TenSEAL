@@ -163,7 +163,7 @@ class PlainTensor {
      * Returns a reference to the internal representation of the
      * tensor.
      */
-    const vector<plain_t>& data() const { return _data.data(); }
+    const vector<plain_t> data() const { return _data.data(); }
     /**
      * Returns the current shape of the tensor.
      */
@@ -187,10 +187,10 @@ class PlainTensor {
     /**
      * Iterator utils
      **/
-    inline iterator begin() noexcept { return _data.begin(); }
-    inline const_iterator cbegin() const noexcept { return _data.cbegin(); }
-    inline iterator end() noexcept { return _data.end(); }
-    inline const_iterator cend() const noexcept { return _data.cend(); }
+    inline auto begin() noexcept { return _data.begin(); }
+    inline auto cbegin() const noexcept { return _data.cbegin(); }
+    inline auto end() noexcept { return _data.end(); }
+    inline auto cend() const noexcept { return _data.cend(); }
     /**
      * Return the vector representation batched by an axis.
      */

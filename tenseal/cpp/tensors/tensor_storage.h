@@ -1,8 +1,8 @@
 #ifndef TENSEAL_TENSOR_STORAGE_H
 #define TENSEAL_TENSOR_STORAGE_H
 
-#include "xtensor/xarray.hpp"
 #include "xtensor/xadapt.hpp"
+#include "xtensor/xarray.hpp"
 
 namespace tenseal {
 
@@ -62,8 +62,7 @@ class TensorStorage {
      * @param[in] input vector.
      */
     TensorStorage(const vector<dtype_t>& data)
-        : _data(xt::adapt(data, {data.size()})), _shape({data.size()}) {
-        }
+        : _data(xt::adapt(data)), _shape({data.size()}) {}
     /**
      * Create a new TensorStorage from a 2D vector.
      * @param[in] input matrix.
@@ -82,7 +81,15 @@ class TensorStorage {
         }
 
         _shape = {H, W};
-        _data = xt::adapt(data, {H, W});
+
+        vector<dtype_t> flat_data;
+        flat_data.reserve(H * W);
+
+        for (auto& vec : data) {
+            flat_data.insert(flat_data.end(), vec.begin(), vec.end());
+        }
+
+        _data = xt::adapt(flat_data, _shape);
     }
     /**
      * Create a new TensorStorage from an ND vector.
@@ -108,13 +115,16 @@ class TensorStorage {
         if (data[0].size() != shape[dim])
             throw invalid_argument("invalid dimension shape");
 
-        /*_data.resize(data.size() * data[0].size());
+        vector<dtype_t> flat_data;
+        flat_data.resize(data.size() * data[0].size());
 
         for (size_t batch_idx = 0; batch_idx < data.size(); ++batch_idx) {
             for (size_t idx = 0; idx < data[batch_idx].size(); ++idx) {
-                _data[idx * data.size() + batch_idx] = data[batch_idx][idx];
+                flat_data[idx * data.size() + batch_idx] = data[batch_idx][idx];
             }
-        }*/
+        }
+
+        _data = xt::adapt(flat_data, shape);
     }
     TensorStorage<dtype_t> reshape(const vector<size_t>& new_shape) {
         return this->copy().reshape_inplace(new_shape);
@@ -182,7 +192,9 @@ class TensorStorage {
     /**
      * Returns the horizontal view of the tensor.
      */
-    auto horizontal_scan() const { return _data; }
+    auto horizontal_scan() const {
+        return vector<dtype_t>(_data.begin(), _data.end());
+    }
     /**
      * Returns the vertical view of a 2D tensor.
      */
@@ -207,7 +219,9 @@ class TensorStorage {
      * Returns a reference to the internal representation of the
      * tensor.
      */
-    const auto& data() const { return _data.data(); }
+    const vector<dtype_t> data() const {
+        return vector<dtype_t>(_data.begin(), _data.end());
+    }
     /**
      * Returns the current shape of the tensor.
      */
@@ -227,7 +241,7 @@ class TensorStorage {
     /**
      * Checks if the tensor is empty.
      */
-    size_t empty() const { return _data.size() != 0; }
+    size_t empty() const { return _data.size() == 0; }
     /**
      * Casts the tensor to an 1D vector.
      */
@@ -235,10 +249,10 @@ class TensorStorage {
     /**
      * Iterator utils
      **/
-    inline iterator begin() noexcept { return _data.begin(); }
-    inline const_iterator cbegin() const noexcept { return _data.cbegin(); }
-    inline iterator end() noexcept { return _data.end(); }
-    inline const_iterator cend() const noexcept { return _data.cend(); }
+    inline auto begin() noexcept { return _data.begin(); }
+    inline auto cbegin() const noexcept { return _data.cbegin(); }
+    inline auto end() noexcept { return _data.end(); }
+    inline auto cend() const noexcept { return _data.cend(); }
     /**
      * Return the vector representation batched by an axis.
      */
@@ -284,11 +298,14 @@ class TensorStorage {
             throw invalid_argument("can't replicate an empty vector");
         }
         size_t init_size = _data.size();
-        /*_data.reserve(times);
+        vector<dtype_t> flat_data = vector<dtype_t>(_data.begin(), _data.end());
+        flat_data.reserve(times);
+
         for (size_t i = 0; i < times - init_size; i++) {
-            _data.push_back(_data[i % init_size]);
-        }*/
-        _shape = {_data.size()};
+            flat_data.push_back(_data[i % init_size]);
+        }
+        _data = xt::adapt(flat_data, {flat_data.size()});
+        _shape = {flat_data.size()};
     }
     static TensorStorage<dtype_t> repeat_value(dtype_t value,
                                                vector<size_t> shape) {

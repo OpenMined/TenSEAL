@@ -223,7 +223,8 @@ TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
     ctx->global_scale(std::pow(2, 40));
 
     auto vec = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}));
-    auto matrix = vector<vector<double>>{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}};
+    auto matrix = PlainTensor<double>(
+        vector<vector<double>>{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}});
     auto expected_result = vector<int64_t>{6, 12, 18};
 
     auto result = vec->matmul_plain(matrix, 2);
