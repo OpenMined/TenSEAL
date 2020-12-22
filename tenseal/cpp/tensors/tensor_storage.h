@@ -220,6 +220,7 @@ class TensorStorage {
      * tensor.
      */
     const vector<dtype_t> data() const {
+        //TODO: use a span to the existing data instead of copying it.
         return vector<dtype_t>(_data.begin(), _data.end());
     }
     /**
@@ -321,6 +322,7 @@ class TensorStorage {
 
    private:
     xt::xarray<dtype_t> _data;
+    //TODO: drop internal shape for the xarray one.
     vector<size_t> _shape;
 };
 
