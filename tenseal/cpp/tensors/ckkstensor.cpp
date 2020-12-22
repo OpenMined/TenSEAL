@@ -364,12 +364,6 @@ shared_ptr<CKKSTensor> CKKSTensor::mul_inplace(
     return this->op_inplace(to_mul, OP::MUL);
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::dot_product_inplace(
-    const shared_ptr<CKKSTensor>& to_mul) {
-    // TODO
-    return shared_from_this();
-}
-
 shared_ptr<CKKSTensor> CKKSTensor::add_plain_inplace(
     const PlainTensor<double>& to_add) {
     return this->op_plain_inplace(to_add, OP::ADD);
@@ -383,12 +377,6 @@ shared_ptr<CKKSTensor> CKKSTensor::sub_plain_inplace(
 shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace(
     const PlainTensor<double>& to_mul) {
     return this->op_plain_inplace(to_mul, OP::MUL);
-}
-
-shared_ptr<CKKSTensor> CKKSTensor::dot_product_plain_inplace(
-    const PlainTensor<double>& to_mul) {
-    // TODO
-    return shared_from_this();
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::add_plain_inplace(const double& to_add) {
@@ -507,7 +495,7 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
-    const shared_ptr<CKKSTensor> other) {
+    const shared_ptr<CKKSTensor>& other) {
     auto this_shape = this->shape();
     auto other_shape = other->shape();
 
