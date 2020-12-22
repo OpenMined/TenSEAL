@@ -538,7 +538,7 @@ def test_polynomial_rescale_off(context, data, polynom):
         ((3, 7), (7, 5)),
     ],
 )
-def test_dot_2d_2d(context, shapes):
+def test_dot(context, shapes):
     r_shape = shapes[0]
     l_shape = shapes[1]
     r_t = np.random.randn(*r_shape)
