@@ -190,8 +190,7 @@ shared_ptr<CKKSVector> CKKSVector::dot_inplace(
     return shared_from_this();
 }
 
-shared_ptr<CKKSVector> CKKSVector::dot_plain_inplace(
-    const plain_t& to_mul) {
+shared_ptr<CKKSVector> CKKSVector::dot_plain_inplace(const plain_t& to_mul) {
     this->mul_plain_inplace(to_mul);
     this->sum_inplace();
 

@@ -117,8 +117,7 @@ class EncryptedTensor {
     virtual encrypted_t mul_plain_inplace(
         const PlainTensor<plain_data_t>& to_mul) = 0;
 
-    encrypted_t dot_plain(
-        const PlainTensor<plain_data_t>& to_mul) const {
+    encrypted_t dot_plain(const PlainTensor<plain_data_t>& to_mul) const {
         return this->copy()->dot_plain_inplace(to_mul);
     };
     virtual encrypted_t dot_plain_inplace(
