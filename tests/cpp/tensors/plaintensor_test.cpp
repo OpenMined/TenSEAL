@@ -12,14 +12,6 @@ class PlainTensorTest : public Test {
    protected:
     void SetUp() {}
 };
-TEST_F(PlainTensorTest, TestGenerateStrides) {
-    ASSERT_THAT(generate_strides({}), ElementsAre());
-    ASSERT_THAT(generate_strides({2}), ElementsAre(1));
-    ASSERT_THAT(generate_strides({3, 2}), ElementsAre(2, 1));
-    ASSERT_THAT(generate_strides({5, 3, 2}), ElementsAre(6, 2, 1));
-    ASSERT_THAT(generate_strides({7, 5, 3, 2}), ElementsAre(30, 6, 2, 1));
-}
-
 TEST_F(PlainTensorTest, TestCreateFrom1D) {
     vector<double> data = {1.1, 2.2, 3.3};
 

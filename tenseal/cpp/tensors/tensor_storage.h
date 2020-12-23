@@ -9,27 +9,17 @@ namespace tenseal {
 using namespace seal;
 using namespace std;
 
-inline vector<size_t> generate_strides(const vector<size_t>& shape) {
-    vector<size_t> strides;
-
-    size_t current_stride = 1;
-    for (auto it = shape.rbegin(); it != shape.rend(); ++it) {
-        strides.push_back(current_stride);
-        current_stride *= *it;
-    }
-
-    std::reverse(begin(strides), end(strides));
-
-    return strides;
-}
-
 inline vector<size_t> position_from_strides(const vector<size_t>& strides,
                                             size_t val) {
     vector<size_t> result;
 
     for (auto& stride : strides) {
-        result.push_back(val / stride);
-        val = val % stride;
+        if (stride == 0)
+            result.push_back(0);
+        else {
+            result.push_back(val / stride);
+            val = val % stride;
+        }
     }
 
     return result;
@@ -271,7 +261,9 @@ class TensorStorage {
 
         auto new_shape = this->shape();
         new_shape.erase(new_shape.begin() + dim);
-        auto new_strides = generate_strides(new_shape);
+
+        xt::xarray<double> dummy(new_shape);
+        auto new_strides = dummy.strides();
 
         for (size_t idx = 0; idx < _data.size(); ++idx) {
             auto pos = position(idx);
