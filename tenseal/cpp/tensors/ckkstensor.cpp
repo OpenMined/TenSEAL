@@ -583,25 +583,57 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
         throw invalid_argument("can't multiply matrices");  // put matrix shapes
 
     vector<size_t> new_shape = vector({this_shape[0], other_shape[1]});
+    size_t new_size = new_shape[0] * new_shape[1];
     vector<Ciphertext> new_data;
     new_data.resize(new_shape[0] * new_shape[1]);
 
+    size_t n_jobs = this->tenseal_context()->dispatcher_size();
     vector<Ciphertext> to_sum;
     to_sum.resize(this_shape[1]);
-    for (size_t i = 0; i < new_shape[0] * new_shape[1]; i++) {
-        auto evaluator = this->tenseal_context()->evaluator;
-        size_t row = i / new_shape[1];
-        size_t col = i % new_shape[1];
-        // inner product
-        for (size_t j = 0; j < this_shape[1]; j++) {
-            to_sum[j] = this->_data.at({row, j});
-            this->perform_op(to_sum[j], other->_data.at({j, col}), OP::MUL);
+
+    auto worker_func = [&](size_t start, size_t end) -> bool {
+        for (size_t i = start; i < end; i++) {
+            auto evaluator = this->tenseal_context()->evaluator;
+            size_t row = i / new_shape[1];
+            size_t col = i % new_shape[1];
+            // inner product
+            for (size_t j = 0; j < this_shape[1]; j++) {
+                to_sum[j] = this->_data.at({row, j});
+                this->perform_op(to_sum[j], other->_data.at({j, col}), OP::MUL);
+            }
+            Ciphertext acc(*this->tenseal_context()->seal_context(),
+                           to_sum[0].parms_id());
+            evaluator->add_many(to_sum, acc);
+            // set element[row, col] to the computed inner product
+            new_data[i] = acc;
         }
-        Ciphertext acc(*this->tenseal_context()->seal_context(),
-                       to_sum[0].parms_id());
-        evaluator->add_many(to_sum, acc);
-        // set element[row, col] to the computed inner product
-        new_data[i] = acc;
+        return true;
+    };
+
+    if (n_jobs == 1) {
+        worker_func(0, new_size);
+    } else {
+        size_t batch_size = (new_size + n_jobs - 1) / n_jobs;
+        vector<future<bool>> futures;
+        for (size_t i = 0; i < n_jobs; i++) {
+            futures.push_back(
+                this->tenseal_context()->dispatcher()->enqueue_task(
+                    worker_func, i * batch_size,
+                    std::min((i + 1) * batch_size, new_size)));
+        }
+        // waiting
+        optional<string> fail;
+        for (size_t i = 0; i < futures.size(); i++) {
+            try {
+                futures[i].get();
+            } catch (std::exception& e) {
+                fail = e.what();
+            }
+        }
+
+        if (fail) {
+            throw invalid_argument(fail.value());
+        }
     }
 
     this->_data = TensorStorage(new_data, new_shape);
@@ -621,28 +653,60 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_plain_inplace(
         throw invalid_argument("can't multiply matrices");  // put matrix shapes
 
     vector<size_t> new_shape = vector({this_shape[0], other_shape[1]});
+    size_t new_size = new_shape[0] * new_shape[1];
     vector<Ciphertext> new_data;
     new_data.resize(new_shape[0] * new_shape[1]);
 
+    size_t n_jobs = this->tenseal_context()->dispatcher_size();
     vector<Ciphertext> to_sum;
     to_sum.resize(this_shape[1]);
-    for (size_t i = 0; i < new_shape[0] * new_shape[1]; i++) {
-        auto evaluator = this->tenseal_context()->evaluator;
-        size_t row = i / new_shape[1];
-        size_t col = i % new_shape[1];
-        // inner product
-        for (size_t j = 0; j < this_shape[1]; j++) {
-            to_sum[j] = this->_data.at({row, j});
-            Plaintext pt;
-            this->tenseal_context()->encode<CKKSEncoder>(other.at({j, col}), pt,
-                                                         this->_init_scale);
-            this->perform_plain_op(to_sum[j], pt, OP::MUL);
+
+    auto worker_func = [&](size_t start, size_t end) -> bool {
+        for (size_t i = start; i < end; i++) {
+            auto evaluator = this->tenseal_context()->evaluator;
+            size_t row = i / new_shape[1];
+            size_t col = i % new_shape[1];
+            // inner product
+            for (size_t j = 0; j < this_shape[1]; j++) {
+                to_sum[j] = this->_data.at({row, j});
+                Plaintext pt;
+                this->tenseal_context()->encode<CKKSEncoder>(
+                    other.at({j, col}), pt, this->_init_scale);
+                this->perform_plain_op(to_sum[j], pt, OP::MUL);
+            }
+            Ciphertext acc(*this->tenseal_context()->seal_context(),
+                           to_sum[0].parms_id());
+            evaluator->add_many(to_sum, acc);
+            // set element[row, col] to the computed inner product
+            new_data[i] = acc;
         }
-        Ciphertext acc(*this->tenseal_context()->seal_context(),
-                       to_sum[0].parms_id());
-        evaluator->add_many(to_sum, acc);
-        // set element[row, col] to the computed inner product
-        new_data[i] = acc;
+        return true;
+    };
+
+    if (n_jobs == 1) {
+        worker_func(0, new_size);
+    } else {
+        size_t batch_size = (new_size + n_jobs - 1) / n_jobs;
+        vector<future<bool>> futures;
+        for (size_t i = 0; i < n_jobs; i++) {
+            futures.push_back(
+                this->tenseal_context()->dispatcher()->enqueue_task(
+                    worker_func, i * batch_size,
+                    std::min((i + 1) * batch_size, new_size)));
+        }
+        // waiting
+        optional<string> fail;
+        for (size_t i = 0; i < futures.size(); i++) {
+            try {
+                futures[i].get();
+            } catch (std::exception& e) {
+                fail = e.what();
+            }
+        }
+
+        if (fail) {
+            throw invalid_argument(fail.value());
+        }
     }
 
     this->_data = TensorStorage(new_data, new_shape);
