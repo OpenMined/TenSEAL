@@ -62,7 +62,7 @@ class TensorStorage {
      * @param[in] input vector.
      */
     TensorStorage(const vector<dtype_t>& data)
-        : _data(xt::adapt(data)), _shape({data.size()}) {}
+        : _data(xt::adapt(data, {data.size()})) {}
     /**
      * Create a new TensorStorage from a 2D vector.
      * @param[in] input matrix.
@@ -80,8 +80,6 @@ class TensorStorage {
             throw invalid_argument("rows sizes are different");
         }
 
-        _shape = {H, W};
-
         vector<dtype_t> flat_data;
         flat_data.reserve(H * W);
 
@@ -89,7 +87,7 @@ class TensorStorage {
             flat_data.insert(flat_data.end(), vec.begin(), vec.end());
         }
 
-        _data = xt::adapt(flat_data, _shape);
+        _data = xt::adapt(flat_data, {H, W});
     }
     /**
      * Create a new TensorStorage from an ND vector.
@@ -97,7 +95,7 @@ class TensorStorage {
      * @param[in] input shape.
      */
     TensorStorage(const vector<dtype_t>& data, const vector<size_t>& shape)
-        : _data(xt::adapt(data, shape)), _shape(shape) {
+        : _data(xt::adapt(data, shape)) {
         size_t expected_size = 1;
         for (auto& d : shape) expected_size *= d;
         if (data.size() != expected_size)
@@ -110,8 +108,7 @@ class TensorStorage {
      * @param[in] batching axis.
      */
     TensorStorage(const vector<vector<dtype_t>>& data,
-                  const vector<size_t>& shape, size_t dim)
-        : _shape(shape) {
+                  const vector<size_t>& shape, size_t dim) {
         if (data[0].size() != shape[dim])
             throw invalid_argument("invalid dimension shape");
 
@@ -131,10 +128,10 @@ class TensorStorage {
     }
 
     TensorStorage<dtype_t>& reshape_inplace(const vector<size_t>& new_shape) {
-        if (!can_reshape(this->_shape, new_shape))
+        if (!can_reshape(this->shape(), new_shape))
             throw invalid_argument("invalid reshape input");
 
-        this->_shape = new_shape;
+        this->_data.reshape(new_shape);
         return *this;
     }
     /**
@@ -163,18 +160,18 @@ class TensorStorage {
      * @param[in] .
      */
     vector<size_t> position(size_t val) const {
-        auto strides = generate_strides(_shape);
+        auto strides = this->strides();
         return position_from_strides(strides, val);
     }
     size_t position(const vector<size_t>& index) const {
-        if (_shape.size() != index.size())
+        if (this->shape().size() != index.size())
             throw invalid_argument(
                 "tensor cannot be viewed in the requested format");
 
-        auto strides = generate_strides(_shape);
+        auto strides = this->strides();
         size_t tensor_idx = 0;
         for (size_t d = 0; d < index.size(); ++d) {
-            if (index[d] >= _shape[d])
+            if (index[d] >= this->shape()[d])
                 throw invalid_argument("invalid dimension index");
             tensor_idx += index[d] * strides[d];
         }
@@ -186,7 +183,7 @@ class TensorStorage {
      * @param[in] desired row.
      */
     auto row(size_t idx) const {
-        auto strides = generate_strides(_shape);
+        auto strides = this->strides();
         return _data.begin() + idx * strides[0];
     }
     /**
@@ -199,11 +196,11 @@ class TensorStorage {
      * Returns the vertical view of a 2D tensor.
      */
     auto vertical_scan() const {
-        if (_shape.size() != 2)
+        if (this->shape().size() != 2)
             throw invalid_argument("tensor cannot be viewed as a matrix");
 
-        size_t in_height = _shape[0];
-        size_t in_width = _shape[1];
+        size_t in_height = this->shape()[0];
+        size_t in_width = this->shape()[1];
 
         vector<dtype_t> dst;
         dst.resize(in_height * in_width);
@@ -226,17 +223,20 @@ class TensorStorage {
     /**
      * Returns the current shape of the tensor.
      */
-    vector<size_t> shape() const { return _shape; }
+    vector<size_t> shape() const {
+        return vector<size_t>(_data.shape().begin(), _data.shape().end());
+    }
     /**
      * Returns the current strides of the tensor.
      */
-    vector<size_t> strides() const { return generate_strides(_shape); }
+    vector<size_t> strides() const { return generate_strides(this->shape()); }
     /**
      * Returns the size of the first dimension of the tensor.
      */
-    size_t size() const { return _shape[0]; }
+    size_t size() const { return this->_data.shape()[0]; }
     size_t flat_size() const {
-        return std::accumulate(_shape.begin(), _shape.end(), 1,
+        return std::accumulate(this->_data.shape().begin(),
+                               this->_data.shape().end(), 1,
                                std::multiplies<size_t>());
     }
     /**
@@ -258,16 +258,16 @@ class TensorStorage {
      * Return the vector representation batched by an axis.
      */
     auto batch(size_t dim) const {
-        if (dim >= this->_shape.size())
+        if (dim >= this->shape().size())
             throw invalid_argument("invalid dimension for batching");
 
-        size_t batch_size = this->_shape[dim];
+        size_t batch_size = this->shape()[dim];
         size_t batch_count = this->_data.size() / batch_size;
 
         vector<vector<dtype_t>> batches;
         batches.resize(batch_count);
 
-        auto new_shape = _shape;
+        auto new_shape = this->shape();
         new_shape.erase(new_shape.begin() + dim);
         auto new_strides = generate_strides(new_shape);
 
@@ -292,7 +292,7 @@ class TensorStorage {
      * Replicates the internal representation for <times> elements.
      */
     void replicate(size_t times) {
-        if (_shape.size() != 1)
+        if (this->shape().size() != 1)
             throw invalid_argument("can't replicate d-dimensional vectors");
 
         if (this->empty()) {
@@ -306,7 +306,6 @@ class TensorStorage {
             flat_data.push_back(_data[i % init_size]);
         }
         _data = xt::adapt(flat_data, {flat_data.size()});
-        _shape = {flat_data.size()};
     }
     static TensorStorage<dtype_t> repeat_value(dtype_t value,
                                                vector<size_t> shape) {
@@ -317,13 +316,11 @@ class TensorStorage {
         return TensorStorage<dtype_t>(repeated, shape);
     }
     TensorStorage<dtype_t> copy() {
-        return TensorStorage<dtype_t>(this->_data, this->_shape);
+        return TensorStorage<dtype_t>(this->_data, this->shape());
     }
 
    private:
     xt::xarray<dtype_t> _data;
-    // TODO: drop internal shape for the xarray one.
-    vector<size_t> _shape;
 };
 
 }  // namespace tenseal
