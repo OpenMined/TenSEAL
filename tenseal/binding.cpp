@@ -277,10 +277,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("polyval_", &CKKSVector::polyval_inplace)
         // because dot doesn't have a magic function like __add__
         // we prefer to overload it instead of having dot_plain functions
-        .def("dot", &CKKSVector::dot_product)
-        .def("dot", &CKKSVector::dot_product_plain)
-        .def("dot_", &CKKSVector::dot_product_inplace)
-        .def("dot_", &CKKSVector::dot_product_plain_inplace)
+        .def("dot", &CKKSVector::dot)
+        .def("dot", &CKKSVector::dot_plain)
+        .def("dot_", &CKKSVector::dot_inplace)
+        .def("dot_", &CKKSVector::dot_plain_inplace)
         .def("sum", &CKKSVector::sum, py::arg("axis") = 0)
         .def("sum_", &CKKSVector::sum_inplace, py::arg("axis") = 0)
         .def(
@@ -502,6 +502,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                                &CKKSTensor::mul_plain_inplace))
         .def("polyval", &CKKSTensor::polyval)
         .def("polyval_", &CKKSTensor::polyval_inplace)
+        .def("dot", &CKKSTensor::dot)
+        .def("dot_", &CKKSTensor::dot_inplace)
+        .def("dot", &CKKSTensor::dot_plain)
+        .def("dot_", &CKKSTensor::dot_plain_inplace)
         // python arithmetic
         .def("__add__", &CKKSTensor::add)
         .def("__add__", py::overload_cast<const double &>(

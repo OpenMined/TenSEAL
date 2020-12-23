@@ -366,12 +366,6 @@ shared_ptr<CKKSTensor> CKKSTensor::mul_inplace(
     return this->op_inplace(to_mul, OP::MUL);
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::dot_product_inplace(
-    const shared_ptr<CKKSTensor>& to_mul) {
-    // TODO
-    return shared_from_this();
-}
-
 shared_ptr<CKKSTensor> CKKSTensor::add_plain_inplace(
     const PlainTensor<double>& to_add) {
     return this->op_plain_inplace(to_add, OP::ADD);
@@ -385,12 +379,6 @@ shared_ptr<CKKSTensor> CKKSTensor::sub_plain_inplace(
 shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace(
     const PlainTensor<double>& to_mul) {
     return this->op_plain_inplace(to_mul, OP::MUL);
-}
-
-shared_ptr<CKKSTensor> CKKSTensor::dot_product_plain_inplace(
-    const PlainTensor<double>& to_mul) {
-    // TODO
-    return shared_from_this();
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::add_plain_inplace(const double& to_add) {
@@ -505,6 +493,223 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
     }
 
     this->_data = TensorStorage<Ciphertext>(result->data(), result->shape());
+    return shared_from_this();
+}
+
+shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
+    const shared_ptr<CKKSTensor>& other) {
+    auto this_shape = this->shape();
+    auto other_shape = other->shape();
+
+    if (this_shape.size() == 1) {
+        if (other_shape.size() == 1) {  // 1D-1D
+            // inner product
+            this->mul_inplace(other);
+            this->sum_inplace();
+            return shared_from_this();
+        } else if (other_shape.size() == 2) {  // 1D-2D
+            // TODO: better implement broadcasting for mul first then would be
+            // implemented similar to 1D-1D
+            throw invalid_argument("1D-2D dot isn't implemented yet");
+        } else {
+            throw invalid_argument(
+                "don't support dot operations of more than 2 dimensions");
+        }
+    } else if (this_shape.size() == 2) {
+        if (other_shape.size() == 1) {  // 2D-1D
+            // TODO: better implement broadcasting for mul first then would be
+            // implemented similar to 1D-1D
+            throw invalid_argument("2D-1D dot isn't implemented yet");
+        } else if (other_shape.size() == 2) {  // 2D-2D
+            this->matmul_inplace(other);
+            return shared_from_this();
+        } else {
+            throw invalid_argument(
+                "don't support dot operations of more than 2 dimensions");
+        }
+    } else {
+        throw invalid_argument(
+            "don't support dot operations of more than 2 dimensions");
+    }
+}
+
+shared_ptr<CKKSTensor> CKKSTensor::dot_plain_inplace(
+    const PlainTensor<double>& other) {
+    auto this_shape = this->shape();
+    auto other_shape = other.shape();
+
+    if (this_shape.size() == 1) {
+        if (other_shape.size() == 1) {  // 1D-1D
+            // inner product
+            this->mul_plain_inplace(other);
+            this->sum_inplace();
+            return shared_from_this();
+        } else if (other_shape.size() == 2) {  // 1D-2D
+            // TODO: better implement broadcasting for mul first then would be
+            // implemented similar to 1D-1D
+            throw invalid_argument("1D-2D dot isn't implemented yet");
+        } else {
+            throw invalid_argument(
+                "don't support dot operations of more than 2 dimensions");
+        }
+    } else if (this_shape.size() == 2) {
+        if (other_shape.size() == 1) {  // 2D-1D
+            // TODO: better implement broadcasting for mul first then would be
+            // implemented similar to 1D-1D
+            throw invalid_argument("2D-1D dot isn't implemented yet");
+        } else if (other_shape.size() == 2) {  // 2D-2D
+            this->matmul_plain_inplace(other);
+            return shared_from_this();
+        } else {
+            throw invalid_argument(
+                "don't support dot operations of more than 2 dimensions");
+        }
+    } else {
+        throw invalid_argument(
+            "don't support dot operations of more than 2 dimensions");
+    }
+}
+
+shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
+    const shared_ptr<CKKSTensor> other) {
+    auto this_shape = this->shape();
+    auto other_shape = other->shape();
+
+    if (this_shape.size() != 2)
+        throw invalid_argument("this tensor isn't a matrix");
+    if (other_shape.size() != 2)
+        throw invalid_argument("operand tensor isn't a matrix");
+    if (this_shape[1] != other_shape[0])
+        throw invalid_argument("can't multiply matrices");  // put matrix shapes
+
+    vector<size_t> new_shape = vector({this_shape[0], other_shape[1]});
+    size_t new_size = new_shape[0] * new_shape[1];
+    vector<Ciphertext> new_data;
+    new_data.resize(new_shape[0] * new_shape[1]);
+
+    size_t n_jobs = this->tenseal_context()->dispatcher_size();
+
+    auto worker_func = [&](size_t start, size_t end) -> bool {
+        vector<Ciphertext> to_sum;
+        to_sum.resize(this_shape[1]);
+        for (size_t i = start; i < end; i++) {
+            auto evaluator = this->tenseal_context()->evaluator;
+            size_t row = i / new_shape[1];
+            size_t col = i % new_shape[1];
+            // inner product
+            for (size_t j = 0; j < this_shape[1]; j++) {
+                to_sum[j] = this->_data.at({row, j});
+                this->perform_op(to_sum[j], other->_data.at({j, col}), OP::MUL);
+            }
+            Ciphertext acc(*this->tenseal_context()->seal_context(),
+                           to_sum[0].parms_id());
+            evaluator->add_many(to_sum, acc);
+            // set element[row, col] to the computed inner product
+            new_data[i] = acc;
+        }
+        return true;
+    };
+
+    if (n_jobs == 1) {
+        worker_func(0, new_size);
+    } else {
+        size_t batch_size = (new_size + n_jobs - 1) / n_jobs;
+        vector<future<bool>> futures;
+        for (size_t i = 0; i < n_jobs; i++) {
+            futures.push_back(
+                this->tenseal_context()->dispatcher()->enqueue_task(
+                    worker_func, i * batch_size,
+                    std::min((i + 1) * batch_size, new_size)));
+        }
+        // waiting
+        optional<string> fail;
+        for (size_t i = 0; i < futures.size(); i++) {
+            try {
+                futures[i].get();
+            } catch (std::exception& e) {
+                fail = e.what();
+            }
+        }
+
+        if (fail) {
+            throw invalid_argument(fail.value());
+        }
+    }
+
+    this->_data = TensorStorage(new_data, new_shape);
+    return shared_from_this();
+}
+
+shared_ptr<CKKSTensor> CKKSTensor::matmul_plain_inplace(
+    const PlainTensor<double>& other) {
+    auto this_shape = this->shape();
+    auto other_shape = other.shape();
+
+    if (this_shape.size() != 2)
+        throw invalid_argument("this tensor isn't a matrix");
+    if (other_shape.size() != 2)
+        throw invalid_argument("operand tensor isn't a matrix");
+    if (this_shape[1] != other_shape[0])
+        throw invalid_argument("can't multiply matrices");  // put matrix shapes
+
+    vector<size_t> new_shape = vector({this_shape[0], other_shape[1]});
+    size_t new_size = new_shape[0] * new_shape[1];
+    vector<Ciphertext> new_data;
+    new_data.resize(new_shape[0] * new_shape[1]);
+
+    size_t n_jobs = this->tenseal_context()->dispatcher_size();
+
+    auto worker_func = [&](size_t start, size_t end) -> bool {
+        vector<Ciphertext> to_sum;
+        to_sum.resize(this_shape[1]);
+        for (size_t i = start; i < end; i++) {
+            auto evaluator = this->tenseal_context()->evaluator;
+            size_t row = i / new_shape[1];
+            size_t col = i % new_shape[1];
+            // inner product
+            for (size_t j = 0; j < this_shape[1]; j++) {
+                to_sum[j] = this->_data.at({row, j});
+                Plaintext pt;
+                this->tenseal_context()->encode<CKKSEncoder>(
+                    other.at({j, col}), pt, this->_init_scale);
+                this->perform_plain_op(to_sum[j], pt, OP::MUL);
+            }
+            Ciphertext acc(*this->tenseal_context()->seal_context(),
+                           to_sum[0].parms_id());
+            evaluator->add_many(to_sum, acc);
+            // set element[row, col] to the computed inner product
+            new_data[i] = acc;
+        }
+        return true;
+    };
+
+    if (n_jobs == 1) {
+        worker_func(0, new_size);
+    } else {
+        size_t batch_size = (new_size + n_jobs - 1) / n_jobs;
+        vector<future<bool>> futures;
+        for (size_t i = 0; i < n_jobs; i++) {
+            futures.push_back(
+                this->tenseal_context()->dispatcher()->enqueue_task(
+                    worker_func, i * batch_size,
+                    std::min((i + 1) * batch_size, new_size)));
+        }
+        // waiting
+        optional<string> fail;
+        for (size_t i = 0; i < futures.size(); i++) {
+            try {
+                futures[i].get();
+            } catch (std::exception& e) {
+                fail = e.what();
+            }
+        }
+
+        if (fail) {
+            throw invalid_argument(fail.value());
+        }
+    }
+
+    this->_data = TensorStorage(new_data, new_shape);
     return shared_from_this();
 }
 
