@@ -140,20 +140,20 @@ class TensorStorage {
      * @param[in] desired position from the tensor.
      */
     dtype_t& ref_at(const vector<size_t>& index) {
-        return _data[position(index)];
+        return _data.data()[position(index)];
     }
     dtype_t at(const vector<size_t>& index) const {
-        return _data[position(index)];
+        return _data.data()[position(index)];
     }
     dtype_t& flat_ref_at(size_t index) {
         if (index >= _data.size()) throw invalid_argument("index too big");
 
-        return _data[index];
+        return _data.data()[index];
     }
     dtype_t flat_at(size_t index) const {
         if (index >= _data.size()) throw invalid_argument("index too big");
 
-        return _data[index];
+        return _data.data()[index];
     }
     /**
      * Converts integer to position.
@@ -196,11 +196,11 @@ class TensorStorage {
      * Returns the vertical view of a 2D tensor.
      */
     auto vertical_scan() const {
-        if (this->shape().size() != 2)
+        if (this->_data.shape().size() != 2)
             throw invalid_argument("tensor cannot be viewed as a matrix");
 
-        size_t in_height = this->shape()[0];
-        size_t in_width = this->shape()[1];
+        size_t in_height = this->_data.shape()[0];
+        size_t in_width = this->_data.shape()[1];
 
         vector<dtype_t> dst;
         dst.resize(in_height * in_width);
@@ -229,7 +229,9 @@ class TensorStorage {
     /**
      * Returns the current strides of the tensor.
      */
-    vector<size_t> strides() const { return generate_strides(this->shape()); }
+    vector<size_t> strides() const {
+        return vector<size_t>(_data.strides().begin(), _data.strides().end());
+    }
     /**
      * Returns the size of the first dimension of the tensor.
      */

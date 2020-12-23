@@ -67,7 +67,7 @@ TEST_F(PlainTensorTest, TestCreateFrom3DTensor) {
 
     ASSERT_THAT(tensor.data(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
     ASSERT_THAT(tensor.shape(), ElementsAreArray({2, 2, 1}));
-    ASSERT_THAT(tensor.strides(), ElementsAreArray({2, 1, 1}));
+    ASSERT_THAT(tensor.strides(), ElementsAreArray({2, 1, 0}));
 }
 
 TEST_F(PlainTensorTest, TestTensorAccess) {
@@ -101,6 +101,19 @@ TEST_F(PlainTensorTest, TestTensorAccess) {
     auto new_tensor = tensor.reshape({2, 2, 2});
     ASSERT_THAT(tensor.shape(), ElementsAreArray({4, 2}));
     ASSERT_THAT(new_tensor.shape(), ElementsAreArray({2, 2, 2}));
+}
+
+TEST_F(PlainTensorTest, TestTensorAccess1D) {
+    vector<vector<double>> data = {{1.1}, {2.2}, {3.3}, {4.4},
+                                   {5.5}, {6.6}, {7.7}, {8.8}};
+    PlainTensor<double> tensor(data);
+
+    ASSERT_EQ(tensor.at({0, 0}), 1.1);
+    ASSERT_EQ(tensor.at({4, 0}), 5.5);
+    ASSERT_EQ(tensor.at({7, 0}), 8.8);
+
+    ASSERT_THAT(tensor.vertical_scan(),
+                ElementsAreArray({1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8}));
 }
 
 TEST_F(PlainTensorTest, TestGetDiagonal) {

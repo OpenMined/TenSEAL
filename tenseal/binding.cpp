@@ -196,8 +196,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         PlainTensor<double> padded_tensor(padded_matrix);
         auto final_vector = padded_tensor.vertical_scan();
 
-        auto ckks_vector = CKKSVector::Create(ctx, final_vector);
-        return ckks_vector;
+        return CKKSVector::Create(ctx, final_vector);
     });
 
     py::class_<CKKSVector, std::shared_ptr<CKKSVector>>(m, "CKKSVector",
