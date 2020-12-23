@@ -16,5 +16,6 @@ cc_library(
         "//tenseal/cpp/context:tenseal_context_cc",
         "//tenseal/cpp/tensors:tenseal_tensors_cc",
         "@com_microsoft_seal//:seal",
+        "@com_xtensorstack_xtensor//:xtensor",
     ],
 )

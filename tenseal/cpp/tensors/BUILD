@@ -28,5 +28,6 @@ cc_library(
         "//tenseal/cpp/context:tenseal_context_cc",
         "//tenseal/proto:tenseal_proto_cc",
         "@com_microsoft_seal//:seal",
+        "@com_xtensorstack_xtensor//:xtensor",
     ],
 )
