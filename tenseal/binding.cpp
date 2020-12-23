@@ -504,6 +504,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("polyval_", &CKKSTensor::polyval_inplace)
         .def("dot", &CKKSTensor::dot)
         .def("dot_", &CKKSTensor::dot_inplace)
+        .def("dot", &CKKSTensor::dot_plain)
+        .def("dot_", &CKKSTensor::dot_plain_inplace)
         // python arithmetic
         .def("__add__", &CKKSTensor::add)
         .def("__add__", py::overload_cast<const double &>(
