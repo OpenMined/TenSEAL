@@ -538,7 +538,8 @@ def test_polynomial_rescale_off(context, data, polynom):
         ((3, 7), (7, 5)),
     ],
 )
-def test_dot(context, shapes):
+@pytest.mark.parametrize("plain", [True, False])
+def test_dot(context, shapes, plain):
     r_shape = shapes[0]
     l_shape = shapes[1]
     r_t = np.random.randn(*r_shape)
@@ -546,7 +547,6 @@ def test_dot(context, shapes):
     r_pt = ts.plain_tensor(r_t.flatten().tolist(), r_shape)
     l_pt = ts.plain_tensor(l_t.flatten().tolist(), l_shape)
     right = ts.ckks_tensor(context, r_pt)
-    plain = False  # TODO: test plain case
     if plain:
         left = l_pt
     else:

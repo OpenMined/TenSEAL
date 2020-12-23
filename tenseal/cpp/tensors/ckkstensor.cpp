@@ -510,6 +510,7 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
         } else if (other_shape.size() == 2) {  // 1D-2D
             // TODO: better implement broadcasting for mul first then would be
             // implemented similar to 1D-1D
+            throw invalid_argument("1D-2D dot isn't implemented yet");
         } else {
             throw invalid_argument(
                 "don't support dot operations of more than 2 dimensions");
@@ -518,6 +519,7 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
         if (other_shape.size() == 1) {  // 2D-1D
             // TODO: better implement broadcasting for mul first then would be
             // implemented similar to 1D-1D
+            throw invalid_argument("2D-1D dot isn't implemented yet");
         } else if (other_shape.size() == 2) {  // 2D-2D
             this->matmul_inplace(other);
             return shared_from_this();
@@ -533,9 +535,39 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
 
 shared_ptr<CKKSTensor> CKKSTensor::dot_plain_inplace(
     const PlainTensor<double>& other) {
-    // TODO
-    throw runtime_error("Not implemented yet");
-    return shared_from_this();
+    auto this_shape = this->shape();
+    auto other_shape = other.shape();
+
+    if (this_shape.size() == 1) {
+        if (other_shape.size() == 1) {  // 1D-1D
+            // inner product
+            this->mul_plain_inplace(other);
+            this->sum_inplace();
+            return shared_from_this();
+        } else if (other_shape.size() == 2) {  // 1D-2D
+            // TODO: better implement broadcasting for mul first then would be
+            // implemented similar to 1D-1D
+            throw invalid_argument("1D-2D dot isn't implemented yet");
+        } else {
+            throw invalid_argument(
+                "don't support dot operations of more than 2 dimensions");
+        }
+    } else if (this_shape.size() == 2) {
+        if (other_shape.size() == 1) {  // 2D-1D
+            // TODO: better implement broadcasting for mul first then would be
+            // implemented similar to 1D-1D
+            throw invalid_argument("2D-1D dot isn't implemented yet");
+        } else if (other_shape.size() == 2) {  // 2D-2D
+            this->matmul_plain_inplace(other);
+            return shared_from_this();
+        } else {
+            throw invalid_argument(
+                "don't support dot operations of more than 2 dimensions");
+        }
+    } else {
+        throw invalid_argument(
+            "don't support dot operations of more than 2 dimensions");
+    }
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
@@ -552,7 +584,7 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
 
     vector<size_t> new_shape = vector({this_shape[0], other_shape[1]});
     vector<Ciphertext> new_data;
-    new_data.reserve(new_shape[0] * new_shape[1]);
+    new_data.resize(new_shape[0] * new_shape[1]);
 
     vector<Ciphertext> to_sum;
     to_sum.resize(this_shape[1]);
@@ -567,7 +599,7 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
         Ciphertext acc(*this->tenseal_context()->seal_context(),
                        to_sum[0].parms_id());
         evaluator->add_many(to_sum, acc);
-        new_data.push_back(acc);
+        new_data[i] = acc;
     }
 
     this->_data = TensorStorage(new_data, new_shape);
@@ -576,8 +608,40 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
 
 shared_ptr<CKKSTensor> CKKSTensor::matmul_plain_inplace(
     const PlainTensor<double>& other) {
-    // TODO
-    throw runtime_error("Not implemented yet");
+    auto this_shape = this->shape();
+    auto other_shape = other.shape();
+
+    if (this_shape.size() != 2)
+        throw invalid_argument("this tensor isn't a matrix");
+    if (other_shape.size() != 2)
+        throw invalid_argument("operand tensor isn't a matrix");
+    if (this_shape[1] != other_shape[0])
+        throw invalid_argument("can't multiply matrices");  // put matrix shapes
+
+    vector<size_t> new_shape = vector({this_shape[0], other_shape[1]});
+    vector<Ciphertext> new_data;
+    new_data.resize(new_shape[0] * new_shape[1]);
+
+    vector<Ciphertext> to_sum;
+    to_sum.resize(this_shape[1]);
+    for (size_t i = 0; i < new_shape[0] * new_shape[1]; i++) {
+        auto evaluator = this->tenseal_context()->evaluator;
+        size_t row = i / new_shape[1];
+        size_t col = i % new_shape[1];
+        for (size_t j = 0; j < this_shape[1]; j++) {
+            to_sum[j] = this->_data.at({row, j});
+            Plaintext pt;
+            this->tenseal_context()->encode<CKKSEncoder>(other.at({j, col}), pt,
+                                                         this->_init_scale);
+            this->perform_plain_op(to_sum[j], pt, OP::MUL);
+        }
+        Ciphertext acc(*this->tenseal_context()->seal_context(),
+                       to_sum[0].parms_id());
+        evaluator->add_many(to_sum, acc);
+        new_data[i] = acc;
+    }
+
+    this->_data = TensorStorage(new_data, new_shape);
     return shared_from_this();
 }
 
