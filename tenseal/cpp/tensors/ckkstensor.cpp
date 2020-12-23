@@ -592,6 +592,7 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
         auto evaluator = this->tenseal_context()->evaluator;
         size_t row = i / new_shape[1];
         size_t col = i % new_shape[1];
+        // inner product
         for (size_t j = 0; j < this_shape[1]; j++) {
             to_sum[j] = this->_data.at({row, j});
             this->perform_op(to_sum[j], other->_data.at({j, col}), OP::MUL);
@@ -599,6 +600,7 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
         Ciphertext acc(*this->tenseal_context()->seal_context(),
                        to_sum[0].parms_id());
         evaluator->add_many(to_sum, acc);
+        // set element[row, col] to the computed inner product
         new_data[i] = acc;
     }
 
@@ -628,6 +630,7 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_plain_inplace(
         auto evaluator = this->tenseal_context()->evaluator;
         size_t row = i / new_shape[1];
         size_t col = i % new_shape[1];
+        // inner product
         for (size_t j = 0; j < this_shape[1]; j++) {
             to_sum[j] = this->_data.at({row, j});
             Plaintext pt;
@@ -638,6 +641,7 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_plain_inplace(
         Ciphertext acc(*this->tenseal_context()->seal_context(),
                        to_sum[0].parms_id());
         evaluator->add_many(to_sum, acc);
+        // set element[row, col] to the computed inner product
         new_data[i] = acc;
     }
 
