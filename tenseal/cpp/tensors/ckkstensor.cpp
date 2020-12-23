@@ -588,10 +588,10 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
     new_data.resize(new_shape[0] * new_shape[1]);
 
     size_t n_jobs = this->tenseal_context()->dispatcher_size();
-    vector<Ciphertext> to_sum;
-    to_sum.resize(this_shape[1]);
 
     auto worker_func = [&](size_t start, size_t end) -> bool {
+        vector<Ciphertext> to_sum;
+        to_sum.resize(this_shape[1]);
         for (size_t i = start; i < end; i++) {
             auto evaluator = this->tenseal_context()->evaluator;
             size_t row = i / new_shape[1];
@@ -658,10 +658,10 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_plain_inplace(
     new_data.resize(new_shape[0] * new_shape[1]);
 
     size_t n_jobs = this->tenseal_context()->dispatcher_size();
-    vector<Ciphertext> to_sum;
-    to_sum.resize(this_shape[1]);
 
     auto worker_func = [&](size_t start, size_t end) -> bool {
+        vector<Ciphertext> to_sum;
+        to_sum.resize(this_shape[1]);
         for (size_t i = start; i < end; i++) {
             auto evaluator = this->tenseal_context()->evaluator;
             size_t row = i / new_shape[1];
