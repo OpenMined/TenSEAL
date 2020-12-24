@@ -37,10 +37,9 @@ void BM_ckkstensor_create(benchmark::State& state) {
     size_t input_cnt = state.range(0);
 
     size_t poly_mod = 8192;
-    while  (input_cnt > poly_mod / 2)
-        poly_mod *= 2;
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, poly_mod, -1, {60, 40, 40, 60});
+    while (input_cnt > poly_mod / 2) poly_mod *= 2;
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, poly_mod, -1,
+                                      {60, 40, 40, 60});
     ctx->global_scale(std::pow(2, 40));
 
     std::vector<double> data;
@@ -59,11 +58,10 @@ void BM_ckkstensor_reshape(benchmark::State& state) {
     size_t input_cnt = state.range(0);
 
     size_t poly_mod = 8192;
-    while  (input_cnt > poly_mod / 2)
-        poly_mod *= 2;
+    while (input_cnt > poly_mod / 2) poly_mod *= 2;
 
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, poly_mod, -1, {60, 40, 40, 60});
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, poly_mod, -1,
+                                      {60, 40, 40, 60});
     ctx->global_scale(std::pow(2, 40));
 
     std::vector<double> data;
@@ -85,11 +83,10 @@ void BM_ckkstensor_add(benchmark::State& state) {
     size_t input_cnt = state.range(0);
 
     size_t poly_mod = 8192;
-    while  (input_cnt > poly_mod / 2)
-        poly_mod *= 2;
+    while (input_cnt > poly_mod / 2) poly_mod *= 2;
 
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, poly_mod, -1, {60, 40, 40, 60});
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, poly_mod, -1,
+                                      {60, 40, 40, 60});
     ctx->global_scale(std::pow(2, 40));
 
     std::vector<double> data;
