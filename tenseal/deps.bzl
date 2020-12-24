@@ -47,6 +47,16 @@ def tenseal_deps():
             strip_prefix = "xtl-0.6.23/include",
             urls = ["https://github.com/xtensor-stack/xtl/archive/0.6.23.tar.gz"],
         )
+    if "com_microsoft_gsl" not in native.existing_rules():
+        http_archive(
+            name = "com_microsoft_gsl",
+            sha256 = "76269b66d95da27b1253f14aaf01ace9f91db785981bc1553b730231faf23fd6",
+            build_file = "//third_party:gsl.BUILD",
+            strip_prefix = "GSL-master/include",
+            urls = ["https://github.com/bcebere/GSL/archive/master.zip"],
+        )
+
+
 
 
     rules_proto_dependencies()
