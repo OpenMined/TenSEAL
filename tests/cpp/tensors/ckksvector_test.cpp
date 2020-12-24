@@ -8,7 +8,8 @@ namespace {
 using namespace ::testing;
 using namespace std;
 
-bool are_close(const std::vector<double>& l, const std::vector<int64_t>& r) {
+template <class Iterable>
+bool are_close(const Iterable& l, const std::vector<int64_t>& r) {
     if (l.size() != r.size()) {
         return false;
     }

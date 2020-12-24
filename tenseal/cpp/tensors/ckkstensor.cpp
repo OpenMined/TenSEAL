@@ -589,7 +589,7 @@ shared_ptr<CKKSTensor> CKKSTensor::deepcopy() const {
     return CKKSTensor::Create(ctx, vec);
 }
 
-vector<Ciphertext> CKKSTensor::data() const { return _data.data(); }
+vector<Ciphertext> CKKSTensor::data() const { return _data.data_dup(); }
 vector<size_t> CKKSTensor::shape_with_batch() const {
     if (_batch_size) {
         auto res = _data.shape();

@@ -17,7 +17,7 @@ TEST_F(PlainTensorTest, TestCreateFrom1D) {
 
     PlainTensor<double> tensor(data);
 
-    ASSERT_THAT(tensor.data(), ElementsAreArray(data));
+    ASSERT_THAT(tensor.data_dup(), ElementsAreArray(data));
     ASSERT_THAT(tensor.shape(), ElementsAre(data.size()));
     ASSERT_THAT(tensor.strides(), ElementsAre(1));
 }
@@ -26,7 +26,7 @@ TEST_F(PlainTensorTest, TestCreateFrom2DVector) {
     vector<vector<double>> data = {{1.1, 2.2}, {3.3, 4.4}};
     PlainTensor<double> tensor(data);
 
-    ASSERT_THAT(tensor.data(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
+    ASSERT_THAT(tensor.data_dup(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
     ASSERT_THAT(tensor.shape(), ElementsAreArray({2, 2}));
     ASSERT_THAT(tensor.strides(), ElementsAreArray({2, 1}));
 }
@@ -43,7 +43,7 @@ TEST_F(PlainTensorTest, TestCreateFrom2DTensor) {
     vector<double> data = {1.1, 2.2, 3.3, 4.4};
     PlainTensor<double> tensor(data, {2, 2});
 
-    ASSERT_THAT(tensor.data(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
+    ASSERT_THAT(tensor.data_dup(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
     ASSERT_THAT(tensor.shape(), ElementsAreArray({2, 2}));
     ASSERT_THAT(tensor.strides(), ElementsAreArray({2, 1}));
 }
@@ -57,7 +57,7 @@ TEST_F(PlainTensorTest, TestCreateFrom3DTensor) {
     vector<double> data = {1.1, 2.2, 3.3, 4.4};
     PlainTensor<double> tensor(data, {2, 2, 1});
 
-    ASSERT_THAT(tensor.data(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
+    ASSERT_THAT(tensor.data_dup(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
     ASSERT_THAT(tensor.shape(), ElementsAreArray({2, 2, 1}));
     ASSERT_THAT(tensor.strides(), ElementsAreArray({2, 1, 0}));
 }
@@ -131,16 +131,16 @@ TEST_F(PlainTensorTest, TestReplicate) {
 
     tensor.replicate(8);
 
-    ASSERT_THAT(tensor.data(), ElementsAreArray({
-                                   1.1,
-                                   2.2,
-                                   3.3,
-                                   4.4,
-                                   1.1,
-                                   2.2,
-                                   3.3,
-                                   4.4,
-                               }));
+    ASSERT_THAT(tensor.data_dup(), ElementsAreArray({
+                                       1.1,
+                                       2.2,
+                                       3.3,
+                                       4.4,
+                                       1.1,
+                                       2.2,
+                                       3.3,
+                                       4.4,
+                                   }));
     ASSERT_THAT(tensor.shape(), ElementsAreArray({8}));
 }
 
@@ -231,7 +231,7 @@ TEST_F(PlainTensorTest, TestUnbatch) {
     PlainTensor<double> unbatch(out, {2, 3, 2}, 0);
 
     ASSERT_THAT(unbatch.shape(), ElementsAreArray({2, 3, 2}));
-    ASSERT_THAT(unbatch.data(), ElementsAreArray(data));
+    ASSERT_THAT(unbatch.data_dup(), ElementsAreArray(data));
 }
 
 }  // namespace

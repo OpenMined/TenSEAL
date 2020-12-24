@@ -163,7 +163,8 @@ class PlainTensor {
      * Returns a reference to the internal representation of the
      * tensor.
      */
-    const vector<plain_t> data() const { return _data.data(); }
+    auto data() const { return _data.data(); }
+    auto data_dup() const { return _data.data_dup(); }
     /**
      * Returns the current shape of the tensor.
      */

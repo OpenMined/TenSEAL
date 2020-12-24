@@ -1,6 +1,7 @@
 #ifndef TENSEAL_TENSOR_STORAGE_H
 #define TENSEAL_TENSOR_STORAGE_H
 
+#include "gsl/span"
 #include "xtensor/xadapt.hpp"
 #include "xtensor/xarray.hpp"
 
@@ -113,6 +114,10 @@ class TensorStorage {
 
         _data = xt::adapt(flat_data, shape);
     }
+    /**
+     * Reshape the TensorStorage.
+     * @param[in] new shape.
+     */
     TensorStorage<dtype_t> reshape(const vector<size_t>& new_shape) {
         return this->copy().reshape_inplace(new_shape);
     }
@@ -130,10 +135,12 @@ class TensorStorage {
      * @param[in] desired position from the tensor.
      */
     dtype_t& ref_at(const vector<size_t>& index) {
-        return _data.data()[position(index)];
+        auto flat_idx = position(index);
+        return flat_ref_at(flat_idx);
     }
     dtype_t at(const vector<size_t>& index) const {
-        return _data.data()[position(index)];
+        auto flat_idx = position(index);
+        return flat_at(flat_idx);
     }
     dtype_t& flat_ref_at(size_t index) {
         if (index >= _data.size()) throw invalid_argument("index too big");
@@ -206,8 +213,14 @@ class TensorStorage {
      * Returns a reference to the internal representation of the
      * tensor.
      */
-    const vector<dtype_t> data() const {
-        // TODO: use a span to the existing data instead of copying it.
+    auto data() const {
+        return gsl::span<const dtype_t>(_data.data(), _data.size());
+    }
+    /**
+     * Returns a copy to the internal representation of the
+     * tensor.
+     */
+    auto data_dup() const {
         return vector<dtype_t>(_data.begin(), _data.end());
     }
     /**

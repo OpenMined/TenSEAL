@@ -33,14 +33,31 @@ class TenSEALEncoder {
     Template encoding functions to choose between the use of
     Integer/BatchEncoder or CKKSEncoder.
     */
-    template <class T>
-    void encode(const vector<int64_t>& vec, Plaintext& pt) {
+    template <class T, template <class> class Iterable>
+    void encode(const Iterable<const int64_t>& vec, Plaintext& pt) {
+        auto encoder = this->get<T>();
+        encoder->encode(vec, pt);
+    }
+    template <class T, template <class> class Iterable>
+    void encode(const Iterable<int64_t>& vec, Plaintext& pt) {
         auto encoder = this->get<T>();
         encoder->encode(vec, pt);
     }
 
-    template <class CKKSEncoder>
-    void encode(const vector<double>& vec, Plaintext& pt,
+    template <class CKKSEncoder, template <class> class Iterable>
+    void encode(const Iterable<const double>& vec, Plaintext& pt,
+                optional<double> optscale = {}) {
+        double scale = 1.0;
+        if (optscale.has_value())
+            scale = optscale.value();
+        else
+            scale = global_scale();
+
+        auto encoder = this->get<CKKSEncoder>();
+        encoder->encode(vec, scale, pt);
+    }
+    template <class CKKSEncoder, template <class> class Iterable>
+    void encode(const Iterable<double>& vec, Plaintext& pt,
                 optional<double> optscale = {}) {
         double scale = 1.0;
         if (optscale.has_value())

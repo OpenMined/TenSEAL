@@ -379,7 +379,7 @@ shared_ptr<CKKSVector> CKKSVector::enc_matmul_plain_inplace(
         1 << (static_cast<size_t>(ceil(log2(plain_vec.size()))));
 
     // pad the vector with zeros to the next power of 2
-    vector<double> padded_plain_vec(plain_vec.data());
+    vector<double> padded_plain_vec(plain_vec.data_dup());
     padded_plain_vec.resize(plain_vec_size, 0);
 
     size_t chunks_nb = padded_plain_vec.size();
