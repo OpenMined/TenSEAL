@@ -71,7 +71,7 @@ void BM_ckkstensor_reshape(benchmark::State& state) {
         data.push_back(idx + 1);
     }
 
-    auto res = CKKSTensor::Create(ctx, data, std::pow(2, 40), true);
+    auto res = CKKSTensor::Create(ctx, data, std::pow(2, 40), false);
     auto new_shape = input_cnt / 10;
 
     for (auto _ : state) {
