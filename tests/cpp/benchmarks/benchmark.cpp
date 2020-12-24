@@ -71,14 +71,40 @@ void BM_ckkstensor_reshape(benchmark::State& state) {
         data.push_back(idx + 1);
     }
 
-    auto res = CKKSTensor::Create(ctx, data, std::pow(2, 40), false);
+    auto t = CKKSTensor::Create(ctx, data, std::pow(2, 40), false);
     auto new_shape = input_cnt / 10;
 
     for (auto _ : state) {
-        res->reshape_inplace({10, new_shape});
+        auto res = t->reshape({10, new_shape});
         ::benchmark::DoNotOptimize(res);
     }
 }
-BENCHMARK(BM_ckkstensor_reshape)->RangeMultiplier(10)->Range(10, 10000);
+BENCHMARK(BM_ckkstensor_reshape)->RangeMultiplier(10)->Range(10, 1000);
+
+void BM_ckkstensor_add(benchmark::State& state) {
+    size_t input_cnt = state.range(0);
+
+    size_t poly_mod = 8192;
+    while  (input_cnt > poly_mod / 2)
+        poly_mod *= 2;
+
+    auto ctx =
+        TenSEALContext::Create(scheme_type::ckks, poly_mod, -1, {60, 40, 40, 60});
+    ctx->global_scale(std::pow(2, 40));
+
+    std::vector<double> data;
+    for (size_t idx = 0; idx < input_cnt; ++idx) {
+        data.push_back(idx + 1);
+    }
+
+    auto t = CKKSTensor::Create(ctx, data, std::pow(2, 40), false);
+
+    for (auto _ : state) {
+        auto r = t->add(t);
+        ::benchmark::DoNotOptimize(r);
+    }
+}
+BENCHMARK(BM_ckkstensor_add)->RangeMultiplier(10)->Range(10, 1000);
+
 }  // namespace
 }  // namespace tenseal
