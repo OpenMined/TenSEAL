@@ -36,6 +36,20 @@ inline bool can_reshape(const vector<size_t>& old_shape,
     return oldprod == newprod;
 }
 
+inline bool can_broadcast(vector<size_t> old_shape, vector<size_t> new_shape) {
+    if (old_shape.empty() || new_shape.empty()) return false;
+
+    std::reverse(old_shape.begin(), old_shape.end());
+    std::reverse(new_shape.begin(), new_shape.end());
+
+    for (size_t idx = 0; idx < min(old_shape.size(), new_shape.size()); ++idx) {
+        if (old_shape[idx] != new_shape[idx] && old_shape[idx] != 1 &&
+            new_shape[idx] != 1)
+            return false;
+    }
+    return true;
+}
+
 /**
  * TensorStorage<dtype_t> interface - A generic API for plain tensor operations.
  * @param dtype_t: root plaintext datatype for representing data(double, int64
@@ -130,6 +144,21 @@ class TensorStorage {
         return *this;
     }
     /**
+     * Broadcast the TensorStorage.
+     * @param[in] new shape.
+     */
+    TensorStorage<dtype_t> broadcast(const vector<size_t>& new_shape) {
+        return this->copy().broadcast_inplace(new_shape);
+    }
+
+    TensorStorage<dtype_t>& broadcast_inplace(const vector<size_t>& new_shape) {
+        if (!can_broadcast(this->shape(), new_shape))
+            throw invalid_argument("invalid broadcast input");
+
+        this->_data = xt::broadcast(this->_data, new_shape);
+        return *this;
+    }
+    /**
      * Returns the element at position {idx1, idx2, ..., idxn} in the current
      * shape
      * @param[in] desired position from the tensor.
@@ -213,16 +242,14 @@ class TensorStorage {
      * Returns a reference to the internal representation of the
      * tensor.
      */
-    auto data() const {
+    auto data_ref() const {
         return gsl::span<const dtype_t>(_data.data(), _data.size());
     }
     /**
      * Returns a copy to the internal representation of the
      * tensor.
      */
-    auto data_dup() const {
-        return vector<dtype_t>(_data.begin(), _data.end());
-    }
+    auto data() const { return vector<dtype_t>(_data.begin(), _data.end()); }
     /**
      * Returns the current shape of the tensor.
      */

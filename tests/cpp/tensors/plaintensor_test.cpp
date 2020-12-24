@@ -17,7 +17,7 @@ TEST_F(PlainTensorTest, TestCreateFrom1D) {
 
     PlainTensor<double> tensor(data);
 
-    ASSERT_THAT(tensor.data_dup(), ElementsAreArray(data));
+    ASSERT_THAT(tensor.data(), ElementsAreArray(data));
     ASSERT_THAT(tensor.shape(), ElementsAre(data.size()));
     ASSERT_THAT(tensor.strides(), ElementsAre(1));
 }
@@ -26,7 +26,7 @@ TEST_F(PlainTensorTest, TestCreateFrom2DVector) {
     vector<vector<double>> data = {{1.1, 2.2}, {3.3, 4.4}};
     PlainTensor<double> tensor(data);
 
-    ASSERT_THAT(tensor.data_dup(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
+    ASSERT_THAT(tensor.data(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
     ASSERT_THAT(tensor.shape(), ElementsAreArray({2, 2}));
     ASSERT_THAT(tensor.strides(), ElementsAreArray({2, 1}));
 }
@@ -43,7 +43,7 @@ TEST_F(PlainTensorTest, TestCreateFrom2DTensor) {
     vector<double> data = {1.1, 2.2, 3.3, 4.4};
     PlainTensor<double> tensor(data, {2, 2});
 
-    ASSERT_THAT(tensor.data_dup(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
+    ASSERT_THAT(tensor.data(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
     ASSERT_THAT(tensor.shape(), ElementsAreArray({2, 2}));
     ASSERT_THAT(tensor.strides(), ElementsAreArray({2, 1}));
 }
@@ -57,7 +57,7 @@ TEST_F(PlainTensorTest, TestCreateFrom3DTensor) {
     vector<double> data = {1.1, 2.2, 3.3, 4.4};
     PlainTensor<double> tensor(data, {2, 2, 1});
 
-    ASSERT_THAT(tensor.data_dup(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
+    ASSERT_THAT(tensor.data(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
     ASSERT_THAT(tensor.shape(), ElementsAreArray({2, 2, 1}));
     ASSERT_THAT(tensor.strides(), ElementsAreArray({2, 1, 0}));
 }
@@ -93,6 +93,27 @@ TEST_F(PlainTensorTest, TestTensorAccess) {
     auto new_tensor = tensor.reshape({2, 2, 2});
     ASSERT_THAT(tensor.shape(), ElementsAreArray({4, 2}));
     ASSERT_THAT(new_tensor.shape(), ElementsAreArray({2, 2, 2}));
+}
+
+TEST_F(PlainTensorTest, TestTensorBroadcast) {
+    vector<double> data = {1.1, 2.2, 3.3, 4.4};
+    PlainTensor<double> tensor(data, {2, 2});
+
+    auto res = tensor.broadcast({2, 2, 2});
+    ASSERT_THAT(res.shape(), ElementsAreArray({2, 2, 2}));
+    ASSERT_THAT(res.strides(), ElementsAreArray({4, 2, 1}));
+    ASSERT_THAT(res.data(),
+                ElementsAreArray({1.1, 2.2, 3.3, 4.4, 1.1, 2.2, 3.3, 4.4}));
+
+    EXPECT_THROW(tensor.broadcast({3, 3}), std::exception);
+
+    tensor.broadcast_inplace({3, 2, 2, 1});
+    ASSERT_THAT(tensor.shape(), ElementsAreArray({3, 2, 2, 2}));
+    ASSERT_THAT(tensor.strides(), ElementsAreArray({8, 4, 2, 1}));
+    ASSERT_THAT(tensor.data(),
+                ElementsAreArray({1.1, 2.2, 3.3, 4.4, 1.1, 2.2, 3.3, 4.4,
+                                  1.1, 2.2, 3.3, 4.4, 1.1, 2.2, 3.3, 4.4,
+                                  1.1, 2.2, 3.3, 4.4, 1.1, 2.2, 3.3, 4.4}));
 }
 
 TEST_F(PlainTensorTest, TestTensorAccess1D) {
@@ -131,16 +152,16 @@ TEST_F(PlainTensorTest, TestReplicate) {
 
     tensor.replicate(8);
 
-    ASSERT_THAT(tensor.data_dup(), ElementsAreArray({
-                                       1.1,
-                                       2.2,
-                                       3.3,
-                                       4.4,
-                                       1.1,
-                                       2.2,
-                                       3.3,
-                                       4.4,
-                                   }));
+    ASSERT_THAT(tensor.data(), ElementsAreArray({
+                                   1.1,
+                                   2.2,
+                                   3.3,
+                                   4.4,
+                                   1.1,
+                                   2.2,
+                                   3.3,
+                                   4.4,
+                               }));
     ASSERT_THAT(tensor.shape(), ElementsAreArray({8}));
 }
 
@@ -231,7 +252,7 @@ TEST_F(PlainTensorTest, TestUnbatch) {
     PlainTensor<double> unbatch(out, {2, 3, 2}, 0);
 
     ASSERT_THAT(unbatch.shape(), ElementsAreArray({2, 3, 2}));
-    ASSERT_THAT(unbatch.data_dup(), ElementsAreArray(data));
+    ASSERT_THAT(unbatch.data(), ElementsAreArray(data));
 }
 
 }  // namespace

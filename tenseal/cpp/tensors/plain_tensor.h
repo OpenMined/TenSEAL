@@ -61,6 +61,16 @@ class PlainTensor {
         return *this;
     }
     /**
+     * Broadcast
+     * **/
+    PlainTensor<plain_t> broadcast(const vector<size_t>& new_shape) {
+        return this->copy().broadcast_inplace(new_shape);
+    }
+    PlainTensor<plain_t>& broadcast_inplace(const vector<size_t>& new_shape) {
+        this->_data.broadcast_inplace(new_shape);
+        return *this;
+    }
+    /**
      * Returns the element at position {idx1, idx2, ..., idxn} in the current
      * shape
      * @param[in] desired position from the tensor.
@@ -163,8 +173,8 @@ class PlainTensor {
      * Returns a reference to the internal representation of the
      * tensor.
      */
+    auto data_ref() const { return _data.data_ref(); }
     auto data() const { return _data.data(); }
-    auto data_dup() const { return _data.data_dup(); }
     /**
      * Returns the current shape of the tensor.
      */

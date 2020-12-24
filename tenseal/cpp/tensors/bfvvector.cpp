@@ -208,7 +208,7 @@ shared_ptr<BFVVector> BFVVector::add_plain_inplace(
 
     Plaintext plaintext;
 
-    this->tenseal_context()->encode<BatchEncoder>(to_add.data(), plaintext);
+    this->tenseal_context()->encode<BatchEncoder>(to_add.data_ref(), plaintext);
     this->tenseal_context()->evaluator->add_plain_inplace(this->_ciphertext,
                                                           plaintext);
 
@@ -228,7 +228,7 @@ shared_ptr<BFVVector> BFVVector::sub_plain_inplace(
 
     Plaintext plaintext;
 
-    this->tenseal_context()->encode<BatchEncoder>(to_sub.data(), plaintext);
+    this->tenseal_context()->encode<BatchEncoder>(to_sub.data_ref(), plaintext);
     this->tenseal_context()->evaluator->sub_plain_inplace(this->_ciphertext,
                                                           plaintext);
 
@@ -247,7 +247,7 @@ shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
     }
 
     Plaintext plaintext;
-    this->tenseal_context()->encode<BatchEncoder>(to_mul.data(), plaintext);
+    this->tenseal_context()->encode<BatchEncoder>(to_mul.data_ref(), plaintext);
 
     try {
         this->tenseal_context()->evaluator->multiply_plain_inplace(
