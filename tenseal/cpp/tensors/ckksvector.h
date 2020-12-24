@@ -52,8 +52,8 @@ class CKKSVector
     encrypted_t add_inplace(const encrypted_t& to_add) override;
     encrypted_t sub_inplace(const encrypted_t& to_sub) override;
     encrypted_t mul_inplace(const encrypted_t& to_mul) override;
-    encrypted_t dot_product_inplace(const encrypted_t& to_mul) override;
-    encrypted_t dot_product_plain_inplace(const plain_t& to_mul) override;
+    encrypted_t dot_inplace(const encrypted_t& to_mul) override;
+    encrypted_t dot_plain_inplace(const plain_t& to_mul) override;
     encrypted_t sum_inplace(size_t axis = 0) override;
 
     /**

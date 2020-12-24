@@ -38,8 +38,6 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
         const shared_ptr<CKKSTensor>& to_sub) override;
     shared_ptr<CKKSTensor> mul_inplace(
         const shared_ptr<CKKSTensor>& to_mul) override;
-    shared_ptr<CKKSTensor> dot_product_inplace(
-        const shared_ptr<CKKSTensor>& to_mul) override;
 
     shared_ptr<CKKSTensor> add_plain_inplace(const double& to_add) override;
     shared_ptr<CKKSTensor> sub_plain_inplace(const double& to_sub) override;
@@ -51,8 +49,6 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
         const PlainTensor<double>& to_sub) override;
     shared_ptr<CKKSTensor> mul_plain_inplace(
         const PlainTensor<double>& to_mul) override;
-    shared_ptr<CKKSTensor> dot_product_plain_inplace(
-        const PlainTensor<double>& to_mul) override;
 
     shared_ptr<CKKSTensor> sum_inplace(size_t axis = 0) override;
     shared_ptr<CKKSTensor> sum_batch() {
@@ -62,6 +58,21 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
 
     shared_ptr<CKKSTensor> polyval_inplace(
         const vector<double>& coefficients) override;
+
+    shared_ptr<CKKSTensor> dot_inplace(
+        const shared_ptr<CKKSTensor>& to_mul) override;
+    shared_ptr<CKKSTensor> dot_plain_inplace(
+        const PlainTensor<double>& to_mul) override;
+
+    shared_ptr<CKKSTensor> matmul(const shared_ptr<CKKSTensor> other) {
+        return this->copy()->matmul_inplace(other);
+    }
+    shared_ptr<CKKSTensor> matmul_inplace(const shared_ptr<CKKSTensor> other);
+    shared_ptr<CKKSTensor> matmul_plain(const PlainTensor<double>& other) {
+        return this->copy()->matmul_plain_inplace(other);
+    }
+    shared_ptr<CKKSTensor> matmul_plain_inplace(
+        const PlainTensor<double>& other);
 
     void load(const string& vec) override;
     string save() const override;

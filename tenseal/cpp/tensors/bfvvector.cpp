@@ -173,7 +173,7 @@ shared_ptr<BFVVector> BFVVector::mul_inplace(
     return shared_from_this();
 }
 
-shared_ptr<BFVVector> BFVVector::dot_product_inplace(
+shared_ptr<BFVVector> BFVVector::dot_inplace(
     const shared_ptr<BFVVector>& to_mul) {
     this->mul_inplace(to_mul);
     this->sum_inplace();
@@ -181,7 +181,7 @@ shared_ptr<BFVVector> BFVVector::dot_product_inplace(
     return shared_from_this();
 }
 
-shared_ptr<BFVVector> BFVVector::dot_product_plain_inplace(
+shared_ptr<BFVVector> BFVVector::dot_plain_inplace(
     const BFVVector::plain_t& to_mul) {
     this->mul_plain_inplace(to_mul);
     this->sum_inplace();

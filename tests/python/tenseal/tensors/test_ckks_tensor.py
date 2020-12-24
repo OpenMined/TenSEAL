@@ -519,3 +519,71 @@ def test_polynomial_rescale_off(context, data, polynom):
     ct = ts.ckks_tensor(context, data)
     with pytest.raises(ValueError) as e:
         result = ct.polyval(polynom)
+
+
+@pytest.mark.parametrize(
+    "shapes",
+    [
+        # 1D-1D
+        ((1,), (1,)),
+        ((3,), (3,)),
+        ((8,), (8,)),
+        # 2D-2D
+        ((2, 1), (1, 2)),
+        ((2, 2), (2, 2)),
+        ((4, 2), (2, 4)),
+        ((3, 2), (2, 5)),
+        ((5, 2), (2, 3)),
+        ((3, 5), (5, 1)),
+        ((3, 7), (7, 5)),
+    ],
+)
+@pytest.mark.parametrize("plain", [True, False])
+def test_dot(context, shapes, plain):
+    r_shape = shapes[0]
+    l_shape = shapes[1]
+    r_t = np.random.randn(*r_shape)
+    l_t = np.random.randn(*l_shape)
+    r_pt = ts.plain_tensor(r_t.flatten().tolist(), r_shape)
+    l_pt = ts.plain_tensor(l_t.flatten().tolist(), l_shape)
+    right = ts.ckks_tensor(context, r_pt)
+    if plain:
+        left = l_pt
+    else:
+        left = ts.ckks_tensor(context, l_pt)
+
+    expected_result = r_t.dot(l_t)
+
+    ## non-inplace
+    result = right.dot(left)
+
+    np_result = np.array(result.decrypt().tolist())
+    assert np_result.shape == expected_result.shape
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    # right didn't change
+    right_result = np.array(right.decrypt().tolist())
+    assert np.allclose(right_result, r_t, rtol=0, atol=0.01)
+    # left didn't change
+    if plain:
+        left_result = l_t
+    else:
+        left_result = np.array(left.decrypt().tolist())
+    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+
+    # inplace
+    right.dot_(left)
+
+    np_result = np.array(result.decrypt().tolist())
+    assert np_result.shape == expected_result.shape
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    # right didn't change
+    right_result = np.array(right.decrypt().tolist())
+
+    assert right_result.shape == expected_result.shape
+    assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
+    # left didn't change
+    if plain:
+        left_result = l_t
+    else:
+        left_result = np.array(left.decrypt().tolist())
+    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
