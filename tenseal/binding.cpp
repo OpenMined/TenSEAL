@@ -283,34 +283,26 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("dot_", &CKKSVector::dot_plain_inplace)
         .def("sum", &CKKSVector::sum, py::arg("axis") = 0)
         .def("sum_", &CKKSVector::sum_inplace, py::arg("axis") = 0)
-        .def(
-            "matmul",
-            [](shared_ptr<CKKSVector> obj,
-               const vector<vector<double>> &matrix) {
-                return obj->matmul_plain(matrix);
-            },
-            py::arg("matrix"), py::arg("n_jobs") = 0)
-        .def(
-            "matmul_",
-            [](shared_ptr<CKKSVector> obj,
-               const vector<vector<double>> &matrix) {
-                return obj->matmul_plain_inplace(matrix);
-            },
-            py::arg("matrix"), py::arg("n_jobs") = 0)
-        .def(
-            "mm",
-            [](shared_ptr<CKKSVector> obj,
-               const vector<vector<double>> &matrix) {
-                return obj->matmul_plain(matrix);
-            },
-            py::arg("matrix"), py::arg("n_jobs") = 0)
-        .def(
-            "mm_",
-            [](shared_ptr<CKKSVector> obj,
-               const vector<vector<double>> &matrix) {
-                return obj->matmul_plain_inplace(matrix);
-            },
-            py::arg("matrix"), py::arg("n_jobs") = 0)
+        .def("matmul",
+             [](shared_ptr<CKKSVector> obj,
+                const vector<vector<double>> &matrix) {
+                 return obj->matmul_plain(matrix);
+             })
+        .def("matmul_",
+             [](shared_ptr<CKKSVector> obj,
+                const vector<vector<double>> &matrix) {
+                 return obj->matmul_plain_inplace(matrix);
+             })
+        .def("mm",
+             [](shared_ptr<CKKSVector> obj,
+                const vector<vector<double>> &matrix) {
+                 return obj->matmul_plain(matrix);
+             })
+        .def("mm_",
+             [](shared_ptr<CKKSVector> obj,
+                const vector<vector<double>> &matrix) {
+                 return obj->matmul_plain_inplace(matrix);
+             })
         .def("conv2d_im2col",
              [](shared_ptr<CKKSVector> obj,
                 const vector<vector<double>> &matrix, const size_t windows_nb) {
@@ -411,20 +403,16 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->mul_plain_inplace(other);
              })
-        .def(
-            "__matmul__",
-            [](shared_ptr<CKKSVector> obj,
-               const vector<vector<double>> &matrix) {
-                return obj->matmul_plain(matrix);
-            },
-            py::arg("matrix"), py::arg("n_jobs") = 0)
-        .def(
-            "__imatmul__",
-            [](shared_ptr<CKKSVector> obj,
-               const vector<vector<double>> &matrix) {
-                return obj->matmul_plain_inplace(matrix);
-            },
-            py::arg("matrix"), py::arg("n_jobs") = 0)
+        .def("__matmul__",
+             [](shared_ptr<CKKSVector> obj,
+                const vector<vector<double>> &matrix) {
+                 return obj->matmul_plain(matrix);
+             })
+        .def("__imatmul__",
+             [](shared_ptr<CKKSVector> obj,
+                const vector<vector<double>> &matrix) {
+                 return obj->matmul_plain_inplace(matrix);
+             })
         .def("context", &CKKSVector::tenseal_context)
         .def("link_context", &CKKSVector::link_tenseal_context)
         .def("serialize",
