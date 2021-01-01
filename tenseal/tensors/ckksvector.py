@@ -144,13 +144,13 @@ class CKKSVector(AbstractTensor):
         other = other.tolist()
         return other
 
-    def mm(self, other, n_jobs=0) -> "CKKSVector":
+    def mm(self, other) -> "CKKSVector":
         other = self._mm(other)
-        return self._wrap(self.data.mm(other, n_jobs))
+        return self._wrap(self.data.mm(other))
 
-    def mm_(self, other, n_jobs=0) -> "CKKSVector":
+    def mm_(self, other) -> "CKKSVector":
         other = self._mm(other)
-        self.data.mm_(other, n_jobs)
+        self.data.mm_(other)
         return self
 
     def matmul(self, *args, **kwargs) -> "CKKSVector":
