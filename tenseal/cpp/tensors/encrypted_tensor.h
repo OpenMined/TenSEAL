@@ -80,6 +80,10 @@ class EncryptedTensor {
         return this->copy()->dot_inplace(to_mul);
     };
     virtual encrypted_t dot_inplace(const encrypted_t& to_mul) = 0;
+    encrypted_t matmul(const encrypted_t& to_mul) const {
+        return this->copy()->matmul_inplace(to_mul);
+    };
+    virtual encrypted_t matmul_inplace(const encrypted_t& to_mul) = 0;
     /**
      * Plain evaluation function operates on an encrypted tensors and plaintext
      * tensors and returns a new EncryptedTensor<plain_data_t, encrypted_t>
@@ -121,6 +125,11 @@ class EncryptedTensor {
         return this->copy()->dot_plain_inplace(to_mul);
     };
     virtual encrypted_t dot_plain_inplace(
+        const PlainTensor<plain_data_t>& to_mul) = 0;
+    encrypted_t matmul_plain(const PlainTensor<plain_data_t>& to_mul) const {
+        return this->copy()->matmul_plain_inplace(to_mul);
+    };
+    virtual encrypted_t matmul_plain_inplace(
         const PlainTensor<plain_data_t>& to_mul) = 0;
     encrypted_t sum(size_t axis = 0) const {
         return this->copy()->sum_inplace(axis);

@@ -285,26 +285,30 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("sum_", &CKKSVector::sum_inplace, py::arg("axis") = 0)
         .def(
             "matmul",
-            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
-               size_t n_jobs) { return obj->matmul_plain(matrix, n_jobs); },
+            [](shared_ptr<CKKSVector> obj,
+               const vector<vector<double>> &matrix) {
+                return obj->matmul_plain(matrix);
+            },
             py::arg("matrix"), py::arg("n_jobs") = 0)
         .def(
             "matmul_",
-            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
-               size_t n_jobs) {
-                return obj->matmul_plain_inplace(matrix, n_jobs);
+            [](shared_ptr<CKKSVector> obj,
+               const vector<vector<double>> &matrix) {
+                return obj->matmul_plain_inplace(matrix);
             },
             py::arg("matrix"), py::arg("n_jobs") = 0)
         .def(
             "mm",
-            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
-               size_t n_jobs) { return obj->matmul_plain(matrix, n_jobs); },
+            [](shared_ptr<CKKSVector> obj,
+               const vector<vector<double>> &matrix) {
+                return obj->matmul_plain(matrix);
+            },
             py::arg("matrix"), py::arg("n_jobs") = 0)
         .def(
             "mm_",
-            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
-               size_t n_jobs) {
-                return obj->matmul_plain_inplace(matrix, n_jobs);
+            [](shared_ptr<CKKSVector> obj,
+               const vector<vector<double>> &matrix) {
+                return obj->matmul_plain_inplace(matrix);
             },
             py::arg("matrix"), py::arg("n_jobs") = 0)
         .def("conv2d_im2col",
@@ -409,14 +413,16 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              })
         .def(
             "__matmul__",
-            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
-               size_t n_jobs) { return obj->matmul_plain(matrix, n_jobs); },
+            [](shared_ptr<CKKSVector> obj,
+               const vector<vector<double>> &matrix) {
+                return obj->matmul_plain(matrix);
+            },
             py::arg("matrix"), py::arg("n_jobs") = 0)
         .def(
             "__imatmul__",
-            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
-               size_t n_jobs) {
-                return obj->matmul_plain_inplace(matrix, n_jobs);
+            [](shared_ptr<CKKSVector> obj,
+               const vector<vector<double>> &matrix) {
+                return obj->matmul_plain_inplace(matrix);
             },
             py::arg("matrix"), py::arg("n_jobs") = 0)
         .def("context", &CKKSVector::tenseal_context)
@@ -506,6 +512,14 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("dot_", &CKKSTensor::dot_inplace)
         .def("dot", &CKKSTensor::dot_plain)
         .def("dot_", &CKKSTensor::dot_plain_inplace)
+        .def("matmul", &CKKSTensor::matmul)
+        .def("matmul_", &CKKSTensor::matmul_inplace)
+        .def("matmul", &CKKSTensor::matmul_plain)
+        .def("matmul_", &CKKSTensor::matmul_plain_inplace)
+        .def("mm", &CKKSTensor::matmul)
+        .def("mm_", &CKKSTensor::matmul_inplace)
+        .def("mm", &CKKSTensor::matmul_plain)
+        .def("mm_", &CKKSTensor::matmul_plain_inplace)
         // python arithmetic
         .def("__add__", &CKKSTensor::add)
         .def("__add__", py::overload_cast<const double &>(
@@ -535,6 +549,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              py::overload_cast<const double &>(&CKKSTensor::mul_plain_inplace))
         .def("__imul__", py::overload_cast<const PlainTensor<double> &>(
                              &CKKSTensor::mul_plain_inplace))
+        .def("__matmul__", &CKKSTensor::matmul)
+        .def("__matmul__", &CKKSTensor::matmul_plain)
+        .def("__imatmul__", &CKKSTensor::matmul_inplace)
+        .def("__imatmul__", &CKKSTensor::matmul_plain_inplace)
         .def("__sub__", &CKKSTensor::sub)
         .def("__sub__", py::overload_cast<const double &>(
                             &CKKSTensor::sub_plain, py::const_))
