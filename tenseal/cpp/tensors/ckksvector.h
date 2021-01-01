@@ -58,7 +58,7 @@ class CKKSVector
     /**
      * Encrypted Vector multiplication with encrypted matrix.
      **/
-    encrypted_t matmul_inplace(const encrypted_t& matrix) override{
+    encrypted_t matmul_inplace(const encrypted_t& matrix) override {
         throw logic_error("not implemented");
     }
 
