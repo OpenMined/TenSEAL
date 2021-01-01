@@ -226,7 +226,7 @@ TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
     auto matrix = vector<vector<double>>{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}};
     auto expected_result = vector<int64_t>{6, 12, 18};
 
-    auto result = vec->matmul_plain(matrix, 2);
+    auto result = vec->matmul_plain(matrix);
 
     if (should_serialize_first) {
         result = duplicate(result);
