@@ -141,7 +141,7 @@ class CKKSVector(AbstractTensor):
                 raise TypeError(f"can't operate with object of type {type(other)}")
         if len(other.shape) != 2:
             raise ValueError("can only operate with a matrix")
-        return other
+        return other.data
 
     def mm(self, other) -> "CKKSVector":
         other = self._mm(other)
