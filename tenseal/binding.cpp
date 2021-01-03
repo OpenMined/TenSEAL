@@ -283,10 +283,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("dot_", &CKKSVector::dot_plain_inplace)
         .def("sum", &CKKSVector::sum, py::arg("axis") = 0)
         .def("sum_", &CKKSVector::sum_inplace, py::arg("axis") = 0)
-        .def("matmul", &CKKSTensor::matmul_plain)
-        .def("matmul_", &CKKSTensor::matmul_plain_inplace)
-        .def("mm", &CKKSTensor::matmul_plain)
-        .def("mm_", &CKKSTensor::matmul_plain_inplace)
+        .def("matmul", &CKKSVector::matmul_plain)
+        .def("matmul_", &CKKSVector::matmul_plain_inplace)
+        .def("mm", &CKKSVector::matmul_plain)
+        .def("mm_", &CKKSVector::matmul_plain_inplace)
         .def("conv2d_im2col",
              [](shared_ptr<CKKSVector> obj,
                 const vector<vector<double>> &matrix, const size_t windows_nb) {
@@ -387,8 +387,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->mul_plain_inplace(other);
              })
-        .def("__matmul__", &CKKSTensor::matmul_plain)
-        .def("__imatmul__", &CKKSTensor::matmul_plain_inplace)
+        .def("__matmul__", &CKKSVector::matmul_plain)
+        .def("__imatmul__", &CKKSVector::matmul_plain_inplace)
         .def("context", &CKKSVector::tenseal_context)
         .def("link_context", &CKKSVector::link_tenseal_context)
         .def("serialize",
