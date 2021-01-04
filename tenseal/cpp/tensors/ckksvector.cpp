@@ -290,8 +290,8 @@ shared_ptr<CKKSVector> CKKSVector::_mul_plain_inplace(const T& to_mul) {
 }
 
 shared_ptr<CKKSVector> CKKSVector::matmul_plain_inplace(
-    const CKKSVector::plain_t& matrix, size_t n_jobs) {
-    this->_ciphertext = this->diagonal_ct_vector_matmul(matrix, n_jobs);
+    const CKKSVector::plain_t& matrix) {
+    this->_ciphertext = this->diagonal_ct_vector_matmul(matrix);
 
     this->_size = matrix.shape()[1];
     this->auto_rescale(_ciphertext);

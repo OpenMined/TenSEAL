@@ -265,7 +265,7 @@ shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
 }
 
 shared_ptr<BFVVector> BFVVector::matmul_plain_inplace(
-    const BFVVector::plain_t& matrix, size_t n_jobs) {
+    const BFVVector::plain_t& matrix) {
     throw std::logic_error("not implemented");
 }
 

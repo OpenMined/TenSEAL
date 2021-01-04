@@ -89,15 +89,6 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
         throw invalid_argument("can't compute on vectors of different sizes");
     }
     /**
-     * Encrypted Vector multiplication with plain matrix.
-     **/
-    encrypted_t matmul_plain(const PlainTensor<plain_t>& matrix,
-                             size_t n_jobs = 0) const {
-        return this->copy()->matmul_plain_inplace(matrix, n_jobs);
-    }
-    virtual encrypted_t matmul_plain_inplace(const PlainTensor<plain_t>& matrix,
-                                             size_t n_jobs = 0) = 0;
-    /**
      * Encrypted Matrix multiplication with plain vector.
      **/
     encrypted_t enc_matmul_plain(const PlainTensor<plain_t>& plain_vec,
@@ -135,8 +126,7 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
     [1] Halevi, S., & Shoup, V. (2014, August). Algorithms in helib. In Annual
     Cryptology Conference (pp. 554-571). Springer, Berlin, Heidelberg.
     */
-    Ciphertext diagonal_ct_vector_matmul(const PlainTensor<plain_t>& matrix,
-                                         size_t n_jobs) {
+    Ciphertext diagonal_ct_vector_matmul(const PlainTensor<plain_t>& matrix) {
         // matrix is organized by rows
         // _check_matrix(matrix, this->size())
 
@@ -197,7 +187,7 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
             return thread_result;
         };
 
-        if (n_jobs == 0) n_jobs = this->tenseal_context()->dispatcher_size();
+        auto n_jobs = this->tenseal_context()->dispatcher_size();
 
         if (n_jobs == 1) return worker_func(0, this->size());
 

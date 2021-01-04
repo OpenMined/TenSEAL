@@ -141,16 +141,15 @@ class CKKSVector(AbstractTensor):
                 raise TypeError(f"can't operate with object of type {type(other)}")
         if len(other.shape) != 2:
             raise ValueError("can only operate with a matrix")
-        other = other.tolist()
-        return other
+        return other.data
 
-    def mm(self, other, n_jobs=0) -> "CKKSVector":
+    def mm(self, other) -> "CKKSVector":
         other = self._mm(other)
-        return self._wrap(self.data.mm(other, n_jobs))
+        return self._wrap(self.data.mm(other))
 
-    def mm_(self, other, n_jobs=0) -> "CKKSVector":
+    def mm_(self, other) -> "CKKSVector":
         other = self._mm(other)
-        self.data.mm_(other, n_jobs)
+        self.data.mm_(other)
         return self
 
     def matmul(self, *args, **kwargs) -> "CKKSVector":
@@ -165,12 +164,23 @@ class CKKSVector(AbstractTensor):
     def __imatmul__(self, *args, **kwargs) -> "CKKSVector":
         return self.mm_(*args, **kwargs)
 
+    @classmethod
+    def _conv2d_im2col(cls, other):
+        if not isinstance(other, ts.PlainTensor):
+            try:
+                other = ts.plain_tensor(other, dtype="float")
+            except TypeError:
+                raise TypeError(f"can't operate with object of type {type(other)}")
+        if len(other.shape) != 2:
+            raise ValueError("can only operate with a matrix")
+        return other.tolist()
+
     def conv2d_im2col(self, other, windows_nb) -> "CKKSVector":
-        other = self._mm(other)
+        other = self._conv2d_im2col(other)
         return self._wrap(self.data.conv2d_im2col(other, windows_nb))
 
     def conv2d_im2col_(self, other, windows_nb) -> "CKKSVector":
-        other = self._mm(other)
+        other = self._conv2d_im2col(other)
         self.data.conv2d_im2col_(other, windows_nb)
         return self
 

@@ -92,6 +92,22 @@ class CKKSTensor(AbstractTensor):
         self.data.dot_(other)
         return self
 
+    def mm(self, other) -> "CKKSTensor":
+        other = self._get_operand(other, dtype="float")
+        result = self.data.mm(other)
+        return self._wrap(result)
+
+    def mm_(self, other) -> "CKKSTensor":
+        other = self._get_operand(other, dtype="float")
+        self.data.mm_(other)
+        return self
+
+    def __matmul__(self, other) -> "CKKSTensor":
+        return self.mm(other)
+
+    def __imatmul__(self, other) -> "CKKSTensor":
+        return self.mm_(other)
+
     def sum_batch(self) -> "CKKSTensor":
         return self._wrap(self.data.sum_batch())
 

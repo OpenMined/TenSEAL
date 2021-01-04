@@ -571,7 +571,7 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_plain_inplace(
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
-    const shared_ptr<CKKSTensor> other) {
+    const shared_ptr<CKKSTensor>& other) {
     auto this_shape = this->shape();
     auto other_shape = other->shape();
 
