@@ -587,3 +587,61 @@ def test_dot(context, shapes, plain):
     else:
         left_result = np.array(left.decrypt().tolist())
     assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+
+
+# this test only test the python API for matmul
+# a previous test already test different shapes
+@pytest.mark.parametrize("plain", [True, False])
+@pytest.mark.parametrize("arithmetic", [True, False])
+def test_matmul_api(context, plain, arithmetic):
+    r_t = np.random.randn(2, 2)
+    l_t = np.random.randn(2, 2)
+    r_pt = ts.plain_tensor(r_t.flatten().tolist(), (2, 2))
+    l_pt = ts.plain_tensor(l_t.flatten().tolist(), (2, 2))
+    right = ts.ckks_tensor(context, r_pt)
+    if plain:
+        left = l_pt
+    else:
+        left = ts.ckks_tensor(context, l_pt)
+
+    expected_result = r_t.dot(l_t)
+
+    ## non-inplace
+    if arithmetic:
+        result = right @ left
+    else:
+        result = right.mm(left)
+
+    np_result = np.array(result.decrypt().tolist())
+    assert np_result.shape == expected_result.shape
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    # right didn't change
+    right_result = np.array(right.decrypt().tolist())
+    assert np.allclose(right_result, r_t, rtol=0, atol=0.01)
+    # left didn't change
+    if plain:
+        left_result = l_t
+    else:
+        left_result = np.array(left.decrypt().tolist())
+    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+
+    # inplace
+    if arithmetic:
+        right @= left
+    else:
+        right.mm_(left)
+
+    np_result = np.array(result.decrypt().tolist())
+    assert np_result.shape == expected_result.shape
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    # right didn't change
+    right_result = np.array(right.decrypt().tolist())
+
+    assert right_result.shape == expected_result.shape
+    assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
+    # left didn't change
+    if plain:
+        left_result = l_t
+    else:
+        left_result = np.array(left.decrypt().tolist())
+    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
