@@ -64,15 +64,10 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     shared_ptr<CKKSTensor> dot_plain_inplace(
         const PlainTensor<double>& to_mul) override;
 
-    shared_ptr<CKKSTensor> matmul(const shared_ptr<CKKSTensor> other) {
-        return this->copy()->matmul_inplace(other);
-    }
-    shared_ptr<CKKSTensor> matmul_inplace(const shared_ptr<CKKSTensor> other);
-    shared_ptr<CKKSTensor> matmul_plain(const PlainTensor<double>& other) {
-        return this->copy()->matmul_plain_inplace(other);
-    }
+    shared_ptr<CKKSTensor> matmul_inplace(
+        const shared_ptr<CKKSTensor>& other) override;
     shared_ptr<CKKSTensor> matmul_plain_inplace(
-        const PlainTensor<double>& other);
+        const PlainTensor<double>& other) override;
 
     void load(const string& vec) override;
     string save() const override;
