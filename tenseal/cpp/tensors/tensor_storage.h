@@ -36,20 +36,6 @@ inline bool can_reshape(const vector<size_t>& old_shape,
     return oldprod == newprod;
 }
 
-inline bool can_broadcast(vector<size_t> old_shape, vector<size_t> new_shape) {
-    if (old_shape.empty() || new_shape.empty()) return false;
-
-    std::reverse(old_shape.begin(), old_shape.end());
-    std::reverse(new_shape.begin(), new_shape.end());
-
-    for (size_t idx = 0; idx < min(old_shape.size(), new_shape.size()); ++idx) {
-        if (old_shape[idx] != new_shape[idx] && old_shape[idx] != 1 &&
-            new_shape[idx] != 1)
-            return false;
-    }
-    return true;
-}
-
 /**
  * TensorStorage<dtype_t> interface - A generic API for plain tensor operations.
  * @param dtype_t: root plaintext datatype for representing data(double, int64
@@ -152,9 +138,6 @@ class TensorStorage {
     }
 
     TensorStorage<dtype_t>& broadcast_inplace(const vector<size_t>& new_shape) {
-        if (!can_broadcast(this->shape(), new_shape))
-            throw invalid_argument("invalid broadcast input");
-
         this->_data = xt::broadcast(this->_data, new_shape);
         return *this;
     }

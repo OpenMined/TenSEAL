@@ -116,6 +116,17 @@ TEST_F(PlainTensorTest, TestTensorBroadcast) {
                                   1.1, 2.2, 3.3, 4.4, 1.1, 2.2, 3.3, 4.4}));
 }
 
+TEST_F(PlainTensorTest, TestTensorBroadcastMemory) {
+    vector<double> data = {1.1, 2.2, 3.3, 4.4};
+    PlainTensor<double> tensor(data, {2, 2});
+
+    auto res = tensor.broadcast({2, 2, 2});
+
+    res.ref_at({1, 1, 1}) = 999;
+    ASSERT_THAT(res.data(), ElementsAreArray(vector<double>(
+                                {1.1, 2.2, 3.3, 4.4, 1.1, 2.2, 3.3, 999})));
+}
+
 TEST_F(PlainTensorTest, TestTensorAccess1D) {
     vector<vector<double>> data = {{1.1}, {2.2}, {3.3}, {4.4},
                                    {5.5}, {6.6}, {7.7}, {8.8}};

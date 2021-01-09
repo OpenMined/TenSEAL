@@ -76,7 +76,9 @@ class PlainTensor {
      * @param[in] desired position from the tensor.
      */
     plain_t at(const vector<size_t>& index) const { return _data.at(index); }
+    plain_t& ref_at(const vector<size_t>& index) { return _data.ref_at(index); }
     plain_t flat_at(size_t index) const { return _data.flat_at(index); }
+    plain_t& flat_ref_at(size_t index) { return _data.flat_ref_at(index); }
     /**
      * Converts integer to position.
      * @param[in] .
