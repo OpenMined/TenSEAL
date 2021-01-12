@@ -7,3 +7,12 @@
 [submodule "third_party/googletest"]
 	path = third_party/googletest
 	url = https://github.com/google/googletest
+[submodule "third_party/xtensor"]
+	path = third_party/xtensor
+	url = https://github.com/xtensor-stack/xtensor
+[submodule "third_party/xtl"]
+	path = third_party/xtl
+	url = https://github.com/xtensor-stack/xtl
+[submodule "third_party/xsimd"]
+	path = third_party/xsimd
+	url = https://github.com/xtensor-stack/xsimd

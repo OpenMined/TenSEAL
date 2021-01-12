@@ -411,8 +411,9 @@ shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
     std::vector<Ciphertext> new_data(new_len);
     vector<vector<Ciphertext>> batches(new_len);
 
-    auto old_strides = generate_strides(working_shape);
-    auto new_strides = generate_strides(new_shape);
+    auto old_strides = _data.strides();
+    xt::xarray<double> dummy(new_shape);
+    auto new_strides = dummy.strides();
 
     for (size_t idx = 0; idx < _data.flat_size(); ++idx) {
         auto pos = position_from_strides(old_strides, idx);

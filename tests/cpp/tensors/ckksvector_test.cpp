@@ -8,7 +8,8 @@ namespace {
 using namespace ::testing;
 using namespace std;
 
-bool are_close(const std::vector<double>& l, const std::vector<int64_t>& r) {
+template <class Iterable>
+bool are_close(const Iterable& l, const std::vector<int64_t>& r) {
     if (l.size() != r.size()) {
         return false;
     }
@@ -223,7 +224,8 @@ TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
     ctx->global_scale(std::pow(2, 40));
 
     auto vec = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}));
-    auto matrix = vector<vector<double>>{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}};
+    auto matrix = PlainTensor<double>(
+        vector<vector<double>>{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}});
     auto expected_result = vector<int64_t>{6, 12, 18};
 
     auto result = vec->matmul_plain(matrix);

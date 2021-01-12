@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8]
-        os: [macos-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-20.04]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -23,10 +23,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Run gtest
         timeout-minutes: 15
-        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/cpp/...
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 --jobs 1 //tests/cpp/...
       - name: Run SEALAPI tests
         timeout-minutes: 15
-        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 //tests/python/sealapi/...
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=900 --jobs 1 //tests/python/sealapi/...
       - name: Run TenSEAL tests
         timeout-minutes: 30
-        run: bazel test --test_output=all --spawn_strategy=standalone --test_output=streamed --local_sigkill_grace_seconds=30 --test_timeout=1500 //tests/python/tenseal/...
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_output=streamed --local_sigkill_grace_seconds=30 --test_timeout=1500 --jobs 1 //tests/python/tenseal/...
