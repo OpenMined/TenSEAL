@@ -61,12 +61,24 @@ class PlainTensor {
         return *this;
     }
     /**
+     * Broadcast
+     * **/
+    PlainTensor<plain_t> broadcast(const vector<size_t>& new_shape) {
+        return this->copy().broadcast_inplace(new_shape);
+    }
+    PlainTensor<plain_t>& broadcast_inplace(const vector<size_t>& new_shape) {
+        this->_data.broadcast_inplace(new_shape);
+        return *this;
+    }
+    /**
      * Returns the element at position {idx1, idx2, ..., idxn} in the current
      * shape
      * @param[in] desired position from the tensor.
      */
     plain_t at(const vector<size_t>& index) const { return _data.at(index); }
+    plain_t& ref_at(const vector<size_t>& index) { return _data.ref_at(index); }
     plain_t flat_at(size_t index) const { return _data.flat_at(index); }
+    plain_t& flat_ref_at(size_t index) { return _data.flat_ref_at(index); }
     /**
      * Converts integer to position.
      * @param[in] .
@@ -163,7 +175,8 @@ class PlainTensor {
      * Returns a reference to the internal representation of the
      * tensor.
      */
-    const vector<plain_t>& data() const { return _data.data(); }
+    auto data_ref() const { return _data.data_ref(); }
+    auto data() const { return _data.data(); }
     /**
      * Returns the current shape of the tensor.
      */
@@ -187,10 +200,10 @@ class PlainTensor {
     /**
      * Iterator utils
      **/
-    inline iterator begin() noexcept { return _data.begin(); }
-    inline const_iterator cbegin() const noexcept { return _data.cbegin(); }
-    inline iterator end() noexcept { return _data.end(); }
-    inline const_iterator cend() const noexcept { return _data.cend(); }
+    inline auto begin() noexcept { return _data.begin(); }
+    inline auto cbegin() const noexcept { return _data.cbegin(); }
+    inline auto end() noexcept { return _data.end(); }
+    inline auto cend() const noexcept { return _data.cend(); }
     /**
      * Return the vector representation batched by an axis.
      */

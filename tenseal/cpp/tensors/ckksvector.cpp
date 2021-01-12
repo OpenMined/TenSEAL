@@ -209,7 +209,7 @@ shared_ptr<CKKSVector> CKKSVector::add_plain_inplace(const plain_t& to_add) {
     if (this->size() != to_add.size()) {
         throw invalid_argument("can't add vectors of different sizes");
     }
-    return this->_add_plain_inplace(to_add.data());
+    return this->_add_plain_inplace(to_add.data_ref());
 }
 
 shared_ptr<CKKSVector> CKKSVector::add_plain_inplace(const double& to_add) {
@@ -231,7 +231,7 @@ shared_ptr<CKKSVector> CKKSVector::sub_plain_inplace(const plain_t& to_sub) {
     if (this->size() != to_sub.size()) {
         throw invalid_argument("can't sub vectors of different sizes");
     }
-    return this->_sub_plain_inplace(to_sub.data());
+    return this->_sub_plain_inplace(to_sub.data_ref());
 }
 
 shared_ptr<CKKSVector> CKKSVector::sub_plain_inplace(const double& to_sub) {
@@ -256,7 +256,7 @@ shared_ptr<CKKSVector> CKKSVector::mul_plain_inplace(const plain_t& to_mul) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
 
-    return this->_mul_plain_inplace(to_mul.data());
+    return this->_mul_plain_inplace(to_mul.data_ref());
 }
 
 shared_ptr<CKKSVector> CKKSVector::mul_plain_inplace(const double& to_mul) {
