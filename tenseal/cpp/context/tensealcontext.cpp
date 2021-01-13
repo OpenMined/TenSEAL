@@ -72,9 +72,6 @@ void TenSEALContext::keys_setup(optional<PublicKey> public_key,
 
     if (!this->_secret_key) return;
 
-    this->decryptor =
-        make_shared<Decryptor>(*this->_context, *this->_secret_key);
-
     if (generate_relin_keys) {
         this->generate_relin_keys(*this->_secret_key);
     }
@@ -138,8 +135,16 @@ void TenSEALContext::decrypt(const Ciphertext& encrypted,
         throw invalid_argument(
             "the current context is public, it cannot decrypt");
     }
-    return this->decryptor->decrypt(encrypted, destination);
+    return this->decrypt(*this->_secret_key, encrypted, destination);
 }
+
+void TenSEALContext::decrypt(const SecretKey& sk, const Ciphertext& encrypted,
+                             Plaintext& destination) const {
+    Decryptor decryptor = Decryptor(*this->seal_context(), sk);
+
+    return decryptor.decrypt(encrypted, destination);
+}
+
 bool TenSEALContext::has_public_key() const {
     return this->_public_key != nullptr;
 }
@@ -233,9 +238,8 @@ void TenSEALContext::make_context_public(bool generate_galois_keys,
     }
 
     scope_guard guard([&]() {
-        // destroy and set _secret_key and decryptor to null
+        // destroy and set _secret_key to null
         this->_secret_key = nullptr;
-        this->decryptor = nullptr;
     });
 
     // create KeyGenerator object only if needed

@@ -73,7 +73,7 @@ CKKSVector::plain_t CKKSVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     vector<double> result;
     result.reserve(this->size());
 
-    this->tenseal_context()->decrypt(this->_ciphertext, plaintext);
+    this->tenseal_context()->decrypt(*sk, this->_ciphertext, plaintext);
     this->tenseal_context()->decode<CKKSEncoder>(plaintext, result);
 
     // result contains all slots of ciphertext (n/2), but we may be using less

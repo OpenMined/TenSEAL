@@ -68,7 +68,7 @@ BFVVector::plain_t BFVVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
     vector<int64_t> result;
 
-    this->tenseal_context()->decrypt(this->_ciphertext, plaintext);
+    this->tenseal_context()->decrypt(*sk, this->_ciphertext, plaintext);
     this->tenseal_context()->decode<BatchEncoder>(plaintext, result);
 
     // result contains all slots of ciphertext (poly_modulus_degree)

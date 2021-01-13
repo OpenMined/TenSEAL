@@ -93,7 +93,7 @@ PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
 
         for (auto it = _data.cbegin(); it != _data.cend(); it++) {
             vector<double> buff;
-            this->tenseal_context()->decrypt(*it, plaintext);
+            this->tenseal_context()->decrypt(*sk, *it, plaintext);
             this->tenseal_context()->decode<CKKSEncoder>(plaintext, buff);
             result.push_back(
                 vector<double>(buff.begin(), buff.begin() + *_batch_size));
@@ -108,7 +108,7 @@ PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
 
         for (auto it = _data.cbegin(); it != _data.cend(); it++) {
             vector<double> buff;
-            this->tenseal_context()->decrypt(*it, plaintext);
+            this->tenseal_context()->decrypt(*sk, *it, plaintext);
             this->tenseal_context()->decode<CKKSEncoder>(plaintext, buff);
             result.push_back(buff[0]);
         }

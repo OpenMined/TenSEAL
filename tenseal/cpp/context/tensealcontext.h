@@ -154,6 +154,8 @@ class TenSEALContext {
      * Decrypt a Ciphertext
      * */
     void decrypt(const Ciphertext& encrypted, Plaintext& destination) const;
+    void decrypt(const SecretKey& sk, const Ciphertext& encrypted,
+                 Plaintext& destination) const;
     /**
      * Template encoding function for the encoders.
      **/
@@ -267,7 +269,6 @@ class TenSEALContext {
     shared_ptr<TenSEALEncoder> encoder_factory;
 
     shared_ptr<Encryptor> encryptor;
-    shared_ptr<Decryptor> decryptor;
 
     shared_ptr<sync::ThreadPool> _dispatcher;
     size_t _threads;
