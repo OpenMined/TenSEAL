@@ -121,6 +121,25 @@ shared_ptr<TenSEALContext> TenSEALContext::Create(
     return shared_ptr<TenSEALContext>(new TenSEALContext(input, n_threads));
 }
 
+void TenSEALContext::encrypt(const Plaintext& plain,
+                             Ciphertext& destination) const {
+    return this->encryptor->encrypt(plain, destination);
+}
+void TenSEALContext::encrypt_zero(Ciphertext& destination) const {
+    return this->encryptor->encrypt_zero(destination);
+}
+void TenSEALContext::encrypt_zero(parms_id_type parms_id,
+                                  Ciphertext& destination) const {
+    return this->encryptor->encrypt_zero(parms_id, destination);
+}
+void TenSEALContext::decrypt(const Ciphertext& encrypted,
+                             Plaintext& destination) const {
+    if (is_public()) {
+        throw invalid_argument(
+            "the current context is public, it cannot decrypt");
+    }
+    return this->decryptor->decrypt(encrypted, destination);
+}
 bool TenSEALContext::has_public_key() const {
     return this->_public_key != nullptr;
 }

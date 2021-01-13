@@ -27,8 +27,6 @@ class TenSEALContext {
      * time for doing operations on encrypted tensors since we only need to
      * instantiate them once.
      **/
-    shared_ptr<Encryptor> encryptor;
-    shared_ptr<Decryptor> decryptor;
     shared_ptr<Evaluator> evaluator;
 
     /**
@@ -147,6 +145,16 @@ class TenSEALContext {
      **/
     shared_ptr<SEALContext> seal_context() const;
     /**
+     * Encrypt a Plaintext to a Ciphertext
+     * */
+    void encrypt(const Plaintext& plain, Ciphertext& destination) const;
+    void encrypt_zero(Ciphertext& destination) const;
+    void encrypt_zero(parms_id_type parms_id, Ciphertext& destination) const;
+    /**
+     * Decrypt a Ciphertext
+     * */
+    void decrypt(const Ciphertext& encrypted, Plaintext& destination) const;
+    /**
      * Template encoding function for the encoders.
      **/
     template <typename T, typename... Args>
@@ -257,6 +265,9 @@ class TenSEALContext {
     shared_ptr<RelinKeys> _relin_keys;
     shared_ptr<GaloisKeys> _galois_keys;
     shared_ptr<TenSEALEncoder> encoder_factory;
+
+    shared_ptr<Encryptor> encryptor;
+    shared_ptr<Decryptor> decryptor;
 
     shared_ptr<sync::ThreadPool> _dispatcher;
     size_t _threads;
