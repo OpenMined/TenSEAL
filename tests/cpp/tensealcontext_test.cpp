@@ -69,7 +69,7 @@ TEST_F(TenSEALContextTest, TestDispatcher) {
     ASSERT_EQ(ctx->dispatcher_size(), get_concurrency());
 
     ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60},
-                                 8);
+                                 encryption_type::public_key, 8);
     ASSERT_EQ(ctx->dispatcher_size(), 8);
 }
 

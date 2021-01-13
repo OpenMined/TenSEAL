@@ -4,6 +4,7 @@
 #include "seal/seal.h"
 #include "tenseal/cpp/context/sealcontext.h"
 #include "tenseal/cpp/context/tensealencoder.h"
+#include "tenseal/cpp/utils/helpers.h"
 #include "tenseal/cpp/utils/threadpool.h"
 #include "tenseal/proto/tensealcontext.pb.h"
 
@@ -11,6 +12,11 @@ namespace tenseal {
 
 using namespace seal;
 using namespace std;
+
+enum class encryption_type {
+    public_key,
+    symmetric,
+};
 
 /**
  * A store for keeping all the keys and parameters required to run an encrypted
@@ -42,11 +48,11 @@ class TenSEALContext {
      *dispatcher. generated.
      * @returns shared_ptr to a new TenSEALContext object.
      **/
-    static shared_ptr<TenSEALContext> Create(scheme_type scheme,
-                                             size_t poly_modulus_degree,
-                                             uint64_t plain_modulus,
-                                             vector<int> coeff_mod_bit_sizes,
-                                             optional<size_t> n_threads = {});
+    static shared_ptr<TenSEALContext> Create(
+        scheme_type scheme, size_t poly_modulus_degree, uint64_t plain_modulus,
+        vector<int> coeff_mod_bit_sizes,
+        encryption_type enc_type = encryption_type::public_key,
+        optional<size_t> n_threads = {});
     /**
      * Create a context from an input stream.
      * @param[in] stream
@@ -271,7 +277,9 @@ class TenSEALContext {
     shared_ptr<Encryptor> encryptor;
 
     shared_ptr<sync::ThreadPool> _dispatcher;
+
     size_t _threads;
+    encryption_type _encryption_type;
 
     /**
      * Switches for automatic relinearization, rescaling, and modulus switching
@@ -284,18 +292,30 @@ class TenSEALContext {
     uint8_t _auto_flags =
         flag_auto_relin | flag_auto_rescale | flag_auto_mod_switch;
 
-    TenSEALContext(EncryptionParameters parms, optional<size_t> n_threads);
+    TenSEALContext(EncryptionParameters parms, encryption_type,
+                   optional<size_t> n_threads);
     TenSEALContext(istream& stream, optional<size_t> n_threads);
     TenSEALContext(const std::string& stream, optional<size_t> n_threads);
     TenSEALContext(const TenSEALContextProto& proto,
                    optional<size_t> n_threads);
 
-    void base_setup(EncryptionParameters parms);
+    void base_setup(EncryptionParameters);
     void dispatcher_setup(optional<size_t> n_threads);
-    void keys_setup(optional<PublicKey> public_key = {},
+    void keys_setup(encryption_type enc_type,
+                    optional<PublicKey> public_key = {},
                     optional<SecretKey> secret_key = {},
                     bool generate_relin_keys = true,
                     bool generate_galois_keys = false);
+    void keys_setup_public_key(optional<PublicKey> public_key = {},
+                               optional<SecretKey> secret_key = {});
+    void keys_setup_symmetric(optional<SecretKey> secret_key = {});
+    /**
+     * Load/Save a protobuffer for the current context.
+     **/
+    void load_proto_public_key(const TenSEALContextProto& buffer);
+    void load_proto_symmetric(const TenSEALContextProto& buffer);
+    TenSEALContextProto save_proto_public_key() const;
+    TenSEALContextProto save_proto_symmetric() const;
 };
 }  // namespace tenseal
 #endif

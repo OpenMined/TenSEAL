@@ -11,10 +11,11 @@ using namespace seal;
 using namespace std;
 
 TenSEALContext::TenSEALContext(EncryptionParameters parms,
+                               encryption_type encryption_type,
                                optional<size_t> n_threads) {
     this->dispatcher_setup(n_threads);
     this->base_setup(parms);
-    this->keys_setup();
+    this->keys_setup(encryption_type);
 }
 
 TenSEALContext::TenSEALContext(istream& stream, optional<size_t> n_threads) {
@@ -47,10 +48,8 @@ void TenSEALContext::base_setup(EncryptionParameters parms) {
     this->encoder_factory = make_shared<TenSEALEncoder>(this->_context);
 }
 
-void TenSEALContext::keys_setup(optional<PublicKey> public_key,
-                                optional<SecretKey> secret_key,
-                                bool generate_relin_keys,
-                                bool generate_galois_keys) {
+void TenSEALContext::keys_setup_public_key(optional<PublicKey> public_key,
+                                           optional<SecretKey> secret_key) {
     if (!public_key && !secret_key) {
         KeyGenerator keygen = KeyGenerator(*this->_context);
 
@@ -69,6 +68,38 @@ void TenSEALContext::keys_setup(optional<PublicKey> public_key,
 
     this->encryptor =
         make_shared<Encryptor>(*this->_context, *this->_public_key);
+}
+
+void TenSEALContext::keys_setup_symmetric(optional<SecretKey> secret_key) {
+    if (secret_key)
+        this->_secret_key = make_shared<SecretKey>(secret_key.value());
+    else {
+        KeyGenerator keygen = KeyGenerator(*this->_context);
+        this->_secret_key = make_shared<SecretKey>(keygen.secret_key());
+    }
+
+    this->encryptor =
+        make_shared<Encryptor>(*this->_context, *this->_secret_key);
+}
+
+void TenSEALContext::keys_setup(encryption_type enc_type,
+                                optional<PublicKey> public_key,
+                                optional<SecretKey> secret_key,
+                                bool generate_relin_keys,
+                                bool generate_galois_keys) {
+    this->_encryption_type = enc_type;
+    switch (enc_type) {
+        case encryption_type::public_key: {
+            this->keys_setup_public_key(public_key, secret_key);
+            break;
+        }
+        case encryption_type::symmetric: {
+            this->keys_setup_symmetric(secret_key);
+            break;
+        }
+        default:
+            throw invalid_argument("invalid encryption type");
+    }
 
     if (!this->_secret_key) return;
 
@@ -83,7 +114,8 @@ void TenSEALContext::keys_setup(optional<PublicKey> public_key,
 
 shared_ptr<TenSEALContext> TenSEALContext::Create(
     scheme_type scheme, size_t poly_modulus_degree, uint64_t plain_modulus,
-    vector<int> coeff_mod_bit_sizes, optional<size_t> n_threads) {
+    vector<int> coeff_mod_bit_sizes, encryption_type encryption_type,
+    optional<size_t> n_threads) {
     EncryptionParameters parms;
     switch (scheme) {
         case scheme_type::bfv:
@@ -100,7 +132,8 @@ shared_ptr<TenSEALContext> TenSEALContext::Create(
             throw invalid_argument("invalid scheme_type");
     }
 
-    return shared_ptr<TenSEALContext>(new TenSEALContext(parms, n_threads));
+    return shared_ptr<TenSEALContext>(
+        new TenSEALContext(parms, encryption_type, n_threads));
 }
 
 shared_ptr<TenSEALContext> TenSEALContext::Create(istream& stream,
@@ -120,14 +153,36 @@ shared_ptr<TenSEALContext> TenSEALContext::Create(
 
 void TenSEALContext::encrypt(const Plaintext& plain,
                              Ciphertext& destination) const {
-    return this->encryptor->encrypt(plain, destination);
+    switch (this->_encryption_type) {
+        case encryption_type::public_key:
+            return this->encryptor->encrypt(plain, destination);
+        case encryption_type::symmetric:
+            return this->encryptor->encrypt_symmetric(plain, destination);
+        default:
+            throw invalid_argument("invalid encryption type");
+    }
 }
 void TenSEALContext::encrypt_zero(Ciphertext& destination) const {
-    return this->encryptor->encrypt_zero(destination);
+    switch (this->_encryption_type) {
+        case encryption_type::public_key:
+            return this->encryptor->encrypt_zero(destination);
+        case encryption_type::symmetric:
+            return this->encryptor->encrypt_zero_symmetric(destination);
+        default:
+            throw invalid_argument("invalid encryption type");
+    }
 }
 void TenSEALContext::encrypt_zero(parms_id_type parms_id,
                                   Ciphertext& destination) const {
-    return this->encryptor->encrypt_zero(parms_id, destination);
+    switch (this->_encryption_type) {
+        case encryption_type::public_key:
+            return this->encryptor->encrypt_zero(parms_id, destination);
+        case encryption_type::symmetric:
+            return this->encryptor->encrypt_zero_symmetric(parms_id,
+                                                           destination);
+        default:
+            throw invalid_argument("invalid encryption type");
+    }
 }
 void TenSEALContext::decrypt(const Ciphertext& encrypted,
                              Plaintext& destination) const {
@@ -236,6 +291,9 @@ void TenSEALContext::make_context_public(bool generate_galois_keys,
     if (this->is_public()) {
         return;
     }
+    if (this->_encryption_type == encryption_type::symmetric)
+        throw invalid_argument(
+            "make_context_public is not supported for symmetric encryption");
 
     scope_guard guard([&]() {
         // destroy and set _secret_key to null
@@ -325,7 +383,7 @@ bool TenSEALContext::equals(
     return true;
 }
 
-void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
+void TenSEALContext::load_proto_public_key(const TenSEALContextProto& buffer) {
     this->base_setup(
         SEALDeserialize<EncryptionParameters>(buffer.encryption_parameters()));
     this->_auto_flags = buffer.public_context().auto_flags();
@@ -337,7 +395,7 @@ void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
         *this->_context, buffer.public_context().public_key());
 
     if (!buffer.has_private_context()) {
-        this->keys_setup(public_key);
+        this->keys_setup(encryption_type::public_key, public_key);
         if (!buffer.public_context().galois_keys().empty()) {
             this->generate_galois_keys(buffer.public_context().galois_keys());
         }
@@ -349,12 +407,39 @@ void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
 
     auto secret_key = SEALDeserialize<SecretKey>(
         *this->_context, buffer.private_context().secret_key());
-    this->keys_setup(public_key, secret_key,
+    this->keys_setup(encryption_type::public_key, public_key, secret_key,
                      buffer.private_context().relin_keys_generated(),
                      buffer.private_context().galois_keys_generated());
 }
 
-TenSEALContextProto TenSEALContext::save_proto() const {
+void TenSEALContext::load_proto_symmetric(const TenSEALContextProto& buffer) {
+    this->base_setup(
+        SEALDeserialize<EncryptionParameters>(buffer.encryption_parameters()));
+    this->_auto_flags = buffer.public_context().auto_flags();
+    if (buffer.public_context().scale() >= 0) {
+        this->global_scale(buffer.public_context().scale());
+    }
+
+    auto secret_key = SEALDeserialize<SecretKey>(
+        *this->_context, buffer.private_context().secret_key());
+    this->keys_setup(encryption_type::symmetric, {}, secret_key,
+                     buffer.private_context().relin_keys_generated(),
+                     buffer.private_context().galois_keys_generated());
+}
+
+void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
+    switch (buffer.encryption_type()) {
+        case to_underlying(encryption_type::public_key):
+            return this->load_proto_public_key(buffer);
+        case to_underlying(encryption_type::symmetric):
+            return this->load_proto_symmetric(buffer);
+        default:
+            throw invalid_argument(
+                "encryption type not support for deserialize");
+    }
+}
+
+TenSEALContextProto TenSEALContext::save_proto_public_key() const {
     TenSEALContextProto buffer;
     *buffer.mutable_encryption_parameters() =
         SEALSerialize<EncryptionParameters>(this->_parms);
@@ -389,6 +474,37 @@ TenSEALContextProto TenSEALContext::save_proto() const {
 
     *buffer.mutable_private_context() = private_buffer;
     return buffer;
+}
+
+TenSEALContextProto TenSEALContext::save_proto_symmetric() const {
+    TenSEALContextProto buffer;
+    *buffer.mutable_encryption_parameters() =
+        SEALSerialize<EncryptionParameters>(this->_parms);
+
+    TenSEALPublicProto public_buffer;
+    public_buffer.set_auto_flags(this->_auto_flags);
+    public_buffer.set_scale(this->safe_global_scale());
+    *buffer.mutable_public_context() = public_buffer;
+
+    TenSEALPrivateProto private_buffer;
+    *private_buffer.mutable_secret_key() =
+        SEALSerialize<SecretKey>(*this->secret_key());
+    private_buffer.set_galois_keys_generated(this->_galois_keys != nullptr);
+    private_buffer.set_relin_keys_generated(this->_relin_keys != nullptr);
+
+    *buffer.mutable_private_context() = private_buffer;
+    return buffer;
+}
+
+TenSEALContextProto TenSEALContext::save_proto() const {
+    switch (this->_encryption_type) {
+        case encryption_type::public_key:
+            return this->save_proto_public_key();
+        case encryption_type::symmetric:
+            return this->save_proto_symmetric();
+        default:
+            throw invalid_argument("encryption type not support for serialize");
+    }
 }
 
 std::shared_ptr<TenSEALContext> TenSEALContext::copy() const {

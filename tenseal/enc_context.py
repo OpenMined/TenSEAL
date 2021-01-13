@@ -7,6 +7,11 @@ from abc import ABC
 import tenseal as ts
 
 
+class ENCRYPTION_TYPE(Enum):
+    PUBLIC_KEY = ts._ts_cpp.ENCRYPTION_TYPE.PUBLIC_KEY
+    SYMMETRIC = ts._ts_cpp.ENCRYPTION_TYPE.SYMMETRIC
+
+
 class SCHEME_TYPE(Enum):
     NONE = ts._ts_cpp.SCHEME_TYPE.NONE
     BFV = ts._ts_cpp.SCHEME_TYPE.BFV
@@ -75,6 +80,7 @@ class Context:
     def __init__(
         self,
         scheme: SCHEME_TYPE = None,
+        encryption_type: ENCRYPTION_TYPE = ENCRYPTION_TYPE.PUBLIC_KEY,
         poly_modulus_degree: int = None,
         plain_modulus: int = None,
         coeff_mod_bit_sizes: List[int] = None,
@@ -86,6 +92,7 @@ class Context:
 
         Args:
             scheme : define the scheme to be used, either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS.
+            encryption_type : define the encryption type to be used, either ENCRYPTION_TYPE.PUBLIC_KEY, or ENCRYPTION_TYPE.SYMMETRIC.
             poly_modulus_degree: The degree of the polynomial modulus, must be a power of two.
             plain_modulus: The plaintext modulus. Should not be passed when the scheme is CKKS.
             coeff_mod_bit_sizes: List of bit size for each coeffecient modulus.
@@ -121,12 +128,21 @@ class Context:
             # We can't pass None here, everything should be set prior to this call
             if isinstance(n_threads, int) and n_threads > 0:
                 self.data = ts._ts_cpp.TenSEALContext.new(
-                    scheme.value, poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes, n_threads
+                    scheme.value,
+                    poly_modulus_degree,
+                    plain_modulus,
+                    coeff_mod_bit_sizes,
+                    encryption_type,
+                    n_threads,
                 )
-
-            self.data = ts._ts_cpp.TenSEALContext.new(
-                scheme.value, poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes
-            )
+            else:
+                self.data = ts._ts_cpp.TenSEALContext.new(
+                    scheme.value,
+                    poly_modulus_degree,
+                    plain_modulus,
+                    coeff_mod_bit_sizes,
+                    encryption_type,
+                )
 
     @property
     def data(self) -> ts._ts_cpp.TenSEALContext:
