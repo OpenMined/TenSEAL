@@ -7,24 +7,22 @@ namespace tenseal {
 
 using namespace ::testing;
 
-class TenSEALContextTest : public ::testing::TestWithParam</*serialize=*/bool> {
+class TenSEALContextTest : public TestWithParam<tuple<bool, encryption_type>> {
    protected:
     void SetUp() {}
     void TearDown() {}
 };
-TEST_F(TenSEALContextTest, TestCreateFail) {
-    EXPECT_THROW(
-        auto ctx = TenSEALContext::Create(scheme_type::none, 8192, 1032193, {}),
-        std::exception);
-    EXPECT_THROW(
-        auto ctx = TenSEALContext::Create(scheme_type::bfv, 8191, 1032193, {}),
-        std::exception);
-    EXPECT_THROW(auto ctx = TenSEALContext::Create(scheme_type::ckks, 8191, -1,
-                                                   {60, 40, 40, 60}),
+TEST_P(TenSEALContextTest, TestCreateFail) {
+    auto enc_type = get<1>(GetParam());
+    EXPECT_THROW(auto ctx = TenSEALContext::Create(scheme_type::none, 8192,
+                                                   1032193, {}, enc_type),
                  std::exception);
-    EXPECT_THROW(
-        auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, 1032193, {}),
-        std::exception);
+    EXPECT_THROW(auto ctx = TenSEALContext::Create(scheme_type::bfv, 8191,
+                                                   1032193, {}, enc_type),
+                 std::exception);
+    EXPECT_THROW(auto ctx = TenSEALContext::Create(scheme_type::ckks, 8191, -1,
+                                                   {60, 40, 40, 60}, enc_type),
+                 std::exception);
 
     EXPECT_THROW(auto ctx = TenSEALContext::Create("invalid"), std::exception);
 
@@ -32,25 +30,30 @@ TEST_F(TenSEALContextTest, TestCreateFail) {
     EXPECT_THROW(auto ctx = TenSEALContext::Create(ss), std::exception);
 }
 
-TEST_F(TenSEALContextTest, TestSerialization) {
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+TEST_P(TenSEALContextTest, TestSerialization) {
+    auto enc_type = get<1>(GetParam());
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ctx->generate_galois_keys();
 
     auto buff = ctx->save();
     auto recreated_ctx = TenSEALContext::Create(buff);
 
     ASSERT_TRUE(recreated_ctx != nullptr);
-    auto &orig_pubkey = ctx->public_key()->data().dyn_array();
-    auto &serial_pubkey = recreated_ctx->public_key()->data().dyn_array();
-    for (size_t idx = 0; idx < orig_pubkey.size(); ++idx) {
-        EXPECT_EQ(orig_pubkey[idx], serial_pubkey[idx]);
+    if (enc_type == encryption_type::asymmetric) {
+        auto &orig_pubkey = ctx->public_key()->data().dyn_array();
+        auto &serial_pubkey = recreated_ctx->public_key()->data().dyn_array();
+        for (size_t idx = 0; idx < orig_pubkey.size(); ++idx) {
+            EXPECT_EQ(orig_pubkey[idx], serial_pubkey[idx]);
+        }
     }
     auto &orig_privkey = ctx->secret_key()->data().dyn_array();
     auto &serial_privkey = recreated_ctx->secret_key()->data().dyn_array();
     for (size_t idx = 0; idx < orig_privkey.size(); ++idx) {
         EXPECT_EQ(orig_privkey[idx], serial_privkey[idx]);
     }
+    ASSERT_EQ(ctx->enc_type(), enc_type);
+    ASSERT_EQ(recreated_ctx->enc_type(), enc_type);
     ASSERT_EQ(ctx->is_private(), recreated_ctx->is_private());
     ASSERT_EQ(ctx->is_public(), recreated_ctx->is_public());
 
@@ -63,20 +66,23 @@ TEST_F(TenSEALContextTest, TestSerialization) {
     ASSERT_EQ(orig_galoiskeys.size(), serial_galoiskeys.size());
 }
 
-TEST_F(TenSEALContextTest, TestDispatcher) {
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+TEST_P(TenSEALContextTest, TestDispatcher) {
+    auto enc_type = get<1>(GetParam());
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_EQ(ctx->dispatcher_size(), get_concurrency());
 
     ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60},
-                                 8);
+                                 enc_type, 8);
     ASSERT_EQ(ctx->dispatcher_size(), 8);
 }
 
 TEST_P(TenSEALContextTest, TestCreateBFV) {
-    bool should_serialize_first = GetParam();
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
 
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
 
     if (should_serialize_first) {
         auto buff = ctx->save();
@@ -84,8 +90,10 @@ TEST_P(TenSEALContextTest, TestCreateBFV) {
     }
 
     ASSERT_TRUE(ctx != nullptr);
-    ASSERT_TRUE(ctx != nullptr);
-    ASSERT_TRUE(ctx->public_key() != nullptr);
+    if (enc_type == encryption_type::asymmetric)
+        ASSERT_TRUE(ctx->public_key() != nullptr);
+    else
+        EXPECT_THROW(ctx->public_key(), std::exception);
     ASSERT_TRUE(ctx->secret_key() != nullptr);
     ASSERT_TRUE(ctx->relin_keys() != nullptr);
     ASSERT_TRUE(ctx->is_private());
@@ -95,10 +103,18 @@ TEST_P(TenSEALContextTest, TestCreateBFV) {
 }
 
 TEST_P(TenSEALContextTest, TestCreateBFVPublic) {
-    bool should_serialize_first = GetParam();
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
 
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
-    ctx->make_context_public(false, false);
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
+
+    if (enc_type == encryption_type::asymmetric) {
+        ctx->make_context_public(false, false);
+    } else {
+        EXPECT_THROW(ctx->make_context_public(false, false), std::exception);
+        return;
+    }
 
     if (should_serialize_first) {
         auto buff = ctx->save();
@@ -116,10 +132,11 @@ TEST_P(TenSEALContextTest, TestCreateBFVPublic) {
 }
 
 TEST_P(TenSEALContextTest, TestCreateCKKS) {
-    bool should_serialize_first = GetParam();
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
 
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
 
     if (should_serialize_first) {
         auto buff = ctx->save();
@@ -127,7 +144,10 @@ TEST_P(TenSEALContextTest, TestCreateCKKS) {
     }
 
     ASSERT_TRUE(ctx != nullptr);
-    ASSERT_TRUE(ctx->public_key() != nullptr);
+    if (enc_type == encryption_type::asymmetric)
+        ASSERT_TRUE(ctx->public_key() != nullptr);
+    else
+        EXPECT_THROW(ctx->public_key(), std::exception);
     ASSERT_TRUE(ctx->secret_key() != nullptr);
     ASSERT_TRUE(ctx->relin_keys() != nullptr);
     ASSERT_TRUE(ctx->is_private());
@@ -137,11 +157,18 @@ TEST_P(TenSEALContextTest, TestCreateCKKS) {
 }
 
 TEST_P(TenSEALContextTest, TestCreateCKKSPublic) {
-    bool should_serialize_first = GetParam();
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
 
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
-    ctx->make_context_public(false, false);
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
+
+    if (enc_type == encryption_type::asymmetric)
+        ctx->make_context_public(false, false);
+    else {
+        EXPECT_THROW(ctx->make_context_public(false, false), std::exception);
+        return;
+    }
 
     if (should_serialize_first) {
         auto buff = ctx->save();
@@ -174,7 +201,11 @@ TEST_F(TenSEALContextTest, TestContextRegressionRecreateGaloisCrash) {
     SEALSerialize<GaloisKeys>(new_gk);
 }
 
-INSTANTIATE_TEST_CASE_P(TestContext, TenSEALContextTest,
-                        ::testing::Values(false, true));
+INSTANTIATE_TEST_CASE_P(
+    TestContext, TenSEALContextTest,
+    ::testing::Values(make_tuple(false, encryption_type::asymmetric),
+                      make_tuple(true, encryption_type::asymmetric),
+                      make_tuple(false, encryption_type::symmetric),
+                      make_tuple(true, encryption_type::symmetric)));
 
 }  // namespace tenseal

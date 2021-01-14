@@ -35,4 +35,6 @@ message TenSEALContextProto {
     TenSEALPublicProto public_context = 2;
     // Optional private members
     TenSEALPrivateProto private_context = 3;
+    // Encryption type - public key or symmetric
+    uint32 encryption_type = 4;
 }

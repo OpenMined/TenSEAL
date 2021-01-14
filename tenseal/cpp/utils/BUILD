@@ -7,6 +7,7 @@ TENSEAL_DEFAULT_COPTS = ["-std=c++17"]
 cc_library(
     name = "tenseal_utils_cc",
     hdrs = [
+        "helpers.h",
         "proto.h",
         "queue.h",
         "scope.h",

@@ -1,10 +1,16 @@
 """The Context manages everything related to the encrypted computation, including keys, which
 optimization should be enabled, and how many threads should run for a parallel computation.
 """
+import multiprocessing
 from enum import Enum
 from typing import List, Union
 from abc import ABC
 import tenseal as ts
+
+
+class ENCRYPTION_TYPE(Enum):
+    ASYMMETRIC = ts._ts_cpp.ENCRYPTION_TYPE.ASYMMETRIC
+    SYMMETRIC = ts._ts_cpp.ENCRYPTION_TYPE.SYMMETRIC
 
 
 class SCHEME_TYPE(Enum):
@@ -77,7 +83,8 @@ class Context:
         scheme: SCHEME_TYPE = None,
         poly_modulus_degree: int = None,
         plain_modulus: int = None,
-        coeff_mod_bit_sizes: List[int] = None,
+        coeff_mod_bit_sizes: List[int] = [],
+        encryption_type: ENCRYPTION_TYPE = ENCRYPTION_TYPE.ASYMMETRIC,
         n_threads: int = None,
         data: ts._ts_cpp.TenSEALContext = None,
     ):
@@ -90,6 +97,7 @@ class Context:
             plain_modulus: The plaintext modulus. Should not be passed when the scheme is CKKS.
             coeff_mod_bit_sizes: List of bit size for each coeffecient modulus.
                 Can be an empty list for BFV, a default value will be given.
+            encryption_type : define the encryption type to be used, either ENCRYPTION_TYPE.ASYMMETRIC, or ENCRYPTION_TYPE.SYMMETRIC.
             n_threads: define number of threads that shall be later used for parallel computation.
             data: A TenSEALContext to wrap. We won't construct a new object if it's passed.
 
@@ -99,34 +107,33 @@ class Context:
         # wrapping
         if data is not None:
             self.data = data
+            return
+
         # constructing a new object
+
+        if scheme == SCHEME_TYPE.BFV:
+            if plain_modulus is None:
+                raise ValueError("plain_modulus must be provided")
+
+        elif scheme == SCHEME_TYPE.CKKS:
+            # must be int, but the value doesn't matter for ckks
+            plain_modulus = 0
+
         else:
-            if scheme == SCHEME_TYPE.BFV:
-                if plain_modulus is None:
-                    raise ValueError("plain_modulus must be provided")
-                if coeff_mod_bit_sizes is None:
-                    coeff_mod_bit_sizes = []
+            raise ValueError("Invalid scheme type, use either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS")
 
-            elif scheme == SCHEME_TYPE.CKKS:
-                # must be int, but the value doesn't matter for ckks
-                plain_modulus = 0
-                if coeff_mod_bit_sizes is None:
-                    raise ValueError("coeff_mod_bit_sizes must be provided")
+        # We can't pass None here, everything should be set prior to this call
+        if not (isinstance(n_threads, int) and n_threads > 0):
+            n_threads = multiprocessing.cpu_count()
 
-            else:
-                raise ValueError(
-                    "Invalid scheme type, use either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS"
-                )
-
-            # We can't pass None here, everything should be set prior to this call
-            if isinstance(n_threads, int) and n_threads > 0:
-                self.data = ts._ts_cpp.TenSEALContext.new(
-                    scheme.value, poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes, n_threads
-                )
-
-            self.data = ts._ts_cpp.TenSEALContext.new(
-                scheme.value, poly_modulus_degree, plain_modulus, coeff_mod_bit_sizes
-            )
+        self.data = ts._ts_cpp.TenSEALContext.new(
+            scheme.value,
+            poly_modulus_degree,
+            plain_modulus,
+            coeff_mod_bit_sizes,
+            encryption_type.value,
+            n_threads,
+        )
 
     @property
     def data(self) -> ts._ts_cpp.TenSEALContext:

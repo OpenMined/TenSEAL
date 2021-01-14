@@ -6,8 +6,8 @@ from tenseal.enc_context import GaloisKeys, RelinKeys
 from tests.python.tenseal.utils import *
 
 
-def ctx():
-    return ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
+def ctx(encryption_type):
+    return ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60], encryption_type)
 
 
 def deep_copy(ctx):
@@ -28,38 +28,51 @@ def recreate(ctx):
 
 
 @pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
-def test_context_recreation(duplicate):
-    orig_context = ctx()
+@pytest.mark.parametrize(
+    "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]
+)
+def test_context_recreation(duplicate, encryption_type):
+    orig_context = ctx(encryption_type)
     context = duplicate(orig_context)
 
     assert context.is_private() is True, "TenSEALContext should be private"
+
+    if encryption_type is not ts.ENCRYPTION_TYPE.ASYMMETRIC:
+        return
+
     assert context.public_key() is not None, "TenSEALContext shouldn't be None"
 
     orig_context.make_context_public(generate_galois_keys=False, generate_relin_keys=False)
     context = duplicate(orig_context)
     assert context.is_public() is True, "TenSEALContext should be public"
 
-    orig_context = ctx()
+    orig_context = ctx(encryption_type)
     context = duplicate(orig_context)
     context.make_context_public(generate_galois_keys=False, generate_relin_keys=False)
     assert orig_context.is_private() is True, "original TenSEALContext should stay private"
 
 
 @pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
-def test_generate_galois_keys(duplicate):
-    orig_context = ctx()
+@pytest.mark.parametrize(
+    "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]
+)
+def test_generate_galois_keys(duplicate, encryption_type):
+    orig_context = ctx(encryption_type)
     orig_context.generate_galois_keys()
 
     context = duplicate(orig_context)
     assert isinstance(context.galois_keys(), GaloisKeys), "Galois keys should be set"
 
-    orig_public_context = ctx()
+    if encryption_type is not ts.ENCRYPTION_TYPE.ASYMMETRIC:
+        return
+
+    orig_public_context = ctx(encryption_type)
     orig_public_context.make_context_public(generate_galois_keys=True, generate_relin_keys=False)
     context = duplicate(orig_public_context)
 
     assert isinstance(context.galois_keys(), GaloisKeys), "Galois keys should be set"
 
-    orig_context = ctx()
+    orig_context = ctx(encryption_type)
     context = duplicate(orig_context)
     context.generate_galois_keys()
     with pytest.raises(ValueError) as exc_info:
@@ -68,32 +81,39 @@ def test_generate_galois_keys(duplicate):
 
 
 @pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
-def test_generate_relin_keys(duplicate):
+@pytest.mark.parametrize(
+    "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]
+)
+def test_generate_relin_keys(duplicate, encryption_type):
     # by default, Relin keys will be generated on context creation
-    orig_context = ctx()
+    orig_context = ctx(encryption_type)
     context = duplicate(orig_context)
     assert isinstance(context.relin_keys(), RelinKeys), "Relin keys should be set"
 
-    orig_public_context = ctx()
+    if encryption_type is not ts.ENCRYPTION_TYPE.ASYMMETRIC:
+        return
+
+    orig_public_context = ctx(encryption_type)
     orig_public_context.make_context_public(generate_galois_keys=False, generate_relin_keys=False)
     context = duplicate(orig_public_context)
     assert isinstance(context.relin_keys(), RelinKeys), "Relin keys should be set"
 
-    orig_public_context = ctx()
+    orig_public_context = ctx(encryption_type)
     orig_public_context.make_context_public(generate_galois_keys=False, generate_relin_keys=True)
     context = duplicate(orig_public_context)
     assert isinstance(context.relin_keys(), RelinKeys), "Relin keys should be set"
 
 
 @pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
-def test_generate_galois_relin_keys(duplicate):
-    orig_public_context = ctx()
+@pytest.mark.parametrize("encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC])
+def test_generate_galois_relin_keys(duplicate, encryption_type):
+    orig_public_context = ctx(encryption_type)
     orig_public_context.make_context_public(generate_galois_keys=True, generate_relin_keys=True)
     context = duplicate(orig_public_context)
     assert isinstance(context.relin_keys(), RelinKeys), "Relin keys should be set"
     assert isinstance(context.galois_keys(), GaloisKeys), "Galois keys should be set"
 
-    orig_context = ctx()
+    orig_context = ctx(encryption_type)
     context = duplicate(orig_context)
     context.make_context_public(generate_galois_keys=True, generate_relin_keys=True)
     with pytest.raises(ValueError) as exc_info:
@@ -103,8 +123,11 @@ def test_generate_galois_relin_keys(duplicate):
 
 @pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
 @pytest.mark.parametrize("scale", [0, 1, 2, 2 ** 40])
-def test_global_scale(duplicate, scale):
-    orig_context = ctx()
+@pytest.mark.parametrize(
+    "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]
+)
+def test_global_scale(duplicate, scale, encryption_type):
+    orig_context = ctx(encryption_type)
     context = duplicate(orig_context)
 
     with pytest.raises(ValueError) as e:
@@ -116,8 +139,11 @@ def test_global_scale(duplicate, scale):
 
 
 @pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
-def test_auto_flags(duplicate):
-    orig_context = ctx()
+@pytest.mark.parametrize(
+    "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]
+)
+def test_auto_flags(duplicate, encryption_type):
+    orig_context = ctx(encryption_type)
     context = duplicate(orig_context)
 
     # default values
@@ -185,8 +211,11 @@ def test_auto_flags(duplicate):
         ([1, 2, 3, 4, 5, 6, 7, 8], [8, 7, 6, 5, 4, 3, 2, 1]),
     ],
 )
-def test_sanity_keys_regeneration(duplicate, vec1, vec2):
-    orig_context = ctx()
+@pytest.mark.parametrize(
+    "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]
+)
+def test_sanity_keys_regeneration(duplicate, vec1, vec2, encryption_type):
+    orig_context = ctx(encryption_type)
     orig_context.global_scale = pow(2, 40)
     orig_context.generate_relin_keys()
     orig_context.generate_galois_keys()

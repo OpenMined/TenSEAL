@@ -30,8 +30,13 @@ EncryptionParameters create_ckks_parameters(size_t poly_modulus_degree,
                                             vector<int> coeff_mod_bit_sizes) {
     EncryptionParameters parameters(scheme_type::ckks);
     parameters.set_poly_modulus_degree(poly_modulus_degree);
-    parameters.set_coeff_modulus(
-        CoeffModulus::Create(poly_modulus_degree, coeff_mod_bit_sizes));
+
+    if (coeff_mod_bit_sizes.size() == 0)
+        parameters.set_coeff_modulus(
+            CoeffModulus::BFVDefault(poly_modulus_degree));
+    else
+        parameters.set_coeff_modulus(
+            CoeffModulus::Create(poly_modulus_degree, coeff_mod_bit_sizes));
 
     return parameters;
 }

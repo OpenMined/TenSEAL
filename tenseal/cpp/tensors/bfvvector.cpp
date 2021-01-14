@@ -59,19 +59,16 @@ Ciphertext BFVVector::encrypt(shared_ptr<TenSEALContext> context,
     Plaintext plaintext;
     pt.replicate(slot_count);
     context->encode<BatchEncoder>(pt.data(), plaintext);
-    context->encryptor->encrypt(plaintext, ciphertext);
+    context->encrypt(plaintext, ciphertext);
 
     return ciphertext;
 }
 
 BFVVector::plain_t BFVVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
-    Decryptor decryptor =
-        Decryptor(*this->tenseal_context()->seal_context(), *sk);
-
     vector<int64_t> result;
 
-    decryptor.decrypt(this->_ciphertext, plaintext);
+    this->tenseal_context()->decrypt(*sk, this->_ciphertext, plaintext);
     this->tenseal_context()->decode<BatchEncoder>(plaintext, result);
 
     // result contains all slots of ciphertext (poly_modulus_degree)
@@ -255,7 +252,7 @@ shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
     } catch (const std::logic_error& e) {
         if (strcmp(e.what(), "result ciphertext is transparent") == 0) {
             // replace by encryption of zero
-            this->tenseal_context()->encryptor->encrypt_zero(this->_ciphertext);
+            this->tenseal_context()->encrypt_zero(this->_ciphertext);
         } else {  // Something else, need to be forwarded
             throw;
         }
