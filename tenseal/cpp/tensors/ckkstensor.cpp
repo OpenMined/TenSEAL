@@ -498,8 +498,8 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
 }
 
 template <typename T>
-shared_ptr<CKKSTensor> CKKSTensor::_dot_inplace(T other,
-                                                vector<size_t> other_shape) {
+shared_ptr<CKKSTensor> CKKSTensor::_dot_inplace(
+    T other, const vector<size_t>& other_shape) {
     auto this_shape = this->shape();
     if (this_shape.size() == 1) {
         if (other_shape.size() == 1) {  // 1D-1D
