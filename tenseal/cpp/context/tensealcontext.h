@@ -246,6 +246,7 @@ class TenSEALContext {
      * @returns the encryption params of the current context.
      **/
     const EncryptionParameters& parms() const { return _parms; }
+    const encryption_type enc_type() const { return _encryption_type; }
     /**
      * @returns true if the contexts are identical.
      **/

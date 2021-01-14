@@ -201,10 +201,18 @@ void TenSEALContext::decrypt(const SecretKey& sk, const Ciphertext& encrypted,
 }
 
 bool TenSEALContext::has_public_key() const {
+    if (this->_encryption_type == encryption_type::symmetric)
+        throw invalid_argument(
+            "has_public_key is not supported for symmetric encryption");
+
     return this->_public_key != nullptr;
 }
 
 shared_ptr<PublicKey> TenSEALContext::public_key() const {
+    if (this->_encryption_type == encryption_type::symmetric)
+        throw invalid_argument(
+            "public_key is not supported for symmetric encryption");
+
     return this->_public_key;
 }
 bool TenSEALContext::has_secret_key() const {
@@ -441,6 +449,8 @@ void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
 
 TenSEALContextProto TenSEALContext::save_proto_public_key() const {
     TenSEALContextProto buffer;
+    buffer.set_encryption_type(to_underlying(this->_encryption_type));
+
     *buffer.mutable_encryption_parameters() =
         SEALSerialize<EncryptionParameters>(this->_parms);
 
@@ -478,6 +488,8 @@ TenSEALContextProto TenSEALContext::save_proto_public_key() const {
 
 TenSEALContextProto TenSEALContext::save_proto_symmetric() const {
     TenSEALContextProto buffer;
+    buffer.set_encryption_type(to_underlying(this->_encryption_type));
+
     *buffer.mutable_encryption_parameters() =
         SEALSerialize<EncryptionParameters>(this->_parms);
 
