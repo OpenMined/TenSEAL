@@ -84,7 +84,7 @@ class Context:
         poly_modulus_degree: int = None,
         plain_modulus: int = None,
         coeff_mod_bit_sizes: List[int] = None,
-        encryption_type: ENCRYPTION_TYPE = ts._ts_cpp.ENCRYPTION_TYPE.PUBLIC_KEY,
+        encryption_type: ENCRYPTION_TYPE = ENCRYPTION_TYPE.PUBLIC_KEY,
         n_threads: int = None,
         data: ts._ts_cpp.TenSEALContext = None,
     ):
@@ -135,7 +135,7 @@ class Context:
             poly_modulus_degree,
             plain_modulus,
             coeff_mod_bit_sizes,
-            encryption_type,
+            encryption_type.value,
             n_threads,
         )
 
