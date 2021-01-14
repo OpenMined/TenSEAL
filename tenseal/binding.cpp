@@ -39,6 +39,16 @@ void bind_plain_tensor(py::module &m, const std::string &name) {
 PYBIND11_MODULE(_tenseal_cpp, m) {
     m.doc() = "Library for doing homomorphic encryption operations on tensors";
 
+    // globals
+    py::enum_<scheme_type>(m, "SCHEME_TYPE")
+        .value("NONE", scheme_type::none)
+        .value("BFV", scheme_type::bfv)
+        .value("CKKS", scheme_type::ckks);
+    py::enum_<encryption_type>(m, "ENCRYPTION_TYPE")
+        .value("PUBLIC_KEY", encryption_type::public_key)
+        .value("SYMMETRIC", encryption_type::symmetric)
+        .export_values();
+
     m.def("bfv_parameters", &create_bfv_parameters,
           R"(Create an EncryptionParameters object for the BFV scheme.
     Args:
@@ -596,11 +606,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             Can be an empty list for BFV, a default value will be given.
         encryption_type : switch between public key and symmetric encryption. Default set to public key encryption.
         n_threads : Optional: number of threads to use for multiplications.
-        )",
-             py::arg("poly_modulus_degree"), py::arg("plain_modulus"),
-             py::arg("coeff_mod_bit_sizes") = vector<int>(),
-             py::arg("encryption_type") = encryption_type::public_key,
-             py::arg("n_threads") = get_concurrency())
+        )")
         .def("public_key", &TenSEALContext::public_key)
         .def("has_public_key", &TenSEALContext::has_public_key)
         .def("secret_key", &TenSEALContext::secret_key)
@@ -672,13 +678,4 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
     py::class_<SecretKey, std::shared_ptr<SecretKey>>(m, "SecretKey");
     py::class_<RelinKeys, std::shared_ptr<RelinKeys>>(m, "RelinKeys");
     py::class_<GaloisKeys, std::shared_ptr<GaloisKeys>>(m, "GaloisKeys");
-
-    // globals
-    py::enum_<scheme_type>(m, "SCHEME_TYPE")
-        .value("NONE", scheme_type::none)
-        .value("BFV", scheme_type::bfv)
-        .value("CKKS", scheme_type::ckks);
-    py::enum_<encryption_type>(m, "ENCRYPTION_TYPE")
-        .value("PUBLIC_KEY", encryption_type::public_key)
-        .value("SYMMETRIC", encryption_type::symmetric);
 }
