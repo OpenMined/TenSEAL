@@ -45,7 +45,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .value("BFV", scheme_type::bfv)
         .value("CKKS", scheme_type::ckks);
     py::enum_<encryption_type>(m, "ENCRYPTION_TYPE")
-        .value("PUBLIC_KEY", encryption_type::public_key)
+        .value("ASYMMETRIC", encryption_type::asymmetric)
         .value("SYMMETRIC", encryption_type::symmetric);
 
     m.def("bfv_parameters", &create_bfv_parameters,

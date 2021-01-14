@@ -89,7 +89,7 @@ void TenSEALContext::keys_setup(encryption_type enc_type,
                                 bool generate_galois_keys) {
     this->_encryption_type = enc_type;
     switch (enc_type) {
-        case encryption_type::public_key: {
+        case encryption_type::asymmetric: {
             this->keys_setup_public_key(public_key, secret_key);
             break;
         }
@@ -154,7 +154,7 @@ shared_ptr<TenSEALContext> TenSEALContext::Create(
 void TenSEALContext::encrypt(const Plaintext& plain,
                              Ciphertext& destination) const {
     switch (this->_encryption_type) {
-        case encryption_type::public_key:
+        case encryption_type::asymmetric:
             return this->encryptor->encrypt(plain, destination);
         case encryption_type::symmetric:
             return this->encryptor->encrypt_symmetric(plain, destination);
@@ -164,7 +164,7 @@ void TenSEALContext::encrypt(const Plaintext& plain,
 }
 void TenSEALContext::encrypt_zero(Ciphertext& destination) const {
     switch (this->_encryption_type) {
-        case encryption_type::public_key:
+        case encryption_type::asymmetric:
             return this->encryptor->encrypt_zero(destination);
         case encryption_type::symmetric:
             return this->encryptor->encrypt_zero_symmetric(destination);
@@ -175,7 +175,7 @@ void TenSEALContext::encrypt_zero(Ciphertext& destination) const {
 void TenSEALContext::encrypt_zero(parms_id_type parms_id,
                                   Ciphertext& destination) const {
     switch (this->_encryption_type) {
-        case encryption_type::public_key:
+        case encryption_type::asymmetric:
             return this->encryptor->encrypt_zero(parms_id, destination);
         case encryption_type::symmetric:
             return this->encryptor->encrypt_zero_symmetric(parms_id,
@@ -403,7 +403,7 @@ void TenSEALContext::load_proto_public_key(const TenSEALContextProto& buffer) {
         *this->_context, buffer.public_context().public_key());
 
     if (!buffer.has_private_context()) {
-        this->keys_setup(encryption_type::public_key, public_key);
+        this->keys_setup(encryption_type::asymmetric, public_key);
         if (!buffer.public_context().galois_keys().empty()) {
             this->generate_galois_keys(buffer.public_context().galois_keys());
         }
@@ -415,7 +415,7 @@ void TenSEALContext::load_proto_public_key(const TenSEALContextProto& buffer) {
 
     auto secret_key = SEALDeserialize<SecretKey>(
         *this->_context, buffer.private_context().secret_key());
-    this->keys_setup(encryption_type::public_key, public_key, secret_key,
+    this->keys_setup(encryption_type::asymmetric, public_key, secret_key,
                      buffer.private_context().relin_keys_generated(),
                      buffer.private_context().galois_keys_generated());
 }
@@ -437,7 +437,7 @@ void TenSEALContext::load_proto_symmetric(const TenSEALContextProto& buffer) {
 
 void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
     switch (buffer.encryption_type()) {
-        case to_underlying(encryption_type::public_key):
+        case to_underlying(encryption_type::asymmetric):
             return this->load_proto_public_key(buffer);
         case to_underlying(encryption_type::symmetric):
             return this->load_proto_symmetric(buffer);
@@ -510,7 +510,7 @@ TenSEALContextProto TenSEALContext::save_proto_symmetric() const {
 
 TenSEALContextProto TenSEALContext::save_proto() const {
     switch (this->_encryption_type) {
-        case encryption_type::public_key:
+        case encryption_type::asymmetric:
             return this->save_proto_public_key();
         case encryption_type::symmetric:
             return this->save_proto_symmetric();

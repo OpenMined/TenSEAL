@@ -10,7 +10,7 @@ void BM_matmul_plain(benchmark::State& state) {
 
     auto ctx =
         TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60},
-                               encryption_type::public_key, threads);
+                               encryption_type::asymmetric, threads);
     ctx->generate_galois_keys();
     ctx->global_scale(std::pow(2, 40));
 

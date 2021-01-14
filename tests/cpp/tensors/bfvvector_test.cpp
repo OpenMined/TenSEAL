@@ -142,7 +142,7 @@ TEST_F(BFVVectorTest, TestBFVSerializationSize) {
     for (int64_t val = 1; val < 1000; ++val) input.push_back(val);
 
     auto pk_ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {},
-                                         encryption_type::public_key);
+                                         encryption_type::asymmetric);
     auto pk_vector = BFVVector::Create(pk_ctx, input);
 
     auto sym_ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {},
@@ -160,8 +160,8 @@ TEST_F(BFVVectorTest, TestBFVSerializationSize) {
 
 INSTANTIATE_TEST_CASE_P(
     TestBFVVector, BFVVectorTest,
-    ::testing::Values(make_tuple(false, encryption_type::public_key),
-                      make_tuple(true, encryption_type::public_key),
+    ::testing::Values(make_tuple(false, encryption_type::asymmetric),
+                      make_tuple(true, encryption_type::asymmetric),
                       make_tuple(false, encryption_type::symmetric),
                       make_tuple(true, encryption_type::symmetric)));
 

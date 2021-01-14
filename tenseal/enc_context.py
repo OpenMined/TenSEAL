@@ -9,7 +9,7 @@ import tenseal as ts
 
 
 class ENCRYPTION_TYPE(Enum):
-    PUBLIC_KEY = ts._ts_cpp.ENCRYPTION_TYPE.PUBLIC_KEY
+    ASYMMETRIC = ts._ts_cpp.ENCRYPTION_TYPE.ASYMMETRIC
     SYMMETRIC = ts._ts_cpp.ENCRYPTION_TYPE.SYMMETRIC
 
 
@@ -84,7 +84,7 @@ class Context:
         poly_modulus_degree: int = None,
         plain_modulus: int = None,
         coeff_mod_bit_sizes: List[int] = [],
-        encryption_type: ENCRYPTION_TYPE = ENCRYPTION_TYPE.PUBLIC_KEY,
+        encryption_type: ENCRYPTION_TYPE = ENCRYPTION_TYPE.ASYMMETRIC,
         n_threads: int = None,
         data: ts._ts_cpp.TenSEALContext = None,
     ):
@@ -97,7 +97,7 @@ class Context:
             plain_modulus: The plaintext modulus. Should not be passed when the scheme is CKKS.
             coeff_mod_bit_sizes: List of bit size for each coeffecient modulus.
                 Can be an empty list for BFV, a default value will be given.
-            encryption_type : define the encryption type to be used, either ENCRYPTION_TYPE.PUBLIC_KEY, or ENCRYPTION_TYPE.SYMMETRIC.
+            encryption_type : define the encryption type to be used, either ENCRYPTION_TYPE.ASYMMETRIC, or ENCRYPTION_TYPE.SYMMETRIC.
             n_threads: define number of threads that shall be later used for parallel computation.
             data: A TenSEALContext to wrap. We won't construct a new object if it's passed.
 

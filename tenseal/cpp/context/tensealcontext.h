@@ -14,7 +14,7 @@ using namespace seal;
 using namespace std;
 
 enum class encryption_type {
-    public_key,
+    asymmetric,
     symmetric,
 };
 
@@ -51,7 +51,7 @@ class TenSEALContext {
     static shared_ptr<TenSEALContext> Create(
         scheme_type scheme, size_t poly_modulus_degree, uint64_t plain_modulus,
         vector<int> coeff_mod_bit_sizes,
-        encryption_type enc_type = encryption_type::public_key,
+        encryption_type enc_type = encryption_type::asymmetric,
         optional<size_t> n_threads = {});
     /**
      * Create a context from an input stream.

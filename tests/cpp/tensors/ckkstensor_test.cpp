@@ -317,7 +317,7 @@ TEST_F(CKKSTensorTest, TestCKKSTensorSerializationSize) {
     auto input = PlainTensor(raw_input);
     auto pk_ctx =
         TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60},
-                               encryption_type::public_key);
+                               encryption_type::asymmetric);
     pk_ctx->global_scale(std::pow(2, 40));
     auto pk_vector = CKKSTensor::Create(pk_ctx, input);
 
@@ -337,8 +337,8 @@ TEST_F(CKKSTensorTest, TestCKKSTensorSerializationSize) {
 }
 INSTANTIATE_TEST_CASE_P(
     TestCKKSTensor, CKKSTensorTest,
-    ::testing::Values(make_tuple(false, encryption_type::public_key),
-                      make_tuple(true, encryption_type::public_key),
+    ::testing::Values(make_tuple(false, encryption_type::asymmetric),
+                      make_tuple(true, encryption_type::asymmetric),
                       make_tuple(false, encryption_type::symmetric),
                       make_tuple(true, encryption_type::symmetric)));
 
