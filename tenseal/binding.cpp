@@ -39,6 +39,15 @@ void bind_plain_tensor(py::module &m, const std::string &name) {
 PYBIND11_MODULE(_tenseal_cpp, m) {
     m.doc() = "Library for doing homomorphic encryption operations on tensors";
 
+    // globals
+    py::enum_<scheme_type>(m, "SCHEME_TYPE")
+        .value("NONE", scheme_type::none)
+        .value("BFV", scheme_type::bfv)
+        .value("CKKS", scheme_type::ckks);
+    py::enum_<encryption_type>(m, "ENCRYPTION_TYPE")
+        .value("ASYMMETRIC", encryption_type::asymmetric)
+        .value("SYMMETRIC", encryption_type::symmetric);
+
     m.def("bfv_parameters", &create_bfv_parameters,
           R"(Create an EncryptionParameters object for the BFV scheme.
     Args:
@@ -585,19 +594,18 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             py::overload_cast<bool>(&TenSEALContext::auto_mod_switch))
         .def("new",
              py::overload_cast<scheme_type, size_t, uint64_t, vector<int>,
-                               optional<size_t>>(&TenSEALContext::Create),
+                               encryption_type, optional<size_t>>(
+                 &TenSEALContext::Create),
              R"(Create a new TenSEALContext object to hold keys and parameters.
     Args:
         scheme : define the scheme to be used, either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS.
         poly_modulus_degree : The degree of the polynomial modulus, must be a power of two.
         plain_modulus : The plaintext modulus. Is not used if scheme is CKKS.
         coeff_mod_bit_sizes : List of bit size for each coeffecient modulus.
-        n_threads : Optional: number of threads to use for multiplications.
             Can be an empty list for BFV, a default value will be given.
-        )",
-             py::arg("poly_modulus_degree"), py::arg("plain_modulus"),
-             py::arg("coeff_mod_bit_sizes") = vector<int>(),
-             py::arg("n_threads") = get_concurrency())
+        encryption_type : switch between public key and symmetric encryption. Default set to public key encryption.
+        n_threads : Optional: number of threads to use for multiplications.
+        )")
         .def("public_key", &TenSEALContext::public_key)
         .def("has_public_key", &TenSEALContext::has_public_key)
         .def("secret_key", &TenSEALContext::secret_key)
@@ -669,10 +677,4 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
     py::class_<SecretKey, std::shared_ptr<SecretKey>>(m, "SecretKey");
     py::class_<RelinKeys, std::shared_ptr<RelinKeys>>(m, "RelinKeys");
     py::class_<GaloisKeys, std::shared_ptr<GaloisKeys>>(m, "GaloisKeys");
-
-    // globals
-    py::enum_<scheme_type>(m, "SCHEME_TYPE")
-        .value("NONE", scheme_type::none)
-        .value("BFV", scheme_type::bfv)
-        .value("CKKS", scheme_type::ckks);
 }

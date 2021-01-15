@@ -42,6 +42,7 @@ jobs:
           ! ( git diff |  grep -q ^ ) || return 1
 
   TenSEAL:
+    needs: [Linter]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -83,6 +84,7 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
 
   SEAL_API:
+    needs: [Linter]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

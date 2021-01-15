@@ -63,20 +63,17 @@ Ciphertext CKKSVector::encrypt(shared_ptr<TenSEALContext> context, double scale,
     Plaintext plaintext;
     pt.replicate(slot_count);
     context->encode<CKKSEncoder>(pt.data(), plaintext, scale);
-    context->encryptor->encrypt(plaintext, ciphertext);
+    context->encrypt(plaintext, ciphertext);
 
     return ciphertext;
 }
 
 CKKSVector::plain_t CKKSVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
-    Decryptor decryptor =
-        Decryptor(*this->tenseal_context()->seal_context(), *sk);
-
     vector<double> result;
     result.reserve(this->size());
 
-    decryptor.decrypt(this->_ciphertext, plaintext);
+    this->tenseal_context()->decrypt(*sk, this->_ciphertext, plaintext);
     this->tenseal_context()->decode<CKKSEncoder>(plaintext, result);
 
     // result contains all slots of ciphertext (n/2), but we may be using less
@@ -276,7 +273,7 @@ shared_ptr<CKKSVector> CKKSVector::_mul_plain_inplace(const T& to_mul) {
     } catch (const std::logic_error& e) {
         if (strcmp(e.what(), "result ciphertext is transparent") == 0) {
             // replace by encryption of zero
-            this->tenseal_context()->encryptor->encrypt_zero(this->_ciphertext);
+            this->tenseal_context()->encrypt_zero(this->_ciphertext);
             this->_ciphertext.scale() = this->_init_scale;
             return this->copy();
         } else {  // Something else, need to be forwarded
@@ -318,7 +315,7 @@ shared_ptr<CKKSVector> CKKSVector::polyval_inplace(
     // we can multiply by 0, or return the encryption of zero
     if (degree == -1) {
         // we set the vector to the encryption of zero
-        this->tenseal_context()->encryptor->encrypt_zero(this->_ciphertext);
+        this->tenseal_context()->encrypt_zero(this->_ciphertext);
         this->_ciphertext.scale() = this->_init_scale;
         return shared_from_this();
     }
