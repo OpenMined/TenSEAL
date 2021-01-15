@@ -25,15 +25,18 @@ auto duplicate(shared_ptr<CKKSVector> in) {
     return CKKSVector::Create(in->tenseal_context(), vec);
 }
 
-class CKKSVectorTest : public TestWithParam</*serialize=*/bool> {
+class CKKSVectorTest
+    : public TestWithParam<tuple</*serialize_first=*/bool,
+                                 /*encryption_type=*/encryption_type>> {
    protected:
     void SetUp() {}
 };
 TEST_P(CKKSVectorTest, TestCreateCKKS) {
-    bool should_serialize_first = GetParam();
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
 
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     auto l = CKKSVector::Create(ctx, std::vector<double>{1, 2, 3}, 1);
@@ -45,9 +48,12 @@ TEST_P(CKKSVectorTest, TestCreateCKKS) {
     ASSERT_EQ(l->ciphertext_size(), 2);
 }
 
-TEST_F(CKKSVectorTest, TestCreateCKKSFail) {
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+TEST_P(CKKSVectorTest, TestCreateCKKSFail) {
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     EXPECT_THROW(
@@ -56,10 +62,11 @@ TEST_F(CKKSVectorTest, TestCreateCKKSFail) {
 }
 
 TEST_P(CKKSVectorTest, TestCKKSAdd) {
-    bool should_serialize_first = GetParam();
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
 
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     ctx->global_scale(std::pow(2, 40));
@@ -95,10 +102,11 @@ TEST_P(CKKSVectorTest, TestCKKSAdd) {
 }
 
 TEST_P(CKKSVectorTest, TestCKKSMul) {
-    bool should_serialize_first = GetParam();
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
 
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     ctx->global_scale(std::pow(2, 40));
@@ -130,10 +138,11 @@ TEST_P(CKKSVectorTest, TestCKKSMul) {
 }
 
 TEST_P(CKKSVectorTest, TestCKKSMulMany) {
-    bool should_serialize_first = GetParam();
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
 
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     ctx->global_scale(std::pow(2, 40));
@@ -158,10 +167,11 @@ TEST_P(CKKSVectorTest, TestCKKSMulMany) {
 }
 
 TEST_P(CKKSVectorTest, TestCKKSMulNoRelin) {
-    bool should_serialize_first = GetParam();
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
 
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     ctx->global_scale(std::pow(2, 40));
@@ -186,10 +196,11 @@ TEST_P(CKKSVectorTest, TestCKKSMulNoRelin) {
 }
 
 TEST_P(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
-    bool should_serialize_first = GetParam();
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
 
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     ctx->generate_galois_keys();
@@ -214,10 +225,11 @@ TEST_P(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
 }
 
 TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
-    bool should_serialize_first = GetParam();
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
 
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     ctx->generate_galois_keys();
@@ -241,15 +253,47 @@ TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
 }
 
 TEST_P(CKKSVectorTest, TestEmptyPlaintext) {
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     EXPECT_THROW(CKKSVector::Create(ctx, std::vector<double>({})),
                  std::exception);
 }
 
-INSTANTIATE_TEST_CASE_P(TestCKKSVector, CKKSVectorTest,
-                        ::testing::Values(false, true));
+TEST_F(CKKSVectorTest, TestCKKSVectorSerializationSize) {
+    vector<double> input;
+    for (double val = 0.5; val < 1000; ++val) input.push_back(val);
+
+    auto pk_ctx =
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60},
+                               encryption_type::asymmetric);
+    pk_ctx->global_scale(std::pow(2, 40));
+    auto pk_vector = CKKSVector::Create(pk_ctx, input);
+
+    auto sym_ctx =
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60},
+                               encryption_type::symmetric);
+    sym_ctx->global_scale(std::pow(2, 40));
+    auto sym_vector = CKKSVector::Create(sym_ctx, input);
+
+    auto pk_buffer = pk_vector->save();
+    auto sym_buffer = sym_vector->save();
+
+    fprintf(stderr, "pk_buffer size = %ld sym_buffer size = %ld\n",
+            pk_buffer.size(), sym_buffer.size());
+    ASSERT_TRUE(pk_buffer.size() != sym_buffer.size());
+    ASSERT_TRUE(2 * sym_buffer.size() > pk_buffer.size());
+}
+INSTANTIATE_TEST_CASE_P(
+    TestCKKSVector, CKKSVectorTest,
+    ::testing::Values(make_tuple(false, encryption_type::asymmetric),
+                      make_tuple(true, encryption_type::asymmetric),
+                      make_tuple(false, encryption_type::symmetric),
+                      make_tuple(true, encryption_type::symmetric)));
 
 TEST_F(CKKSVectorTest, TestCKKSLazyContext) {
     auto ctx =

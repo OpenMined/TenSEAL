@@ -28,7 +28,7 @@ class EncryptedTensor {
      *of real numbers using the secret-key.
      **/
     PlainTensor<plain_data_t> decrypt() const {
-        if (this->tenseal_context()->decryptor == nullptr) {
+        if (this->tenseal_context()->is_public()) {
             // this->context was loaded with public keys only
             throw invalid_argument(
                 "the current context of the tensor doesn't hold a secret_key, "

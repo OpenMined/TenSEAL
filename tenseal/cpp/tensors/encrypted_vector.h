@@ -142,15 +142,15 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
 
         Ciphertext result;
         // result should have the same scale and modulus as vec * pt_diag (ct)
-        this->tenseal_context()->encryptor->encrypt_zero(
-            this->_ciphertext.parms_id(), result);
+        this->tenseal_context()->encrypt_zero(this->_ciphertext.parms_id(),
+                                              result);
         result.scale() =
             this->_ciphertext.scale() * this->tenseal_context()->global_scale();
 
         auto worker_func = [&](size_t start, size_t end) -> Ciphertext {
             Ciphertext thread_result;
-            this->tenseal_context()->encryptor->encrypt_zero(
-                this->_ciphertext.parms_id(), thread_result);
+            this->tenseal_context()->encrypt_zero(this->_ciphertext.parms_id(),
+                                                  thread_result);
             thread_result.scale() = this->_ciphertext.scale() *
                                     this->tenseal_context()->global_scale();
 

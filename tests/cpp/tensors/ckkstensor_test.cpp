@@ -25,15 +25,19 @@ auto duplicate(shared_ptr<CKKSTensor> in) {
     return CKKSTensor::Create(in->tenseal_context(), vec);
 }
 
-class CKKSTensorTest : public TestWithParam</*serialize=*/bool> {
+class CKKSTensorTest
+    : public TestWithParam<tuple</*serialize_first=*/bool,
+                                 /*encryption_type=*/encryption_type>> {
    protected:
     void SetUp() {}
 };
-TEST_P(CKKSTensorTest, TestCreateCKKSNoBatching) {
-    bool should_serialize_first = GetParam();
 
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+TEST_P(CKKSTensorTest, TestCreateCKKSNoBatching) {
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     auto l = CKKSTensor::Create(ctx, std::vector<double>{1, 2, 3},
@@ -47,10 +51,11 @@ TEST_P(CKKSTensorTest, TestCreateCKKSNoBatching) {
 }
 
 TEST_P(CKKSTensorTest, TestDecryptCKKSNoBatching) {
-    bool should_serialize_first = GetParam();
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
 
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     auto l = CKKSTensor::Create(ctx, std::vector<double>{1, 2, 3},
@@ -65,10 +70,11 @@ TEST_P(CKKSTensorTest, TestDecryptCKKSNoBatching) {
 }
 
 TEST_P(CKKSTensorTest, TestCreateCKKSWithBatching) {
-    bool should_serialize_first = GetParam();
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
 
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     auto l = CKKSTensor::Create(ctx, std::vector<double>{1, 2, 3},
@@ -82,10 +88,11 @@ TEST_P(CKKSTensorTest, TestCreateCKKSWithBatching) {
 }
 
 TEST_P(CKKSTensorTest, TestDecryptCKKSWithBatching) {
-    bool should_serialize_first = GetParam();
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
 
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     auto l = CKKSTensor::Create(ctx, std::vector<double>{1, 2, 3},
@@ -99,9 +106,12 @@ TEST_P(CKKSTensorTest, TestDecryptCKKSWithBatching) {
     ASSERT_TRUE(are_close(decr.data(), {1, 2, 3}));
 }
 
-TEST_F(CKKSTensorTest, TestCKKSSumNoBatching) {
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+TEST_P(CKKSTensorTest, TestCKKSSumNoBatching) {
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     auto data =
@@ -140,9 +150,12 @@ TEST_F(CKKSTensorTest, TestCKKSSumNoBatching) {
     ASSERT_TRUE(are_close(decr.data(), {4, 6, 12, 14}));
 }
 
-TEST_F(CKKSTensorTest, TestCKKSSumBatching) {
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+TEST_P(CKKSTensorTest, TestCKKSSumBatching) {
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
@@ -161,9 +174,12 @@ TEST_F(CKKSTensorTest, TestCKKSSumBatching) {
     ASSERT_TRUE(are_close(decr.data(), {6, 15}));
 }
 
-TEST_F(CKKSTensorTest, TestCKKSPower) {
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+TEST_P(CKKSTensorTest, TestCKKSPower) {
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
@@ -177,9 +193,12 @@ TEST_F(CKKSTensorTest, TestCKKSPower) {
     ASSERT_TRUE(are_close(decr.data(), {1, 4, 9, 16, 25, 36}));
 }
 
-TEST_F(CKKSTensorTest, TestCKKSTensorPolyval) {
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+TEST_P(CKKSTensorTest, TestCKKSTensorPolyval) {
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     auto data =
@@ -192,9 +211,12 @@ TEST_F(CKKSTensorTest, TestCKKSTensorPolyval) {
     ASSERT_TRUE(are_close(decr.data(), {3, 7, 13, 21, 31, 43}));
 }
 
-TEST_F(CKKSTensorTest, TestCreateCKKSFail) {
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+TEST_P(CKKSTensorTest, TestCreateCKKSFail) {
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     EXPECT_THROW(
@@ -202,9 +224,12 @@ TEST_F(CKKSTensorTest, TestCreateCKKSFail) {
         std::exception);
 }
 
-TEST_F(CKKSTensorTest, TestCKKSReshapeNoBatching) {
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+TEST_P(CKKSTensorTest, TestCKKSReshapeNoBatching) {
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
@@ -235,9 +260,12 @@ TEST_F(CKKSTensorTest, TestCKKSReshapeNoBatching) {
     ASSERT_THAT(newt->shape(), ElementsAreArray({4, 2}));
 }
 
-TEST_F(CKKSTensorTest, TestCKKSReshapeBatching) {
-    auto ctx =
-        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+TEST_P(CKKSTensorTest, TestCKKSReshapeBatching) {
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
@@ -271,15 +299,48 @@ TEST_F(CKKSTensorTest, TestCKKSReshapeBatching) {
 }
 
 TEST_P(CKKSTensorTest, TestEmptyPlaintext) {
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     EXPECT_THROW(CKKSTensor::Create(ctx, std::vector<double>({})),
                  std::exception);
 }
 
-INSTANTIATE_TEST_CASE_P(TestCKKSTensor, CKKSTensorTest,
-                        ::testing::Values(false, true));
+TEST_F(CKKSTensorTest, TestCKKSTensorSerializationSize) {
+    vector<double> raw_input;
+    for (double val = 0.5; val < 1000; ++val) raw_input.push_back(val);
+
+    auto input = PlainTensor(raw_input);
+    auto pk_ctx =
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60},
+                               encryption_type::asymmetric);
+    pk_ctx->global_scale(std::pow(2, 40));
+    auto pk_vector = CKKSTensor::Create(pk_ctx, input);
+
+    auto sym_ctx =
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60},
+                               encryption_type::symmetric);
+    sym_ctx->global_scale(std::pow(2, 40));
+    auto sym_vector = CKKSTensor::Create(sym_ctx, input);
+
+    auto pk_buffer = pk_vector->save();
+    auto sym_buffer = sym_vector->save();
+
+    fprintf(stderr, "pk_buffer size = %ld sym_buffer size = %ld\n",
+            pk_buffer.size(), sym_buffer.size());
+    ASSERT_TRUE(pk_buffer.size() != sym_buffer.size());
+    ASSERT_TRUE(2 * sym_buffer.size() > pk_buffer.size());
+}
+INSTANTIATE_TEST_CASE_P(
+    TestCKKSTensor, CKKSTensorTest,
+    ::testing::Values(make_tuple(false, encryption_type::asymmetric),
+                      make_tuple(true, encryption_type::asymmetric),
+                      make_tuple(false, encryption_type::symmetric),
+                      make_tuple(true, encryption_type::symmetric)));
 
 TEST_F(CKKSTensorTest, TestCKKSLazyContext) {
     auto ctx =

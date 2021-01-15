@@ -77,16 +77,13 @@ Ciphertext CKKSTensor::encrypt(const shared_ptr<TenSEALContext>& ctx,
     Ciphertext ciphertext(*ctx->seal_context());
     Plaintext plaintext;
     ctx->encode<CKKSEncoder>(data, plaintext, scale);
-    ctx->encryptor->encrypt(plaintext, ciphertext);
+    ctx->encrypt(plaintext, ciphertext);
 
     return ciphertext;
 }
 
 PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
-    Decryptor decryptor =
-        Decryptor(*this->tenseal_context()->seal_context(), *sk);
-
     auto sz = this->_data.flat_size();
     auto shape = this->shape_with_batch();
 
@@ -96,7 +93,7 @@ PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
 
         for (auto it = _data.cbegin(); it != _data.cend(); it++) {
             vector<double> buff;
-            decryptor.decrypt(*it, plaintext);
+            this->tenseal_context()->decrypt(*sk, *it, plaintext);
             this->tenseal_context()->decode<CKKSEncoder>(plaintext, buff);
             result.push_back(
                 vector<double>(buff.begin(), buff.begin() + *_batch_size));
@@ -111,7 +108,7 @@ PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
 
         for (auto it = _data.cbegin(); it != _data.cend(); it++) {
             vector<double> buff;
-            decryptor.decrypt(*it, plaintext);
+            this->tenseal_context()->decrypt(*sk, *it, plaintext);
             this->tenseal_context()->decode<CKKSEncoder>(plaintext, buff);
             result.push_back(buff[0]);
         }
@@ -201,7 +198,7 @@ void CKKSTensor::perform_plain_op(seal::Ciphertext& ct, seal::Plaintext other,
             } catch (const std::logic_error& e) {
                 if (strcmp(e.what(), "result ciphertext is transparent") == 0) {
                     // replace by encryption of zero
-                    this->tenseal_context()->encryptor->encrypt_zero(ct);
+                    this->tenseal_context()->encrypt_zero(ct);
                     ct.scale() = this->_init_scale;
                 } else {  // Something else, need to be forwarded
                     throw;
