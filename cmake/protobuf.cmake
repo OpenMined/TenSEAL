@@ -5,16 +5,14 @@ set(protobuf_DEBUG ON)
 set(protobuf_MSVC_STATIC_RUNTIME OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
     
-#add_subdirectory(third_party/protobuf/cmake)
-
 set(Protobuf_ROOT third_party/protobuf/cmake)
 
-find_package( Protobuf REQUIRED HINTS ${Protobuf_ROOT}/lib/cmake/protobuf )
 include(${Protobuf_ROOT}/lib/cmake/protobuf/protobuf-config.cmake)
 include(${Protobuf_ROOT}/lib/cmake/protobuf/protobuf-module.cmake)
 include(${Protobuf_ROOT}/lib/cmake/protobuf/protobuf-options.cmake)
 include(${Protobuf_ROOT}/lib/cmake/protobuf/protobuf-targets.cmake)
 
+find_package( Protobuf REQUIRED HINTS ${Protobuf_ROOT}/lib/cmake/protobuf )
 if ( Protobuf_FOUND )
     message( STATUS "Protobuf version : ${Protobuf_VERSION}" )
     message( STATUS "Protobuf include path : ${Protobuf_INCLUDE_DIRS}" )
