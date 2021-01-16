@@ -13,10 +13,23 @@ void BFVVector::prepare_context(const shared_ptr<TenSEALContext>& ctx) {
 
 BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx,
                      const plain_t& vec) {
-    this->prepare_context(ctx);
     // Encrypts the whole vector into a single ciphertext using BFV batching
-    this->_ciphertext = {BFVVector::encrypt(ctx, vec)};
-    this->_size = vec.size();
+
+    this->prepare_context(ctx);
+    if (vec.empty()) {
+        throw invalid_argument("Attempting to encrypt an empty vector");
+    }
+
+    auto slot_count = ctx->slot_count<BatchEncoder>();
+    auto vec_chunks = vec.chunks(slot_count);
+
+    this->_ciphertexts = vector<Ciphertext>();
+    this->_sizes = vector<size_t>();
+
+    for (auto& chunk : vec_chunks) {
+        this->_ciphertexts.push_back(BFVVector::encrypt(ctx, chunk));
+        this->_sizes.push_back(chunk.size());
+    }
 }
 
 BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx, const string& vec) {
@@ -39,8 +52,8 @@ BFVVector::BFVVector(const TenSEALContextProto& ctx,
 }
 BFVVector::BFVVector(const shared_ptr<const BFVVector>& vec) {
     this->prepare_context(vec->tenseal_context());
-    this->_size = vec->size();
-    this->_ciphertext = vec->ciphertext();
+    this->_sizes = vec->chunked_size();
+    this->_ciphertexts = vec->ciphertext();
 }
 
 Ciphertext BFVVector::encrypt(shared_ptr<TenSEALContext> context,
@@ -65,10 +78,10 @@ Ciphertext BFVVector::encrypt(shared_ptr<TenSEALContext> context,
 }
 
 BFVVector::plain_t BFVVector::decrypt(const shared_ptr<SecretKey>& sk) const {
-    Plaintext plaintext;
     vector<int64_t> result;
 
-    this->tenseal_context()->decrypt(*sk, this->_ciphertext[0], plaintext);
+    Plaintext plaintext;
+    this->tenseal_context()->decrypt(*sk, this->_ciphertexts[0], plaintext);
     this->tenseal_context()->decode<BatchEncoder>(plaintext, result);
 
     // result contains all slots of ciphertext (poly_modulus_degree)
@@ -106,14 +119,17 @@ shared_ptr<BFVVector> BFVVector::power_inplace(unsigned int power) {
 }
 
 shared_ptr<BFVVector> BFVVector::negate_inplace() {
-    this->tenseal_context()->evaluator->negate_inplace(this->_ciphertext[0]);
+    for (auto& ct : this->_ciphertexts)
+        this->tenseal_context()->evaluator->negate_inplace(ct);
 
     return shared_from_this();
 }
 
 shared_ptr<BFVVector> BFVVector::square_inplace() {
-    this->tenseal_context()->evaluator->square_inplace(this->_ciphertext[0]);
-    this->auto_relin(_ciphertext[0]);
+    for (auto& ct : this->_ciphertexts) {
+        this->tenseal_context()->evaluator->square_inplace(ct);
+        this->auto_relin(ct);
+    }
 
     return shared_from_this();
 }
@@ -129,8 +145,9 @@ shared_ptr<BFVVector> BFVVector::add_inplace(
 
     this->broadcast_or_throw(to_add);
 
-    this->tenseal_context()->evaluator->add_inplace(this->_ciphertext[0],
-                                                    to_add->_ciphertext[0]);
+    for (size_t idx = 0; idx < this->_ciphertexts.size(); ++idx)
+        this->tenseal_context()->evaluator->add_inplace(
+            this->_ciphertexts[idx], to_add->_ciphertexts[idx]);
 
     return shared_from_this();
 }
@@ -146,8 +163,9 @@ shared_ptr<BFVVector> BFVVector::sub_inplace(
 
     this->broadcast_or_throw(to_sub);
 
-    this->tenseal_context()->evaluator->sub_inplace(this->_ciphertext[0],
-                                                    to_sub->_ciphertext[0]);
+    for (size_t idx = 0; idx < this->_ciphertexts.size(); ++idx)
+        this->tenseal_context()->evaluator->sub_inplace(
+            this->_ciphertexts[idx], to_sub->_ciphertexts[idx]);
 
     return shared_from_this();
 }
@@ -163,9 +181,11 @@ shared_ptr<BFVVector> BFVVector::mul_inplace(
 
     this->broadcast_or_throw(to_mul);
 
-    this->tenseal_context()->evaluator->multiply_inplace(
-        this->_ciphertext[0], to_mul->_ciphertext[0]);
-    this->auto_relin(_ciphertext[0]);
+    for (size_t idx = 0; idx < this->_ciphertexts.size(); ++idx) {
+        this->tenseal_context()->evaluator->multiply_inplace(
+            this->_ciphertexts[idx], to_mul->_ciphertexts[idx]);
+        this->auto_relin(_ciphertexts[idx]);
+    }
 
     return shared_from_this();
 }
@@ -187,8 +207,8 @@ shared_ptr<BFVVector> BFVVector::dot_plain_inplace(
 }
 
 shared_ptr<BFVVector> BFVVector::sum_inplace(size_t /*axis=0*/) {
-    sum_vector(this->tenseal_context(), this->_ciphertext[0], this->size());
-    this->_size = 1;
+    sum_vector(this->tenseal_context(), this->_ciphertexts[0], this->size());
+    this->_sizes = {1};
     return shared_from_this();
 }
 
@@ -206,7 +226,7 @@ shared_ptr<BFVVector> BFVVector::add_plain_inplace(
     Plaintext plaintext;
 
     this->tenseal_context()->encode<BatchEncoder>(to_add.data_ref(), plaintext);
-    this->tenseal_context()->evaluator->add_plain_inplace(this->_ciphertext[0],
+    this->tenseal_context()->evaluator->add_plain_inplace(this->_ciphertexts[0],
                                                           plaintext);
 
     return shared_from_this();
@@ -226,7 +246,7 @@ shared_ptr<BFVVector> BFVVector::sub_plain_inplace(
     Plaintext plaintext;
 
     this->tenseal_context()->encode<BatchEncoder>(to_sub.data_ref(), plaintext);
-    this->tenseal_context()->evaluator->sub_plain_inplace(this->_ciphertext[0],
+    this->tenseal_context()->evaluator->sub_plain_inplace(this->_ciphertexts[0],
                                                           plaintext);
 
     return shared_from_this();
@@ -248,11 +268,11 @@ shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
 
     try {
         this->tenseal_context()->evaluator->multiply_plain_inplace(
-            this->_ciphertext[0], plaintext);
+            this->_ciphertexts[0], plaintext);
     } catch (const std::logic_error& e) {
         if (strcmp(e.what(), "result ciphertext is transparent") == 0) {
             // replace by encryption of zero
-            this->tenseal_context()->encrypt_zero(this->_ciphertext[0]);
+            this->tenseal_context()->encrypt_zero(this->_ciphertexts[0]);
         } else {  // Something else, need to be forwarded
             throw;
         }
@@ -283,22 +303,22 @@ shared_ptr<BFVVector> BFVVector::enc_matmul_plain_inplace(
 
 shared_ptr<BFVVector> BFVVector::replicate_first_slot_inplace(size_t n) {
     // mask
-    vector<int64_t> mask(this->_size, 0);
+    vector<int64_t> mask(this->size(), 0);
     mask[0] = 1;
     this->mul_plain_inplace(mask);
 
     // replicate
-    Ciphertext tmp = this->_ciphertext[0];
+    Ciphertext tmp = this->_ciphertexts[0];
     auto galois_keys = this->tenseal_context()->galois_keys();
     for (size_t i = 0; i < (size_t)ceil(log2(n)); i++) {
         this->tenseal_context()->evaluator->rotate_vector_inplace(
             tmp, static_cast<int>(-pow(2, i)), *galois_keys);
-        this->tenseal_context()->evaluator->add_inplace(this->_ciphertext[0],
+        this->tenseal_context()->evaluator->add_inplace(this->_ciphertexts[0],
                                                         tmp);
-        tmp = this->_ciphertext[0];
+        tmp = this->_ciphertexts[0];
     }
 
-    this->_size = n;
+    this->_sizes = {n};
     return shared_from_this();
 }
 
@@ -306,8 +326,8 @@ void BFVVector::load_proto(const BFVVectorProto& vec) {
     if (this->tenseal_context() == nullptr) {
         throw invalid_argument("context missing for deserialization");
     }
-    this->_size = vec.size();
-    this->_ciphertext = {SEALDeserialize<Ciphertext>(
+    this->_sizes = {vec.size()};
+    this->_ciphertexts = {SEALDeserialize<Ciphertext>(
         *this->tenseal_context()->seal_context(), vec.ciphertext())};
 }
 
@@ -315,8 +335,8 @@ BFVVectorProto BFVVector::save_proto() const {
     BFVVectorProto buffer;
 
     *buffer.mutable_ciphertext() =
-        SEALSerialize<Ciphertext>(this->_ciphertext[0]);
-    buffer.set_size(static_cast<int>(this->_size));
+        SEALSerialize<Ciphertext>(this->_ciphertexts[0]);
+    buffer.set_size(static_cast<int>(this->_sizes[0]));
 
     return buffer;
 }

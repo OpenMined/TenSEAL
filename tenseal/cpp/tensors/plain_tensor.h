@@ -200,8 +200,13 @@ class PlainTensor {
     /**
      * Split the tensor in chunks
      * */
-    vector<PlainTensor<plain_t>> chunks(size_t max_size) {
-        return vector<PlainTensor<plain_t>>();
+    vector<PlainTensor<plain_t>> chunks(size_t max_size) const {
+        auto storage_chunks = _data.chunks(max_size);
+
+        vector<PlainTensor<plain_t>> result;
+        for (auto& chunk : storage_chunks)
+            result.push_back(PlainTensor<plain_t>(chunk));
+        return result;
     }
     /**
      * Iterator utils
