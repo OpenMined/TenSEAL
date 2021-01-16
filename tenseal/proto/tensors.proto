@@ -3,18 +3,18 @@ package tenseal;
 
 //BFVVector parameters
 message BFVVectorProto {
-    // The size of the encrypted vector
-    uint32 size = 1;
-    // The serialized ciphertext
-    bytes ciphertext = 2;
+    // The sizes of the chunks of the encrypted vector
+    repeated uint32 sizes = 1;
+    // The serialized ciphertexts
+    repeated bytes ciphertexts = 2;
 };
 
 //CKKSVector parameters
 message CKKSVectorProto {
-    // The size of the encrypted vector
-    uint32 size = 1;
-    // The serialized ciphertext
-    bytes ciphertext = 2;
+    // The size of the chunks of the encrypted vector
+    repeated uint32 sizes = 1;
+    // The serialized ciphertexts
+    repeated bytes ciphertexts = 2;
     // Scale value
     double scale = 3;
 };

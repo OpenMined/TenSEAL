@@ -29,7 +29,7 @@ CKKSVector::CKKSVector(const shared_ptr<TenSEALContext>& ctx,
         // Encrypts the whole vector into a single ciphertext using CKKS
         // batching
         this->_ciphertexts.push_back(
-            CKKSVector::encrypt(ctx, this->_init_scale, vec));
+            CKKSVector::encrypt(ctx, this->_init_scale, chunk));
         this->_sizes.push_back(chunk.size());
     }
 }

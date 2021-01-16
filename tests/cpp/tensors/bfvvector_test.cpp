@@ -158,6 +158,39 @@ TEST_F(BFVVectorTest, TestBFVSerializationSize) {
     ASSERT_TRUE(2 * sym_buffer.size() > pk_buffer.size());
 }
 
+TEST_P(BFVVectorTest, TestBFVAddBigVector) {
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
+
+    int poly_mod = 8192;
+    int input_size = 100000;
+
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, poly_mod, 1032193, {},
+                                      enc_type);
+    ASSERT_TRUE(ctx != nullptr);
+
+    vector<int64_t> l_input, r_input, expected;
+    for (int64_t i = 1; i < input_size; i++) {
+        l_input.push_back(2 * i);
+        r_input.push_back(3 * i);
+        expected.push_back(5 * i);
+    }
+
+    auto l = BFVVector::Create(ctx, l_input);
+    auto r = BFVVector::Create(ctx, r_input);
+
+    auto add = l->add(r);
+
+    if (should_serialize_first) {
+        add = duplicate(add);
+    }
+
+    ASSERT_EQ(add->chunked_size().size(), int(input_size / poly_mod) + 1);
+
+    auto decr = add->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray(expected));
+}
+
 INSTANTIATE_TEST_CASE_P(
     TestBFVVector, BFVVectorTest,
     ::testing::Values(make_tuple(false, encryption_type::asymmetric),
