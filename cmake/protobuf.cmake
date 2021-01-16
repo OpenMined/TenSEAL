@@ -50,4 +50,5 @@ else()
   )
 endif()
 
+include_directories(${Protobuf_INCLUDE_DIRS})
 add_subdirectory(tenseal/proto)
