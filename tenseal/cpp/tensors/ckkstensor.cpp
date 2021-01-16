@@ -28,8 +28,8 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
 
     } else {
         for (auto it = tensor.cbegin(); it != tensor.cend(); it++)
-            enc_data.push_back(CKKSTensor::encrypt(ctx, this->_init_scale,
-                                                   vector<double>({*it})));
+            enc_data.push_back(
+                CKKSTensor::encrypt(ctx, this->_init_scale, *it));
     }
 
     _data = TensorStorage<Ciphertext>(enc_data, enc_shape);
@@ -74,6 +74,16 @@ Ciphertext CKKSTensor::encrypt(const shared_ptr<TenSEALContext>& ctx,
             "can't encrypt vectors of this size, please use a larger "
             "polynomial modulus degree.");
 
+    Ciphertext ciphertext(*ctx->seal_context());
+    Plaintext plaintext;
+    ctx->encode<CKKSEncoder>(data, plaintext, scale);
+    ctx->encrypt(plaintext, ciphertext);
+
+    return ciphertext;
+}
+
+Ciphertext CKKSTensor::encrypt(const shared_ptr<TenSEALContext>& ctx,
+                               const double scale, const double data) {
     Ciphertext ciphertext(*ctx->seal_context());
     Plaintext plaintext;
     ctx->encode<CKKSEncoder>(data, plaintext, scale);
