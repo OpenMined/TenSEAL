@@ -1,23 +1,29 @@
-cmake_minimum_required( VERSION 3.15 )
+set(protobuf_BUILD_TESTS OFF)
+set(protobuf_BUILD_EXPORT OFF)
+set(protobuf_USE_STATIC_LIBS ON)
+set(protobuf_DEBUG ON)
+set(protobuf_MSVC_STATIC_RUNTIME OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    
+#add_subdirectory(third_party/protobuf/cmake)
 
-include( FetchContent )
+set(Protobuf_ROOT third_party/protobuf/cmake)
 
-FetchContent_Declare(
-  protobuf
-  GIT_REPOSITORY  https://github.com/protocolbuffers/protobuf.git
-  GIT_TAG         v3.14.0
-)
+find_package( Protobuf REQUIRED HINTS ${Protobuf_ROOT}/lib/cmake/protobuf )
+include(${Protobuf_ROOT}/lib/cmake/protobuf/protobuf-config.cmake)
+include(${Protobuf_ROOT}/lib/cmake/protobuf/protobuf-module.cmake)
+include(${Protobuf_ROOT}/lib/cmake/protobuf/protobuf-options.cmake)
+include(${Protobuf_ROOT}/lib/cmake/protobuf/protobuf-targets.cmake)
 
-FetchContent_GetProperties( protobuf )
-if( NOT protobuf_POPULATED )
-  option(protobuf_BUILD_TESTS OFF)
-  option(Protobuf_USE_STATIC_LIBS ON)
-  option(Protobuf_DEBUG ON)
-  option(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-  FetchContent_Populate(protobuf)
-  include_directories(${Protobuf_INCLUDE_DIRS})
-  add_subdirectory(${protobuf_SOURCE_DIR}/cmake ${protobuf_BINARY_DIR})
+if ( Protobuf_FOUND )
+    message( STATUS "Protobuf version : ${Protobuf_VERSION}" )
+    message( STATUS "Protobuf include path : ${Protobuf_INCLUDE_DIRS}" )
+    message( STATUS "Protobuf libraries : ${Protobuf_LIBRARIES}" )
+    message( STATUS "Protobuf compiler libraries : ${Protobuf_PROTOC_LIBRARIES}")
+    message( STATUS "Protobuf lite libraries : ${Protobuf_LITE_LIBRARIES}")
+else()
+    message( WARNING "Protobuf package not found -> specify search path via Protobuf_ROOT variable")
 endif()
 
+include_directories(${Protobuf_INCLUDE_DIRS})
 add_subdirectory(tenseal/proto)

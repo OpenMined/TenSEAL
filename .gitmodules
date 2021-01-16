@@ -16,3 +16,6 @@
 [submodule "third_party/xsimd"]
 	path = third_party/xsimd
 	url = https://github.com/xtensor-stack/xsimd
+[submodule "third_party/protobuf"]
+	path = third_party/protobuf
+	url = https://github.com/protocolbuffers/protobuf
