@@ -21,6 +21,8 @@ def context():
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
+        ([2 * i for i in range(10000)], [3 * i for i in range(10000)]),
+        ([2 * i for i in range(100000)], [3 * i for i in range(100000)]),
     ],
 )
 def test_add(context, vec1, vec2):
@@ -50,6 +52,8 @@ def test_add(context, vec1, vec2):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
+        ([2 * i for i in range(10000)], [3 * i for i in range(10000)]),
+        ([2 * i for i in range(100000)], [3 * i for i in range(100000)]),
     ],
 )
 def test_add_inplace(context, vec1, vec2):
@@ -78,6 +82,8 @@ def test_add_inplace(context, vec1, vec2):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
+        ([2 * i for i in range(10000)], [3 * i for i in range(10000)]),
+        ([2 * i for i in range(100000)], [3 * i for i in range(100000)]),
     ],
 )
 def test_add_plain(context, vec1, vec2):
@@ -106,6 +112,8 @@ def test_add_plain(context, vec1, vec2):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
+        ([2 * i for i in range(10000)], [3 * i for i in range(10000)]),
+        ([2 * i for i in range(100000)], [3 * i for i in range(100000)]),
     ],
 )
 def test_add_plain_inplace(context, vec1, vec2):
@@ -133,6 +141,8 @@ def test_add_plain_inplace(context, vec1, vec2):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
+        ([2 * i for i in range(10000)], [3 * i for i in range(10000)]),
+        ([2 * i for i in range(100000)], [3 * i for i in range(100000)]),
     ],
 )
 def test_sub(context, vec1, vec2):
@@ -161,6 +171,8 @@ def test_sub(context, vec1, vec2):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
+        ([2 * i for i in range(10000)], [3 * i for i in range(10000)]),
+        ([2 * i for i in range(100000)], [3 * i for i in range(100000)]),
     ],
 )
 def test_sub_inplace(context, vec1, vec2):
@@ -189,6 +201,8 @@ def test_sub_inplace(context, vec1, vec2):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
+        ([2 * i for i in range(10000)], [3 * i for i in range(10000)]),
+        ([2 * i for i in range(100000)], [3 * i for i in range(100000)]),
     ],
 )
 def test_sub_plain(context, vec1, vec2):
@@ -217,6 +231,8 @@ def test_sub_plain(context, vec1, vec2):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
+        ([2 * i for i in range(10000)], [3 * i for i in range(10000)]),
+        ([2 * i for i in range(100000)], [3 * i for i in range(100000)]),
     ],
 )
 def test_sub_plain_inplace(context, vec1, vec2):
@@ -243,6 +259,7 @@ def test_sub_plain_inplace(context, vec1, vec2):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
+        ([2 for i in range(10000)], [3 for i in range(10000)]),
     ],
 )
 def test_mul(context, vec1, vec2):
