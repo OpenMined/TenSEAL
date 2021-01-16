@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(Protobuf_USE_STATIC_LIBS ON)
 
 include(FindProtobuf)
-find_package(Protobuf REQUIRED)
+find_package(protobuf REQUIRED)
 
 include_directories(${Protobuf_INCLUDE_DIRS})
 
