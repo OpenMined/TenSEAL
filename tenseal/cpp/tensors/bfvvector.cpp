@@ -79,14 +79,26 @@ Ciphertext BFVVector::encrypt(shared_ptr<TenSEALContext> context,
 
 BFVVector::plain_t BFVVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     vector<int64_t> result;
+    result.reserve(this->size());
 
-    Plaintext plaintext;
-    this->tenseal_context()->decrypt(*sk, this->_ciphertexts[0], plaintext);
-    this->tenseal_context()->decode<BatchEncoder>(plaintext, result);
+    for (size_t idx = 0; idx < this->_ciphertexts.size(); ++idx) {
+        vector<int64_t> partial_result;
 
-    // result contains all slots of ciphertext (poly_modulus_degree)
-    // we use the real vector size to delimit the resulting plaintext vector
-    return vector<int64_t>(result.cbegin(), result.cbegin() + this->size());
+        Plaintext plaintext;
+        this->tenseal_context()->decrypt(*sk, this->_ciphertexts[idx],
+                                         plaintext);
+        this->tenseal_context()->decode<BatchEncoder>(plaintext,
+                                                      partial_result);
+
+        // result contains all slots of ciphertext (poly_modulus_degree)
+        // we use the real vector size to delimit the resulting plaintext vector
+        auto partial_decr =
+            vector<int64_t>(partial_result.cbegin(),
+                            partial_result.cbegin() + this->_sizes[idx]);
+        result.insert(result.end(), partial_decr.begin(), partial_decr.end());
+    }
+
+    return result;
 }
 
 shared_ptr<BFVVector> BFVVector::power_inplace(unsigned int power) {
@@ -207,7 +219,16 @@ shared_ptr<BFVVector> BFVVector::dot_plain_inplace(
 }
 
 shared_ptr<BFVVector> BFVVector::sum_inplace(size_t /*axis=0*/) {
-    sum_vector(this->tenseal_context(), this->_ciphertexts[0], this->size());
+    vector<Ciphertext> interm_sum;
+    for (size_t idx = 0; idx < this->_ciphertexts.size(); ++idx) {
+        Ciphertext out = this->_ciphertexts[idx];
+        sum_vector(this->tenseal_context(), out, this->_sizes[idx]);
+        interm_sum.push_back(out);
+    }
+    Ciphertext result;
+    tenseal_context()->evaluator->add_many(interm_sum, result);
+
+    this->_ciphertexts = {result};
     this->_sizes = {1};
     return shared_from_this();
 }
@@ -218,17 +239,20 @@ shared_ptr<BFVVector> BFVVector::add_plain_inplace(
 }
 
 shared_ptr<BFVVector> BFVVector::add_plain_inplace(
-    const BFVVector::plain_t& to_add) {
-    if (this->size() != to_add.size()) {
+    const BFVVector::plain_t& vector_to_add) {
+    if (this->size() != vector_to_add.size()) {
         throw invalid_argument("can't add vectors of different sizes");
     }
+    auto slot_count = tenseal_context()->slot_count<BatchEncoder>();
+    auto to_add = vector_to_add.chunks(slot_count);
 
-    Plaintext plaintext;
-
-    this->tenseal_context()->encode<BatchEncoder>(to_add.data_ref(), plaintext);
-    this->tenseal_context()->evaluator->add_plain_inplace(this->_ciphertexts[0],
-                                                          plaintext);
-
+    for (size_t idx = 0; idx < this->_ciphertexts.size(); ++idx) {
+        Plaintext plaintext;
+        this->tenseal_context()->encode<BatchEncoder>(to_add[idx].data_ref(),
+                                                      plaintext);
+        this->tenseal_context()->evaluator->add_plain_inplace(
+            this->_ciphertexts[idx], plaintext);
+    }
     return shared_from_this();
 }
 
@@ -238,17 +262,22 @@ shared_ptr<BFVVector> BFVVector::sub_plain_inplace(
 }
 
 shared_ptr<BFVVector> BFVVector::sub_plain_inplace(
-    const BFVVector::plain_t& to_sub) {
-    if (this->size() != to_sub.size()) {
+    const BFVVector::plain_t& vector_to_sub) {
+    if (this->size() != vector_to_sub.size()) {
         throw invalid_argument("can't sub vectors of different sizes");
     }
 
-    Plaintext plaintext;
+    auto slot_count = tenseal_context()->slot_count<BatchEncoder>();
+    auto to_sub = vector_to_sub.chunks(slot_count);
 
-    this->tenseal_context()->encode<BatchEncoder>(to_sub.data_ref(), plaintext);
-    this->tenseal_context()->evaluator->sub_plain_inplace(this->_ciphertexts[0],
-                                                          plaintext);
+    for (size_t idx = 0; idx < this->_ciphertexts.size(); ++idx) {
+        Plaintext plaintext;
 
+        this->tenseal_context()->encode<BatchEncoder>(to_sub[idx].data_ref(),
+                                                      plaintext);
+        this->tenseal_context()->evaluator->sub_plain_inplace(
+            this->_ciphertexts[idx], plaintext);
+    }
     return shared_from_this();
 }
 
@@ -258,23 +287,29 @@ shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
 }
 
 shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
-    const BFVVector::plain_t& to_mul) {
-    if (this->size() != to_mul.size()) {
+    const BFVVector::plain_t& vector_to_mul) {
+    if (this->size() != vector_to_mul.size()) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
 
-    Plaintext plaintext;
-    this->tenseal_context()->encode<BatchEncoder>(to_mul.data_ref(), plaintext);
+    auto slot_count = tenseal_context()->slot_count<BatchEncoder>();
+    auto to_mul = vector_to_mul.chunks(slot_count);
 
-    try {
-        this->tenseal_context()->evaluator->multiply_plain_inplace(
-            this->_ciphertexts[0], plaintext);
-    } catch (const std::logic_error& e) {
-        if (strcmp(e.what(), "result ciphertext is transparent") == 0) {
-            // replace by encryption of zero
-            this->tenseal_context()->encrypt_zero(this->_ciphertexts[0]);
-        } else {  // Something else, need to be forwarded
-            throw;
+    for (size_t idx = 0; idx < this->_ciphertexts.size(); ++idx) {
+        Plaintext plaintext;
+        this->tenseal_context()->encode<BatchEncoder>(to_mul[idx].data_ref(),
+                                                      plaintext);
+
+        try {
+            this->tenseal_context()->evaluator->multiply_plain_inplace(
+                this->_ciphertexts[idx], plaintext);
+        } catch (const std::logic_error& e) {
+            if (strcmp(e.what(), "result ciphertext is transparent") == 0) {
+                // replace by encryption of zero
+                this->tenseal_context()->encrypt_zero(this->_ciphertexts[idx]);
+            } else {  // Something else, need to be forwarded
+                throw;
+            }
         }
     }
 
@@ -302,6 +337,9 @@ shared_ptr<BFVVector> BFVVector::enc_matmul_plain_inplace(
 }
 
 shared_ptr<BFVVector> BFVVector::replicate_first_slot_inplace(size_t n) {
+    if (this->_ciphertexts.size() != 1)
+        throw invalid_argument("can't replicate first_slot on chunked vectors");
+
     // mask
     vector<int64_t> mask(this->size(), 0);
     mask[0] = 1;

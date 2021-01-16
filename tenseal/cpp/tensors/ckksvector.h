@@ -126,11 +126,11 @@ class CKKSVector
     Private evaluation functions to process both scalar and vector arguments.
     */
     template <typename T>
-    encrypted_t _add_plain_inplace(const T& to_add);
+    void _add_plain_inplace(Ciphertext& ct, const T& to_add);
     template <typename T>
-    encrypted_t _sub_plain_inplace(const T& to_sub);
+    void _sub_plain_inplace(Ciphertext& ct, const T& to_sub);
     template <typename T>
-    encrypted_t _mul_plain_inplace(const T& to_mul);
+    void _mul_plain_inplace(Ciphertext& ct, const T& to_mul);
 
     CKKSVector(const shared_ptr<TenSEALContext>& ctx, const plain_t& vec,
                optional<double> scale = {});
