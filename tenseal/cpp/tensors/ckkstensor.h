@@ -111,6 +111,49 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
                                             OP op);
     shared_ptr<CKKSTensor> op_plain_inplace(const double& operand, OP op);
 
+    /*
+    Private overlaod functions to call the right implementation depending on the
+    parameter
+    */
+    shared_ptr<CKKSTensor> _add_inplace(const shared_ptr<CKKSTensor>& to_add) {
+        return this->add_inplace(to_add);
+    }
+    shared_ptr<CKKSTensor> _sub_inplace(const shared_ptr<CKKSTensor>& to_sub) {
+        return this->sub_inplace(to_sub);
+    }
+    shared_ptr<CKKSTensor> _mul_inplace(const shared_ptr<CKKSTensor>& to_mul) {
+        return this->mul_inplace(to_mul);
+    }
+    shared_ptr<CKKSTensor> _matmul_inplace(
+        const shared_ptr<CKKSTensor>& other) {
+        return this->matmul_inplace(other);
+    }
+    shared_ptr<CKKSTensor> _add_inplace(const double& to_add) {
+        return this->add_plain_inplace(to_add);
+    }
+    shared_ptr<CKKSTensor> _sub_inplace(const double& to_sub) {
+        return this->sub_plain_inplace(to_sub);
+    }
+    shared_ptr<CKKSTensor> _mul_inplace(const double& to_mul) {
+        return this->mul_plain_inplace(to_mul);
+    }
+    shared_ptr<CKKSTensor> _add_inplace(const PlainTensor<double>& to_add) {
+        return this->add_plain_inplace(to_add);
+    }
+    shared_ptr<CKKSTensor> _sub_inplace(const PlainTensor<double>& to_sub) {
+        return this->sub_plain_inplace(to_sub);
+    }
+    shared_ptr<CKKSTensor> _mul_inplace(const PlainTensor<double>& to_mul) {
+        return this->mul_plain_inplace(to_mul);
+    }
+    shared_ptr<CKKSTensor> _matmul_inplace(const PlainTensor<double>& other) {
+        return this->matmul_plain_inplace(other);
+    }
+
+    template <typename T>
+    shared_ptr<CKKSTensor> _dot_inplace(T other,
+                                        const vector<size_t>& other_shape);
+
     void load_proto(const CKKSTensorProto& buffer);
     CKKSTensorProto save_proto() const;
     void clear();

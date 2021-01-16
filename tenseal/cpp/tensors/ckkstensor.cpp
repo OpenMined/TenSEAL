@@ -494,15 +494,14 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
     return shared_from_this();
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
-    const shared_ptr<CKKSTensor>& other) {
+template <typename T>
+shared_ptr<CKKSTensor> CKKSTensor::_dot_inplace(
+    T other, const vector<size_t>& other_shape) {
     auto this_shape = this->shape();
-    auto other_shape = other->shape();
-
     if (this_shape.size() == 1) {
         if (other_shape.size() == 1) {  // 1D-1D
             // inner product
-            this->mul_inplace(other);
+            this->_mul_inplace(other);
             this->sum_inplace();
             return shared_from_this();
         } else if (other_shape.size() == 2) {  // 1D-2D
@@ -519,7 +518,7 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
             // implemented similar to 1D-1D
             throw invalid_argument("2D-1D dot isn't implemented yet");
         } else if (other_shape.size() == 2) {  // 2D-2D
-            this->matmul_inplace(other);
+            this->_matmul_inplace(other);
             return shared_from_this();
         } else {
             throw invalid_argument(
@@ -531,41 +530,18 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
     }
 }
 
+shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
+    const shared_ptr<CKKSTensor>& other) {
+    auto other_shape = other->shape();
+
+    return this->_dot_inplace(other, other_shape);
+}
+
 shared_ptr<CKKSTensor> CKKSTensor::dot_plain_inplace(
     const PlainTensor<double>& other) {
-    auto this_shape = this->shape();
     auto other_shape = other.shape();
 
-    if (this_shape.size() == 1) {
-        if (other_shape.size() == 1) {  // 1D-1D
-            // inner product
-            this->mul_plain_inplace(other);
-            this->sum_inplace();
-            return shared_from_this();
-        } else if (other_shape.size() == 2) {  // 1D-2D
-            // TODO: better implement broadcasting for mul first then would be
-            // implemented similar to 1D-1D
-            throw invalid_argument("1D-2D dot isn't implemented yet");
-        } else {
-            throw invalid_argument(
-                "don't support dot operations of more than 2 dimensions");
-        }
-    } else if (this_shape.size() == 2) {
-        if (other_shape.size() == 1) {  // 2D-1D
-            // TODO: better implement broadcasting for mul first then would be
-            // implemented similar to 1D-1D
-            throw invalid_argument("2D-1D dot isn't implemented yet");
-        } else if (other_shape.size() == 2) {  // 2D-2D
-            this->matmul_plain_inplace(other);
-            return shared_from_this();
-        } else {
-            throw invalid_argument(
-                "don't support dot operations of more than 2 dimensions");
-        }
-    } else {
-        throw invalid_argument(
-            "don't support dot operations of more than 2 dimensions");
-    }
+    return this->_dot_inplace(other, other_shape);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
