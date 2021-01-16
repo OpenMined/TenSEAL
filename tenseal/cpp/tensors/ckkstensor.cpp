@@ -87,7 +87,7 @@ Ciphertext CKKSTensor::encrypt(const shared_ptr<TenSEALContext>& ctx,
     Ciphertext ciphertext(*ctx->seal_context());
     Plaintext plaintext;
     ctx->encode<CKKSEncoder>(data, plaintext, scale);
-    ctx->encryptor->encrypt(plaintext, ciphertext);
+    ctx->encrypt(plaintext, ciphertext);
 
     return ciphertext;
 }
