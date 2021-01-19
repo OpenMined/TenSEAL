@@ -201,18 +201,18 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
                     std::min((i + 1) * batch_size, this->size())));
         }
 
-        std::optional<std::exception> fail;
+        std::optional<string> fail;
         for (size_t i = 0; i < n_jobs; i++) {
             try {
                 this->tenseal_context()->evaluator->add_inplace(
                     result, future_results[i].get());
             } catch (std::exception& e) {
-                fail = e;
+                fail = e.what();
             }
         }
 
         if (fail) {
-            throw invalid_argument(fail.value().what());
+            throw invalid_argument(fail.value());
         }
 
         return result;
