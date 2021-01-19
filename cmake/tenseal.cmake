@@ -37,5 +37,3 @@ if(NOT WIN32)
   target_link_libraries(tenseal PRIVATE tenseal_proto)
   target_link_libraries(_tenseal_cpp PRIVATE tenseal_proto)
 endif()
-
-
