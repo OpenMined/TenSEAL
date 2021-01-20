@@ -10,7 +10,7 @@ else()
 
   set(Protobuf_ROOT ${CMAKE_SOURCE_DIR}/third_party/protobuf/cmake)
   set(Protobuf_DIR
-      ${Protobuf_ROOT}/${CMAKE_INSTALL_LIBDIR}/cmake/protobuf/)
+      ${Protobuf_ROOT}/${CMAKE_INSTALL_LIBDIR}/cmake/protobuf)
 
   message(STATUS "Setting up protobuf ...")
   execute_process(
@@ -41,8 +41,8 @@ else()
 
   include(${Protobuf_DIR}/protobuf-config.cmake)
   include(${Protobuf_DIR}/protobuf-module.cmake)
-  include(${Protobuf_DIR}/protobuf/protobuf-options.cmake)
-  include(${Protobuf_DIR}/protobuf/protobuf-targets.cmake)
+  include(${Protobuf_DIR}/protobuf-options.cmake)
+  include(${Protobuf_DIR}/protobuf-targets.cmake)
 
   if(Protobuf_FOUND)
     message(STATUS "Protobuf version : ${Protobuf_VERSION}")
