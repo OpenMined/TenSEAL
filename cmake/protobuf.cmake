@@ -5,10 +5,15 @@ set(Protobuf_MSVC_STATIC_RUNTIME OFF)
 set(Protobuf_ROOT ${CMAKE_SOURCE_DIR}/third_party/protobuf/cmake)
 set(Protobuf_DIR ${Protobuf_ROOT}/${CMAKE_INSTALL_LIBDIR}/cmake/protobuf)
 
+set(CMAKE_BUILDTYPE "")
+if(WIN32)
+    set(CMAKE_BUILDTYPE -DCMAKE_BUILD_TYPE=Release)
+endif()
+
 message(STATUS "Setting up protobuf ...")
 execute_process(
   COMMAND
-    ${CMAKE_COMMAND} -D protobuf_BUILD_TESTS=OFF -D
+    ${CMAKE_COMMAND} ${CMAKE_BUILDTYPE} -D protobuf_BUILD_TESTS=OFF -D
     protobuf_MSVC_STATIC_RUNTIME=OFF -D protobuf_VERBOSE=ON -D
     protobuf_BUILD_LIBPROTOC=ON -D protobuf_BUILD_PROTOC_BINARIES=ON -D
     CMAKE_POSITION_INDEPENDENT_CODE=ON -G "${CMAKE_GENERATOR}" .
@@ -20,7 +25,7 @@ endif()
 
 message(STATUS "Building protobuf ...")
 execute_process(
-  COMMAND ${CMAKE_COMMAND} --build .
+  COMMAND ${CMAKE_COMMAND} ${CMAKE_BUILDTYPE} --build .
   RESULT_VARIABLE result
   WORKING_DIRECTORY ${Protobuf_ROOT})
 if(result)
