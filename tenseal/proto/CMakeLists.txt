@@ -3,8 +3,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(Protobuf_USE_STATIC_LIBS ON)
 set(Protobuf_ROOT ${CMAKE_SOURCE_DIR}/third_party/protobuf/cmake)
-set(Protobuf_DIR
-    ${CMAKE_SOURCE_DIR}/third_party/protobuf/cmake/lib/cmake/protobuf/)
+set(Protobuf_DIR ${Protobuf_ROOT}/${CMAKE_INSTALL_LIBDIR}/cmake/protobuf)
 
 find_package(Protobuf REQUIRED HINTS ${Protobuf_DIR})
 
