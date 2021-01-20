@@ -8,10 +8,6 @@ set(SOURCES
     ${TENSEAL_BASEDIR}/cpp/tensors/ckkstensor.cpp
     ${TENSEAL_BASEDIR}/cpp/tensors/ckksvector.cpp
     ${TENSEAL_BASEDIR}/cpp/tensors/utils/utils.cpp)
-if(WIN32)
-  set(SOURCES ${SOURCES} ${TENSEAL_BASEDIR}/proto/tensealcontext.pb.cc
-              ${TENSEAL_BASEDIR}/proto/tensors.pb.cc)
-endif()
 
 add_library(tenseal SHARED ${SOURCES})
 pybind11_add_module(_tenseal_cpp ${SOURCES} ${TENSEAL_BASEDIR}/binding.cpp)
@@ -33,7 +29,5 @@ target_include_directories(_tenseal_cpp PUBLIC ${xtensor_INCLUDE_DIRS})
 target_link_libraries(_sealapi_cpp PRIVATE seal)
 target_link_libraries(_tenseal_cpp PRIVATE seal xtensor)
 target_link_libraries(tenseal PRIVATE seal xtensor)
-if(NOT WIN32)
-  target_link_libraries(tenseal PRIVATE tenseal_proto)
-  target_link_libraries(_tenseal_cpp PRIVATE tenseal_proto)
-endif()
+target_link_libraries(tenseal PRIVATE tenseal_proto)
+target_link_libraries(_tenseal_cpp PRIVATE tenseal_proto)
