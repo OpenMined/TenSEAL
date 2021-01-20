@@ -19,7 +19,6 @@ else()
       protobuf_MSVC_STATIC_RUNTIME=OFF -D protobuf_BUILD_LIBPROTOC=ON -D
       protobuf_BUILD_PROTOC_BINARIES=ON -D CMAKE_POSITION_INDEPENDENT_CODE=ON -G
       "${CMAKE_GENERATOR}" .
-    OUTPUT_QUIET
     RESULT_VARIABLE result
     WORKING_DIRECTORY ${Protobuf_ROOT})
   if(result)
@@ -29,7 +28,6 @@ else()
   message(STATUS "Building protobuf ...")
   execute_process(
     COMMAND ${CMAKE_COMMAND} --build .
-    OUTPUT_QUIET
     RESULT_VARIABLE result
     WORKING_DIRECTORY ${Protobuf_ROOT})
   if(result)
