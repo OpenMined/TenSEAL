@@ -7,7 +7,4 @@ set PATH=%PATH%;%programfiles%/protobuf/bin/;%programfiles(x86)%/protobuf/bin/
 :: The general recommendation is to use MD, but for that we need to build and use protobufs as DLL.
 set _CL_=/MT
 
-protoc --proto_path=tenseal\proto --cpp_out=tenseal\proto tenseal\proto\tensealcontext.proto
-protoc --proto_path=tenseal\proto --cpp_out=tenseal\proto tenseal\proto\tensors.proto
-
 pip install .
