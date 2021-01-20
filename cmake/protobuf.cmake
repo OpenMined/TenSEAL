@@ -27,25 +27,5 @@ if(result)
   message(FATAL_ERROR "Failed to build protobuf (${result})!")
 endif()
 
-find_package(Protobuf REQUIRED HINTS ${Protobuf_DIR})
 
-include(${Protobuf_DIR}/protobuf-config.cmake)
-include(${Protobuf_DIR}/protobuf-module.cmake)
-include(${Protobuf_DIR}/protobuf-options.cmake)
-include(${Protobuf_DIR}/protobuf-targets.cmake)
-
-if(Protobuf_FOUND)
-  message(STATUS "Protobuf version : ${Protobuf_VERSION}")
-  message(STATUS "Protobuf include path : ${Protobuf_INCLUDE_DIRS}")
-  message(STATUS "Protobuf libraries : ${Protobuf_LIBRARIES}")
-  message(STATUS "Protobuf compiler libraries : ${Protobuf_PROTOC_LIBRARIES}")
-  message(STATUS "Protobuf lite libraries : ${Protobuf_LITE_LIBRARIES}")
-else()
-  message(
-    WARNING
-      "Protobuf package not found -> specify search path via Protobuf_ROOT variable"
-  )
-endif()
-
-include_directories(${Protobuf_INCLUDE_DIRS})
 add_subdirectory(tenseal/proto)

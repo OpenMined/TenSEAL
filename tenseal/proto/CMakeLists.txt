@@ -7,6 +7,25 @@ set(Protobuf_DIR ${Protobuf_ROOT}/${CMAKE_INSTALL_LIBDIR}/cmake/protobuf)
 
 find_package(Protobuf REQUIRED HINTS ${Protobuf_DIR})
 
+include(${Protobuf_DIR}/protobuf-config.cmake)
+include(${Protobuf_DIR}/protobuf-module.cmake)
+include(${Protobuf_DIR}/protobuf-options.cmake)
+include(${Protobuf_DIR}/protobuf-targets.cmake)
+
+if(Protobuf_FOUND)
+  message(STATUS "Protobuf version : ${Protobuf_VERSION}")
+  message(STATUS "Protobuf include path : ${Protobuf_INCLUDE_DIRS}")
+  message(STATUS "Protobuf libraries : ${Protobuf_LIBRARIES}")
+  message(STATUS "Protobuf compiler libraries : ${Protobuf_PROTOC_LIBRARIES}")
+  message(STATUS "Protobuf lite libraries : ${Protobuf_LITE_LIBRARIES}")
+  message(STATUS "Protobuf protoc : ${Protobuf_PROTOC_EXECUTABLE}")
+else()
+  message(
+    WARNING
+      "Protobuf package not found -> specify search path via Protobuf_ROOT variable"
+  )
+endif()
+
 include_directories(${Protobuf_INCLUDE_DIRS})
 
 file(GLOB PROTOBUF_FILELIST tensealcontext.proto tensors.proto)
