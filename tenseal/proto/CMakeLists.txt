@@ -6,12 +6,7 @@ set(Protobuf_ROOT ${CMAKE_SOURCE_DIR}/third_party/protobuf/cmake)
 set(Protobuf_DIR
     ${CMAKE_SOURCE_DIR}/third_party/protobuf/cmake/lib/cmake/protobuf/)
 
-if(WIN32)
-  include(FindProtobuf)
-  find_package(Protobuf REQUIRED)
-else()
-  find_package(Protobuf REQUIRED HINTS ${Protobuf_DIR})
-endif()
+find_package(Protobuf REQUIRED HINTS ${Protobuf_DIR})
 
 include_directories(${Protobuf_INCLUDE_DIRS})
 
