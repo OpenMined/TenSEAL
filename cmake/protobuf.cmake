@@ -11,8 +11,7 @@ execute_process(
     ${CMAKE_COMMAND} -D protobuf_BUILD_TESTS=OFF -D
     protobuf_MSVC_STATIC_RUNTIME=OFF -D protobuf_VERBOSE=ON -D
     protobuf_BUILD_LIBPROTOC=ON -D protobuf_BUILD_PROTOC_BINARIES=ON -D
-    CMAKE_POSITION_INDEPENDENT_CODE=ON -D CMAKE_BUILD_TYPE=Release -G
-    "${CMAKE_GENERATOR}" .
+    CMAKE_POSITION_INDEPENDENT_CODE=ON -G "${CMAKE_GENERATOR}" .
   RESULT_VARIABLE result
   WORKING_DIRECTORY ${Protobuf_ROOT})
 if(result)
@@ -21,22 +20,11 @@ endif()
 
 message(STATUS "Building protobuf ...")
 execute_process(
-  COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Release --build .
+  COMMAND ${CMAKE_COMMAND} --build .
   RESULT_VARIABLE result
   WORKING_DIRECTORY ${Protobuf_ROOT})
 if(result)
   message(FATAL_ERROR "Failed to build protobuf (${result})!")
-endif()
-
-if(WIN32)
-  message(STATUS "Installing protobuf ...")
-  execute_process(
-    COMMAND ${CMAKE_COMMAND} --build . --target install --config Release
-    RESULT_VARIABLE result
-    WORKING_DIRECTORY ${Protobuf_ROOT})
-  if(result)
-    message(FATAL_ERROR "Failed to install protobuf (${result})!")
-  endif()
 endif()
 
 find_package(Protobuf REQUIRED HINTS ${Protobuf_DIR})
