@@ -3,11 +3,6 @@ name: Windows Package
 on:
   release:
     types: [created]
-  push:
-    branches: [master]
-  pull_request:
-    types: [opened, synchronize, reopened]
-
 
 jobs:
   deploy:
