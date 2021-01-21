@@ -76,6 +76,11 @@ def plain_tensor(*args, **kwargs) -> PlainTensor:
     return PlainTensor(*args, **kwargs)
 
 
+def plain_tensor_from(data: bytes, dtype: str = "float") -> PlainTensor:
+    """Load a PlainTensor from a buffer."""
+    return PlainTensor.load(data, dtype)
+
+
 def bfv_vector(*args, **kwargs) -> BFVVector:
     """Constructor function for tenseal.BFVVector"""
     return BFVVector(*args, **kwargs)
@@ -138,6 +143,7 @@ __all__ = [
     "context_from",
     "im2col_encoding",
     "plain_tensor",
+    "plain_tensor_from",
     "ENCRYPTION_TYPE",
     "__version__",
 ]

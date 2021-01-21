@@ -17,6 +17,13 @@ class PlainTensor:
         """
         if dtype not in ("float", "int"):
             raise ValueError("wrong dtype, must be either 'float' or 'int'")
+
+        # wrapping
+        if isinstance(tensor, (ts._ts_cpp.PlainTensorDouble, ts._ts_cpp.PlainTensorInt64)):
+            self._dtype = dtype
+            self.data = tensor
+            return
+
         try:
             t = np.array(tensor, dtype=dtype)
         except:
@@ -109,3 +116,27 @@ class PlainTensor:
         "Changes the internal representation to a new shape"
         self.data.reshape_(shape)
         return self
+
+    @classmethod
+    def load(cls, data: bytes, dtype: str = "float") -> "PlainTensor":
+        """
+        Constructor method for the tensor object from a serialized string.
+        Args:
+            data: the serialized data.
+            dtype: underlining data type.
+        Returns:
+            Tensor object.
+        """
+        if not isinstance(data, bytes):
+            raise TypeError("Invalid input types: vector: {}".format(type(data)))
+
+        if dtype == "float":
+            return cls(ts._ts_cpp.PlainTensorDouble(data))
+        elif dtype == "int":
+            return cls(ts._ts_cpp.PlainTensorInt(data))
+        else:
+            raise ValueError("wrong dtype, must be either 'float' or 'int'")
+
+    def serialize(self) -> bytes:
+        """Serialize the tensor into a stream of bytes"""
+        return self.data.serialize()
