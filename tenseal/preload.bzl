@@ -18,7 +18,7 @@ def tenseal_preload():
             name = "rules_foreign_cc",
             remote = "https://github.com/bazelbuild/rules_foreign_cc",
             init_submodules = True,
-            commit="04c04fe7d2fa09e46c630c37d8f32e56598527ca",
+            commit="d54c78ab86b40770ee19f0949db9d74a831ab9f0",
             )
 
     if "pybind11_bazel" not in native.existing_rules():
