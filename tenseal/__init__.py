@@ -76,9 +76,9 @@ def plain_tensor(*args, **kwargs) -> PlainTensor:
     return PlainTensor(*args, **kwargs)
 
 
-def plain_tensor_from(data: bytes) -> PlainTensor:
+def plain_tensor_from(data: bytes, dtype: str = "float") -> PlainTensor:
     """Load a PlainTensor from a buffer."""
-    return PlainTensor.load_double(data)
+    return PlainTensor.load(data, dtype)
 
 
 def bfv_vector(*args, **kwargs) -> BFVVector:

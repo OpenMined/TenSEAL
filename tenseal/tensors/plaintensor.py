@@ -118,18 +118,24 @@ class PlainTensor:
         return self
 
     @classmethod
-    def load_double(cls, data: bytes) -> "PlainTensor":
+    def load(cls, data: bytes, dtype: str = "float") -> "PlainTensor":
         """
         Constructor method for the tensor object from a serialized string.
         Args:
             data: the serialized data.
+            dtype: underlining data type.
         Returns:
             Tensor object.
         """
-        if isinstance(data, bytes):
-            return cls(ts._ts_cpp.PlainTensorDouble(data))
+        if not isinstance(data, bytes):
+            raise TypeError("Invalid input types: vector: {}".format(type(data)))
 
-        raise TypeError("Invalid input types: vector: {}".format(type(data)))
+        if dtype == "float":
+            return cls(ts._ts_cpp.PlainTensorDouble(data))
+        elif dtype == "int":
+            return cls(ts._ts_cpp.PlainTensorInt(data))
+        else:
+            raise ValueError("wrong dtype, must be either 'float' or 'int'")
 
     def serialize(self) -> bytes:
         """Serialize the tensor into a stream of bytes"""
