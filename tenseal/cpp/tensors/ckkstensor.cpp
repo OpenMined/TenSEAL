@@ -520,7 +520,7 @@ shared_ptr<CKKSTensor> CKKSTensor::_dot_inplace(
             // TODO: remove boradcast when implemented in _mul
             this->_data.broadcast_inplace(other_shape);
             this->_mul_inplace(other);
-            this->sum_inplace()
+            this->sum_inplace();
         } else {
             throw invalid_argument(
                 "don't support dot operations of more than 2 dimensions");
