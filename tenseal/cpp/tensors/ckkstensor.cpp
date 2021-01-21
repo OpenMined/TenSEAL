@@ -755,6 +755,8 @@ void CKKSTensor::load(const std::string& tensor_str) {
 }
 
 std::string CKKSTensor::save() const {
+    if (_lazy_buffer) return _lazy_buffer.value();
+
     auto buffer = this->save_proto();
     std::string output;
     output.resize(proto_bytes_size(buffer));
@@ -768,10 +770,14 @@ std::string CKKSTensor::save() const {
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::copy() const {
+    if (_lazy_buffer)
+        return shared_ptr<CKKSTensor>(new CKKSTensor(_lazy_buffer.value()));
     return shared_ptr<CKKSTensor>(new CKKSTensor(shared_from_this()));
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::deepcopy() const {
+    if (_lazy_buffer) return this->copy();
+
     TenSEALContextProto ctx = this->tenseal_context()->save_proto();
     CKKSTensorProto vec = this->save_proto();
     return CKKSTensor::Create(ctx, vec);
