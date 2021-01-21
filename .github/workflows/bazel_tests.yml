@@ -21,12 +21,10 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Setup bazel
-        uses: jwlawson/actions-setup-bazel@v1
+      - name: Setup Bazel
+        uses: abhinavsingh/setup-bazel@v3
         with:
-            bazel-version: '3.7'
-      - name: Use bazel
-        run: bazel --version
+            version: 3.7.1
       - name: Run gtest
         timeout-minutes: 30
         run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=1500 --jobs 1 //tests/cpp/...
