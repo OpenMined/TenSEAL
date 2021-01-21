@@ -32,6 +32,16 @@ def test_sanity(data, shape):
     assert tensor.empty() == False
     assert tensor.strides() == strides
 
+    buf = tensor.serialize()
+    new_tensor = ts.plain_tensor_from(buf)
+
+    assert new_tensor.raw == data
+    assert new_tensor.shape == shape
+    assert new_tensor.size() == shape[0]
+    assert len(new_tensor) == shape[0]
+    assert new_tensor.empty() == False
+    assert new_tensor.strides() == strides
+
 
 @pytest.mark.parametrize(
     "data, shape, reshape",

@@ -1,6 +1,8 @@
 #ifndef TENSEAL_TENSOR_STORAGE_H
 #define TENSEAL_TENSOR_STORAGE_H
 
+#include <xtensor/xjson.hpp>
+
 #include "gsl/span"
 #include "xtensor/xadapt.hpp"
 #include "xtensor/xarray.hpp"
@@ -114,6 +116,11 @@ class TensorStorage {
 
         _data = xt::adapt(flat_data, shape);
     }
+    /**
+     * Create a new TensorStorage from a serialized buffer.
+     * @param[in] input buffer.
+     */
+    TensorStorage(const std::string& data) { this->load(data); }
     /**
      * Reshape the TensorStorage.
      * @param[in] new shape.
@@ -334,6 +341,15 @@ class TensorStorage {
     }
     TensorStorage<dtype_t> copy() {
         return TensorStorage<dtype_t>(this->_data, this->shape());
+    }
+
+    std::string save() {
+        nlohmann::json buf = _data;
+        return buf.dump();
+    }
+
+    void load(const std::string& buf) {
+        xt::from_json(nlohmann::json::parse(buf), _data);
     }
 
    private:
