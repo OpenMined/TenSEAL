@@ -20,6 +20,7 @@ void bind_plain_tensor(py::module &m, const std::string &name) {
         .def(py::init<const vector<plain_t> &>())
         .def(py::init<const vector<vector<plain_t>> &>())
         .def(py::init<const vector<plain_t> &, const vector<size_t> &>())
+        .def(py::init<const string &>())
         .def("at", &type::at)
         .def("get_diagonal", &type::get_diagonal)
         .def("horizontal_scan", &type::horizontal_scan)
@@ -33,7 +34,8 @@ void bind_plain_tensor(py::module &m, const std::string &name) {
         .def("reshape_", &type::reshape_inplace)
         .def("__len__", &type::size)
         .def("empty", &type::empty)
-        .def("replicate", &type::replicate);
+        .def("replicate", &type::replicate)
+        .def("serialize", [](type &obj) { return py::bytes(obj.save()); });
 }
 
 PYBIND11_MODULE(_tenseal_cpp, m) {
