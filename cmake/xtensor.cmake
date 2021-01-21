@@ -1,7 +1,9 @@
 add_definitions(-DXTENSOR_USE_XSIMD)
 set(XTENSOR_USE_XSIMD ON)
 
+include_directories(third_party/json/include/)
 include_directories(third_party/xtl/include)
+
 add_subdirectory(third_party/xtl)
 set(xtl_DIR
     "${CMAKE_CURRENT_BINARY_DIR}/third_party/xtl"
