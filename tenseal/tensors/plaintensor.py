@@ -118,7 +118,7 @@ class PlainTensor:
         return self
 
     @classmethod
-    def load_double(cls, data: bytes) -> 'PlainTensor':
+    def load_double(cls, data: bytes) -> "PlainTensor":
         """
         Constructor method for the tensor object from a serialized string.
         Args:
