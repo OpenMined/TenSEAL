@@ -515,9 +515,12 @@ shared_ptr<CKKSTensor> CKKSTensor::_dot_inplace(
             this->sum_inplace();
             return shared_from_this();
         } else if (other_shape.size() == 2) {  // 1D-2D
-            // TODO: better implement broadcasting for mul first then would be
-            // implemented similar to 1D-1D
-            throw invalid_argument("1D-2D dot isn't implemented yet");
+            if (this_shape[0] != other_shape[0])
+                throw invalid_argument("can't perform dot: dimension mismatch");
+            // TODO: remove boradcast when implemented in _mul
+            this->_data.broadcast_inplace(other_shape);
+            this->_mul_inplace(other);
+            this->sum_inplace()
         } else {
             throw invalid_argument(
                 "don't support dot operations of more than 2 dimensions");
