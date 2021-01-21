@@ -24,7 +24,7 @@ jobs:
       - name: Setup bazel
         uses: jwlawson/actions-setup-bazel@v1
         with:
-            bazel-version: '3.7.1'
+            bazel-version: '3.7'
       - name: Use bazel
         run: bazel --version
       - name: Run gtest
