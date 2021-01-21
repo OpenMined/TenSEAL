@@ -18,7 +18,7 @@ def tenseal_preload():
             name = "rules_foreign_cc",
             remote = "https://github.com/bazelbuild/rules_foreign_cc",
             init_submodules = True,
-            commit="04c04fe7d2fa09e46c630c37d8f32e56598527ca",
+            commit="d54c78ab86b40770ee19f0949db9d74a831ab9f0",
             )
 
     if "pybind11_bazel" not in native.existing_rules():
@@ -40,5 +40,6 @@ def tenseal_preload():
     if "rules_python" not in native.existing_rules():
         http_archive(
             name = "rules_python",
+            sha256 = "b6d46438523a3ec0f3cead544190ee13223a52f6a6765a29eae7b7cc24cc83a0",
             url = "https://github.com/bazelbuild/rules_python/releases/download/0.1.0/rules_python-0.1.0.tar.gz",
         )
