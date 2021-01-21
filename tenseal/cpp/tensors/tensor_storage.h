@@ -1,11 +1,10 @@
 #ifndef TENSEAL_TENSOR_STORAGE_H
 #define TENSEAL_TENSOR_STORAGE_H
 
-#include <xtensor/xjson.hpp>
-
 #include "gsl/span"
 #include "xtensor/xadapt.hpp"
 #include "xtensor/xarray.hpp"
+#include "xtensor/xjson.hpp"
 
 namespace tenseal {
 
