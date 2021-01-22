@@ -28,7 +28,7 @@ class EncryptedTensor {
      *of real numbers using the secret-key.
      **/
     PlainTensor<plain_data_t> decrypt() const {
-        if (this->tenseal_context()->decryptor == nullptr) {
+        if (this->tenseal_context()->is_public()) {
             // this->context was loaded with public keys only
             throw invalid_argument(
                 "the current context of the tensor doesn't hold a secret_key, "
@@ -76,10 +76,14 @@ class EncryptedTensor {
         return this->copy()->mul_inplace(to_mul);
     };
     virtual encrypted_t mul_inplace(const encrypted_t& to_mul) = 0;
-    encrypted_t dot_product(encrypted_t to_mul) const {
-        return this->copy()->dot_product_inplace(to_mul);
+    encrypted_t dot(const encrypted_t& to_mul) const {
+        return this->copy()->dot_inplace(to_mul);
     };
-    virtual encrypted_t dot_product_inplace(const encrypted_t& to_mul) = 0;
+    virtual encrypted_t dot_inplace(const encrypted_t& to_mul) = 0;
+    encrypted_t matmul(const encrypted_t& to_mul) const {
+        return this->copy()->matmul_inplace(to_mul);
+    };
+    virtual encrypted_t matmul_inplace(const encrypted_t& to_mul) = 0;
     /**
      * Plain evaluation function operates on an encrypted tensors and plaintext
      * tensors and returns a new EncryptedTensor<plain_data_t, encrypted_t>
@@ -117,11 +121,15 @@ class EncryptedTensor {
     virtual encrypted_t mul_plain_inplace(
         const PlainTensor<plain_data_t>& to_mul) = 0;
 
-    encrypted_t dot_product_plain(
-        const PlainTensor<plain_data_t>& to_mul) const {
-        return this->copy()->dot_product_plain_inplace(to_mul);
+    encrypted_t dot_plain(const PlainTensor<plain_data_t>& to_mul) const {
+        return this->copy()->dot_plain_inplace(to_mul);
     };
-    virtual encrypted_t dot_product_plain_inplace(
+    virtual encrypted_t dot_plain_inplace(
+        const PlainTensor<plain_data_t>& to_mul) = 0;
+    encrypted_t matmul_plain(const PlainTensor<plain_data_t>& to_mul) const {
+        return this->copy()->matmul_plain_inplace(to_mul);
+    };
+    virtual encrypted_t matmul_plain_inplace(
         const PlainTensor<plain_data_t>& to_mul) = 0;
     encrypted_t sum(size_t axis = 0) const {
         return this->copy()->sum_inplace(axis);
@@ -155,12 +163,19 @@ class EncryptedTensor {
         if (_context == nullptr) throw invalid_argument("missing context");
         return _context;
     };
-
+    /**
+     * Check if the context is linked
+     * **/
+    bool has_context() const { return _context != nullptr; };
     /**
      * Link to a TenSEAL context.
      **/
     void link_tenseal_context(shared_ptr<TenSEALContext> ctx) {
         this->_context = ctx;
+        if (_lazy_buffer) {
+            this->load(*_lazy_buffer);
+            _lazy_buffer = {};
+        }
     };
     void load_context_proto(const TenSEALContextProto& ctx) {
         this->link_tenseal_context(TenSEALContext::Create(ctx));
@@ -252,9 +267,10 @@ class EncryptedTensor {
     virtual ~EncryptedTensor(){};
 
    protected:
-    shared_ptr<TenSEALContext> _context;
+    optional<string> _lazy_buffer;
 
    private:
+    shared_ptr<TenSEALContext> _context;
 };
 
 }  // namespace tenseal

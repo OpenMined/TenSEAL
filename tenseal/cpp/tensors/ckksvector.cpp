@@ -26,6 +26,8 @@ CKKSVector::CKKSVector(const shared_ptr<TenSEALContext>& ctx,
     this->load(vec);
 }
 
+CKKSVector::CKKSVector(const string& vec) { this->load(vec); }
+
 CKKSVector::CKKSVector(const TenSEALContextProto& ctx,
                        const CKKSVectorProto& vec) {
     this->load_context_proto(ctx);
@@ -61,20 +63,17 @@ Ciphertext CKKSVector::encrypt(shared_ptr<TenSEALContext> context, double scale,
     Plaintext plaintext;
     pt.replicate(slot_count);
     context->encode<CKKSEncoder>(pt.data(), plaintext, scale);
-    context->encryptor->encrypt(plaintext, ciphertext);
+    context->encrypt(plaintext, ciphertext);
 
     return ciphertext;
 }
 
 CKKSVector::plain_t CKKSVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
-    Decryptor decryptor =
-        Decryptor(*this->tenseal_context()->seal_context(), *sk);
-
     vector<double> result;
     result.reserve(this->size());
 
-    decryptor.decrypt(this->_ciphertext, plaintext);
+    this->tenseal_context()->decrypt(*sk, this->_ciphertext, plaintext);
     this->tenseal_context()->decode<CKKSEncoder>(plaintext, result);
 
     // result contains all slots of ciphertext (n/2), but we may be using less
@@ -182,7 +181,7 @@ shared_ptr<CKKSVector> CKKSVector::mul_inplace(
     return shared_from_this();
 }
 
-shared_ptr<CKKSVector> CKKSVector::dot_product_inplace(
+shared_ptr<CKKSVector> CKKSVector::dot_inplace(
     const shared_ptr<CKKSVector>& to_mul) {
     this->mul_inplace(to_mul);
     this->sum_inplace();
@@ -190,8 +189,7 @@ shared_ptr<CKKSVector> CKKSVector::dot_product_inplace(
     return shared_from_this();
 }
 
-shared_ptr<CKKSVector> CKKSVector::dot_product_plain_inplace(
-    const plain_t& to_mul) {
+shared_ptr<CKKSVector> CKKSVector::dot_plain_inplace(const plain_t& to_mul) {
     this->mul_plain_inplace(to_mul);
     this->sum_inplace();
 
@@ -208,7 +206,7 @@ shared_ptr<CKKSVector> CKKSVector::add_plain_inplace(const plain_t& to_add) {
     if (this->size() != to_add.size()) {
         throw invalid_argument("can't add vectors of different sizes");
     }
-    return this->_add_plain_inplace(to_add.data());
+    return this->_add_plain_inplace(to_add.data_ref());
 }
 
 shared_ptr<CKKSVector> CKKSVector::add_plain_inplace(const double& to_add) {
@@ -230,7 +228,7 @@ shared_ptr<CKKSVector> CKKSVector::sub_plain_inplace(const plain_t& to_sub) {
     if (this->size() != to_sub.size()) {
         throw invalid_argument("can't sub vectors of different sizes");
     }
-    return this->_sub_plain_inplace(to_sub.data());
+    return this->_sub_plain_inplace(to_sub.data_ref());
 }
 
 shared_ptr<CKKSVector> CKKSVector::sub_plain_inplace(const double& to_sub) {
@@ -255,7 +253,7 @@ shared_ptr<CKKSVector> CKKSVector::mul_plain_inplace(const plain_t& to_mul) {
         throw invalid_argument("can't multiply vectors of different sizes");
     }
 
-    return this->_mul_plain_inplace(to_mul.data());
+    return this->_mul_plain_inplace(to_mul.data_ref());
 }
 
 shared_ptr<CKKSVector> CKKSVector::mul_plain_inplace(const double& to_mul) {
@@ -275,7 +273,7 @@ shared_ptr<CKKSVector> CKKSVector::_mul_plain_inplace(const T& to_mul) {
     } catch (const std::logic_error& e) {
         if (strcmp(e.what(), "result ciphertext is transparent") == 0) {
             // replace by encryption of zero
-            this->tenseal_context()->encryptor->encrypt_zero(this->_ciphertext);
+            this->tenseal_context()->encrypt_zero(this->_ciphertext);
             this->_ciphertext.scale() = this->_init_scale;
             return this->copy();
         } else {  // Something else, need to be forwarded
@@ -289,8 +287,8 @@ shared_ptr<CKKSVector> CKKSVector::_mul_plain_inplace(const T& to_mul) {
 }
 
 shared_ptr<CKKSVector> CKKSVector::matmul_plain_inplace(
-    const CKKSVector::plain_t& matrix, size_t n_jobs) {
-    this->_ciphertext = this->diagonal_ct_vector_matmul(matrix, n_jobs);
+    const CKKSVector::plain_t& matrix) {
+    this->_ciphertext = this->diagonal_ct_vector_matmul(matrix);
 
     this->_size = matrix.shape()[1];
     this->auto_rescale(_ciphertext);
@@ -317,7 +315,7 @@ shared_ptr<CKKSVector> CKKSVector::polyval_inplace(
     // we can multiply by 0, or return the encryption of zero
     if (degree == -1) {
         // we set the vector to the encryption of zero
-        this->tenseal_context()->encryptor->encrypt_zero(this->_ciphertext);
+        this->tenseal_context()->encrypt_zero(this->_ciphertext);
         this->_ciphertext.scale() = this->_init_scale;
         return shared_from_this();
     }
@@ -461,6 +459,11 @@ CKKSVectorProto CKKSVector::save_proto() const {
 }
 
 void CKKSVector::load(const std::string& vec) {
+    if (!this->has_context()) {
+        _lazy_buffer = vec;
+        return;
+    }
+
     CKKSVectorProto buffer;
     if (!buffer.ParseFromArray(vec.c_str(), static_cast<int>(vec.size()))) {
         throw invalid_argument("failed to parse CKKS stream");
@@ -469,6 +472,8 @@ void CKKSVector::load(const std::string& vec) {
 }
 
 std::string CKKSVector::save() const {
+    if (_lazy_buffer) return _lazy_buffer.value();
+
     auto buffer = this->save_proto();
     std::string output;
     output.resize(proto_bytes_size(buffer));
@@ -482,10 +487,15 @@ std::string CKKSVector::save() const {
 }
 
 shared_ptr<CKKSVector> CKKSVector::copy() const {
+    if (_lazy_buffer)
+        return shared_ptr<CKKSVector>(new CKKSVector(_lazy_buffer.value()));
+
     return shared_ptr<CKKSVector>(new CKKSVector(shared_from_this()));
 }
 
 shared_ptr<CKKSVector> CKKSVector::deepcopy() const {
+    if (_lazy_buffer) return this->copy();
+
     TenSEALContextProto ctx = this->tenseal_context()->save_proto();
     CKKSVectorProto vec = this->save_proto();
     return CKKSVector::Create(ctx, vec);

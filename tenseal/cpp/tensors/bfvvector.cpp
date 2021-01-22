@@ -24,6 +24,8 @@ BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx, const string& vec) {
     this->load(vec);
 }
 
+BFVVector::BFVVector(const string& vec) { this->load(vec); }
+
 BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx,
                      const BFVVectorProto& vec) {
     this->prepare_context(ctx);
@@ -57,19 +59,16 @@ Ciphertext BFVVector::encrypt(shared_ptr<TenSEALContext> context,
     Plaintext plaintext;
     pt.replicate(slot_count);
     context->encode<BatchEncoder>(pt.data(), plaintext);
-    context->encryptor->encrypt(plaintext, ciphertext);
+    context->encrypt(plaintext, ciphertext);
 
     return ciphertext;
 }
 
 BFVVector::plain_t BFVVector::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
-    Decryptor decryptor =
-        Decryptor(*this->tenseal_context()->seal_context(), *sk);
-
     vector<int64_t> result;
 
-    decryptor.decrypt(this->_ciphertext, plaintext);
+    this->tenseal_context()->decrypt(*sk, this->_ciphertext, plaintext);
     this->tenseal_context()->decode<BatchEncoder>(plaintext, result);
 
     // result contains all slots of ciphertext (poly_modulus_degree)
@@ -171,7 +170,7 @@ shared_ptr<BFVVector> BFVVector::mul_inplace(
     return shared_from_this();
 }
 
-shared_ptr<BFVVector> BFVVector::dot_product_inplace(
+shared_ptr<BFVVector> BFVVector::dot_inplace(
     const shared_ptr<BFVVector>& to_mul) {
     this->mul_inplace(to_mul);
     this->sum_inplace();
@@ -179,7 +178,7 @@ shared_ptr<BFVVector> BFVVector::dot_product_inplace(
     return shared_from_this();
 }
 
-shared_ptr<BFVVector> BFVVector::dot_product_plain_inplace(
+shared_ptr<BFVVector> BFVVector::dot_plain_inplace(
     const BFVVector::plain_t& to_mul) {
     this->mul_plain_inplace(to_mul);
     this->sum_inplace();
@@ -206,7 +205,7 @@ shared_ptr<BFVVector> BFVVector::add_plain_inplace(
 
     Plaintext plaintext;
 
-    this->tenseal_context()->encode<BatchEncoder>(to_add.data(), plaintext);
+    this->tenseal_context()->encode<BatchEncoder>(to_add.data_ref(), plaintext);
     this->tenseal_context()->evaluator->add_plain_inplace(this->_ciphertext,
                                                           plaintext);
 
@@ -226,7 +225,7 @@ shared_ptr<BFVVector> BFVVector::sub_plain_inplace(
 
     Plaintext plaintext;
 
-    this->tenseal_context()->encode<BatchEncoder>(to_sub.data(), plaintext);
+    this->tenseal_context()->encode<BatchEncoder>(to_sub.data_ref(), plaintext);
     this->tenseal_context()->evaluator->sub_plain_inplace(this->_ciphertext,
                                                           plaintext);
 
@@ -245,7 +244,7 @@ shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
     }
 
     Plaintext plaintext;
-    this->tenseal_context()->encode<BatchEncoder>(to_mul.data(), plaintext);
+    this->tenseal_context()->encode<BatchEncoder>(to_mul.data_ref(), plaintext);
 
     try {
         this->tenseal_context()->evaluator->multiply_plain_inplace(
@@ -253,7 +252,7 @@ shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
     } catch (const std::logic_error& e) {
         if (strcmp(e.what(), "result ciphertext is transparent") == 0) {
             // replace by encryption of zero
-            this->tenseal_context()->encryptor->encrypt_zero(this->_ciphertext);
+            this->tenseal_context()->encrypt_zero(this->_ciphertext);
         } else {  // Something else, need to be forwarded
             throw;
         }
@@ -263,7 +262,7 @@ shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
 }
 
 shared_ptr<BFVVector> BFVVector::matmul_plain_inplace(
-    const BFVVector::plain_t& matrix, size_t n_jobs) {
+    const BFVVector::plain_t& matrix) {
     throw std::logic_error("not implemented");
 }
 
@@ -321,8 +320,9 @@ BFVVectorProto BFVVector::save_proto() const {
 }
 
 void BFVVector::load(const std::string& vec) {
-    if (this->tenseal_context() == nullptr) {
-        throw invalid_argument("context missing for deserialization");
+    if (!this->has_context()) {
+        _lazy_buffer = vec;
+        return;
     }
     BFVVectorProto buffer;
     if (!buffer.ParseFromArray(vec.c_str(), static_cast<int>(vec.size()))) {
@@ -332,6 +332,8 @@ void BFVVector::load(const std::string& vec) {
 }
 
 std::string BFVVector::save() const {
+    if (_lazy_buffer) return _lazy_buffer.value();
+
     auto buffer = this->save_proto();
     std::string output;
     output.resize(proto_bytes_size(buffer));
@@ -345,10 +347,15 @@ std::string BFVVector::save() const {
 }
 
 shared_ptr<BFVVector> BFVVector::copy() const {
+    if (_lazy_buffer)
+        return shared_ptr<BFVVector>(new BFVVector(_lazy_buffer.value()));
+
     return shared_ptr<BFVVector>(new BFVVector(shared_from_this()));
 }
 
 shared_ptr<BFVVector> BFVVector::deepcopy() const {
+    if (_lazy_buffer) return this->copy();
+
     TenSEALContextProto ctx = this->tenseal_context()->save_proto();
     BFVVectorProto vec = this->save_proto();
     return BFVVector::Create(ctx, vec);

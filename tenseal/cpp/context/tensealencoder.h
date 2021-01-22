@@ -7,6 +7,7 @@
 #include <typeindex>
 #include <vector>
 
+#include "gsl/span"
 #include "seal/seal.h"
 
 namespace tenseal {
@@ -29,10 +30,23 @@ class TenSEALEncoder {
         return any_cast<shared_ptr<T>>(_encoders[tidx]);
     }
 
+    double unwrap_scale(optional<double> optscale = {}) {
+        double scale = 1.0;
+        if (optscale.has_value())
+            scale = optscale.value();
+        else
+            scale = global_scale();
+        return scale;
+    }
     /*
     Template encoding functions to choose between the use of
     Integer/BatchEncoder or CKKSEncoder.
     */
+    template <class T>
+    void encode(const gsl::span<const int64_t>& vec, Plaintext& pt) {
+        auto encoder = this->get<T>();
+        encoder->encode(vec, pt);
+    }
     template <class T>
     void encode(const vector<int64_t>& vec, Plaintext& pt) {
         auto encoder = this->get<T>();
@@ -40,28 +54,22 @@ class TenSEALEncoder {
     }
 
     template <class CKKSEncoder>
+    void encode(const gsl::span<const double>& vec, Plaintext& pt,
+                optional<double> optscale = {}) {
+        auto encoder = this->get<CKKSEncoder>();
+        encoder->encode(vec, unwrap_scale(optscale), pt);
+    }
+    template <class CKKSEncoder>
     void encode(const vector<double>& vec, Plaintext& pt,
                 optional<double> optscale = {}) {
-        double scale = 1.0;
-        if (optscale.has_value())
-            scale = optscale.value();
-        else
-            scale = global_scale();
-
         auto encoder = this->get<CKKSEncoder>();
-        encoder->encode(vec, scale, pt);
+        encoder->encode(vec, unwrap_scale(optscale), pt);
     }
 
     template <class CKKSEncoder>
     void encode(double value, Plaintext& pt, optional<double> optscale = {}) {
-        double scale = 1.0;
-        if (optscale.has_value())
-            scale = optscale.value();
-        else
-            scale = global_scale();
-
         auto encoder = this->get<CKKSEncoder>();
-        encoder->encode(value, scale, pt);
+        encoder->encode(value, unwrap_scale(optscale), pt);
     }
 
     /*

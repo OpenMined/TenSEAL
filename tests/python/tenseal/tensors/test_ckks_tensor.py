@@ -64,10 +64,66 @@ def precision():
     return 1
 
 
+def reshape(batched, shape):
+    new_shape = shape.copy()
+    if batched:
+        batch_size = new_shape[0]
+        new_shape = new_shape[1:]
+
+    new_shape = new_shape[-1:] + new_shape[:-1]
+
+    full_shape = new_shape.copy()
+    if batched:
+        full_shape.insert(0, batch_size)
+    return new_shape, full_shape
+
+
+@pytest.mark.parametrize(
+    "data, new_shape",
+    [
+        # (ts.plain_tensor([0]), 0),
+        (ts.plain_tensor([i for i in range(8)]), [4, 2]),
+        (ts.plain_tensor([i for i in range(210)], shape=[2, 3, 5, 7]), [7, 15, 2]),
+    ],
+)
+def test_reshape_no_batching(context, data, new_shape):
+    tensor = ts.ckks_tensor(context, data, batch=False)
+
+    old_shape = tensor.shape
+    new_t = tensor.reshape(new_shape)
+
+    assert new_t.shape == new_shape
+    assert tensor.shape == old_shape
+
+    tensor.reshape_(new_shape)
+    assert tensor.shape == new_shape
+
+
+@pytest.mark.parametrize(
+    "data, new_shape",
+    [
+        # (ts.plain_tensor([0]), 0),
+        (ts.plain_tensor([i for i in range(8)], shape=[2, 2, 2]), [4]),
+        (ts.plain_tensor([i for i in range(210)], shape=[2, 3, 5, 7]), [7, 15]),
+    ],
+)
+def test_reshape_batching(context, data, new_shape):
+    tensor = ts.ckks_tensor(context, data, batch=True)
+
+    old_shape = tensor.shape
+    new_t = tensor.reshape(new_shape)
+
+    assert new_t.shape == new_shape
+    assert tensor.shape == old_shape
+
+    tensor.reshape_(new_shape)
+    assert tensor.shape == new_shape
+
+
 @pytest.mark.parametrize(
     "data, axis",
     [
-        (ts.plain_tensor([0]), 0),
+        # (ts.plain_tensor([0]), 0),
         (ts.plain_tensor([i for i in range(8)]), 0),
         (ts.plain_tensor([i for i in range(6)], shape=[2, 3]), 0),
         (ts.plain_tensor([i for i in range(6)], shape=[2, 3]), 1),
@@ -82,25 +138,31 @@ def precision():
     ],
 )
 @pytest.mark.parametrize("batch", [False, True])
-def test_sum(context, data, batch, axis, precision):
+@pytest.mark.parametrize("reshape_first", [False, True])
+def test_sum(context, data, batch, reshape_first, axis, precision):
     context.generate_galois_keys()
     tensor = ts.ckks_tensor(context, data, batch=batch)
 
+    shape = data.shape
+    full_shape = data.shape
+    if reshape_first:
+        shape, full_shape = reshape(batch, shape)
+        tensor = tensor.reshape(shape)
+        data = data.reshape(full_shape)
+
     result = tensor.sum(axis)
 
-    orig = ts.tolist(data)
-    np_orig = np.array(orig).reshape(data.shape())
+    orig = data.tolist()
+    np_orig = np.array(orig).reshape(full_shape)
     expected = np.sum(np_orig, axis).tolist()
-
-    result = tensor.sum(axis)
 
     # Decryption
     plain_ts = result.decrypt()
-    decrypted_result = ts.tolist(plain_ts)
+    decrypted_result = plain_ts.tolist()
 
     assert _almost_equal(decrypted_result, expected, precision), "Sum of tensor is incorrect."
     assert _almost_equal(
-        ts.tolist(tensor.decrypt()), orig, precision
+        tensor.decrypt().tolist(), orig, precision
     ), "Something went wrong in memory."
 
 
@@ -114,23 +176,31 @@ def test_sum(context, data, batch, axis, precision):
         (ts.plain_tensor([i for i in range(210)], shape=[2, 3, 5, 7])),
     ],
 )
-def test_sum_batch(context, data, precision):
+@pytest.mark.parametrize("reshape_first", [False, True])
+def test_sum_batch(context, data, reshape_first, precision):
     context.generate_galois_keys()
     tensor = ts.ckks_tensor(context, data, batch=True)
 
-    orig = ts.tolist(data)
-    np_orig = np.array(orig).reshape(data.shape())
+    shape = data.shape
+    full_shape = data.shape
+    if reshape_first:
+        shape, full_shape = reshape(True, shape)
+        tensor = tensor.reshape(shape)
+        data = data.reshape(full_shape)
+
+    orig = data.tolist()
+    np_orig = np.array(orig).reshape(full_shape)
     expected = np.sum(np_orig, 0).tolist()
 
     result = tensor.sum_batch()
 
     # Decryption
     plain_ts = result.decrypt()
-    decrypted_result = ts.tolist(plain_ts)
+    decrypted_result = plain_ts.tolist()
 
     assert _almost_equal(decrypted_result, expected, precision), "Sum of tensor is incorrect."
     assert _almost_equal(
-        ts.tolist(tensor.decrypt()), orig, precision
+        tensor.decrypt().tolist(), orig, precision
     ), "Something went wrong in memory."
 
 
@@ -148,20 +218,26 @@ def test_sum_fail(context, data, batch, precision):
 def test_size(context):
     for size in range(1, 10):
         vec = ts.ckks_tensor(context, ts.plain_tensor([1] * size))
-        assert vec.shape() == [size], "Size of encrypted tensor is incorrect."
+        assert vec.shape == [size], "Size of encrypted tensor is incorrect."
 
 
 @pytest.mark.parametrize(
     "plain",
     [ts.plain_tensor([0]), ts.plain_tensor([1, 2, 3]), ts.plain_tensor([1, 2, 3, 4], [2, 2]),],
 )
-def test_negate(context, plain, precision):
+@pytest.mark.parametrize("reshape_first", [False, True])
+def test_negate(context, plain, precision, reshape_first):
     tensor = ts.ckks_tensor(context, plain)
 
-    expected = np.negative(ts.tolist(plain))
+    if reshape_first:
+        shape, _ = reshape(False, plain.shape)
+        tensor = tensor.reshape(shape)
+        plain = plain.reshape(shape)
+
+    expected = np.negative(plain.tolist())
 
     result = -tensor
-    decrypted_result = ts.tolist(result.decrypt())
+    decrypted_result = result.decrypt().tolist()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
 
 
@@ -172,10 +248,10 @@ def test_negate(context, plain, precision):
 def test_negate_inplace(context, plain, precision):
     tensor = ts.ckks_tensor(context, plain)
 
-    expected = np.negative(ts.tolist(plain))
+    expected = np.negative(plain.tolist())
 
     tensor.neg_()
-    decrypted_result = ts.tolist(tensor.decrypt())
+    decrypted_result = tensor.decrypt().tolist()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
 
 
@@ -183,15 +259,21 @@ def test_negate_inplace(context, plain, precision):
     "plain",
     [ts.plain_tensor([0]), ts.plain_tensor([1, 2, 3]), ts.plain_tensor([1, 2, 3, 4], [2, 2]),],
 )
-def test_square(context, plain, precision):
+@pytest.mark.parametrize("reshape_first", [False, True])
+def test_square(context, plain, precision, reshape_first):
     tensor = ts.ckks_tensor(context, plain)
-    expected = np.square(ts.tolist(plain))
-
     result = tensor.square()
-    decrypted_result = ts.tolist(result.decrypt())
+
+    if reshape_first:
+        shape, _ = reshape(False, plain.shape)
+        result = result.reshape(shape)
+        plain = plain.reshape(shape)
+    expected = np.square(plain.tolist())
+
+    decrypted_result = result.decrypt().tolist()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
     assert _almost_equal(
-        ts.tolist(tensor.decrypt()), ts.tolist(plain), precision
+        tensor.decrypt().tolist(), plain.tolist(), precision
     ), "Something went wrong in memory."
 
 
@@ -201,17 +283,18 @@ def test_square(context, plain, precision):
 )
 def test_square_inplace(context, plain, precision):
     tensor = ts.ckks_tensor(context, plain)
-    expected = np.square(ts.tolist(plain))
+    expected = np.square(plain.tolist())
 
     tensor.square_()
-    decrypted_result = ts.tolist(tensor.decrypt())
+    decrypted_result = tensor.decrypt().tolist()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
 
 
 @pytest.mark.parametrize("shape", SHAPES)
 @pytest.mark.parametrize("plain", [True, False])
 @pytest.mark.parametrize("op", ["add", "sub", "mul"])
-def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
+@pytest.mark.parametrize("reshape_first", [False, True])
+def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op, reshape_first):
     r_t = np.random.randn(*shape)
     l_t = np.random.randn(*shape)
     r_pt = ts.plain_tensor(r_t.flatten().tolist(), shape)
@@ -221,6 +304,15 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
         left = l_pt
     else:
         left = ts.ckks_tensor(context, l_pt)
+
+    if reshape_first:
+        shape, _ = reshape(False, shape)
+        r_t = r_t.reshape(shape)
+        l_t = l_t.reshape(shape)
+        r_pt = r_pt.reshape(shape)
+        l_pt = l_pt.reshape(shape)
+        right = right.reshape(shape)
+        left = left.reshape(shape)
 
     if op == "add":
         expected_result = r_t + l_t
@@ -237,17 +329,17 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
     elif op == "mul":
         result = right * left
 
-    np_result = np.array(ts.tolist(result.decrypt()))
+    np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
     assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
     # right didn't change
-    right_result = np.array(ts.tolist(right.decrypt()))
+    right_result = np.array(right.decrypt().tolist())
     assert np.allclose(right_result, r_t, rtol=0, atol=0.01)
     # left didn't change
     if plain:
         left_result = l_t
     else:
-        left_result = np.array(ts.tolist(left.decrypt()))
+        left_result = np.array(left.decrypt().tolist())
     assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
 
     # inplace
@@ -258,18 +350,19 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
     elif op == "mul":
         right *= left
 
-    np_result = np.array(ts.tolist(result.decrypt()))
+    np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
     assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
     # right didn't change
-    right_result = np.array(ts.tolist(right.decrypt()))
+    right_result = np.array(right.decrypt().tolist())
+
     assert right_result.shape == expected_result.shape
     assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
     # left didn't change
     if plain:
         left_result = l_t
     else:
-        left_result = np.array(ts.tolist(left.decrypt()))
+        left_result = np.array(left.decrypt().tolist())
     assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
 
 
@@ -296,11 +389,11 @@ def test_add_sub_mul_scalar(context, shape, op):
     elif op == "mul":
         result = right * left
 
-    np_result = np.array(ts.tolist(result.decrypt()))
+    np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
     assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
     # right didn't change
-    right_result = np.array(ts.tolist(right.decrypt()))
+    right_result = np.array(right.decrypt().tolist())
     assert np.allclose(right_result, r_t, rtol=0, atol=0.01)
 
     # inplace
@@ -311,11 +404,11 @@ def test_add_sub_mul_scalar(context, shape, op):
     elif op == "mul":
         right *= left
 
-    np_result = np.array(ts.tolist(result.decrypt()))
+    np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
     assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
     # right didn't change
-    right_result = np.array(ts.tolist(right.decrypt()))
+    right_result = np.array(right.decrypt().tolist())
     assert right_result.shape == expected_result.shape
     assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
 
@@ -334,13 +427,13 @@ def test_power(context, plain, power, precision):
     context.global_scale = pow(2, 40)
 
     tensor = ts.ckks_tensor(context, plain)
-    expected = np.array([np.power(v, power) for v in plain.data()]).reshape(plain.shape()).tolist()
+    expected = np.array([np.power(v, power) for v in plain.raw]).reshape(plain.shape).tolist()
 
     new_tensor = tensor ** power
-    decrypted_result = ts.tolist(new_tensor.decrypt())
+    decrypted_result = new_tensor.decrypt().tolist()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
     assert _almost_equal(
-        ts.tolist(tensor.decrypt()), ts.tolist(plain), precision
+        tensor.decrypt().tolist(), plain.tolist(), precision
     ), "Something went wrong in memory."
 
 
@@ -358,10 +451,10 @@ def test_power_inplace(context, plain, power, precision):
     context.global_scale = pow(2, 40)
 
     tensor = ts.ckks_tensor(context, plain)
-    expected = np.array([np.power(v, power) for v in plain.data()]).reshape(plain.shape()).tolist()
+    expected = np.array([np.power(v, power) for v in plain.raw]).reshape(plain.shape).tolist()
 
     tensor **= power
-    decrypted_result = ts.tolist(tensor.decrypt())
+    decrypted_result = tensor.decrypt().tolist()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
 
 
@@ -374,19 +467,27 @@ def test_power_inplace(context, plain, power, precision):
         (ts.plain_tensor([1, 2, 3, 4, 5, 6], [2, 3]), [3, 2, 4, 5]),
     ],
 )
-def test_polynomial(context, data, polynom):
+@pytest.mark.parametrize("reshape_first", [False, True])
+def test_polynomial(context, data, polynom, reshape_first):
     ct = ts.ckks_tensor(context, data)
+
+    shape = data.shape
+    if reshape_first:
+        shape, _ = reshape(False, shape)
+        data = data.reshape(shape)
+
     expected = (
-        np.array([np.polyval(polynom[::-1], x) for x in data.data()]).reshape(data.shape()).tolist()
+        np.array([np.polyval(polynom[::-1], x) for x in data.raw]).reshape(data.shape).tolist()
     )
     result = ct.polyval(polynom)
+    result = result.reshape(shape)
 
     if len(polynom) >= 13:
         precision = -1
     else:
         precision = 1
 
-    decrypted_result = ts.tolist(result.decrypt())
+    decrypted_result = result.decrypt().tolist()
     assert _almost_equal(
         decrypted_result, expected, precision
     ), "Polynomial evaluation is incorrect."
@@ -418,3 +519,129 @@ def test_polynomial_rescale_off(context, data, polynom):
     ct = ts.ckks_tensor(context, data)
     with pytest.raises(ValueError) as e:
         result = ct.polyval(polynom)
+
+
+@pytest.mark.parametrize(
+    "shapes",
+    [
+        # 1D-1D
+        ((1,), (1,)),
+        ((3,), (3,)),
+        ((8,), (8,)),
+        # 2D-2D
+        ((2, 1), (1, 2)),
+        ((2, 2), (2, 2)),
+        ((4, 2), (2, 4)),
+        ((3, 2), (2, 5)),
+        ((5, 2), (2, 3)),
+        ((3, 5), (5, 1)),
+        ((3, 7), (7, 5)),
+    ],
+)
+@pytest.mark.parametrize("plain", [True, False])
+def test_dot(context, shapes, plain):
+    r_shape = shapes[0]
+    l_shape = shapes[1]
+    r_t = np.random.randn(*r_shape)
+    l_t = np.random.randn(*l_shape)
+    r_pt = ts.plain_tensor(r_t.flatten().tolist(), r_shape)
+    l_pt = ts.plain_tensor(l_t.flatten().tolist(), l_shape)
+    right = ts.ckks_tensor(context, r_pt)
+    if plain:
+        left = l_pt
+    else:
+        left = ts.ckks_tensor(context, l_pt)
+
+    expected_result = r_t.dot(l_t)
+
+    ## non-inplace
+    result = right.dot(left)
+
+    np_result = np.array(result.decrypt().tolist())
+    assert np_result.shape == expected_result.shape
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    # right didn't change
+    right_result = np.array(right.decrypt().tolist())
+    assert np.allclose(right_result, r_t, rtol=0, atol=0.01)
+    # left didn't change
+    if plain:
+        left_result = l_t
+    else:
+        left_result = np.array(left.decrypt().tolist())
+    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+
+    # inplace
+    right.dot_(left)
+
+    np_result = np.array(result.decrypt().tolist())
+    assert np_result.shape == expected_result.shape
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    # right didn't change
+    right_result = np.array(right.decrypt().tolist())
+
+    assert right_result.shape == expected_result.shape
+    assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
+    # left didn't change
+    if plain:
+        left_result = l_t
+    else:
+        left_result = np.array(left.decrypt().tolist())
+    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+
+
+# this test only test the python API for matmul
+# a previous test already test different shapes
+@pytest.mark.parametrize("plain", [True, False])
+@pytest.mark.parametrize("arithmetic", [True, False])
+def test_matmul_api(context, plain, arithmetic):
+    r_t = np.random.randn(2, 2)
+    l_t = np.random.randn(2, 2)
+    r_pt = ts.plain_tensor(r_t.flatten().tolist(), (2, 2))
+    l_pt = ts.plain_tensor(l_t.flatten().tolist(), (2, 2))
+    right = ts.ckks_tensor(context, r_pt)
+    if plain:
+        left = l_pt
+    else:
+        left = ts.ckks_tensor(context, l_pt)
+
+    expected_result = r_t.dot(l_t)
+
+    ## non-inplace
+    if arithmetic:
+        result = right @ left
+    else:
+        result = right.mm(left)
+
+    np_result = np.array(result.decrypt().tolist())
+    assert np_result.shape == expected_result.shape
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    # right didn't change
+    right_result = np.array(right.decrypt().tolist())
+    assert np.allclose(right_result, r_t, rtol=0, atol=0.01)
+    # left didn't change
+    if plain:
+        left_result = l_t
+    else:
+        left_result = np.array(left.decrypt().tolist())
+    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+
+    # inplace
+    if arithmetic:
+        right @= left
+    else:
+        right.mm_(left)
+
+    np_result = np.array(result.decrypt().tolist())
+    assert np_result.shape == expected_result.shape
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    # right didn't change
+    right_result = np.array(right.decrypt().tolist())
+
+    assert right_result.shape == expected_result.shape
+    assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
+    # left didn't change
+    if plain:
+        left_result = l_t
+    else:
+        left_result = np.array(left.decrypt().tolist())
+    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)

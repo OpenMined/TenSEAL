@@ -20,6 +20,7 @@ void bind_plain_tensor(py::module &m, const std::string &name) {
         .def(py::init<const vector<plain_t> &>())
         .def(py::init<const vector<vector<plain_t>> &>())
         .def(py::init<const vector<plain_t> &, const vector<size_t> &>())
+        .def(py::init<const string &>())
         .def("at", &type::at)
         .def("get_diagonal", &type::get_diagonal)
         .def("horizontal_scan", &type::horizontal_scan)
@@ -29,13 +30,25 @@ void bind_plain_tensor(py::module &m, const std::string &name) {
         .def("strides", &type::strides)
         .def("size", &type::size)
         .def("batch", &type::batch)
+        .def("reshape", &type::reshape)
+        .def("reshape_", &type::reshape_inplace)
         .def("__len__", &type::size)
         .def("empty", &type::empty)
-        .def("replicate", &type::replicate);
+        .def("replicate", &type::replicate)
+        .def("serialize", [](type &obj) { return py::bytes(obj.save()); });
 }
 
 PYBIND11_MODULE(_tenseal_cpp, m) {
     m.doc() = "Library for doing homomorphic encryption operations on tensors";
+
+    // globals
+    py::enum_<scheme_type>(m, "SCHEME_TYPE")
+        .value("NONE", scheme_type::none)
+        .value("BFV", scheme_type::bfv)
+        .value("CKKS", scheme_type::ckks);
+    py::enum_<encryption_type>(m, "ENCRYPTION_TYPE")
+        .value("ASYMMETRIC", encryption_type::asymmetric)
+        .value("SYMMETRIC", encryption_type::symmetric);
 
     m.def("bfv_parameters", &create_bfv_parameters,
           R"(Create an EncryptionParameters object for the BFV scheme.
@@ -73,6 +86,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
                 return BFVVector::Create(ctx, data);
             }))
+        .def(py::init(
+            [](const std::string &data) { return BFVVector::Create(data); }))
         .def("size", py::overload_cast<>(&BFVVector::size, py::const_))
         .def("decrypt",
              [](shared_ptr<BFVVector> obj) { return obj->decrypt().data(); })
@@ -142,8 +157,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
                  return obj->mul_plain_inplace(other);
              })
-        .def("context",
-             [](shared_ptr<BFVVector> obj) { return obj->tenseal_context(); })
+        .def("context", &BFVVector::tenseal_context)
+        .def("link_context", &BFVVector::link_tenseal_context)
         .def("serialize",
              [](shared_ptr<BFVVector> &obj) { return py::bytes(obj->save()); })
         .def("copy", &BFVVector::deepcopy)
@@ -192,8 +207,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         PlainTensor<double> padded_tensor(padded_matrix);
         auto final_vector = padded_tensor.vertical_scan();
 
-        auto ckks_vector = CKKSVector::Create(ctx, final_vector);
-        return ckks_vector;
+        return CKKSVector::Create(ctx, final_vector);
     });
 
     py::class_<CKKSVector, std::shared_ptr<CKKSVector>>(m, "CKKSVector",
@@ -212,6 +226,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
                 return CKKSVector::Create(ctx, data);
             }))
+        .def(py::init(
+            [](const std::string &data) { return CKKSVector::Create(data); }))
         .def("size", py::overload_cast<>(&CKKSVector::size, py::const_))
         .def("decrypt",
              [](shared_ptr<CKKSVector> obj) { return obj->decrypt().data(); })
@@ -271,36 +287,16 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("polyval_", &CKKSVector::polyval_inplace)
         // because dot doesn't have a magic function like __add__
         // we prefer to overload it instead of having dot_plain functions
-        .def("dot", &CKKSVector::dot_product)
-        .def("dot", &CKKSVector::dot_product_plain)
-        .def("dot_", &CKKSVector::dot_product_inplace)
-        .def("dot_", &CKKSVector::dot_product_plain_inplace)
+        .def("dot", &CKKSVector::dot)
+        .def("dot", &CKKSVector::dot_plain)
+        .def("dot_", &CKKSVector::dot_inplace)
+        .def("dot_", &CKKSVector::dot_plain_inplace)
         .def("sum", &CKKSVector::sum, py::arg("axis") = 0)
         .def("sum_", &CKKSVector::sum_inplace, py::arg("axis") = 0)
-        .def(
-            "matmul",
-            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
-               size_t n_jobs) { return obj->matmul_plain(matrix, n_jobs); },
-            py::arg("matrix"), py::arg("n_jobs") = 0)
-        .def(
-            "matmul_",
-            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
-               size_t n_jobs) {
-                return obj->matmul_plain_inplace(matrix, n_jobs);
-            },
-            py::arg("matrix"), py::arg("n_jobs") = 0)
-        .def(
-            "mm",
-            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
-               size_t n_jobs) { return obj->matmul_plain(matrix, n_jobs); },
-            py::arg("matrix"), py::arg("n_jobs") = 0)
-        .def(
-            "mm_",
-            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
-               size_t n_jobs) {
-                return obj->matmul_plain_inplace(matrix, n_jobs);
-            },
-            py::arg("matrix"), py::arg("n_jobs") = 0)
+        .def("matmul", &CKKSVector::matmul_plain)
+        .def("matmul_", &CKKSVector::matmul_plain_inplace)
+        .def("mm", &CKKSVector::matmul_plain)
+        .def("mm_", &CKKSVector::matmul_plain_inplace)
         .def("conv2d_im2col",
              [](shared_ptr<CKKSVector> obj,
                 const vector<vector<double>> &matrix, const size_t windows_nb) {
@@ -401,20 +397,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              [](shared_ptr<CKKSVector> obj, const vector<double> &other) {
                  return obj->mul_plain_inplace(other);
              })
-        .def(
-            "__matmul__",
-            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
-               size_t n_jobs) { return obj->matmul_plain(matrix, n_jobs); },
-            py::arg("matrix"), py::arg("n_jobs") = 0)
-        .def(
-            "__imatmul__",
-            [](shared_ptr<CKKSVector> obj, const vector<vector<double>> &matrix,
-               size_t n_jobs) {
-                return obj->matmul_plain_inplace(matrix, n_jobs);
-            },
-            py::arg("matrix"), py::arg("n_jobs") = 0)
-        .def("context",
-             [](shared_ptr<CKKSVector> obj) { return obj->tenseal_context(); })
+        .def("__matmul__", &CKKSVector::matmul_plain)
+        .def("__imatmul__", &CKKSVector::matmul_plain_inplace)
+        .def("context", &CKKSVector::tenseal_context)
+        .def("link_context", &CKKSVector::link_tenseal_context)
         .def("serialize",
              [](shared_ptr<CKKSVector> obj) { return py::bytes(obj->save()); })
         .def("copy", &CKKSVector::deepcopy)
@@ -446,6 +432,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
                 return CKKSTensor::Create(ctx, data);
             }))
+        .def(py::init(
+            [](const std::string &data) { return CKKSTensor::Create(data); }))
         .def("decrypt",
              [](shared_ptr<CKKSTensor> obj) { return obj->decrypt(); })
         .def("decrypt",
@@ -494,6 +482,18 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                                &CKKSTensor::mul_plain_inplace))
         .def("polyval", &CKKSTensor::polyval)
         .def("polyval_", &CKKSTensor::polyval_inplace)
+        .def("dot", &CKKSTensor::dot)
+        .def("dot_", &CKKSTensor::dot_inplace)
+        .def("dot", &CKKSTensor::dot_plain)
+        .def("dot_", &CKKSTensor::dot_plain_inplace)
+        .def("matmul", &CKKSTensor::matmul)
+        .def("matmul_", &CKKSTensor::matmul_inplace)
+        .def("matmul", &CKKSTensor::matmul_plain)
+        .def("matmul_", &CKKSTensor::matmul_plain_inplace)
+        .def("mm", &CKKSTensor::matmul)
+        .def("mm_", &CKKSTensor::matmul_inplace)
+        .def("mm", &CKKSTensor::matmul_plain)
+        .def("mm_", &CKKSTensor::matmul_plain_inplace)
         // python arithmetic
         .def("__add__", &CKKSTensor::add)
         .def("__add__", py::overload_cast<const double &>(
@@ -523,6 +523,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              py::overload_cast<const double &>(&CKKSTensor::mul_plain_inplace))
         .def("__imul__", py::overload_cast<const PlainTensor<double> &>(
                              &CKKSTensor::mul_plain_inplace))
+        .def("__matmul__", &CKKSTensor::matmul)
+        .def("__matmul__", &CKKSTensor::matmul_plain)
+        .def("__imatmul__", &CKKSTensor::matmul_inplace)
+        .def("__imatmul__", &CKKSTensor::matmul_plain_inplace)
         .def("__sub__", &CKKSTensor::sub)
         .def("__sub__", py::overload_cast<const double &>(
                             &CKKSTensor::sub_plain, py::const_))
@@ -558,8 +562,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("__neg__", &CKKSTensor::negate)
         .def("__pow__", &CKKSTensor::power)
         .def("__ipow__", &CKKSTensor::power_inplace)
-        .def("context",
-             [](shared_ptr<CKKSTensor> obj) { return obj->tenseal_context(); })
+        .def("context", &CKKSTensor::tenseal_context)
+        .def("link_context", &CKKSTensor::link_tenseal_context)
         .def("serialize",
              [](shared_ptr<CKKSTensor> &obj) { return py::bytes(obj->save()); })
         .def("copy", &CKKSTensor::deepcopy)
@@ -569,6 +573,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                                 py::dict) { return obj->deepcopy(); })
         .def("shape", &CKKSTensor::shape)
         .def("data", &CKKSTensor::data)
+        .def("reshape", &CKKSTensor::reshape)
+        .def("reshape_", &CKKSTensor::reshape_inplace)
         .def("scale", &CKKSTensor::scale);
 
     py::class_<Ciphertext>(m, "Ciphertext", py::module_local());
@@ -593,19 +599,18 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
             py::overload_cast<bool>(&TenSEALContext::auto_mod_switch))
         .def("new",
              py::overload_cast<scheme_type, size_t, uint64_t, vector<int>,
-                               optional<size_t>>(&TenSEALContext::Create),
+                               encryption_type, optional<size_t>>(
+                 &TenSEALContext::Create),
              R"(Create a new TenSEALContext object to hold keys and parameters.
     Args:
         scheme : define the scheme to be used, either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS.
         poly_modulus_degree : The degree of the polynomial modulus, must be a power of two.
         plain_modulus : The plaintext modulus. Is not used if scheme is CKKS.
         coeff_mod_bit_sizes : List of bit size for each coeffecient modulus.
-        n_threads : Optional: number of threads to use for multiplications.
             Can be an empty list for BFV, a default value will be given.
-        )",
-             py::arg("poly_modulus_degree"), py::arg("plain_modulus"),
-             py::arg("coeff_mod_bit_sizes") = vector<int>(),
-             py::arg("n_threads") = get_concurrency())
+        encryption_type : switch between public key and symmetric encryption. Default set to public key encryption.
+        n_threads : Optional: number of threads to use for multiplications.
+        )")
         .def("public_key", &TenSEALContext::public_key)
         .def("has_public_key", &TenSEALContext::has_public_key)
         .def("secret_key", &TenSEALContext::secret_key)
@@ -677,10 +682,4 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
     py::class_<SecretKey, std::shared_ptr<SecretKey>>(m, "SecretKey");
     py::class_<RelinKeys, std::shared_ptr<RelinKeys>>(m, "RelinKeys");
     py::class_<GaloisKeys, std::shared_ptr<GaloisKeys>>(m, "GaloisKeys");
-
-    // globals
-    py::enum_<scheme_type>(m, "SCHEME_TYPE")
-        .value("NONE", scheme_type::none)
-        .value("BFV", scheme_type::bfv)
-        .value("CKKS", scheme_type::ckks);
 }

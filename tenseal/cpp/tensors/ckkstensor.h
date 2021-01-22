@@ -38,8 +38,6 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
         const shared_ptr<CKKSTensor>& to_sub) override;
     shared_ptr<CKKSTensor> mul_inplace(
         const shared_ptr<CKKSTensor>& to_mul) override;
-    shared_ptr<CKKSTensor> dot_product_inplace(
-        const shared_ptr<CKKSTensor>& to_mul) override;
 
     shared_ptr<CKKSTensor> add_plain_inplace(const double& to_add) override;
     shared_ptr<CKKSTensor> sub_plain_inplace(const double& to_sub) override;
@@ -51,8 +49,6 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
         const PlainTensor<double>& to_sub) override;
     shared_ptr<CKKSTensor> mul_plain_inplace(
         const PlainTensor<double>& to_mul) override;
-    shared_ptr<CKKSTensor> dot_product_plain_inplace(
-        const PlainTensor<double>& to_mul) override;
 
     shared_ptr<CKKSTensor> sum_inplace(size_t axis = 0) override;
     shared_ptr<CKKSTensor> sum_batch() {
@@ -63,6 +59,16 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     shared_ptr<CKKSTensor> polyval_inplace(
         const vector<double>& coefficients) override;
 
+    shared_ptr<CKKSTensor> dot_inplace(
+        const shared_ptr<CKKSTensor>& to_mul) override;
+    shared_ptr<CKKSTensor> dot_plain_inplace(
+        const PlainTensor<double>& to_mul) override;
+
+    shared_ptr<CKKSTensor> matmul_inplace(
+        const shared_ptr<CKKSTensor>& other) override;
+    shared_ptr<CKKSTensor> matmul_plain_inplace(
+        const PlainTensor<double>& other) override;
+
     void load(const string& vec) override;
     string save() const override;
 
@@ -71,11 +77,13 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
 
     vector<Ciphertext> data() const;
     vector<size_t> shape() const;
+    shared_ptr<CKKSTensor> reshape(const vector<size_t>& new_shape);
+    shared_ptr<CKKSTensor> reshape_inplace(const vector<size_t>& new_shape);
+    vector<size_t> shape_with_batch() const;
     double scale() const override;
 
    private:
-    vector<Ciphertext> _data;
-    vector<size_t> _shape;
+    TensorStorage<Ciphertext> _data;
     double _init_scale;
     optional<size_t> _batch_size;
 
@@ -84,6 +92,7 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
                std::optional<double> scale = {}, bool batch = true);
     CKKSTensor(const TenSEALContextProto& ctx, const CKKSTensorProto& tensor);
     CKKSTensor(const shared_ptr<TenSEALContext>& ctx, const string& vec);
+    CKKSTensor(const string& vec);
     CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
                const CKKSTensorProto& tensor);
     CKKSTensor(const shared_ptr<const CKKSTensor>& vec);
@@ -101,6 +110,49 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     shared_ptr<CKKSTensor> op_plain_inplace(const PlainTensor<double>& operand,
                                             OP op);
     shared_ptr<CKKSTensor> op_plain_inplace(const double& operand, OP op);
+
+    /*
+    Private overlaod functions to call the right implementation depending on the
+    parameter
+    */
+    shared_ptr<CKKSTensor> _add_inplace(const shared_ptr<CKKSTensor>& to_add) {
+        return this->add_inplace(to_add);
+    }
+    shared_ptr<CKKSTensor> _sub_inplace(const shared_ptr<CKKSTensor>& to_sub) {
+        return this->sub_inplace(to_sub);
+    }
+    shared_ptr<CKKSTensor> _mul_inplace(const shared_ptr<CKKSTensor>& to_mul) {
+        return this->mul_inplace(to_mul);
+    }
+    shared_ptr<CKKSTensor> _matmul_inplace(
+        const shared_ptr<CKKSTensor>& other) {
+        return this->matmul_inplace(other);
+    }
+    shared_ptr<CKKSTensor> _add_inplace(const double& to_add) {
+        return this->add_plain_inplace(to_add);
+    }
+    shared_ptr<CKKSTensor> _sub_inplace(const double& to_sub) {
+        return this->sub_plain_inplace(to_sub);
+    }
+    shared_ptr<CKKSTensor> _mul_inplace(const double& to_mul) {
+        return this->mul_plain_inplace(to_mul);
+    }
+    shared_ptr<CKKSTensor> _add_inplace(const PlainTensor<double>& to_add) {
+        return this->add_plain_inplace(to_add);
+    }
+    shared_ptr<CKKSTensor> _sub_inplace(const PlainTensor<double>& to_sub) {
+        return this->sub_plain_inplace(to_sub);
+    }
+    shared_ptr<CKKSTensor> _mul_inplace(const PlainTensor<double>& to_mul) {
+        return this->mul_plain_inplace(to_mul);
+    }
+    shared_ptr<CKKSTensor> _matmul_inplace(const PlainTensor<double>& other) {
+        return this->matmul_plain_inplace(other);
+    }
+
+    template <typename T>
+    shared_ptr<CKKSTensor> _dot_inplace(T other,
+                                        const vector<size_t>& other_shape);
 
     void load_proto(const CKKSTensorProto& buffer);
     CKKSTensorProto save_proto() const;

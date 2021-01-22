@@ -7,8 +7,7 @@ using namespace std;
 
 CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
                        const PlainTensor<double>& tensor,
-                       std::optional<double> scale, bool batch)
-    : _shape(tensor.shape()) {
+                       std::optional<double> scale, bool batch) {
     this->link_tenseal_context(ctx);
     if (scale.has_value()) {
         this->_init_scale = scale.value();
@@ -16,18 +15,24 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
         this->_init_scale = ctx->global_scale();
     }
 
+    vector<Ciphertext> enc_data;
+    vector<size_t> enc_shape = tensor.shape();
     if (batch) {
-        _batch_size = _shape[0];
+        _batch_size = enc_shape[0];
         auto data = tensor.batch(0);
+        enc_shape.erase(enc_shape.begin());
 
         for (auto it = data.cbegin(); it != data.cend(); it++)
-            _data.push_back(CKKSTensor::encrypt(ctx, this->_init_scale, *it));
+            enc_data.push_back(
+                CKKSTensor::encrypt(ctx, this->_init_scale, *it));
 
     } else {
         for (auto it = tensor.cbegin(); it != tensor.cend(); it++)
-            _data.push_back(CKKSTensor::encrypt(ctx, this->_init_scale,
-                                                vector<double>({*it})));
+            enc_data.push_back(
+                CKKSTensor::encrypt(ctx, this->_init_scale, *it));
     }
+
+    _data = TensorStorage<Ciphertext>(enc_data, enc_shape);
 }
 
 CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
@@ -35,6 +40,8 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
     this->link_tenseal_context(ctx);
     this->load(tensor);
 }
+
+CKKSTensor::CKKSTensor(const string& tensor) { this->load(tensor); }
 
 CKKSTensor::CKKSTensor(const TenSEALContextProto& ctx,
                        const CKKSTensorProto& tensor) {
@@ -51,8 +58,7 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
 CKKSTensor::CKKSTensor(const shared_ptr<const CKKSTensor>& tensor) {
     this->link_tenseal_context(tensor->tenseal_context());
     this->_init_scale = tensor->scale();
-    this->_shape = tensor->shape();
-    this->_data = tensor->data();
+    this->_data = TensorStorage<Ciphertext>(tensor->data(), tensor->shape());
     this->_batch_size = tensor->_batch_size;
 }
 
@@ -71,42 +77,53 @@ Ciphertext CKKSTensor::encrypt(const shared_ptr<TenSEALContext>& ctx,
     Ciphertext ciphertext(*ctx->seal_context());
     Plaintext plaintext;
     ctx->encode<CKKSEncoder>(data, plaintext, scale);
-    ctx->encryptor->encrypt(plaintext, ciphertext);
+    ctx->encrypt(plaintext, ciphertext);
+
+    return ciphertext;
+}
+
+Ciphertext CKKSTensor::encrypt(const shared_ptr<TenSEALContext>& ctx,
+                               const double scale, const double data) {
+    Ciphertext ciphertext(*ctx->seal_context());
+    Plaintext plaintext;
+    ctx->encode<CKKSEncoder>(data, plaintext, scale);
+    ctx->encrypt(plaintext, ciphertext);
 
     return ciphertext;
 }
 
 PlainTensor<double> CKKSTensor::decrypt(const shared_ptr<SecretKey>& sk) const {
     Plaintext plaintext;
-    Decryptor decryptor =
-        Decryptor(*this->tenseal_context()->seal_context(), *sk);
+    auto sz = this->_data.flat_size();
+    auto shape = this->shape_with_batch();
 
     if (_batch_size) {
         vector<vector<double>> result;
-        result.reserve(this->_data.size());
+        result.reserve(sz);
 
-        for (size_t i = 0; i < this->_data.size(); i++) {
+        for (auto it = _data.cbegin(); it != _data.cend(); it++) {
             vector<double> buff;
-            decryptor.decrypt(this->_data[i], plaintext);
+            this->tenseal_context()->decrypt(*sk, *it, plaintext);
             this->tenseal_context()->decode<CKKSEncoder>(plaintext, buff);
             result.push_back(
                 vector<double>(buff.begin(), buff.begin() + *_batch_size));
         }
 
         return PlainTensor<double>(/*batched_tensor=*/result,
-                                   /*original_shape=*/_shape, /*batch_axis=*/0);
+                                   /*shape_with_batch=*/shape,
+                                   /*batch_axis=*/0);
     } else {
         vector<double> result;
-        result.reserve(this->_data.size());
+        result.reserve(sz);
 
-        for (size_t i = 0; i < this->_data.size(); i++) {
+        for (auto it = _data.cbegin(); it != _data.cend(); it++) {
             vector<double> buff;
-            decryptor.decrypt(this->_data[i], plaintext);
+            this->tenseal_context()->decrypt(*sk, *it, plaintext);
             this->tenseal_context()->decode<CKKSEncoder>(plaintext, buff);
             result.push_back(buff[0]);
         }
 
-        return PlainTensor<double>(result, /*original_shape=*/_shape);
+        return PlainTensor<double>(result, /*shape_with_batch=*/shape);
     }
 }
 
@@ -117,10 +134,11 @@ shared_ptr<CKKSTensor> CKKSTensor::negate_inplace() {
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::square_inplace() {
-    for (auto& ct : _data)
+    for (auto& ct : _data) {
         this->tenseal_context()->evaluator->square_inplace(ct);
-    this->auto_relin(_data);
-    this->auto_rescale(_data);
+        this->auto_relin(ct);
+        this->auto_rescale(ct);
+    }
     return shared_from_this();
 }
 
@@ -190,7 +208,7 @@ void CKKSTensor::perform_plain_op(seal::Ciphertext& ct, seal::Plaintext other,
             } catch (const std::logic_error& e) {
                 if (strcmp(e.what(), "result ciphertext is transparent") == 0) {
                     // replace by encryption of zero
-                    this->tenseal_context()->encryptor->encrypt_zero(ct);
+                    this->tenseal_context()->encrypt_zero(ct);
                     ct.scale() = this->_init_scale;
                 } else {  // Something else, need to be forwarded
                     throw;
@@ -207,7 +225,7 @@ void CKKSTensor::perform_plain_op(seal::Ciphertext& ct, seal::Plaintext other,
 shared_ptr<CKKSTensor> CKKSTensor::op_inplace(
     const shared_ptr<CKKSTensor>& operand, OP op) {
     // TODO implement broadcasting
-    if (this->_shape != operand->_shape) {
+    if (this->shape() != operand->shape()) {
         // TODO provide a better message (what are the shapes)
         throw invalid_argument("Operands don't have the same shape");
     }
@@ -216,21 +234,22 @@ shared_ptr<CKKSTensor> CKKSTensor::op_inplace(
 
     auto worker_func = [&](size_t start, size_t end) -> bool {
         for (size_t i = start; i < end; i++) {
-            this->perform_op(this->_data[i], operand->_data[i], op);
+            this->perform_op(this->_data.flat_ref_at(i),
+                             operand->_data.flat_ref_at(i), op);
         }
         return true;
     };
 
     if (n_jobs == 1) {
-        worker_func(0, this->_data.size());
+        worker_func(0, this->_data.flat_size());
     } else {
-        size_t batch_size = (this->_data.size() + n_jobs - 1) / n_jobs;
+        size_t batch_size = (this->_data.flat_size() + n_jobs - 1) / n_jobs;
         vector<future<bool>> futures;
         for (size_t i = 0; i < n_jobs; i++) {
             futures.push_back(
                 this->tenseal_context()->dispatcher()->enqueue_task(
                     worker_func, i * batch_size,
-                    std::min((i + 1) * batch_size, this->_data.size())));
+                    std::min((i + 1) * batch_size, this->_data.flat_size())));
         }
         // waiting
         optional<string> fail;
@@ -252,34 +271,33 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(
     const PlainTensor<double>& operand, OP op) {
     // TODO implement broadcasting
     // TODO batched ops
-    if (this->_shape != operand.shape()) {
+    if (this->shape() != operand.shape()) {
         // TODO provide a better message (what are the shapes)
         throw invalid_argument("Operands don't have the same shape");
     }
 
     size_t n_jobs = this->tenseal_context()->dispatcher_size();
-    auto operand_data = operand.data();
 
     auto worker_func = [&](size_t start, size_t end) -> bool {
         Plaintext plaintext;
         for (size_t i = start; i < end; i++) {
             this->tenseal_context()->encode<CKKSEncoder>(
-                operand_data[i], plaintext, this->_init_scale);
-            this->perform_plain_op(this->_data[i], plaintext, op);
+                operand.flat_at(i), plaintext, this->_init_scale);
+            this->perform_plain_op(this->_data.flat_ref_at(i), plaintext, op);
         }
         return true;
     };
 
     if (n_jobs == 1) {
-        worker_func(0, this->_data.size());
+        worker_func(0, this->_data.flat_size());
     } else {
-        size_t batch_size = (this->_data.size() + n_jobs - 1) / n_jobs;
+        size_t batch_size = (this->_data.flat_size() + n_jobs - 1) / n_jobs;
         vector<future<bool>> futures;
         for (size_t i = 0; i < n_jobs; i++) {
             futures.push_back(
                 this->tenseal_context()->dispatcher()->enqueue_task(
                     worker_func, i * batch_size,
-                    std::min((i + 1) * batch_size, this->_data.size())));
+                    std::min((i + 1) * batch_size, this->_data.flat_size())));
         }
         // waiting
         optional<string> fail;
@@ -308,21 +326,21 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(const double& operand,
 
     auto worker_func = [&](size_t start, size_t end) -> bool {
         for (size_t i = start; i < end; i++) {
-            this->perform_plain_op(this->_data[i], plaintext, op);
+            this->perform_plain_op(this->_data.flat_ref_at(i), plaintext, op);
         }
         return true;
     };
 
     if (n_jobs == 1) {
-        worker_func(0, this->_data.size());
+        worker_func(0, this->_data.flat_size());
     } else {
-        size_t batch_size = (this->_data.size() + n_jobs - 1) / n_jobs;
+        size_t batch_size = (this->_data.flat_size() + n_jobs - 1) / n_jobs;
         vector<future<bool>> futures;
         for (size_t i = 0; i < n_jobs; i++) {
             futures.push_back(
                 this->tenseal_context()->dispatcher()->enqueue_task(
                     worker_func, i * batch_size,
-                    std::min((i + 1) * batch_size, this->_data.size())));
+                    std::min((i + 1) * batch_size, this->_data.flat_size())));
         }
         // waiting
         std::optional<std::string> fail;
@@ -355,13 +373,6 @@ shared_ptr<CKKSTensor> CKKSTensor::mul_inplace(
     return this->op_inplace(to_mul, OP::MUL);
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::dot_product_inplace(
-    const shared_ptr<CKKSTensor>& to_mul) {
-    this->mul_inplace(to_mul);
-    for (auto& dim : _shape) this->sum_inplace();
-    return shared_from_this();
-}
-
 shared_ptr<CKKSTensor> CKKSTensor::add_plain_inplace(
     const PlainTensor<double>& to_add) {
     return this->op_plain_inplace(to_add, OP::ADD);
@@ -377,13 +388,6 @@ shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace(
     return this->op_plain_inplace(to_mul, OP::MUL);
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::dot_product_plain_inplace(
-    const PlainTensor<double>& to_mul) {
-    this->mul_plain_inplace(to_mul);
-    for (auto& dim : _shape) this->sum_inplace();
-    return shared_from_this();
-}
-
 shared_ptr<CKKSTensor> CKKSTensor::add_plain_inplace(const double& to_add) {
     return this->op_plain_inplace(to_add, OP::ADD);
 }
@@ -397,31 +401,28 @@ shared_ptr<CKKSTensor> CKKSTensor::mul_plain_inplace(const double& to_mul) {
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
-    if (axis >= _shape.size()) throw invalid_argument("invalid axis");
+    if (axis >= shape_with_batch().size())
+        throw invalid_argument("invalid axis");
 
     if (_batch_size && axis == 0) return sum_batch_inplace();
 
-    auto new_shape = _shape;
-    auto new_len = _data.size() / _shape[axis];
+    if (_batch_size) axis--;
+
+    auto new_shape = shape();
+    auto new_len = _data.flat_size() / shape()[axis];
 
     // remove the summation axis
     new_shape.erase(new_shape.begin() + axis);
-
-    auto working_shape = _shape;
-    if (_batch_size) {
-        // remove the batched axis
-        working_shape.erase(working_shape.begin());
-        new_shape.erase(new_shape.begin());
-        axis--;
-    }
+    auto working_shape = shape();
 
     std::vector<Ciphertext> new_data(new_len);
     vector<vector<Ciphertext>> batches(new_len);
 
-    auto old_strides = generate_strides(working_shape);
-    auto new_strides = generate_strides(new_shape);
+    auto old_strides = _data.strides();
+    xt::xarray<double> dummy(new_shape);
+    auto new_strides = dummy.strides();
 
-    for (size_t idx = 0; idx < _data.size(); ++idx) {
+    for (size_t idx = 0; idx < _data.flat_size(); ++idx) {
         auto pos = position_from_strides(old_strides, idx);
         pos.erase(pos.begin() + axis);
 
@@ -429,31 +430,25 @@ shared_ptr<CKKSTensor> CKKSTensor::sum_inplace(size_t axis) {
         for (size_t pidx = 0; pidx < pos.size(); ++pidx)
             new_idx += new_strides[pidx] * pos[pidx];
 
-        batches[new_idx].push_back(_data[idx]);
+        batches[new_idx].push_back(_data.flat_ref_at(idx));
     }
 
     for (size_t idx = 0; idx < new_len; ++idx) {
         tenseal_context()->evaluator->add_many(batches[idx], new_data[idx]);
     }
 
-    if (_batch_size) {
-        // reinsert the batched axis
-        new_shape.insert(new_shape.begin(), *_batch_size);
-    }
-
-    _data = new_data;
-    _shape = new_shape;
+    _data = TensorStorage<Ciphertext>(new_data, new_shape);
     return shared_from_this();
 }
 shared_ptr<CKKSTensor> CKKSTensor::sum_batch_inplace() {
     if (!_batch_size) throw invalid_argument("unsupported operation");
 
-    for (size_t idx = 0; idx < _data.size(); ++idx) {
-        sum_vector(this->tenseal_context(), _data[idx], *_batch_size);
+    for (size_t idx = 0; idx < _data.flat_size(); ++idx) {
+        sum_vector(this->tenseal_context(), _data.flat_ref_at(idx),
+                   *_batch_size);
     }
 
     _batch_size = {};
-    _shape.erase(_shape.begin());
     return shared_from_this();
 }
 
@@ -473,7 +468,8 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
     }
 
     if (degree == -1) {
-        auto zeros = PlainTensor<double>::repeat_value(0, this->shape());
+        auto zeros =
+            PlainTensor<double>::repeat_value(0, this->shape_with_batch());
         *this = CKKSTensor(this->tenseal_context(), zeros, this->_init_scale,
                            _batch_size.has_value());
         return shared_from_this();
@@ -491,8 +487,8 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
         x_squares.push_back(x->copy());  // x^(2^i)
     }
 
-    auto cst_coeff =
-        PlainTensor<double>::repeat_value(coefficients[0], this->shape());
+    auto cst_coeff = PlainTensor<double>::repeat_value(
+        coefficients[0], this->shape_with_batch());
     auto result =
         CKKSTensor::Create(this->tenseal_context(), cst_coeff,
                            this->_init_scale, _batch_size.has_value());
@@ -504,13 +500,205 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
         result->add_inplace(x);
     }
 
-    this->_data = result->data();
+    this->_data = TensorStorage<Ciphertext>(result->data(), result->shape());
+    return shared_from_this();
+}
+
+template <typename T>
+shared_ptr<CKKSTensor> CKKSTensor::_dot_inplace(
+    T other, const vector<size_t>& other_shape) {
+    auto this_shape = this->shape();
+    if (this_shape.size() == 1) {
+        if (other_shape.size() == 1) {  // 1D-1D
+            // inner product
+            this->_mul_inplace(other);
+            this->sum_inplace();
+            return shared_from_this();
+        } else if (other_shape.size() == 2) {  // 1D-2D
+            // TODO: better implement broadcasting for mul first then would be
+            // implemented similar to 1D-1D
+            throw invalid_argument("1D-2D dot isn't implemented yet");
+        } else {
+            throw invalid_argument(
+                "don't support dot operations of more than 2 dimensions");
+        }
+    } else if (this_shape.size() == 2) {
+        if (other_shape.size() == 1) {  // 2D-1D
+            // TODO: better implement broadcasting for mul first then would be
+            // implemented similar to 1D-1D
+            throw invalid_argument("2D-1D dot isn't implemented yet");
+        } else if (other_shape.size() == 2) {  // 2D-2D
+            this->_matmul_inplace(other);
+            return shared_from_this();
+        } else {
+            throw invalid_argument(
+                "don't support dot operations of more than 2 dimensions");
+        }
+    } else {
+        throw invalid_argument(
+            "don't support dot operations of more than 2 dimensions");
+    }
+}
+
+shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
+    const shared_ptr<CKKSTensor>& other) {
+    auto other_shape = other->shape();
+
+    return this->_dot_inplace(other, other_shape);
+}
+
+shared_ptr<CKKSTensor> CKKSTensor::dot_plain_inplace(
+    const PlainTensor<double>& other) {
+    auto other_shape = other.shape();
+
+    return this->_dot_inplace(other, other_shape);
+}
+
+shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
+    const shared_ptr<CKKSTensor>& other) {
+    auto this_shape = this->shape();
+    auto other_shape = other->shape();
+
+    if (this_shape.size() != 2)
+        throw invalid_argument("this tensor isn't a matrix");
+    if (other_shape.size() != 2)
+        throw invalid_argument("operand tensor isn't a matrix");
+    if (this_shape[1] != other_shape[0])
+        throw invalid_argument("can't multiply matrices");  // put matrix shapes
+
+    vector<size_t> new_shape = vector({this_shape[0], other_shape[1]});
+    size_t new_size = new_shape[0] * new_shape[1];
+    vector<Ciphertext> new_data;
+    new_data.resize(new_shape[0] * new_shape[1]);
+
+    size_t n_jobs = this->tenseal_context()->dispatcher_size();
+
+    auto worker_func = [&](size_t start, size_t end) -> bool {
+        vector<Ciphertext> to_sum;
+        to_sum.resize(this_shape[1]);
+        for (size_t i = start; i < end; i++) {
+            auto evaluator = this->tenseal_context()->evaluator;
+            size_t row = i / new_shape[1];
+            size_t col = i % new_shape[1];
+            // inner product
+            for (size_t j = 0; j < this_shape[1]; j++) {
+                to_sum[j] = this->_data.at({row, j});
+                this->perform_op(to_sum[j], other->_data.at({j, col}), OP::MUL);
+            }
+            Ciphertext acc(*this->tenseal_context()->seal_context(),
+                           to_sum[0].parms_id());
+            evaluator->add_many(to_sum, acc);
+            // set element[row, col] to the computed inner product
+            new_data[i] = acc;
+        }
+        return true;
+    };
+
+    if (n_jobs == 1) {
+        worker_func(0, new_size);
+    } else {
+        size_t batch_size = (new_size + n_jobs - 1) / n_jobs;
+        vector<future<bool>> futures;
+        for (size_t i = 0; i < n_jobs; i++) {
+            futures.push_back(
+                this->tenseal_context()->dispatcher()->enqueue_task(
+                    worker_func, i * batch_size,
+                    std::min((i + 1) * batch_size, new_size)));
+        }
+        // waiting
+        optional<string> fail;
+        for (size_t i = 0; i < futures.size(); i++) {
+            try {
+                futures[i].get();
+            } catch (std::exception& e) {
+                fail = e.what();
+            }
+        }
+
+        if (fail) {
+            throw invalid_argument(fail.value());
+        }
+    }
+
+    this->_data = TensorStorage(new_data, new_shape);
+    return shared_from_this();
+}
+
+shared_ptr<CKKSTensor> CKKSTensor::matmul_plain_inplace(
+    const PlainTensor<double>& other) {
+    auto this_shape = this->shape();
+    auto other_shape = other.shape();
+
+    if (this_shape.size() != 2)
+        throw invalid_argument("this tensor isn't a matrix");
+    if (other_shape.size() != 2)
+        throw invalid_argument("operand tensor isn't a matrix");
+    if (this_shape[1] != other_shape[0])
+        throw invalid_argument("can't multiply matrices");  // put matrix shapes
+
+    vector<size_t> new_shape = vector({this_shape[0], other_shape[1]});
+    size_t new_size = new_shape[0] * new_shape[1];
+    vector<Ciphertext> new_data;
+    new_data.resize(new_shape[0] * new_shape[1]);
+
+    size_t n_jobs = this->tenseal_context()->dispatcher_size();
+
+    auto worker_func = [&](size_t start, size_t end) -> bool {
+        vector<Ciphertext> to_sum;
+        to_sum.resize(this_shape[1]);
+        for (size_t i = start; i < end; i++) {
+            auto evaluator = this->tenseal_context()->evaluator;
+            size_t row = i / new_shape[1];
+            size_t col = i % new_shape[1];
+            // inner product
+            for (size_t j = 0; j < this_shape[1]; j++) {
+                to_sum[j] = this->_data.at({row, j});
+                Plaintext pt;
+                this->tenseal_context()->encode<CKKSEncoder>(
+                    other.at({j, col}), pt, this->_init_scale);
+                this->perform_plain_op(to_sum[j], pt, OP::MUL);
+            }
+            Ciphertext acc(*this->tenseal_context()->seal_context(),
+                           to_sum[0].parms_id());
+            evaluator->add_many(to_sum, acc);
+            // set element[row, col] to the computed inner product
+            new_data[i] = acc;
+        }
+        return true;
+    };
+
+    if (n_jobs == 1) {
+        worker_func(0, new_size);
+    } else {
+        size_t batch_size = (new_size + n_jobs - 1) / n_jobs;
+        vector<future<bool>> futures;
+        for (size_t i = 0; i < n_jobs; i++) {
+            futures.push_back(
+                this->tenseal_context()->dispatcher()->enqueue_task(
+                    worker_func, i * batch_size,
+                    std::min((i + 1) * batch_size, new_size)));
+        }
+        // waiting
+        optional<string> fail;
+        for (size_t i = 0; i < futures.size(); i++) {
+            try {
+                futures[i].get();
+            } catch (std::exception& e) {
+                fail = e.what();
+            }
+        }
+
+        if (fail) {
+            throw invalid_argument(fail.value());
+        }
+    }
+
+    this->_data = TensorStorage(new_data, new_shape);
     return shared_from_this();
 }
 
 void CKKSTensor::clear() {
-    this->_shape = vector<size_t>();
-    this->_data = vector<Ciphertext>();
+    this->_data = TensorStorage<Ciphertext>();
     this->_batch_size = optional<double>();
     this->_init_scale = 0;
 }
@@ -521,14 +709,18 @@ void CKKSTensor::load_proto(const CKKSTensorProto& tensor_proto) {
     }
     this->clear();
 
+    vector<Ciphertext> enc_data;
+    vector<size_t> enc_shape;
+
     for (int idx = 0; idx < tensor_proto.shape_size(); ++idx) {
-        this->_shape.push_back(tensor_proto.shape(idx));
+        enc_shape.push_back(tensor_proto.shape(idx));
     }
     for (int idx = 0; idx < tensor_proto.ciphertexts_size(); ++idx)
-        this->_data.push_back(SEALDeserialize<Ciphertext>(
+        enc_data.push_back(SEALDeserialize<Ciphertext>(
             *this->tenseal_context()->seal_context(),
             tensor_proto.ciphertexts(idx)));
     this->_init_scale = tensor_proto.scale();
+    this->_data = TensorStorage<Ciphertext>(enc_data, enc_shape);
     if (tensor_proto.batch_size())
         this->_batch_size = tensor_proto.batch_size();
 }
@@ -536,10 +728,10 @@ void CKKSTensor::load_proto(const CKKSTensorProto& tensor_proto) {
 CKKSTensorProto CKKSTensor::save_proto() const {
     CKKSTensorProto buffer;
 
-    for (auto& ct : this->_data) {
+    for (auto& ct : this->data()) {
         buffer.add_ciphertexts(SEALSerialize<Ciphertext>(ct));
     }
-    for (auto& dim : this->_shape) {
+    for (auto& dim : this->shape()) {
         buffer.add_shape(dim);
     }
     buffer.set_scale(this->_init_scale);
@@ -549,6 +741,11 @@ CKKSTensorProto CKKSTensor::save_proto() const {
 }
 
 void CKKSTensor::load(const std::string& tensor_str) {
+    if (!this->has_context()) {
+        _lazy_buffer = tensor_str;
+        return;
+    }
+
     CKKSTensorProto buffer;
     if (!buffer.ParseFromArray(tensor_str.c_str(),
                                static_cast<int>(tensor_str.size()))) {
@@ -558,6 +755,8 @@ void CKKSTensor::load(const std::string& tensor_str) {
 }
 
 std::string CKKSTensor::save() const {
+    if (_lazy_buffer) return _lazy_buffer.value();
+
     auto buffer = this->save_proto();
     std::string output;
     output.resize(proto_bytes_size(buffer));
@@ -571,16 +770,40 @@ std::string CKKSTensor::save() const {
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::copy() const {
+    if (_lazy_buffer)
+        return shared_ptr<CKKSTensor>(new CKKSTensor(_lazy_buffer.value()));
     return shared_ptr<CKKSTensor>(new CKKSTensor(shared_from_this()));
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::deepcopy() const {
+    if (_lazy_buffer) return this->copy();
+
     TenSEALContextProto ctx = this->tenseal_context()->save_proto();
     CKKSTensorProto vec = this->save_proto();
     return CKKSTensor::Create(ctx, vec);
 }
 
-vector<Ciphertext> CKKSTensor::data() const { return _data; }
-vector<size_t> CKKSTensor::shape() const { return _shape; }
+vector<Ciphertext> CKKSTensor::data() const { return _data.data(); }
+vector<size_t> CKKSTensor::shape_with_batch() const {
+    if (_batch_size) {
+        auto res = _data.shape();
+        res.insert(res.begin(), *_batch_size);
+        return res;
+    }
+
+    return _data.shape();
+}
+vector<size_t> CKKSTensor::shape() const { return _data.shape(); }
+
+shared_ptr<CKKSTensor> CKKSTensor::reshape(const vector<size_t>& new_shape) {
+    return this->copy()->reshape_inplace(new_shape);
+}
+shared_ptr<CKKSTensor> CKKSTensor::reshape_inplace(
+    const vector<size_t>& new_shape) {
+    this->_data.reshape_inplace(new_shape);
+
+    return shared_from_this();
+}
+
 double CKKSTensor::scale() const { return _init_scale; }
 }  // namespace tenseal

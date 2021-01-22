@@ -55,9 +55,15 @@ class BFVVector
     encrypted_t add_inplace(const encrypted_t& to_add) override;
     encrypted_t sub_inplace(const encrypted_t& to_sub) override;
     encrypted_t mul_inplace(const encrypted_t& to_mul) override;
-    encrypted_t dot_product_inplace(const encrypted_t& to_mul) override;
-    encrypted_t dot_product_plain_inplace(const plain_t& to_mul) override;
+    encrypted_t dot_inplace(const encrypted_t& to_mul) override;
+    encrypted_t dot_plain_inplace(const plain_t& to_mul) override;
     encrypted_t sum_inplace(size_t axis = 0) override;
+    /**
+     * Encrypted Vector multiplication with encrypted matrix.
+     **/
+    encrypted_t matmul_inplace(const encrypted_t& matrix) override {
+        throw logic_error("not implemented");
+    }
 
     /**
      * Plain evaluation function operates on an encrypted vector and plaintext
@@ -74,8 +80,7 @@ class BFVVector
     /**
      * Encrypted Vector multiplication with plain matrix.
      **/
-    encrypted_t matmul_plain_inplace(const plain_t& matrix,
-                                     size_t n_jobs = 0) override;
+    encrypted_t matmul_plain_inplace(const plain_t& matrix) override;
 
     /**
      * Encrypted Matrix multiplication with plain vector.
@@ -120,6 +125,7 @@ class BFVVector
     BFVVector(const shared_ptr<TenSEALContext>& ctx, const plain_t& vec);
     BFVVector(const shared_ptr<const BFVVector>&);
     BFVVector(const shared_ptr<TenSEALContext>& ctx, const string& vec);
+    BFVVector(const string& vec);
     BFVVector(const TenSEALContextProto& ctx, const BFVVectorProto& vec);
     BFVVector(const shared_ptr<TenSEALContext>& ctx, const BFVVectorProto& vec);
 

@@ -12,14 +12,6 @@ class PlainTensorTest : public Test {
    protected:
     void SetUp() {}
 };
-TEST_F(PlainTensorTest, TestGenerateStrides) {
-    ASSERT_THAT(generate_strides({}), ElementsAre());
-    ASSERT_THAT(generate_strides({2}), ElementsAre(1));
-    ASSERT_THAT(generate_strides({3, 2}), ElementsAre(2, 1));
-    ASSERT_THAT(generate_strides({5, 3, 2}), ElementsAre(6, 2, 1));
-    ASSERT_THAT(generate_strides({7, 5, 3, 2}), ElementsAre(30, 6, 2, 1));
-}
-
 TEST_F(PlainTensorTest, TestCreateFrom1D) {
     vector<double> data = {1.1, 2.2, 3.3};
 
@@ -37,6 +29,18 @@ TEST_F(PlainTensorTest, TestCreateFrom2DVector) {
     ASSERT_THAT(tensor.data(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
     ASSERT_THAT(tensor.shape(), ElementsAreArray({2, 2}));
     ASSERT_THAT(tensor.strides(), ElementsAreArray({2, 1}));
+}
+
+TEST_F(PlainTensorTest, TestCreateFromString) {
+    vector<vector<double>> data = {{1.1, 2.2}, {3.3, 4.4}};
+    PlainTensor<double> tensor(data);
+    auto buf = tensor.save();
+
+    auto newtensor = PlainTensor<double>(buf);
+
+    ASSERT_THAT(newtensor.data(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
+    ASSERT_THAT(newtensor.shape(), ElementsAreArray({2, 2}));
+    ASSERT_THAT(newtensor.strides(), ElementsAreArray({2, 1}));
 }
 
 TEST_F(PlainTensorTest, TestCreateFrom2DVectorFail) {
@@ -67,7 +71,7 @@ TEST_F(PlainTensorTest, TestCreateFrom3DTensor) {
 
     ASSERT_THAT(tensor.data(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
     ASSERT_THAT(tensor.shape(), ElementsAreArray({2, 2, 1}));
-    ASSERT_THAT(tensor.strides(), ElementsAreArray({2, 1, 1}));
+    ASSERT_THAT(tensor.strides(), ElementsAreArray({2, 1, 0}));
 }
 
 TEST_F(PlainTensorTest, TestTensorAccess) {
@@ -83,6 +87,69 @@ TEST_F(PlainTensorTest, TestTensorAccess) {
     ASSERT_THAT(*tensor.row(1), 5.5);
     ASSERT_EQ(tensor.size(), 2);
     ASSERT_EQ(tensor.empty(), false);
+
+    tensor.reshape_inplace({4, 2});
+    ASSERT_THAT(tensor.shape(), ElementsAreArray({4, 2}));
+    ASSERT_THAT(tensor.strides(), ElementsAreArray({2, 1}));
+    ASSERT_EQ(tensor.at({0, 0}), 1.1);
+    ASSERT_EQ(tensor.at({3, 0}), 7.7);
+    ASSERT_THAT(tensor.position(0), ElementsAre(0, 0));
+    ASSERT_THAT(tensor.position(1), ElementsAre(0, 1));
+    ASSERT_THAT(tensor.position(3), ElementsAre(1, 1));
+    ASSERT_THAT(*tensor.row(1), 3.3);
+    ASSERT_EQ(tensor.size(), 4);
+    ASSERT_EQ(tensor.empty(), false);
+
+    EXPECT_THROW(tensor.reshape({5, 5}), std::exception);
+
+    auto new_tensor = tensor.reshape({2, 2, 2});
+    ASSERT_THAT(tensor.shape(), ElementsAreArray({4, 2}));
+    ASSERT_THAT(new_tensor.shape(), ElementsAreArray({2, 2, 2}));
+}
+
+TEST_F(PlainTensorTest, TestTensorBroadcast) {
+    vector<double> data = {1.1, 2.2, 3.3, 4.4};
+    PlainTensor<double> tensor(data, {2, 2});
+
+    auto res = tensor.broadcast({2, 2, 2});
+    ASSERT_THAT(res.shape(), ElementsAreArray({2, 2, 2}));
+    ASSERT_THAT(res.strides(), ElementsAreArray({4, 2, 1}));
+    ASSERT_THAT(res.data(),
+                ElementsAreArray({1.1, 2.2, 3.3, 4.4, 1.1, 2.2, 3.3, 4.4}));
+
+    EXPECT_THROW(tensor.broadcast({3, 3}), std::exception);
+
+    tensor.broadcast_inplace({3, 2, 2, 1});
+    ASSERT_THAT(tensor.shape(), ElementsAreArray({3, 2, 2, 2}));
+    ASSERT_THAT(tensor.strides(), ElementsAreArray({8, 4, 2, 1}));
+    ASSERT_THAT(tensor.data(),
+                ElementsAreArray({1.1, 2.2, 3.3, 4.4, 1.1, 2.2, 3.3, 4.4,
+                                  1.1, 2.2, 3.3, 4.4, 1.1, 2.2, 3.3, 4.4,
+                                  1.1, 2.2, 3.3, 4.4, 1.1, 2.2, 3.3, 4.4}));
+}
+
+TEST_F(PlainTensorTest, TestTensorBroadcastMemory) {
+    vector<double> data = {1.1, 2.2, 3.3, 4.4};
+    PlainTensor<double> tensor(data, {2, 2});
+
+    auto res = tensor.broadcast({2, 2, 2});
+
+    res.ref_at({1, 1, 1}) = 999;
+    ASSERT_THAT(res.data(), ElementsAreArray(vector<double>(
+                                {1.1, 2.2, 3.3, 4.4, 1.1, 2.2, 3.3, 999})));
+}
+
+TEST_F(PlainTensorTest, TestTensorAccess1D) {
+    vector<vector<double>> data = {{1.1}, {2.2}, {3.3}, {4.4},
+                                   {5.5}, {6.6}, {7.7}, {8.8}};
+    PlainTensor<double> tensor(data);
+
+    ASSERT_EQ(tensor.at({0, 0}), 1.1);
+    ASSERT_EQ(tensor.at({4, 0}), 5.5);
+    ASSERT_EQ(tensor.at({7, 0}), 8.8);
+
+    ASSERT_THAT(tensor.vertical_scan(),
+                ElementsAreArray({1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8}));
 }
 
 TEST_F(PlainTensorTest, TestGetDiagonal) {

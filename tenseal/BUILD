@@ -25,6 +25,7 @@ py_library(
     name = "tenseal",
     srcs = [
         "__init__.py",
+        "enc_context.py",
         "version.py",
     ],
     data = ["//tenseal:_tenseal_cpp.so"],
