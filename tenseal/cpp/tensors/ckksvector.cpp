@@ -472,6 +472,8 @@ void CKKSVector::load(const std::string& vec) {
 }
 
 std::string CKKSVector::save() const {
+    if (_lazy_buffer) return _lazy_buffer.value();
+
     auto buffer = this->save_proto();
     std::string output;
     output.resize(proto_bytes_size(buffer));
@@ -485,10 +487,15 @@ std::string CKKSVector::save() const {
 }
 
 shared_ptr<CKKSVector> CKKSVector::copy() const {
+    if (_lazy_buffer)
+        return shared_ptr<CKKSVector>(new CKKSVector(_lazy_buffer.value()));
+
     return shared_ptr<CKKSVector>(new CKKSVector(shared_from_this()));
 }
 
 shared_ptr<CKKSVector> CKKSVector::deepcopy() const {
+    if (_lazy_buffer) return this->copy();
+
     TenSEALContextProto ctx = this->tenseal_context()->save_proto();
     CKKSVectorProto vec = this->save_proto();
     return CKKSVector::Create(ctx, vec);

@@ -317,5 +317,68 @@ TEST_F(CKKSVectorTest, TestCKKSLazyContext) {
     ASSERT_TRUE(are_close(decr.data(), {4, 6, 7}));
 }
 
+TEST_F(CKKSVectorTest, TestCKKSLazyContextSanityDoubleSerde) {
+    auto ctx =
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    ASSERT_TRUE(ctx != nullptr);
+
+    ctx->global_scale(std::pow(2, 40));
+
+    auto l = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}));
+    auto r = CKKSVector::Create(ctx, std::vector<double>({3, 4, 4}));
+
+    // double serde
+    auto buffer = l->save();
+    auto newl = CKKSVector::Create(buffer);
+    buffer = newl->save();
+    newl = CKKSVector::Create(buffer);
+
+    newl->link_tenseal_context(ctx);
+    auto res = newl->add(r);
+
+    auto decr = res->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {4, 6, 7}));
+}
+
+TEST_F(CKKSVectorTest, TestCKKSLazyContextSanityCopy) {
+    auto ctx =
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    ASSERT_TRUE(ctx != nullptr);
+
+    ctx->global_scale(std::pow(2, 40));
+
+    auto l = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}));
+    auto r = CKKSVector::Create(ctx, std::vector<double>({3, 4, 4}));
+
+    auto buffer = l->save();
+    auto newl = CKKSVector::Create(buffer);
+
+    auto cpy = newl->copy();
+    cpy->link_tenseal_context(ctx);
+    auto res = cpy->add(r);
+    auto decr = res->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {4, 6, 7}));
+}
+
+TEST_F(CKKSVectorTest, TestCKKSLazyContextSanityDeepcopy) {
+    auto ctx =
+        TenSEALContext::Create(scheme_type::ckks, 8192, -1, {60, 40, 40, 60});
+    ASSERT_TRUE(ctx != nullptr);
+
+    ctx->global_scale(std::pow(2, 40));
+
+    auto l = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}));
+    auto r = CKKSVector::Create(ctx, std::vector<double>({3, 4, 4}));
+
+    auto buffer = l->save();
+    auto newl = CKKSVector::Create(buffer);
+
+    auto cpy = newl->deepcopy();
+    cpy->link_tenseal_context(ctx);
+    auto res = cpy->add(r);
+    auto decr = res->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {4, 6, 7}));
+}
+
 }  // namespace
 }  // namespace tenseal
