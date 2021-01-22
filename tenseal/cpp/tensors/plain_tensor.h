@@ -51,6 +51,11 @@ class PlainTensor {
      */
     PlainTensor(const TensorStorage<plain_t>& data) : _data(data) {}
     /**
+     * Create a new PlainTensor from a serialized buffer.
+     * @param[in] serialized buffer.
+     */
+    PlainTensor(const std::string& data) { this->load(data); }
+    /**
      * Reshape the tensor
      * **/
     PlainTensor<plain_t> reshape(const vector<size_t>& new_shape) {
@@ -222,6 +227,10 @@ class PlainTensor {
         return PlainTensor<plain_t>(repeated, shape);
     }
     PlainTensor<plain_t> copy() { return PlainTensor<plain_t>(this->_data); }
+
+    std::string save() { return _data.save(); }
+
+    void load(const std::string& buf) { _data = TensorStorage<plain_t>(buf); }
 
    private:
     TensorStorage<plain_t> _data;
