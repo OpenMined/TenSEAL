@@ -177,7 +177,9 @@ class Context:
         save_relin_keys: bool = True,
     ) -> bytes:
         """Serialize the context into a stream of bytes."""
-        return self.data.serialize()
+        return self.data.serialize(
+            save_public_key, save_secret_key, save_galois_keys, save_relin_keys
+        )
 
     @property
     def global_scale(self) -> float:
