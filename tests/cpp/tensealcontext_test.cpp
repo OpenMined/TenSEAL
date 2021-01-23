@@ -181,6 +181,161 @@ TEST_P(TenSEALContextTest, TestCreateCKKSPublic) {
     ASSERT_FALSE(ctx->is_private());
 }
 
+TEST_P(TenSEALContextTest, TestSerializationCKKSDropRelinKeys) {
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
+
+    ctx->generate_galois_keys();
+
+    ASSERT_TRUE(ctx->has_relin_keys());
+    ASSERT_TRUE(ctx->has_galois_key());
+    ASSERT_TRUE(ctx->has_secret_key());
+
+    if (enc_type == encryption_type::asymmetric)
+        ASSERT_TRUE(ctx->public_key() != nullptr);
+    else
+        EXPECT_THROW(ctx->public_key(), std::exception);
+
+    // Drop Relin keys
+    auto buff = ctx->save(/*save_public_key=*/true, /*save_secret_key=*/true,
+                          /*save_galois_keys=*/true, /*save_relin_keys=*/false);
+    auto des = TenSEALContext::Create(buff);
+
+    ASSERT_FALSE(des->has_relin_keys());
+    ASSERT_TRUE(des->has_galois_key());
+    ASSERT_TRUE(des->has_secret_key());
+
+    if (enc_type == encryption_type::asymmetric)
+        ASSERT_TRUE(des->public_key() != nullptr);
+    else
+        EXPECT_THROW(des->public_key(), std::exception);
+
+    // Drop Relin keys and secret key
+    buff = ctx->save(/*save_public_key=*/true, /*save_secret_key=*/false,
+                     /*save_galois_keys=*/true, /*save_relin_keys=*/false);
+    des = TenSEALContext::Create(buff);
+
+    ASSERT_FALSE(des->has_secret_key());
+    ASSERT_FALSE(des->has_relin_keys());
+    ASSERT_TRUE(des->has_galois_key());
+
+    if (enc_type == encryption_type::asymmetric)
+        ASSERT_TRUE(des->public_key() != nullptr);
+    else
+        EXPECT_THROW(des->public_key(), std::exception);
+}
+
+TEST_P(TenSEALContextTest, TestSerializationCKKSDropGaloisKeys) {
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
+
+    ctx->generate_galois_keys();
+
+    ASSERT_TRUE(ctx->has_relin_keys());
+    ASSERT_TRUE(ctx->has_galois_key());
+    ASSERT_TRUE(ctx->has_secret_key());
+
+    if (enc_type == encryption_type::asymmetric)
+        ASSERT_TRUE(ctx->public_key() != nullptr);
+    else
+        EXPECT_THROW(ctx->public_key(), std::exception);
+
+    // Drop Galois keys
+    auto buff = ctx->save(/*save_public_key=*/true, /*save_secret_key=*/true,
+                          /*save_galois_keys=*/false, /*save_relin_keys=*/true);
+    auto des = TenSEALContext::Create(buff);
+
+    ASSERT_TRUE(des->has_relin_keys());
+    ASSERT_FALSE(des->has_galois_key());
+    ASSERT_TRUE(des->has_secret_key());
+
+    if (enc_type == encryption_type::asymmetric)
+        ASSERT_TRUE(des->public_key() != nullptr);
+    else
+        EXPECT_THROW(des->public_key(), std::exception);
+
+    // Drop Galois keys and secret key
+    buff = ctx->save(/*save_public_key=*/true, /*save_secret_key=*/false,
+                     /*save_galois_keys=*/false, /*save_relin_keys=*/true);
+    des = TenSEALContext::Create(buff);
+
+    ASSERT_TRUE(des->has_relin_keys());
+    ASSERT_FALSE(des->has_galois_key());
+    ASSERT_FALSE(des->has_secret_key());
+
+    if (enc_type == encryption_type::asymmetric)
+        ASSERT_TRUE(des->public_key() != nullptr);
+    else
+        EXPECT_THROW(des->public_key(), std::exception);
+}
+
+TEST_P(TenSEALContextTest, TestSerializationCKKSDropPublicKey) {
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
+
+    ctx->generate_galois_keys();
+
+    ASSERT_TRUE(ctx->has_relin_keys());
+    ASSERT_TRUE(ctx->has_galois_key());
+    ASSERT_TRUE(ctx->has_secret_key());
+
+    if (enc_type == encryption_type::asymmetric)
+        ASSERT_TRUE(ctx->public_key() != nullptr);
+    else
+        EXPECT_THROW(ctx->public_key(), std::exception);
+
+    // Drop public key
+    auto buff = ctx->save(/*save_public_key=*/false, /*save_secret_key=*/true,
+                          /*save_galois_keys=*/true, /*save_relin_keys=*/true);
+    auto des = TenSEALContext::Create(buff);
+
+    ASSERT_TRUE(des->has_relin_keys());
+    ASSERT_TRUE(des->has_galois_key());
+    ASSERT_TRUE(des->has_secret_key());
+
+    if (enc_type == encryption_type::asymmetric)
+        ASSERT_FALSE(des->public_key() != nullptr);
+    else
+        EXPECT_THROW(des->public_key(), std::exception);
+}
+
+TEST_P(TenSEALContextTest, TestSerializationCKKSDropSecretKey) {
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
+
+    ctx->generate_galois_keys();
+
+    ASSERT_TRUE(ctx->has_relin_keys());
+    ASSERT_TRUE(ctx->has_galois_key());
+    ASSERT_TRUE(ctx->has_secret_key());
+
+    if (enc_type == encryption_type::asymmetric)
+        ASSERT_TRUE(ctx->public_key() != nullptr);
+    else
+        EXPECT_THROW(ctx->public_key(), std::exception);
+
+    // Drop secret key
+    auto buff = ctx->save(/*save_public_key=*/true, /*save_secret_key=*/false,
+                          /*save_galois_keys=*/true, /*save_relin_keys=*/true);
+    auto des = TenSEALContext::Create(buff);
+    ASSERT_TRUE(des->has_relin_keys());
+    ASSERT_TRUE(des->has_galois_key());
+    ASSERT_FALSE(des->has_secret_key());
+
+    if (enc_type == encryption_type::asymmetric)
+        ASSERT_TRUE(des->public_key() != nullptr);
+    else
+        EXPECT_THROW(des->public_key(), std::exception);
+}
+
 TEST_F(TenSEALContextTest, TestContextRegressionRecreateGaloisCrash) {
     EncryptionParameters parameters(scheme_type::ckks);
     parameters.set_poly_modulus_degree(8192);
