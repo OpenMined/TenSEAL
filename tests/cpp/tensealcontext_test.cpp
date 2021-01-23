@@ -7,6 +7,12 @@ namespace tenseal {
 
 using namespace ::testing;
 
+auto duplicate(const shared_ptr<TenSEALContext> &ctx) {
+    auto buff = ctx->save(/*save_public_key=*/true, /*save_secret_key=*/true,
+                          /*save_galois_keys=*/true, /*save_relin_keys=*/true);
+    return TenSEALContext::Create(buff);
+}
+
 class TenSEALContextTest : public TestWithParam<tuple<bool, encryption_type>> {
    protected:
     void SetUp() {}
@@ -25,9 +31,6 @@ TEST_P(TenSEALContextTest, TestCreateFail) {
                  std::exception);
 
     EXPECT_THROW(auto ctx = TenSEALContext::Create("invalid"), std::exception);
-
-    std::stringstream ss;
-    EXPECT_THROW(auto ctx = TenSEALContext::Create(ss), std::exception);
 }
 
 TEST_P(TenSEALContextTest, TestSerialization) {
@@ -36,8 +39,7 @@ TEST_P(TenSEALContextTest, TestSerialization) {
                                       {60, 40, 40, 60}, enc_type);
     ctx->generate_galois_keys();
 
-    auto buff = ctx->save();
-    auto recreated_ctx = TenSEALContext::Create(buff);
+    auto recreated_ctx = duplicate(ctx);
 
     ASSERT_TRUE(recreated_ctx != nullptr);
     if (enc_type == encryption_type::asymmetric) {
@@ -85,8 +87,7 @@ TEST_P(TenSEALContextTest, TestCreateBFV) {
         TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
 
     if (should_serialize_first) {
-        auto buff = ctx->save();
-        ctx = TenSEALContext::Create(buff);
+        ctx = duplicate(ctx);
     }
 
     ASSERT_TRUE(ctx != nullptr);
@@ -117,8 +118,7 @@ TEST_P(TenSEALContextTest, TestCreateBFVPublic) {
     }
 
     if (should_serialize_first) {
-        auto buff = ctx->save();
-        ctx = TenSEALContext::Create(buff);
+        ctx = duplicate(ctx);
     }
 
     EXPECT_THROW(ctx->galois_keys(), std::exception);
@@ -139,8 +139,7 @@ TEST_P(TenSEALContextTest, TestCreateCKKS) {
                                       {60, 40, 40, 60}, enc_type);
 
     if (should_serialize_first) {
-        auto buff = ctx->save();
-        ctx = TenSEALContext::Create(buff);
+        ctx = duplicate(ctx);
     }
 
     ASSERT_TRUE(ctx != nullptr);
@@ -171,8 +170,7 @@ TEST_P(TenSEALContextTest, TestCreateCKKSPublic) {
     }
 
     if (should_serialize_first) {
-        auto buff = ctx->save();
-        ctx = TenSEALContext::Create(buff);
+        ctx = duplicate(ctx);
     }
 
     ASSERT_TRUE(ctx != nullptr);

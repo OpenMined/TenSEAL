@@ -169,7 +169,13 @@ class Context:
             return cls._wrap(ts._ts_cpp.TenSEALContext.deserialize(data, n_threads))
         return cls._wrap(ts._ts_cpp.TenSEALContext.deserialize(data))
 
-    def serialize(self) -> bytes:
+    def serialize(
+        self,
+        save_public_key: bool = True,
+        save_secret_key: bool = True,
+        save_galois_keys: bool = True,
+        save_relin_keys: bool = True,
+    ) -> bytes:
         """Serialize the context into a stream of bytes."""
         return self.data.serialize()
 
