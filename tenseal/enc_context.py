@@ -172,7 +172,7 @@ class Context:
     def serialize(
         self,
         save_public_key: bool = True,
-        save_secret_key: bool = True,
+        save_secret_key: bool = False,
         save_galois_keys: bool = True,
         save_relin_keys: bool = True,
     ) -> bytes:

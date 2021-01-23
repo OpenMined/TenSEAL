@@ -300,7 +300,8 @@ class TenSEALContext {
                     bool generate_galois_keys = false,
                     bool generate_secret_key = true);
     void keys_setup_public_key(optional<PublicKey> public_key = {},
-                               optional<SecretKey> secret_key = {});
+                               optional<SecretKey> secret_key = {},
+                               bool generate_secret_key = true);
     void keys_setup_symmetric(optional<SecretKey> secret_key = {},
                               bool generate_secret_key = true);
     /**

@@ -45,8 +45,9 @@ void TenSEALContext::base_setup(EncryptionParameters parms) {
 }
 
 void TenSEALContext::keys_setup_public_key(optional<PublicKey> public_key,
-                                           optional<SecretKey> secret_key) {
-    if (!public_key && !secret_key) {
+                                           optional<SecretKey> secret_key,
+                                           bool generate_key) {
+    if (!public_key && !secret_key && generate_key) {
         KeyGenerator keygen = KeyGenerator(*this->_context);
 
         PublicKey pk;
@@ -91,7 +92,8 @@ void TenSEALContext::keys_setup(encryption_type enc_type,
     this->_encryption_type = enc_type;
     switch (enc_type) {
         case encryption_type::asymmetric: {
-            this->keys_setup_public_key(public_key, secret_key);
+            this->keys_setup_public_key(public_key, secret_key,
+                                        generate_secret);
             break;
         }
         case encryption_type::symmetric: {

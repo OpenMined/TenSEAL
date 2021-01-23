@@ -303,6 +303,20 @@ TEST_P(TenSEALContextTest, TestSerializationCKKSDropPublicKey) {
         ASSERT_FALSE(des->public_key() != nullptr);
     else
         EXPECT_THROW(des->public_key(), std::exception);
+
+    // Drop public key and secret key
+    buff = ctx->save(/*save_public_key=*/false, /*save_secret_key=*/false,
+                     /*save_galois_keys=*/true, /*save_relin_keys=*/true);
+    des = TenSEALContext::Create(buff);
+
+    ASSERT_TRUE(des->has_relin_keys());
+    ASSERT_TRUE(des->has_galois_key());
+    ASSERT_FALSE(des->has_secret_key());
+
+    if (enc_type == encryption_type::asymmetric)
+        ASSERT_FALSE(des->public_key() != nullptr);
+    else
+        EXPECT_THROW(des->public_key(), std::exception);
 }
 
 TEST_P(TenSEALContextTest, TestSerializationCKKSDropSecretKey) {
