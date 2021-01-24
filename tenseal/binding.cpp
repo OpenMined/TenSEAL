@@ -638,7 +638,12 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                  &TenSEALContext::generate_relin_keys),
              "Generate Relinearization keys using the secret key")
         .def("serialize",
-             [](const TenSEALContext &obj) { return py::bytes(obj.save()); })
+             [](const TenSEALContext &obj, bool save_public_key,
+                bool save_secret_key, bool save_galois_keys,
+                bool save_relin_keys) {
+                 return py::bytes(obj.save(save_public_key, save_secret_key,
+                                           save_galois_keys, save_relin_keys));
+             })
         .def_static("deserialize",
                     py::overload_cast<const std::string &, optional<size_t>>(
                         &TenSEALContext::Create),

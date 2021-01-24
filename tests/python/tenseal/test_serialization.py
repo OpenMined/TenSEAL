@@ -23,7 +23,7 @@ def internal_copy(ctx):
 
 
 def recreate(ctx):
-    proto = ctx.serialize()
+    proto = ctx.serialize(save_secret_key=True)
     return ts.context_from(proto)
 
 
@@ -237,3 +237,154 @@ def test_sanity_keys_regeneration(duplicate, vec1, vec2, encryption_type):
     ), "Dot product of vectors is incorrect."
     assert almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
     assert almost_equal(second_vec.decrypt(), vec2, precision), "Something went wrong in memory."
+
+
+@pytest.mark.parametrize(
+    "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]
+)
+def test_serialization_parameters_drop_relinkey(encryption_type):
+    orig_context = ctx(encryption_type)
+    orig_context.generate_galois_keys()
+
+    assert orig_context.has_relin_keys()
+    assert orig_context.has_galois_keys()
+    assert orig_context.has_secret_key()
+
+    if encryption_type is ts.ENCRYPTION_TYPE.ASYMMETRIC:
+        assert orig_context.has_public_key()
+
+    # drop relin keys
+    proto = orig_context.serialize(
+        save_public_key=True, save_secret_key=True, save_galois_keys=True, save_relin_keys=False
+    )
+    nctx = ts.context_from(proto)
+
+    assert not nctx.has_relin_keys()
+    assert nctx.has_galois_keys()
+    assert nctx.has_secret_key()
+
+    if encryption_type is ts.ENCRYPTION_TYPE.ASYMMETRIC:
+        assert nctx.has_public_key()
+
+    # drop relin keys and secret key
+    proto = orig_context.serialize(
+        save_public_key=True, save_secret_key=False, save_galois_keys=True, save_relin_keys=False
+    )
+    nctx = ts.context_from(proto)
+
+    assert not nctx.has_relin_keys()
+    assert nctx.has_galois_keys()
+    assert not nctx.has_secret_key()
+
+    if encryption_type is ts.ENCRYPTION_TYPE.ASYMMETRIC:
+        assert nctx.has_public_key()
+
+
+@pytest.mark.parametrize(
+    "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]
+)
+def test_serialization_parameters_drop_galoiskey(encryption_type):
+    orig_context = ctx(encryption_type)
+    orig_context.generate_galois_keys()
+
+    assert orig_context.has_relin_keys()
+    assert orig_context.has_galois_keys()
+    assert orig_context.has_secret_key()
+
+    if encryption_type is ts.ENCRYPTION_TYPE.ASYMMETRIC:
+        assert orig_context.has_public_key()
+
+    # drop galois keys
+    proto = orig_context.serialize(
+        save_public_key=True, save_secret_key=True, save_galois_keys=False, save_relin_keys=True
+    )
+    nctx = ts.context_from(proto)
+
+    assert nctx.has_relin_keys()
+    assert not nctx.has_galois_keys()
+    assert nctx.has_secret_key()
+
+    if encryption_type is ts.ENCRYPTION_TYPE.ASYMMETRIC:
+        assert nctx.has_public_key()
+
+    # drop galois keys and secret key
+    proto = orig_context.serialize(
+        save_public_key=True, save_secret_key=False, save_galois_keys=False, save_relin_keys=True
+    )
+    nctx = ts.context_from(proto)
+
+    assert nctx.has_relin_keys()
+    assert not nctx.has_galois_keys()
+    assert not nctx.has_secret_key()
+
+    if encryption_type is ts.ENCRYPTION_TYPE.ASYMMETRIC:
+        assert nctx.has_public_key()
+
+
+@pytest.mark.parametrize(
+    "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]
+)
+def test_serialization_parameters_drop_secretkey(encryption_type):
+    orig_context = ctx(encryption_type)
+    orig_context.generate_galois_keys()
+
+    assert orig_context.has_relin_keys()
+    assert orig_context.has_galois_keys()
+    assert orig_context.has_secret_key()
+
+    if encryption_type is ts.ENCRYPTION_TYPE.ASYMMETRIC:
+        assert orig_context.has_public_key()
+
+    # drop secret key
+    proto = orig_context.serialize(
+        save_public_key=True, save_secret_key=False, save_galois_keys=True, save_relin_keys=True
+    )
+    nctx = ts.context_from(proto)
+
+    assert nctx.has_relin_keys()
+    assert nctx.has_galois_keys()
+    assert not nctx.has_secret_key()
+
+    if encryption_type is ts.ENCRYPTION_TYPE.ASYMMETRIC:
+        assert nctx.has_public_key()
+
+
+@pytest.mark.parametrize(
+    "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]
+)
+def test_serialization_parameters_drop_publickey(encryption_type):
+    orig_context = ctx(encryption_type)
+    orig_context.generate_galois_keys()
+
+    assert orig_context.has_relin_keys()
+    assert orig_context.has_galois_keys()
+    assert orig_context.has_secret_key()
+
+    if encryption_type is ts.ENCRYPTION_TYPE.ASYMMETRIC:
+        assert orig_context.has_public_key()
+
+    # drop public key
+    proto = orig_context.serialize(
+        save_public_key=False, save_secret_key=True, save_galois_keys=True, save_relin_keys=True
+    )
+    nctx = ts.context_from(proto)
+
+    assert nctx.has_relin_keys()
+    assert nctx.has_galois_keys()
+    assert nctx.has_secret_key()
+
+    if encryption_type is ts.ENCRYPTION_TYPE.ASYMMETRIC:
+        assert not nctx.has_public_key()
+
+    # drop public key and secret key
+    proto = orig_context.serialize(
+        save_public_key=False, save_secret_key=False, save_galois_keys=True, save_relin_keys=True
+    )
+    nctx = ts.context_from(proto)
+
+    assert nctx.has_relin_keys()
+    assert nctx.has_galois_keys()
+    assert not nctx.has_secret_key()
+
+    if encryption_type is ts.ENCRYPTION_TYPE.ASYMMETRIC:
+        assert not nctx.has_public_key()
