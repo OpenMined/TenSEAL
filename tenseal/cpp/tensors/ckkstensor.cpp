@@ -522,6 +522,7 @@ shared_ptr<CKKSTensor> CKKSTensor::_dot_inplace(
             this->_data.broadcast_inplace(other_shape);
             this->_mul_inplace(other);
             this->sum_inplace();
+            return shared_from_this();
         } else {
             throw invalid_argument(
                 "don't support dot operations of more than 2 dimensions");
