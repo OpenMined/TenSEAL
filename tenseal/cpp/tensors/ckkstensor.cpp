@@ -778,7 +778,9 @@ shared_ptr<CKKSTensor> CKKSTensor::copy() const {
 shared_ptr<CKKSTensor> CKKSTensor::deepcopy() const {
     if (_lazy_buffer) return this->copy();
 
-    TenSEALContextProto ctx = this->tenseal_context()->save_proto();
+    TenSEALContextProto ctx = this->tenseal_context()->save_proto(
+        /*save_public_key=*/true, /*save_secret_key=*/true,
+        /*save_galois_keys=*/true, /*save_relin_keys=*/true);
     CKKSTensorProto vec = this->save_proto();
     return CKKSTensor::Create(ctx, vec);
 }
