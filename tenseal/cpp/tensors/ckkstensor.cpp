@@ -517,8 +517,8 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
         } else if (other_shape.size() == 2) {  // 1D-2D
             if (this_shape[0] != other_shape[0])
                 throw invalid_argument("can't perform dot: dimension mismatch");
-            // TODO: remove boradcast when implemented in _mul
-            this->_data.reshape_inplace(vector<size_t>({this_shape[0], 1}));
+            this->reshape_inplace(vector<size_t>({this_shape[0], 1}));
+            // TODO: remove broadcast when implemented in _mul
             this->_data.broadcast_inplace(other_shape);
             this->_mul_inplace(other);
             this->sum_inplace();
@@ -531,10 +531,9 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
         if (other_shape.size() == 1) {  // 2D-1D
             if (this_shape[1] != other_shape[0])
                 throw invalid_argument("can't perform dot: dimension mismatch");
-            // TODO: remove boradcast when implemented in _mul
-            auto other_copy = other->copy();
-            other_copy->_data.reshape_inplace(
-                vector<size_t>({1, other_shape[0]}));
+            auto other_copy =
+                other->reshape(vector<size_t>({1, other_shape[0]}));
+            // TODO: remove broadcast when implemented in _mul
             other_copy->_data.broadcast_inplace(this_shape);
             this->_mul_inplace(other_copy);
             this->sum_inplace(1);
@@ -565,8 +564,8 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_plain_inplace(
         } else if (other_shape.size() == 2) {  // 1D-2D
             if (this_shape[0] != other_shape[0])
                 throw invalid_argument("can't perform dot: dimension mismatch");
-            // TODO: remove boradcast when implemented in _mul
-            this->_data.reshape_inplace(vector<size_t>({this_shape[0], 1}));
+            this->reshape_inplace(vector<size_t>({this_shape[0], 1}));
+            // TODO: remove broadcast when implemented in _mul
             this->_data.broadcast_inplace(other_shape);
             this->_mul_inplace(other);
             this->sum_inplace();
@@ -579,9 +578,8 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_plain_inplace(
         if (other_shape.size() == 1) {  // 2D-1D
             if (this_shape[1] != other_shape[0])
                 throw invalid_argument("can't perform dot: dimension mismatch");
-            // TODO: remove boradcast when implemented in _mul
-            auto other_copy = other;
-            other_copy.reshape_inplace(vector<size_t>({1, other_shape[0]}));
+            auto other_copy = other.reshape(vector<size_t>({1, other_shape[0]}));
+            // TODO: remove broadcast when implemented in _mul
             other_copy.broadcast_inplace(this_shape);
             this->_mul_inplace(other_copy);
             this->sum_inplace(1);

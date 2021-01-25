@@ -58,7 +58,7 @@ class PlainTensor {
     /**
      * Reshape the tensor
      * **/
-    PlainTensor<plain_t> reshape(const vector<size_t>& new_shape) {
+    PlainTensor<plain_t> reshape(const vector<size_t>& new_shape) const {
         return this->copy().reshape_inplace(new_shape);
     }
     PlainTensor<plain_t>& reshape_inplace(const vector<size_t>& new_shape) {
@@ -68,7 +68,7 @@ class PlainTensor {
     /**
      * Broadcast
      * **/
-    PlainTensor<plain_t> broadcast(const vector<size_t>& new_shape) {
+    PlainTensor<plain_t> broadcast(const vector<size_t>& new_shape) const {
         return this->copy().broadcast_inplace(new_shape);
     }
     PlainTensor<plain_t>& broadcast_inplace(const vector<size_t>& new_shape) {
