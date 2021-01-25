@@ -536,7 +536,7 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
             other_copy->_data.reshape_inplace(
                 vector<size_t>({1, other_shape[0]}));
             other_copy->_data.broadcast_inplace(this_shape);
-            this->_mul_inplace(other);
+            this->_mul_inplace(other_copy);
             this->sum_inplace(1);
             return shared_from_this();
         } else if (other_shape.size() == 2) {  // 2D-2D
