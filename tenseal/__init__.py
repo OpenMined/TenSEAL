@@ -145,5 +145,6 @@ __all__ = [
     "plain_tensor",
     "plain_tensor_from",
     "ENCRYPTION_TYPE",
+    "SCHEME_TYPE",
     "__version__",
 ]
