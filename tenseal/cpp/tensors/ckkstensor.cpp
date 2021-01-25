@@ -505,9 +505,9 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
 }
 
 template <typename T>
-shared_ptr<CKKSTensor> CKKSTensor::_dot_inplace(
-    T other, const vector<size_t>& other_shape) {
+shared_ptr<CKKSTensor> CKKSTensor::_dot_inplace(T other) {
     auto this_shape = this->shape();
+    auto other_shape = other->shape();
     if (this_shape.size() == 1) {
         if (other_shape.size() == 1) {  // 1D-1D
             // inner product
@@ -529,9 +529,14 @@ shared_ptr<CKKSTensor> CKKSTensor::_dot_inplace(
         }
     } else if (this_shape.size() == 2) {
         if (other_shape.size() == 1) {  // 2D-1D
-            // TODO: better implement broadcasting for mul first then would be
-            // implemented similar to 1D-1D
-            throw invalid_argument("2D-1D dot isn't implemented yet");
+            if (this_shape[1] != other_shape[0])
+                throw invalid_argument("can't perform dot: dimension mismatch");
+            // TODO: remove boradcast when implemented in _mul
+            other->_data.reshape_inplace(vector<size_t>({1, other_shape[0]}));
+            other->_data.broadcast_inplace(this_shape);
+            this->_mul_inplace(other);
+            this->sum_inplace(1);
+            return shared_from_this();
         } else if (other_shape.size() == 2) {  // 2D-2D
             this->_matmul_inplace(other);
             return shared_from_this();
@@ -547,16 +552,19 @@ shared_ptr<CKKSTensor> CKKSTensor::_dot_inplace(
 
 shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
     const shared_ptr<CKKSTensor>& other) {
-    auto other_shape = other->shape();
-
-    return this->_dot_inplace(other, other_shape);
+    // TODO: copy is required when other need to change (e.g. 2D-1D)
+    // optimize that
+    return this->_dot_inplace(other->copy());
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::dot_plain_inplace(
     const PlainTensor<double>& other) {
-    auto other_shape = other.shape();
-
-    return this->_dot_inplace(other, other_shape);
+    // TODO: copy is required when other need to change (e.g. 2D-1D)
+    // optimize that
+    auto other_copy = other;
+    // _dot_inplace expect a pointer
+    auto other_ptr = make_shared<PlainTensor<double>>(other_copy);
+    return this->_dot_inplace(other_ptr);
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(

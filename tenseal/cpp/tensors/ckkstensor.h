@@ -151,8 +151,7 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     }
 
     template <typename T>
-    shared_ptr<CKKSTensor> _dot_inplace(T other,
-                                        const vector<size_t>& other_shape);
+    shared_ptr<CKKSTensor> _dot_inplace(T other);
 
     void load_proto(const CKKSTensorProto& buffer);
     CKKSTensorProto save_proto() const;
