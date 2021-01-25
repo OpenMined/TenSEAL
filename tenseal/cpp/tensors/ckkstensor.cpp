@@ -504,8 +504,8 @@ shared_ptr<CKKSTensor> CKKSTensor::polyval_inplace(
     return shared_from_this();
 }
 
-template <typename T>
-shared_ptr<CKKSTensor> CKKSTensor::_dot_inplace(T other) {
+shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
+    const shared_ptr<CKKSTensor>& other) {
     auto this_shape = this->shape();
     auto other_shape = other->shape();
     if (this_shape.size() == 1) {
@@ -532,8 +532,9 @@ shared_ptr<CKKSTensor> CKKSTensor::_dot_inplace(T other) {
             if (this_shape[1] != other_shape[0])
                 throw invalid_argument("can't perform dot: dimension mismatch");
             // TODO: remove boradcast when implemented in _mul
-            other->_data.reshape_inplace(vector<size_t>({1, other_shape[0]}));
-            other->_data.broadcast_inplace(this_shape);
+            auto other_copy = other->copy();
+            other_copy->_data.reshape_inplace(vector<size_t>({1, other_shape[0]}));
+            other_copy->_data.broadcast_inplace(this_shape);
             this->_mul_inplace(other);
             this->sum_inplace(1);
             return shared_from_this();
@@ -550,21 +551,51 @@ shared_ptr<CKKSTensor> CKKSTensor::_dot_inplace(T other) {
     }
 }
 
-shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
-    const shared_ptr<CKKSTensor>& other) {
-    // TODO: copy is required when other need to change (e.g. 2D-1D)
-    // optimize that
-    return this->_dot_inplace(other->copy());
-}
-
 shared_ptr<CKKSTensor> CKKSTensor::dot_plain_inplace(
     const PlainTensor<double>& other) {
-    // TODO: copy is required when other need to change (e.g. 2D-1D)
-    // optimize that
-    auto other_copy = other;
-    // _dot_inplace expect a pointer
-    auto other_ptr = make_shared<PlainTensor<double>>(other_copy);
-    return this->_dot_inplace(other_ptr);
+    auto this_shape = this->shape();
+    auto other_shape = other.shape();
+    if (this_shape.size() == 1) {
+        if (other_shape.size() == 1) {  // 1D-1D
+            // inner product
+            this->_mul_inplace(other);
+            this->sum_inplace();
+            return shared_from_this();
+        } else if (other_shape.size() == 2) {  // 1D-2D
+            if (this_shape[0] != other_shape[0])
+                throw invalid_argument("can't perform dot: dimension mismatch");
+            // TODO: remove boradcast when implemented in _mul
+            this->_data.reshape_inplace(vector<size_t>({this_shape[0], 1}));
+            this->_data.broadcast_inplace(other_shape);
+            this->_mul_inplace(other);
+            this->sum_inplace();
+            return shared_from_this();
+        } else {
+            throw invalid_argument(
+                "don't support dot operations of more than 2 dimensions");
+        }
+    } else if (this_shape.size() == 2) {
+        if (other_shape.size() == 1) {  // 2D-1D
+            if (this_shape[1] != other_shape[0])
+                throw invalid_argument("can't perform dot: dimension mismatch");
+            // TODO: remove boradcast when implemented in _mul
+            auto other_copy = other;
+            other_copy.reshape_inplace(vector<size_t>({1, other_shape[0]}));
+            other_copy.broadcast_inplace(this_shape);
+            this->_mul_inplace(other_copy);
+            this->sum_inplace(1);
+            return shared_from_this();
+        } else if (other_shape.size() == 2) {  // 2D-2D
+            this->_matmul_inplace(other);
+            return shared_from_this();
+        } else {
+            throw invalid_argument(
+                "don't support dot operations of more than 2 dimensions");
+        }
+    } else {
+        throw invalid_argument(
+            "don't support dot operations of more than 2 dimensions");
+    }
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
