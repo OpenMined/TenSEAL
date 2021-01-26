@@ -13,9 +13,8 @@ void BFVVector::prepare_context(const shared_ptr<TenSEALContext>& ctx) {
 
 BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx,
                      const plain_t& vec) {
-    // Encrypts the whole vector into a single ciphertext using BFV batching
-
     this->prepare_context(ctx);
+
     if (vec.empty()) {
         throw invalid_argument("Attempting to encrypt an empty vector");
     }
@@ -23,6 +22,15 @@ BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx,
     auto slot_count = ctx->slot_count<BatchEncoder>();
     auto vec_chunks = vec.chunks(slot_count);
 
+    if (vec_chunks.size() > 1) {
+        std::cout
+            << "WARNING: The input does not fit in a single ciphertext, and "
+               "some operations will be disabled.\n"
+               "The following operations are disabled in this setup: matmul, "
+               "matmul_plain, replicate_first_slot, conv2d_im2col.\n"
+               "If you need to use those operations, try increasing the "
+               "poly_modulus parameter, to fit your input.\n";
+    }
     this->_ciphertexts = vector<Ciphertext>();
     this->_sizes = vector<size_t>();
 
