@@ -27,7 +27,7 @@ CKKSVector::CKKSVector(const shared_ptr<TenSEALContext>& ctx,
             << "WARNING: The input does not fit in a single ciphertext, and "
                "some operations will be disabled.\n"
                "The following operations are disabled in this setup: matmul, "
-               "matmul_plain, replicate_first_slot, conv2d_im2col.\n"
+               "matmul_plain, enc_matmul_plain, conv2d_im2col.\n"
                "If you need to use those operations, try increasing the "
                "poly_modulus parameter, to fit your input.\n";
     }
@@ -243,6 +243,7 @@ shared_ptr<CKKSVector> CKKSVector::dot_plain_inplace(const plain_t& to_mul) {
 
 shared_ptr<CKKSVector> CKKSVector::sum_inplace(size_t /*axis = 0*/) {
     vector<Ciphertext> interm_sum;
+    // TODO use multithreading for the sum
     for (size_t idx = 0; idx < this->_ciphertexts.size(); ++idx) {
         Ciphertext out = this->_ciphertexts[idx];
         sum_vector(this->tenseal_context(), out, this->_sizes[idx]);
@@ -431,6 +432,10 @@ shared_ptr<CKKSVector> CKKSVector::polyval_inplace(
 
 shared_ptr<CKKSVector> CKKSVector::conv2d_im2col_inplace(
     const CKKSVector::plain_t& kernel, const size_t windows_nb) {
+    if (this->_ciphertexts.size() != 1)
+        throw invalid_argument(
+            "can't execute conv2d_im2col on chunked vectors");
+
     if (windows_nb == 0) {
         throw invalid_argument("Windows number can't be zero");
     }
@@ -450,6 +455,10 @@ shared_ptr<CKKSVector> CKKSVector::enc_matmul_plain_inplace(
     if (plain_vec.empty()) {
         throw invalid_argument("Plain vector can't be empty");
     }
+
+    if (this->_ciphertexts.size() != 1)
+        throw invalid_argument(
+            "can't execute enc_matmul_plain on chunked vectors");
 
     // calculate the next power of 2
     size_t plain_vec_size =
@@ -500,9 +509,6 @@ shared_ptr<CKKSVector> CKKSVector::enc_matmul_plain_inplace(
 }
 
 shared_ptr<CKKSVector> CKKSVector::replicate_first_slot_inplace(size_t n) {
-    if (this->_ciphertexts.size() != 1)
-        throw invalid_argument("can't replicate first_slot on chunked vectors");
-
     // mask
     vector<double> mask(this->size(), 0);
     mask[0] = 1;

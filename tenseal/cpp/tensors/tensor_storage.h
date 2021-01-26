@@ -339,6 +339,8 @@ class TensorStorage {
         auto storage_chunks = split_vector(flat_data, max_size);
 
         vector<TensorStorage<dtype_t>> result;
+        result.reserve(storage_chunks.size());
+
         for (auto& chunk : storage_chunks)
             result.push_back(TensorStorage<dtype_t>(chunk));
         return result;

@@ -57,6 +57,7 @@ shared_ptr<T> compute_polynomial_term(int degree, double coeff,
     return x;
 }
 
+// TODO support multi-ciphertext vectors
 template <typename T, class Encoder, typename D>
 shared_ptr<T> pack_vectors(const vector<shared_ptr<T>>& vectors) {
     size_t vectors_nb = vectors.size();

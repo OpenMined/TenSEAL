@@ -209,6 +209,8 @@ class PlainTensor {
         auto storage_chunks = _data.chunks(max_size);
 
         vector<PlainTensor<plain_t>> result;
+        result.reserve(storage_chunks.size());
+
         for (auto& chunk : storage_chunks)
             result.push_back(PlainTensor<plain_t>(chunk));
         return result;

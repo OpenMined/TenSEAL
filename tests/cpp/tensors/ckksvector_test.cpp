@@ -45,7 +45,7 @@ TEST_P(CKKSVectorTest, TestCreateCKKS) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l->ciphertext_size(), 2);
+    ASSERT_THAT(l->ciphertext_size(), ElementsAreArray({2}));
 }
 
 TEST_P(CKKSVectorTest, TestCreateCKKSFail) {
@@ -84,7 +84,7 @@ TEST_P(CKKSVectorTest, TestCKKSAdd) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(add->ciphertext_size(), 2);
+    ASSERT_THAT(add->ciphertext_size(), ElementsAreArray({2}));
 
     auto decr = add->decrypt();
     ASSERT_TRUE(are_close(decr.data(), {4, 6, 7}));
@@ -96,7 +96,7 @@ TEST_P(CKKSVectorTest, TestCKKSAdd) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l->ciphertext_size(), 2);
+    ASSERT_THAT(l->ciphertext_size(), ElementsAreArray({2}));
     decr = l->decrypt();
     ASSERT_TRUE(are_close(decr.data(), {7, 10, 11}));
 }
@@ -119,7 +119,7 @@ TEST_P(CKKSVectorTest, TestCKKSMul) {
     auto r = CKKSVector::Create(ctx, std::vector<double>({2, 2, 2}));
 
     auto mul = l->mul(r);
-    ASSERT_EQ(mul->ciphertext_size(), 2);
+    ASSERT_THAT(mul->ciphertext_size(), ElementsAreArray({2}));
 
     auto decr = mul->decrypt();
     std::cout << decr.at({0}) << std::endl;
@@ -132,7 +132,7 @@ TEST_P(CKKSVectorTest, TestCKKSMul) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l->ciphertext_size(), 2);
+    ASSERT_THAT(l->ciphertext_size(), ElementsAreArray({2}));
     decr = l->decrypt();
     ASSERT_TRUE(are_close(decr.data(), {4, 8, 12}));
 }
@@ -161,7 +161,7 @@ TEST_P(CKKSVectorTest, TestCKKSMulMany) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l->ciphertext_size(), 2);
+    ASSERT_THAT(l->ciphertext_size(), ElementsAreArray({2}));
     auto decr = l->decrypt();
     ASSERT_TRUE(are_close(decr.data(), {4, 8, 12}));
 }
@@ -190,7 +190,7 @@ TEST_P(CKKSVectorTest, TestCKKSMulNoRelin) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l->ciphertext_size(), 4);
+    ASSERT_THAT(l->ciphertext_size(), ElementsAreArray({4}));
     auto decr = l->decrypt();
     ASSERT_TRUE(are_close(decr.data(), {4, 8, 12}));
 }

@@ -27,7 +27,7 @@ BFVVector::BFVVector(const shared_ptr<TenSEALContext>& ctx,
             << "WARNING: The input does not fit in a single ciphertext, and "
                "some operations will be disabled.\n"
                "The following operations are disabled in this setup: matmul, "
-               "matmul_plain, replicate_first_slot, conv2d_im2col.\n"
+               "matmul_plain, conv2d_im2col.\n"
                "If you need to use those operations, try increasing the "
                "poly_modulus parameter, to fit your input.\n";
     }
@@ -228,6 +228,7 @@ shared_ptr<BFVVector> BFVVector::dot_plain_inplace(
 
 shared_ptr<BFVVector> BFVVector::sum_inplace(size_t /*axis=0*/) {
     vector<Ciphertext> interm_sum;
+    // TODO use multithreading for sum
     for (size_t idx = 0; idx < this->_ciphertexts.size(); ++idx) {
         Ciphertext out = this->_ciphertexts[idx];
         sum_vector(this->tenseal_context(), out, this->_sizes[idx]);
@@ -345,9 +346,6 @@ shared_ptr<BFVVector> BFVVector::enc_matmul_plain_inplace(
 }
 
 shared_ptr<BFVVector> BFVVector::replicate_first_slot_inplace(size_t n) {
-    if (this->_ciphertexts.size() != 1)
-        throw invalid_argument("can't replicate first_slot on chunked vectors");
-
     // mask
     vector<int64_t> mask(this->size(), 0);
     mask[0] = 1;

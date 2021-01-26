@@ -59,9 +59,9 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
     /**
      * Return information about the ciphertext.
      **/
-    size_t ciphertext_size() const {
-        size_t res = 0;
-        for (auto& ct : this->_ciphertexts) res += ct.size();
+    vector<size_t> ciphertext_size() const {
+        vector<size_t> res;
+        for (auto& ct : this->_ciphertexts) res.push_back(ct.size());
         return res;
     }
     const vector<Ciphertext>& ciphertext() const { return this->_ciphertexts; }

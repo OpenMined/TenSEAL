@@ -34,7 +34,7 @@ TEST_P(BFVVectorTest, TestCreateBFV) {
     }
 
     ASSERT_EQ(l->size(), 3);
-    ASSERT_EQ(l->ciphertext_size(), 2);
+    ASSERT_THAT(l->ciphertext_size(), ElementsAreArray({2}));
 }
 
 TEST_P(BFVVectorTest, TestBFVAdd) {
@@ -49,7 +49,7 @@ TEST_P(BFVVectorTest, TestBFVAdd) {
     auto r = BFVVector::Create(ctx, vector<int64_t>({2, 3, 4}));
 
     auto add = l->add(r);
-    ASSERT_EQ(add->ciphertext_size(), 2);
+    ASSERT_THAT(add->ciphertext_size(), ElementsAreArray({2}));
 
     auto decr = add->decrypt();
     EXPECT_THAT(decr.data(), ElementsAreArray({3, 5, 7}));
@@ -63,7 +63,7 @@ TEST_P(BFVVectorTest, TestBFVAdd) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l->ciphertext_size(), 2);
+    ASSERT_THAT(l->ciphertext_size(), ElementsAreArray({2}));
     decr = l->decrypt();
     EXPECT_THAT(decr.data(), ElementsAreArray({9, 14, 19}));
 }
@@ -80,7 +80,7 @@ TEST_P(BFVVectorTest, TestBFVMul) {
     auto r = BFVVector::Create(ctx, vector<int64_t>({2, 3, 4}));
 
     auto mul = l->mul(r);
-    ASSERT_EQ(mul->ciphertext_size(), 2);
+    ASSERT_THAT(mul->ciphertext_size(), ElementsAreArray({2}));
 
     auto decr = mul->decrypt();
     EXPECT_THAT(decr.data(), ElementsAreArray({2, 6, 12}));
@@ -96,7 +96,7 @@ TEST_P(BFVVectorTest, TestBFVMul) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l->ciphertext_size(), 2);
+    ASSERT_THAT(l->ciphertext_size(), ElementsAreArray({2}));
 
     decr = l->decrypt();
     EXPECT_THAT(decr.data(), ElementsAreArray({16, 32, 48}));
