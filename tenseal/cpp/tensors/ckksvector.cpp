@@ -27,7 +27,8 @@ CKKSVector::CKKSVector(const shared_ptr<TenSEALContext>& ctx,
             << "WARNING: The input does not fit in a single ciphertext, and "
                "some operations will be disabled.\n"
                "The following operations are disabled in this setup: matmul, "
-               "matmul_plain, enc_matmul_plain, conv2d_im2col.\n"
+               "matmul_plain, enc_matmul_plain, conv2d_im2col, "
+               "replicate_first_slot.\n"
                "If you need to use those operations, try increasing the "
                "poly_modulus parameter, to fit your input.\n";
     }
@@ -509,6 +510,10 @@ shared_ptr<CKKSVector> CKKSVector::enc_matmul_plain_inplace(
 }
 
 shared_ptr<CKKSVector> CKKSVector::replicate_first_slot_inplace(size_t n) {
+    if (this->_ciphertexts.size() != 1)
+        throw invalid_argument(
+            "can't execute replicate_first_slot on chunked vectors");
+
     // mask
     vector<double> mask(this->size(), 0);
     mask[0] = 1;
