@@ -31,6 +31,18 @@ TEST_F(PlainTensorTest, TestCreateFrom2DVector) {
     ASSERT_THAT(tensor.strides(), ElementsAreArray({2, 1}));
 }
 
+TEST_F(PlainTensorTest, TestCreateFromString) {
+    vector<vector<double>> data = {{1.1, 2.2}, {3.3, 4.4}};
+    PlainTensor<double> tensor(data);
+    auto buf = tensor.save();
+
+    auto newtensor = PlainTensor<double>(buf);
+
+    ASSERT_THAT(newtensor.data(), ElementsAreArray({1.1, 2.2, 3.3, 4.4}));
+    ASSERT_THAT(newtensor.shape(), ElementsAreArray({2, 2}));
+    ASSERT_THAT(newtensor.strides(), ElementsAreArray({2, 1}));
+}
+
 TEST_F(PlainTensorTest, TestCreateFrom2DVectorFail) {
     vector<vector<double>> data = {{1.1, 2.2}, {3.3}};
     EXPECT_THROW(PlainTensor<double> tensor(data), std::exception);

@@ -18,10 +18,6 @@ TenSEALContext::TenSEALContext(EncryptionParameters parms,
     this->keys_setup(encryption_type);
 }
 
-TenSEALContext::TenSEALContext(istream& stream, optional<size_t> n_threads) {
-    this->dispatcher_setup(n_threads);
-    this->load(stream);
-}
 TenSEALContext::TenSEALContext(const std::string& input,
                                optional<size_t> n_threads) {
     this->dispatcher_setup(n_threads);
@@ -49,8 +45,9 @@ void TenSEALContext::base_setup(EncryptionParameters parms) {
 }
 
 void TenSEALContext::keys_setup_public_key(optional<PublicKey> public_key,
-                                           optional<SecretKey> secret_key) {
-    if (!public_key && !secret_key) {
+                                           optional<SecretKey> secret_key,
+                                           bool generate_key) {
+    if (!public_key && !secret_key && generate_key) {
         KeyGenerator keygen = KeyGenerator(*this->_context);
 
         PublicKey pk;
@@ -60,41 +57,47 @@ void TenSEALContext::keys_setup_public_key(optional<PublicKey> public_key,
         this->_secret_key = make_shared<SecretKey>(keygen.secret_key());
     }
 
-    if (public_key)
+    if (public_key) {
         this->_public_key = make_shared<PublicKey>(public_key.value());
+    }
 
     if (secret_key)
         this->_secret_key = make_shared<SecretKey>(secret_key.value());
 
-    this->encryptor =
-        make_shared<Encryptor>(*this->_context, *this->_public_key);
+    if (this->_public_key)
+        this->encryptor =
+            make_shared<Encryptor>(*this->_context, *this->_public_key);
 }
 
-void TenSEALContext::keys_setup_symmetric(optional<SecretKey> secret_key) {
+void TenSEALContext::keys_setup_symmetric(optional<SecretKey> secret_key,
+                                          bool generate_secret) {
     if (secret_key)
         this->_secret_key = make_shared<SecretKey>(secret_key.value());
-    else {
+    else if (generate_secret) {
         KeyGenerator keygen = KeyGenerator(*this->_context);
         this->_secret_key = make_shared<SecretKey>(keygen.secret_key());
     }
 
-    this->encryptor =
-        make_shared<Encryptor>(*this->_context, *this->_secret_key);
+    if (this->_secret_key)
+        this->encryptor =
+            make_shared<Encryptor>(*this->_context, *this->_secret_key);
 }
 
 void TenSEALContext::keys_setup(encryption_type enc_type,
                                 optional<PublicKey> public_key,
                                 optional<SecretKey> secret_key,
                                 bool generate_relin_keys,
-                                bool generate_galois_keys) {
+                                bool generate_galois_keys,
+                                bool generate_secret) {
     this->_encryption_type = enc_type;
     switch (enc_type) {
         case encryption_type::asymmetric: {
-            this->keys_setup_public_key(public_key, secret_key);
+            this->keys_setup_public_key(public_key, secret_key,
+                                        generate_secret);
             break;
         }
         case encryption_type::symmetric: {
-            this->keys_setup_symmetric(secret_key);
+            this->keys_setup_symmetric(secret_key, generate_secret);
             break;
         }
         default:
@@ -134,11 +137,6 @@ shared_ptr<TenSEALContext> TenSEALContext::Create(
 
     return shared_ptr<TenSEALContext>(
         new TenSEALContext(parms, encryption_type, n_threads));
-}
-
-shared_ptr<TenSEALContext> TenSEALContext::Create(istream& stream,
-                                                  optional<size_t> n_threads) {
-    return shared_ptr<TenSEALContext>(new TenSEALContext(stream, n_threads));
 }
 
 shared_ptr<TenSEALContext> TenSEALContext::Create(const std::string& input,
@@ -399,11 +397,17 @@ void TenSEALContext::load_proto_public_key(const TenSEALContextProto& buffer) {
         this->global_scale(buffer.public_context().scale());
     }
 
-    auto public_key = SEALDeserialize<PublicKey>(
-        *this->_context, buffer.public_context().public_key());
+    optional<PublicKey> public_key = {};
+    if (!buffer.public_context().public_key().empty()) {
+        public_key = SEALDeserialize<PublicKey>(
+            *this->_context, buffer.public_context().public_key());
+    }
 
     if (!buffer.has_private_context()) {
-        this->keys_setup(encryption_type::asymmetric, public_key);
+        this->keys_setup(encryption_type::asymmetric, public_key, {},
+                         /*generate_relin_keys=*/false,
+                         /*generate_galois_keys=*/false,
+                         /*generate_secret_key=*/false);
         if (!buffer.public_context().galois_keys().empty()) {
             this->generate_galois_keys(buffer.public_context().galois_keys());
         }
@@ -413,11 +417,14 @@ void TenSEALContext::load_proto_public_key(const TenSEALContextProto& buffer) {
         return;
     }
 
-    auto secret_key = SEALDeserialize<SecretKey>(
-        *this->_context, buffer.private_context().secret_key());
+    optional<SecretKey> secret_key = {};
+    if (!buffer.private_context().secret_key().empty()) {
+        secret_key = SEALDeserialize<SecretKey>(
+            *this->_context, buffer.private_context().secret_key());
+    }
     this->keys_setup(encryption_type::asymmetric, public_key, secret_key,
                      buffer.private_context().relin_keys_generated(),
-                     buffer.private_context().galois_keys_generated());
+                     buffer.private_context().galois_keys_generated(), false);
 }
 
 void TenSEALContext::load_proto_symmetric(const TenSEALContextProto& buffer) {
@@ -428,11 +435,25 @@ void TenSEALContext::load_proto_symmetric(const TenSEALContextProto& buffer) {
         this->global_scale(buffer.public_context().scale());
     }
 
-    auto secret_key = SEALDeserialize<SecretKey>(
-        *this->_context, buffer.private_context().secret_key());
-    this->keys_setup(encryption_type::symmetric, {}, secret_key,
-                     buffer.private_context().relin_keys_generated(),
-                     buffer.private_context().galois_keys_generated());
+    if (!buffer.private_context().secret_key().empty()) {
+        auto secret_key = SEALDeserialize<SecretKey>(
+            *this->_context, buffer.private_context().secret_key());
+        this->keys_setup(encryption_type::symmetric, {}, secret_key,
+                         buffer.private_context().relin_keys_generated(),
+                         buffer.private_context().galois_keys_generated(),
+                         false);
+    } else {
+        this->keys_setup(encryption_type::symmetric, {}, {},
+                         /*generate_relin_keys=*/false,
+                         /*               generate_galois_keys=*/false,
+                         /*generate_secret_key=*/false);
+        if (!buffer.public_context().galois_keys().empty()) {
+            this->generate_galois_keys(buffer.public_context().galois_keys());
+        }
+        if (!buffer.public_context().relin_keys().empty()) {
+            this->generate_relin_keys(buffer.public_context().relin_keys());
+        }
+    }
 }
 
 void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
@@ -447,7 +468,9 @@ void TenSEALContext::load_proto(const TenSEALContextProto& buffer) {
     }
 }
 
-TenSEALContextProto TenSEALContext::save_proto_public_key() const {
+TenSEALContextProto TenSEALContext::save_proto_public_key(
+    bool save_public_key, bool save_secret_key, bool save_galois_keys,
+    bool save_relin_keys) const {
     TenSEALContextProto buffer;
     buffer.set_encryption_type(to_underlying(this->_encryption_type));
 
@@ -456,37 +479,45 @@ TenSEALContextProto TenSEALContext::save_proto_public_key() const {
 
     TenSEALPublicProto public_buffer;
     public_buffer.set_auto_flags(this->_auto_flags);
-    *public_buffer.mutable_public_key() =
-        SEALSerialize<PublicKey>(*this->public_key());
-
     public_buffer.set_scale(this->safe_global_scale());
 
-    if (this->is_public()) {
-        if (this->_galois_keys)
+    if (save_public_key) {
+        *public_buffer.mutable_public_key() =
+            SEALSerialize<PublicKey>(*this->public_key());
+    }
+
+    if (this->is_public() || !save_secret_key) {
+        if (save_galois_keys && this->_galois_keys)
             *public_buffer.mutable_galois_keys() =
                 SEALSerialize<GaloisKeys>(*this->_galois_keys);
-        if (this->_relin_keys)
+        if (save_relin_keys && this->_relin_keys)
             *public_buffer.mutable_relin_keys() =
                 SEALSerialize<RelinKeys>(*this->_relin_keys);
     }
 
     *buffer.mutable_public_context() = public_buffer;
 
-    if (this->is_public()) {
+    if (this->is_public() || !save_secret_key) {
         return buffer;
     }
 
     TenSEALPrivateProto private_buffer;
+
     *private_buffer.mutable_secret_key() =
         SEALSerialize<SecretKey>(*this->secret_key());
-    private_buffer.set_galois_keys_generated(this->_galois_keys != nullptr);
-    private_buffer.set_relin_keys_generated(this->_relin_keys != nullptr);
+
+    if (save_galois_keys)
+        private_buffer.set_galois_keys_generated(this->_galois_keys != nullptr);
+    if (save_relin_keys)
+        private_buffer.set_relin_keys_generated(this->_relin_keys != nullptr);
 
     *buffer.mutable_private_context() = private_buffer;
     return buffer;
 }
 
-TenSEALContextProto TenSEALContext::save_proto_symmetric() const {
+TenSEALContextProto TenSEALContext::save_proto_symmetric(
+    bool save_public_key, bool save_secret_key, bool save_galois_keys,
+    bool save_relin_keys) const {
     TenSEALContextProto buffer;
     buffer.set_encryption_type(to_underlying(this->_encryption_type));
 
@@ -496,47 +527,58 @@ TenSEALContextProto TenSEALContext::save_proto_symmetric() const {
     TenSEALPublicProto public_buffer;
     public_buffer.set_auto_flags(this->_auto_flags);
     public_buffer.set_scale(this->safe_global_scale());
+
+    if (!save_secret_key) {
+        if (save_galois_keys && this->_galois_keys)
+            *public_buffer.mutable_galois_keys() =
+                SEALSerialize<GaloisKeys>(*this->_galois_keys);
+        if (save_relin_keys && this->_relin_keys)
+            *public_buffer.mutable_relin_keys() =
+                SEALSerialize<RelinKeys>(*this->_relin_keys);
+    }
+
     *buffer.mutable_public_context() = public_buffer;
+
+    if (!save_secret_key) {
+        return buffer;
+    }
 
     TenSEALPrivateProto private_buffer;
     *private_buffer.mutable_secret_key() =
         SEALSerialize<SecretKey>(*this->secret_key());
-    private_buffer.set_galois_keys_generated(this->_galois_keys != nullptr);
-    private_buffer.set_relin_keys_generated(this->_relin_keys != nullptr);
+    if (save_galois_keys)
+        private_buffer.set_galois_keys_generated(this->_galois_keys != nullptr);
+    if (save_relin_keys)
+        private_buffer.set_relin_keys_generated(this->_relin_keys != nullptr);
 
     *buffer.mutable_private_context() = private_buffer;
     return buffer;
 }
 
-TenSEALContextProto TenSEALContext::save_proto() const {
+TenSEALContextProto TenSEALContext::save_proto(bool save_public_key,
+                                               bool save_secret_key,
+                                               bool save_galois_keys,
+                                               bool save_relin_keys) const {
     switch (this->_encryption_type) {
         case encryption_type::asymmetric:
-            return this->save_proto_public_key();
+            return this->save_proto_public_key(save_public_key, save_secret_key,
+                                               save_galois_keys,
+                                               save_relin_keys);
         case encryption_type::symmetric:
-            return this->save_proto_symmetric();
+            return this->save_proto_symmetric(save_public_key, save_secret_key,
+                                              save_galois_keys,
+                                              save_relin_keys);
         default:
             throw invalid_argument("encryption type not support for serialize");
     }
 }
 
 std::shared_ptr<TenSEALContext> TenSEALContext::copy() const {
-    TenSEALContextProto buffer = this->save_proto();
+    TenSEALContextProto buffer =
+        this->save_proto(/*save_public_key=*/true, /*save_secret_key=*/true,
+                         /*save_galois_keys=*/true, /*save_relin_keys=*/true);
     return shared_ptr<TenSEALContext>(
         new TenSEALContext(buffer, this->_threads));
-}
-
-void TenSEALContext::load(std::istream& stream) {
-    TenSEALContextProto buffer;
-    if (!buffer.ParseFromIstream(&stream)) {
-        throw invalid_argument("failed to parse stream");
-    }
-
-    this->load_proto(buffer);
-}
-
-bool TenSEALContext::save(std::ostream& stream) const {
-    TenSEALContextProto buffer = this->save_proto();
-    return buffer.SerializeToOstream(&stream);
 }
 
 void TenSEALContext::load(const std::string& input) {
@@ -547,8 +589,11 @@ void TenSEALContext::load(const std::string& input) {
     this->load_proto(buffer);
 }
 
-std::string TenSEALContext::save() const {
-    TenSEALContextProto buffer = this->save_proto();
+std::string TenSEALContext::save(bool save_public_key, bool save_secret_key,
+                                 bool save_galois_keys,
+                                 bool save_relin_keys) const {
+    TenSEALContextProto buffer = this->save_proto(
+        save_public_key, save_secret_key, save_galois_keys, save_relin_keys);
     std::string output;
     output.resize(proto_bytes_size(buffer));
 

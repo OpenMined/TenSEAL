@@ -137,6 +137,63 @@ TEST_P(BFVVectorTest, TestBFVLazyLoading) {
     EXPECT_THAT(decr.data(), ElementsAreArray({3, 5, 7}));
 }
 
+TEST_F(BFVVectorTest, TestCKKSLazyContextSanityDoubleSerde) {
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {},
+                                      encryption_type::asymmetric);
+    ASSERT_TRUE(ctx != nullptr);
+
+    auto l = BFVVector::Create(ctx, vector<int64_t>({1, 2, 3}));
+    auto r = BFVVector::Create(ctx, vector<int64_t>({2, 3, 4}));
+
+    // double serde
+    auto buffer = l->save();
+    auto newl = BFVVector::Create(buffer);
+    buffer = newl->save();
+    newl = BFVVector::Create(buffer);
+
+    newl->link_tenseal_context(ctx);
+    auto res = newl->add(r);
+
+    auto decr = res->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({3, 5, 7}));
+}
+
+TEST_F(BFVVectorTest, TestCKKSLazyContextSanityCopy) {
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {},
+                                      encryption_type::asymmetric);
+    ASSERT_TRUE(ctx != nullptr);
+
+    auto l = BFVVector::Create(ctx, vector<int64_t>({1, 2, 3}));
+    auto r = BFVVector::Create(ctx, vector<int64_t>({2, 3, 4}));
+
+    auto buffer = l->save();
+    auto newl = BFVVector::Create(buffer);
+
+    auto cpy = newl->copy();
+    cpy->link_tenseal_context(ctx);
+    auto res = cpy->add(r);
+    auto decr = res->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({3, 5, 7}));
+}
+
+TEST_F(BFVVectorTest, TestCKKSLazyContextSanityDeepcopy) {
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {},
+                                      encryption_type::asymmetric);
+    ASSERT_TRUE(ctx != nullptr);
+
+    auto l = BFVVector::Create(ctx, vector<int64_t>({1, 2, 3}));
+    auto r = BFVVector::Create(ctx, vector<int64_t>({2, 3, 4}));
+
+    auto buffer = l->save();
+    auto newl = BFVVector::Create(buffer);
+
+    auto cpy = newl->deepcopy();
+    cpy->link_tenseal_context(ctx);
+    auto res = cpy->add(r);
+    auto decr = res->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({3, 5, 7}));
+}
+
 TEST_F(BFVVectorTest, TestBFVSerializationSize) {
     vector<int64_t> input;
     for (int64_t val = 1; val < 1000; ++val) input.push_back(val);

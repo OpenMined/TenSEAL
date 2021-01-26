@@ -34,10 +34,10 @@ def tenseal_deps():
     if "com_xtensorstack_xtensor" not in native.existing_rules():
         http_archive(
             name = "com_xtensorstack_xtensor",
-            sha256 = "c6263cf5e22bff44c3258223ea4af74d885060625dd4b092889eb0e7d2d749b0",
+            sha256 = "b73aacfdef12422f45b27ac43537bd9371ede092df4c14e20d2b8e41b2b5648e",
             build_file = "//third_party:xtensor.BUILD",
-            strip_prefix = "xtensor-master/include",
-            urls = ["https://github.com/bcebere/xtensor/archive/master.zip"],
+            strip_prefix = "xtensor-0.22.0/include",
+            urls = ["https://github.com/xtensor-stack/xtensor/archive/0.22.0.tar.gz"],
         )
     if "com_xtensorstack_xtl" not in native.existing_rules():
         http_archive(
@@ -47,13 +47,21 @@ def tenseal_deps():
             strip_prefix = "xtl-0.6.23/include",
             urls = ["https://github.com/xtensor-stack/xtl/archive/0.6.23.tar.gz"],
         )
+    if "com_nlohmann_json" not in native.existing_rules():
+        http_archive(
+            name = "com_nlohmann_json",
+            build_file = "//third_party:nlohmann_json.BUILD",
+            sha256 = "4cf0df69731494668bdd6460ed8cb269b68de9c19ad8c27abc24cd72605b2d5b",
+            strip_prefix = "json-3.9.1/include",
+            urls = ["https://github.com/nlohmann/json/archive/v3.9.1.tar.gz"],
+        )
     if "com_microsoft_gsl" not in native.existing_rules():
         http_archive(
             name = "com_microsoft_gsl",
-            sha256 = "76269b66d95da27b1253f14aaf01ace9f91db785981bc1553b730231faf23fd6",
+            sha256 = "d3234d7f94cea4389e3ca70619b82e8fb4c2f33bb3a070799f1e18eef500a083",
             build_file = "//third_party:gsl.BUILD",
-            strip_prefix = "GSL-master/include",
-            urls = ["https://github.com/bcebere/GSL/archive/master.zip"],
+            strip_prefix = "GSL-3.1.0/include",
+            urls = ["https://github.com/microsoft/GSL/archive/v3.1.0.tar.gz"],
         )
 
 

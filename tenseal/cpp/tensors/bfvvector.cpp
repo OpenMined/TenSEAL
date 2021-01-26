@@ -398,6 +398,8 @@ void BFVVector::load(const std::string& vec) {
 }
 
 std::string BFVVector::save() const {
+    if (_lazy_buffer) return _lazy_buffer.value();
+
     auto buffer = this->save_proto();
     std::string output;
     output.resize(proto_bytes_size(buffer));
@@ -411,11 +413,18 @@ std::string BFVVector::save() const {
 }
 
 shared_ptr<BFVVector> BFVVector::copy() const {
+    if (_lazy_buffer)
+        return shared_ptr<BFVVector>(new BFVVector(_lazy_buffer.value()));
+
     return shared_ptr<BFVVector>(new BFVVector(shared_from_this()));
 }
 
 shared_ptr<BFVVector> BFVVector::deepcopy() const {
-    TenSEALContextProto ctx = this->tenseal_context()->save_proto();
+    if (_lazy_buffer) return this->copy();
+
+    TenSEALContextProto ctx = this->tenseal_context()->save_proto(
+        /*save_public_key=*/true, /*save_secret_key=*/true,
+        /*save_galois_keys=*/true, /*save_relin_keys=*/true);
     BFVVectorProto vec = this->save_proto();
     return BFVVector::Create(ctx, vec);
 }

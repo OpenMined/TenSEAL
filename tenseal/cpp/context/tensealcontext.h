@@ -212,27 +212,16 @@ class TenSEALContext {
     bool auto_rescale() const;
     bool auto_mod_switch() const;
     /**
-     * Read a serialized protobuffer from an input stream and populate the
-     *current context.
-     * @param[in] input stream.
-     **/
-    void load(std::istream& stream);
-    /**
      * Populate the current context from a serialized protobuffer.
      * @param[in] input serialized protobuffer.
      **/
     void load(const std::string& input);
     /**
-     * Save the current context to a serialized protobuffer and write it to an
-     *output stream.
-     * @param[in] output stream.
-     **/
-    bool save(std::ostream& stream) const;
-    /**
      * Save the current context to a serialized protobuffer.
      * @returns serialized protobuffer.
      **/
-    std::string save() const;
+    std::string save(bool save_public_key, bool save_secret_key,
+                     bool save_galois_keys, bool save_relin_keys) const;
     /**
      * @returns a deepcopy of the current context.
      **/
@@ -241,7 +230,9 @@ class TenSEALContext {
      * Load/Save a protobuffer for the current context.
      **/
     void load_proto(const TenSEALContextProto& buffer);
-    TenSEALContextProto save_proto() const;
+    TenSEALContextProto save_proto(bool save_public_key, bool save_secret_key,
+                                   bool save_galois_keys,
+                                   bool save_relin_keys) const;
     /**
      * @returns the encryption params of the current context.
      **/
@@ -306,17 +297,26 @@ class TenSEALContext {
                     optional<PublicKey> public_key = {},
                     optional<SecretKey> secret_key = {},
                     bool generate_relin_keys = true,
-                    bool generate_galois_keys = false);
+                    bool generate_galois_keys = false,
+                    bool generate_secret_key = true);
     void keys_setup_public_key(optional<PublicKey> public_key = {},
-                               optional<SecretKey> secret_key = {});
-    void keys_setup_symmetric(optional<SecretKey> secret_key = {});
+                               optional<SecretKey> secret_key = {},
+                               bool generate_secret_key = true);
+    void keys_setup_symmetric(optional<SecretKey> secret_key = {},
+                              bool generate_secret_key = true);
     /**
      * Load/Save a protobuffer for the current context.
      **/
     void load_proto_public_key(const TenSEALContextProto& buffer);
     void load_proto_symmetric(const TenSEALContextProto& buffer);
-    TenSEALContextProto save_proto_public_key() const;
-    TenSEALContextProto save_proto_symmetric() const;
+    TenSEALContextProto save_proto_public_key(bool save_public_key,
+                                              bool save_secret_key,
+                                              bool save_galois_keys,
+                                              bool save_relin_keys) const;
+    TenSEALContextProto save_proto_symmetric(bool save_public_key,
+                                             bool save_secret_key,
+                                             bool save_galois_keys,
+                                             bool save_relin_keys) const;
 };
 }  // namespace tenseal
 #endif
