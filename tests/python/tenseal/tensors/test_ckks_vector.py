@@ -212,6 +212,7 @@ def test_square_inplace(context, plain_vec, precision):
         ([1, 0, -2, 73], [-5,]),
         ([1, 2, 3, 4, 5], [1,]),
         ([1, 0, -2, 0, -8, 4, 73], [81,]),
+        ([2 * i for i in range(100000)], [81,]),
         ([2 * i for i in range(100000)], [3 * i for i in range(100000)]),
         ([2 for i in range(1000000)], [3 for i in range(1000000)]),
     ],
@@ -386,6 +387,7 @@ def test_add_plain_inplace(context, vec1, vec2, precision):
         ([1, 0, -2, 73], [-5,]),
         ([1, 2, 3, 4, 5], [1,]),
         ([1, 0, -2, 0, -8, 4, 73], [81,]),
+        ([2 * i for i in range(100000)], [81,]),
         ([2 * i for i in range(100000)], [3 * i for i in range(100000)]),
     ],
 )
@@ -567,6 +569,7 @@ def test_sub_plain_inplace(context, vec1, vec2, precision):
         ([1, 0, -2, 73], [-5,]),
         ([1, 2, 3, 4, 5], [1,]),
         ([1, 0, -2, 0, -8, 4, 73], [81,]),
+        ([2 for i in range(100000)], [3,]),
         ([2 for i in range(10000)], [3 for i in range(10000)]),
     ],
 )

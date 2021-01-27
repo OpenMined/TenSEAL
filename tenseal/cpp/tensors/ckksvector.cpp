@@ -27,8 +27,7 @@ CKKSVector::CKKSVector(const shared_ptr<TenSEALContext>& ctx,
             << "WARNING: The input does not fit in a single ciphertext, and "
                "some operations will be disabled.\n"
                "The following operations are disabled in this setup: matmul, "
-               "matmul_plain, enc_matmul_plain, conv2d_im2col, "
-               "replicate_first_slot.\n"
+               "matmul_plain, enc_matmul_plain, conv2d_im2col.\n"
                "If you need to use those operations, try increasing the "
                "poly_modulus parameter, to fit your input.\n";
     }
@@ -510,27 +509,52 @@ shared_ptr<CKKSVector> CKKSVector::enc_matmul_plain_inplace(
 }
 
 shared_ptr<CKKSVector> CKKSVector::replicate_first_slot_inplace(size_t n) {
-    if (this->_ciphertexts.size() != 1)
-        throw invalid_argument(
-            "can't execute replicate_first_slot on chunked vectors");
-
+    auto slot_count = this->tenseal_context()->slot_count<CKKSEncoder>();
     // mask
-    vector<double> mask(this->size(), 0);
+    vector<double> mask(min(slot_count, n), 0);
     mask[0] = 1;
-    this->mul_plain_inplace(mask);
+    this->_mul_plain_inplace(this->_ciphertexts[0], mask);
+    Ciphertext masked = this->_ciphertexts[0];
 
-    // replicate
-    Ciphertext tmp = this->_ciphertexts[0];
     auto galois_keys = this->tenseal_context()->galois_keys();
-    for (size_t i = 0; i < (size_t)ceil(log2(n)); i++) {
-        this->tenseal_context()->evaluator->rotate_vector_inplace(
-            tmp, static_cast<int>(-pow(2, i)), *galois_keys);
-        this->tenseal_context()->evaluator->add_inplace(this->_ciphertexts[0],
-                                                        tmp);
-        tmp = this->_ciphertexts[0];
+
+    auto replicator = [&](Ciphertext ct, size_t n_repl) -> Ciphertext {
+        Ciphertext tmp = ct;
+        for (size_t i = 0; i < (size_t)ceil(log2(n_repl)); i++) {
+            this->tenseal_context()->evaluator->rotate_vector_inplace(
+                tmp, static_cast<int>(-pow(2, i)), *galois_keys);
+            this->tenseal_context()->evaluator->add_inplace(ct, tmp);
+            tmp = ct;
+        }
+
+        return ct;
+    };
+
+    // recreate ciphertexts
+    this->_ciphertexts = vector<Ciphertext>();
+    vector<size_t> sizes = vector<size_t>();
+    // number of full replicated ciphertexts
+    auto n_full = n / slot_count;
+    // number of slots used for the last ciphertext
+    auto n_remain = n % slot_count;
+    this->_ciphertexts.reserve(n_full + (n_remain == 0 ? 0 : 1));
+    sizes.reserve(n_full + (n_remain == 0 ? 0 : 1));
+    // n_full replicated ciphertext
+    if (n_full != 0) {
+        auto full_replicate = replicator(masked, slot_count);
+        for (size_t i = 0; i < n_full; i++) {
+            this->_ciphertexts.push_back(full_replicate);
+            sizes.push_back(slot_count);
+        }
+    }
+    // last ciphertext contains ciphertext with n_remain replicates
+    if (n_remain != 0) {
+        // Can actually push a full_replicate but set the size to n_remain?
+        this->_ciphertexts.push_back(replicator(masked, n_remain));
+        sizes.push_back(n_remain);
     }
 
-    this->_sizes = {n};
+    this->_sizes = sizes;
     return shared_from_this();
 }
 
