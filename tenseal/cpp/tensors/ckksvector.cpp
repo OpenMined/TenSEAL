@@ -27,8 +27,7 @@ CKKSVector::CKKSVector(const shared_ptr<TenSEALContext>& ctx,
             << "WARNING: The input does not fit in a single ciphertext, and "
                "some operations will be disabled.\n"
                "The following operations are disabled in this setup: matmul, "
-               "matmul_plain, enc_matmul_plain, conv2d_im2col, "
-               "replicate_first_slot.\n"
+               "matmul_plain, enc_matmul_plain, conv2d_im2col.\n"
                "If you need to use those operations, try increasing the "
                "poly_modulus parameter, to fit your input.\n";
     }
