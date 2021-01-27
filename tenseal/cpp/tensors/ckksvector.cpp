@@ -537,8 +537,8 @@ shared_ptr<CKKSVector> CKKSVector::replicate_first_slot_inplace(size_t n) {
     auto n_full = n / slot_count;
     // number of slots used for the last ciphertext
     auto n_remain = n % slot_count;
-    this->_ciphertexts.reserve(n_full + n_remain == 0 ? 0 : 1);
-    sizes.reserve(n_full + n_remain == 0 ? 0 : 1);
+    this->_ciphertexts.reserve(n_full + (n_remain == 0 ? 0 : 1));
+    sizes.reserve(n_full + (n_remain == 0 ? 0 : 1));
     // n_full replicated ciphertext
     if (n_full != 0) {
         auto full_replicate = replicator(masked, slot_count);
