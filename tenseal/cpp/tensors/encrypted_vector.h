@@ -51,15 +51,21 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
     /**
      * Return the size of the encrypted vector.
      **/
-    size_t size() const { return this->_size; }
-    void size(size_t val) { this->_size = val; }
-
+    size_t size() const {
+        return std::accumulate(this->_sizes.begin(), this->_sizes.end(), 0);
+    }
+    void chunked_size(const vector<size_t>& val) { this->_sizes = val; }
+    vector<size_t> chunked_size() const { return this->_sizes; }
     /**
      * Return information about the ciphertext.
      **/
-    size_t ciphertext_size() const { return this->_ciphertext.size(); }
-    const Ciphertext& ciphertext() const { return this->_ciphertext; }
-    void ciphertext(Ciphertext&& other) { this->_ciphertext = other; }
+    vector<size_t> ciphertext_size() const {
+        vector<size_t> res;
+        for (auto& ct : this->_ciphertexts) res.push_back(ct.size());
+        return res;
+    }
+    const vector<Ciphertext>& ciphertext() const { return this->_ciphertexts; }
+    void ciphertext(vector<Ciphertext>&& other) { this->_ciphertexts = other; }
     /**
      * Replicate the first slot of a ciphertext n times. Requires a
      *multiplication.
@@ -116,8 +122,11 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
      * @param[in] The Galois keys
      **/
     void rotate_vector_inplace(int steps, const GaloisKeys& galois_keys) {
+        if (this->_ciphertexts.size() != 1)
+            throw invalid_argument(
+                "Vector rotation not supported for big vectors");
         this->tenseal_context()->evaluator->rotate_vector_inplace(
-            this->_ciphertext, steps, galois_keys);
+            this->_ciphertexts[0], steps, galois_keys);
     }
 
     /*
@@ -129,6 +138,9 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
     Ciphertext diagonal_ct_vector_matmul(const PlainTensor<plain_t>& matrix) {
         // matrix is organized by rows
         // _check_matrix(matrix, this->size())
+        if (this->_ciphertexts.size() != 1)
+            throw invalid_argument(
+                "diagonal_ct_vector_matmul not supported for big vectors");
 
         if (this->size() != matrix.size()) {
             throw invalid_argument(
@@ -142,16 +154,16 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
 
         Ciphertext result;
         // result should have the same scale and modulus as vec * pt_diag (ct)
-        this->tenseal_context()->encrypt_zero(this->_ciphertext.parms_id(),
+        this->tenseal_context()->encrypt_zero(this->_ciphertexts[0].parms_id(),
                                               result);
-        result.scale() =
-            this->_ciphertext.scale() * this->tenseal_context()->global_scale();
+        result.scale() = this->_ciphertexts[0].scale() *
+                         this->tenseal_context()->global_scale();
 
         auto worker_func = [&](size_t start, size_t end) -> Ciphertext {
             Ciphertext thread_result;
-            this->tenseal_context()->encrypt_zero(this->_ciphertext.parms_id(),
-                                                  thread_result);
-            thread_result.scale() = this->_ciphertext.scale() *
+            this->tenseal_context()->encrypt_zero(
+                this->_ciphertexts[0].parms_id(), thread_result);
+            thread_result.scale() = this->_ciphertexts[0].scale() *
                                     this->tenseal_context()->global_scale();
 
             for (size_t local_i = start; local_i < end; ++local_i) {
@@ -171,11 +183,11 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
                 this->tenseal_context()->template encode<encoder_t>(diag,
                                                                     pt_diag);
 
-                if (this->_ciphertext.parms_id() != pt_diag.parms_id()) {
-                    this->set_to_same_mod(pt_diag, _ciphertext);
+                if (this->_ciphertexts[0].parms_id() != pt_diag.parms_id()) {
+                    this->set_to_same_mod(pt_diag, _ciphertexts[0]);
                 }
                 this->tenseal_context()->evaluator->multiply_plain(
-                    this->_ciphertext, pt_diag, ct);
+                    this->_ciphertexts[0], pt_diag, ct);
 
                 this->tenseal_context()->evaluator->rotate_vector_inplace(
                     ct, local_i, *this->tenseal_context()->galois_keys());
@@ -221,8 +233,8 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
     virtual ~EncryptedVector(){};
 
    protected:
-    size_t _size;
-    Ciphertext _ciphertext;
+    std::vector<size_t> _sizes;
+    std::vector<Ciphertext> _ciphertexts;
 };
 
 }  // namespace tenseal

@@ -203,6 +203,19 @@ class PlainTensor {
      */
     operator vector<plain_t>() const { return _data.data(); }
     /**
+     * Split the tensor in chunks
+     * */
+    vector<PlainTensor<plain_t>> chunks(size_t max_size) const {
+        auto storage_chunks = _data.chunks(max_size);
+
+        vector<PlainTensor<plain_t>> result;
+        result.reserve(storage_chunks.size());
+
+        for (auto& chunk : storage_chunks)
+            result.push_back(PlainTensor<plain_t>(chunk));
+        return result;
+    }
+    /**
      * Iterator utils
      **/
     inline auto begin() noexcept { return _data.begin(); }

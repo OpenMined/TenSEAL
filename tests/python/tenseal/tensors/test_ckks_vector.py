@@ -42,7 +42,16 @@ def precision():
 
 
 @pytest.mark.parametrize(
-    "plain_vec", [[0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
+    "plain_vec",
+    [
+        [0],
+        [-1],
+        [1],
+        [21, 81, 90],
+        [-73, -81, -90],
+        [-11, 82, -43, 52],
+        [i for i in range(100000)],
+    ],
 )
 def test_negate(context, plain_vec, precision):
     ckks_vec = ts.ckks_vector(context, plain_vec)
@@ -54,7 +63,16 @@ def test_negate(context, plain_vec, precision):
 
 
 @pytest.mark.parametrize(
-    "plain_vec", [[0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
+    "plain_vec",
+    [
+        [0],
+        [-1],
+        [1],
+        [21, 81, 90],
+        [-73, -81, -90],
+        [-11, 82, -43, 52],
+        [i for i in range(100000)],
+    ],
 )
 def test_negate_inplace(context, plain_vec, precision):
     ckks_vec = ts.ckks_vector(context, plain_vec)
@@ -82,6 +100,7 @@ def test_negate_inplace(context, plain_vec, precision):
         ([1, -2, 3, -4], 6, 1),
         ([1, -2, 3, -4], 7, 0),
         ([1, -2, 3, -4], 8, -1),
+        ([2 for i in range(100000)], 3, 1),
     ],
 )
 def test_power(context, plain_vec, power, precision):
@@ -140,6 +159,7 @@ def test_power_inplace(context, plain_vec, power, precision):
         [1, -2, 3, -4],
         [3, -2, 5, -4],
         [1, -4, 3, 5],
+        [2 for i in range(10000)],
     ],
 )
 def test_square(context, plain_vec, precision):
@@ -192,6 +212,8 @@ def test_square_inplace(context, plain_vec, precision):
         ([1, 0, -2, 73], [-5,]),
         ([1, 2, 3, 4, 5], [1,]),
         ([1, 0, -2, 0, -8, 4, 73], [81,]),
+        ([2 * i for i in range(100000)], [3 * i for i in range(100000)]),
+        ([2 for i in range(1000000)], [3 for i in range(1000000)]),
     ],
 )
 def test_add(context, vec1, vec2, precision):
@@ -231,6 +253,7 @@ def test_add(context, vec1, vec2, precision):
         ([1, 0, -2, 73], [-5,]),
         ([1, 2, 3, 4, 5], [1,]),
         ([1, 0, -2, 0, -8, 4, 73], [81,]),
+        ([2 * i for i in range(100000)], [3 * i for i in range(100000)]),
     ],
 )
 def test_add_inplace(context, vec1, vec2, precision):
@@ -267,6 +290,7 @@ def test_add_inplace(context, vec1, vec2, precision):
         ([1, 2, 3, 4], 2),
         ([1, 2, 3, 4], 0),
         ([1, 2, 3, 4], -2),
+        ([2 * i for i in range(100000)], 5),
     ],
 )
 def test_add_plain(context, vec1, vec2, precision):
@@ -362,6 +386,7 @@ def test_add_plain_inplace(context, vec1, vec2, precision):
         ([1, 0, -2, 73], [-5,]),
         ([1, 2, 3, 4, 5], [1,]),
         ([1, 0, -2, 0, -8, 4, 73], [81,]),
+        ([2 * i for i in range(100000)], [3 * i for i in range(100000)]),
     ],
 )
 def test_sub(context, vec1, vec2, precision):
@@ -440,6 +465,7 @@ def test_sub_inplace(context, vec1, vec2, precision):
         ([1, 2, 3, 4], 2),
         ([1, 2, 3, 4], 0),
         ([1, 2, 3, 4], -2),
+        ([2 * i for i in range(100000)], 3),
     ],
 )
 def test_sub_plain(context, vec1, vec2, precision):
@@ -541,6 +567,7 @@ def test_sub_plain_inplace(context, vec1, vec2, precision):
         ([1, 0, -2, 73], [-5,]),
         ([1, 2, 3, 4, 5], [1,]),
         ([1, 0, -2, 0, -8, 4, 73], [81,]),
+        ([2 for i in range(10000)], [3 for i in range(10000)]),
     ],
 )
 def test_mul(context, vec1, vec2, precision):
@@ -619,6 +646,7 @@ def test_mul_inplace(context, vec1, vec2, precision):
         ([1, 2, 3, 4], 2),
         ([1, 2, 3, 4], 0),
         ([1, 2, 3, 4], -2),
+        ([2 * i for i in range(100000)], 3),
     ],
 )
 def test_mul_plain(context, vec1, vec2, precision):
@@ -856,6 +884,7 @@ def test_dot_product_plain_inplace(context, vec1, vec2, precision):
         ([1, 2, 3, 4, 5, 6]),
         ([1, 2, 3, 4, 5, 6, 7]),
         ([1, 2, 3, 4, 5, 6, 7, 8]),
+        ([2 * i for i in range(100000)]),
     ],
 )
 def test_sum(context, vec1, precision):
@@ -1069,6 +1098,7 @@ def test_enc_matmul_plain_inplace(context, matrix_shape, vector_size, precision)
         ([0, 1, 2, 3, 4], [0, 0, 0, 1]),
         ([0, 1, 2, 3, 4], [3, 2, 4, 5]),
         ([0, -1, -2, -3, -4], [-3, -2, -4, -5, 1]),
+        ([2 for i in range(100000)], [-3, -2, -4, -5, 1]),
     ],
 )
 def test_polynomial(context, data, polynom, precision):

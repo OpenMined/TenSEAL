@@ -1,3 +1,4 @@
+#include <pybind11/iostream.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -80,12 +81,16 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
                                                       py::module_local())
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<int64_t> &data) {
-            return BFVVector::Create(ctx, data);
-        }))
-        .def(py::init(
-            [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
-                return BFVVector::Create(ctx, data);
-            }))
+                 return BFVVector::Create(ctx, data);
+             }),
+             py::call_guard<py::scoped_ostream_redirect,
+                            py::scoped_estream_redirect>())
+        .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
+                         const std::string &data) {
+                 return BFVVector::Create(ctx, data);
+             }),
+             py::call_guard<py::scoped_ostream_redirect,
+                            py::scoped_estream_redirect>())
         .def(py::init(
             [](const std::string &data) { return BFVVector::Create(data); }))
         .def("size", py::overload_cast<>(&BFVVector::size, py::const_))
@@ -215,17 +220,23 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         // specifying scale
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<double> &data, double scale) {
-            return CKKSVector::Create(ctx, data, scale);
-        }))
+                 return CKKSVector::Create(ctx, data, scale);
+             }),
+             py::call_guard<py::scoped_ostream_redirect,
+                            py::scoped_estream_redirect>())
         // using global_scale if set
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const vector<double> &data) {
-            return CKKSVector::Create(ctx, data);
-        }))
-        .def(py::init(
-            [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
-                return CKKSVector::Create(ctx, data);
-            }))
+                 return CKKSVector::Create(ctx, data);
+             }),
+             py::call_guard<py::scoped_ostream_redirect,
+                            py::scoped_estream_redirect>())
+        .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
+                         const std::string &data) {
+                 return CKKSVector::Create(ctx, data);
+             }),
+             py::call_guard<py::scoped_ostream_redirect,
+                            py::scoped_estream_redirect>())
         .def(py::init(
             [](const std::string &data) { return CKKSVector::Create(data); }))
         .def("size", py::overload_cast<>(&CKKSVector::size, py::const_))

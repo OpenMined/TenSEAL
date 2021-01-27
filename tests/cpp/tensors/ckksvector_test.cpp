@@ -9,7 +9,7 @@ using namespace ::testing;
 using namespace std;
 
 template <class Iterable>
-bool are_close(const Iterable& l, const std::vector<int64_t>& r) {
+bool are_close(const Iterable& l, const std::vector<double>& r) {
     if (l.size() != r.size()) {
         return false;
     }
@@ -45,7 +45,7 @@ TEST_P(CKKSVectorTest, TestCreateCKKS) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l->ciphertext_size(), 2);
+    ASSERT_THAT(l->ciphertext_size(), ElementsAreArray({2}));
 }
 
 TEST_P(CKKSVectorTest, TestCreateCKKSFail) {
@@ -84,7 +84,7 @@ TEST_P(CKKSVectorTest, TestCKKSAdd) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(add->ciphertext_size(), 2);
+    ASSERT_THAT(add->ciphertext_size(), ElementsAreArray({2}));
 
     auto decr = add->decrypt();
     ASSERT_TRUE(are_close(decr.data(), {4, 6, 7}));
@@ -96,7 +96,7 @@ TEST_P(CKKSVectorTest, TestCKKSAdd) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l->ciphertext_size(), 2);
+    ASSERT_THAT(l->ciphertext_size(), ElementsAreArray({2}));
     decr = l->decrypt();
     ASSERT_TRUE(are_close(decr.data(), {7, 10, 11}));
 }
@@ -119,7 +119,7 @@ TEST_P(CKKSVectorTest, TestCKKSMul) {
     auto r = CKKSVector::Create(ctx, std::vector<double>({2, 2, 2}));
 
     auto mul = l->mul(r);
-    ASSERT_EQ(mul->ciphertext_size(), 2);
+    ASSERT_THAT(mul->ciphertext_size(), ElementsAreArray({2}));
 
     auto decr = mul->decrypt();
     std::cout << decr.at({0}) << std::endl;
@@ -132,7 +132,7 @@ TEST_P(CKKSVectorTest, TestCKKSMul) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l->ciphertext_size(), 2);
+    ASSERT_THAT(l->ciphertext_size(), ElementsAreArray({2}));
     decr = l->decrypt();
     ASSERT_TRUE(are_close(decr.data(), {4, 8, 12}));
 }
@@ -161,7 +161,7 @@ TEST_P(CKKSVectorTest, TestCKKSMulMany) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l->ciphertext_size(), 2);
+    ASSERT_THAT(l->ciphertext_size(), ElementsAreArray({2}));
     auto decr = l->decrypt();
     ASSERT_TRUE(are_close(decr.data(), {4, 8, 12}));
 }
@@ -190,7 +190,7 @@ TEST_P(CKKSVectorTest, TestCKKSMulNoRelin) {
         l = duplicate(l);
     }
 
-    ASSERT_EQ(l->ciphertext_size(), 4);
+    ASSERT_THAT(l->ciphertext_size(), ElementsAreArray({4}));
     auto decr = l->decrypt();
     ASSERT_TRUE(are_close(decr.data(), {4, 8, 12}));
 }
@@ -238,7 +238,7 @@ TEST_P(CKKSVectorTest, TestCKKSPlainMatMul) {
     auto vec = CKKSVector::Create(ctx, std::vector<double>({1, 2, 3}));
     auto matrix = PlainTensor<double>(
         vector<vector<double>>{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}});
-    auto expected_result = vector<int64_t>{6, 12, 18};
+    auto expected_result = vector<double>{6, 12, 18};
 
     auto result = vec->matmul_plain(matrix);
 
@@ -288,6 +288,46 @@ TEST_F(CKKSVectorTest, TestCKKSVectorSerializationSize) {
     ASSERT_TRUE(pk_buffer.size() != sym_buffer.size());
     ASSERT_TRUE(2 * sym_buffer.size() > pk_buffer.size());
 }
+
+TEST_P(CKKSVectorTest, TestCKKSAddBigVector) {
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
+
+    int poly_mod = 8192;
+    int input_size = 100000;
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, poly_mod, -1,
+                                      {60, 40, 40, 60}, enc_type);
+    ASSERT_TRUE(ctx != nullptr);
+
+    ctx->global_scale(std::pow(2, 40));
+
+    ctx->auto_relin(false);
+    ctx->auto_rescale(false);
+    ctx->auto_mod_switch(false);
+
+    vector<double> l_input, r_input, expected;
+    for (double i = 1.3; i < input_size; i++) {
+        l_input.push_back(2 * i);
+        r_input.push_back(3 * i);
+        expected.push_back(5 * i);
+    }
+
+    auto l = CKKSVector::Create(ctx, l_input);
+    auto r = CKKSVector::Create(ctx, r_input);
+
+    auto add = l->add(r);
+
+    if (should_serialize_first) {
+        l = duplicate(l);
+    }
+
+    ASSERT_EQ(add->chunked_size().size(), 2 * int(input_size / poly_mod) + 1);
+
+    auto decr = add->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), expected));
+}
+
 INSTANTIATE_TEST_CASE_P(
     TestCKKSVector, CKKSVectorTest,
     ::testing::Values(make_tuple(false, encryption_type::asymmetric),

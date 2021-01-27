@@ -2,6 +2,7 @@
 #define TENSEAL_TENSOR_STORAGE_H
 
 #include "gsl/span"
+#include "tenseal/cpp/utils/helpers.h"
 #include "xtensor/xadapt.hpp"
 #include "xtensor/xarray.hpp"
 #include "xtensor/xjson.hpp"
@@ -329,6 +330,20 @@ class TensorStorage {
             flat_data.push_back(_data[i % init_size]);
         }
         _data = xt::adapt(flat_data, {flat_data.size()});
+    }
+    /**
+     * Split the internal storage in 1D chunks of max_size maximum size.
+     * */
+    vector<TensorStorage<dtype_t>> chunks(size_t max_size) const {
+        auto flat_data = vector<dtype_t>(_data.begin(), _data.end());
+        auto storage_chunks = split_vector(flat_data, max_size);
+
+        vector<TensorStorage<dtype_t>> result;
+        result.reserve(storage_chunks.size());
+
+        for (auto& chunk : storage_chunks)
+            result.push_back(TensorStorage<dtype_t>(chunk));
+        return result;
     }
     static TensorStorage<dtype_t> repeat_value(dtype_t value,
                                                vector<size_t> shape) {

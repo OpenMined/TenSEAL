@@ -57,6 +57,7 @@ shared_ptr<T> compute_polynomial_term(int degree, double coeff,
     return x;
 }
 
+// TODO support multi-ciphertext vectors
 template <typename T, class Encoder, typename D>
 shared_ptr<T> pack_vectors(const vector<shared_ptr<T>>& vectors) {
     size_t vectors_nb = vectors.size();
@@ -93,7 +94,7 @@ shared_ptr<T> pack_vectors(const vector<shared_ptr<T>>& vectors) {
     replicate_vector(replicated_mask, slot_count);
 
     auto packed_vec = vectors[0]->copy();
-    packed_vec->size(slot_count);
+    packed_vec->chunked_size({slot_count});
     packed_vec->mul_plain_inplace(replicated_mask);
 
     for (size_t i = 1; i < vectors_nb; i++) {
@@ -104,13 +105,13 @@ shared_ptr<T> pack_vectors(const vector<shared_ptr<T>>& vectors) {
 
         // multiply with the mask vector then accumulate
         auto vec = vectors[i]->copy();
-        vec->size(slot_count);
+        vec->chunked_size({slot_count});
         vec->mul_plain_inplace(replicated_mask);
         packed_vec->add_inplace(vec);
     }
 
     // set packed vector size to the total size of vectors
-    packed_vec->size(output_size);
+    packed_vec->chunked_size({output_size});
 
     return packed_vec;
 }
