@@ -48,6 +48,8 @@ jobs:
       matrix:
         python-version: [3.6, 3.7, 3.8]
         os: [macos-latest, ubuntu-latest, windows-latest]
+    env:
+        CC: clang
     steps:
       - uses: actions/checkout@v2
         with:
@@ -90,6 +92,8 @@ jobs:
       matrix:
         python-version: [3.6, 3.7, 3.8]
         os: [macos-latest, ubuntu-latest, windows-latest]
+    env:
+        CC: clang
     steps:
       - uses: actions/checkout@v2
         with:
