@@ -50,6 +50,7 @@ jobs:
         os: [macos-latest, ubuntu-latest, windows-latest]
     env:
         CC: clang
+        CXX: clang++
     steps:
       - uses: actions/checkout@v2
         with:
@@ -94,6 +95,7 @@ jobs:
         os: [macos-latest, ubuntu-latest, windows-latest]
     env:
         CC: clang
+        CXX: clang++
     steps:
       - uses: actions/checkout@v2
         with:

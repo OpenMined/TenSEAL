@@ -15,6 +15,7 @@ jobs:
         os: [macos-latest, ubuntu-20.04]
     env:
         CC: clang
+        CXX: clang++
     steps:
       - uses: actions/checkout@v2
         with:
