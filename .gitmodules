@@ -7,15 +7,19 @@
 [submodule "third_party/googletest"]
 	path = third_party/googletest
 	url = https://github.com/google/googletest
+	ignore = dirty
 [submodule "third_party/xtensor"]
 	path = third_party/xtensor
 	url = https://github.com/xtensor-stack/xtensor
+	ignore = dirty
 [submodule "third_party/xtl"]
 	path = third_party/xtl
 	url = https://github.com/xtensor-stack/xtl
+	ignore = dirty
 [submodule "third_party/xsimd"]
 	path = third_party/xsimd
 	url = https://github.com/xtensor-stack/xsimd
+	ignore = dirty
 [submodule "third_party/protobuf"]
 	path = third_party/protobuf
 	url = https://github.com/protocolbuffers/protobuf

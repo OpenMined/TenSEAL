@@ -13,13 +13,15 @@ jobs:
       matrix:
         python-version: [3.8]
         os: [macos-latest, ubuntu-20.04]
-    env:
-        CC: clang
-        CXX: clang++
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: true
+      - name: Prepare ENV
+        run: |
+            echo "CC=clang" >> $GITHUB_ENV
+            echo "CXX=clang++" >> $GITHUB_ENV
+        if: ${{ matrix.os == 'ubuntu-latest' }} 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:

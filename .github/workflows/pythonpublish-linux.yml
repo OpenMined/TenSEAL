@@ -20,8 +20,11 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: true
-      - name: Set target Python version PATH
-        run: echo "/opt/python/${{ matrix.python-version }}/bin" >> $GITHUB_PATH
+      - name: Prepare ENV
+        run: |
+            echo "CC=clang" >> $GITHUB_ENV
+            echo "CXX=clang++" >> $GITHUB_ENV
+            echo "/opt/python/${{ matrix.python-version }}/bin" >> $GITHUB_PATH
       - name: Install dependencies
         run: .github/workflows/scripts/install_req_centos.sh
       - name: Build and publish
