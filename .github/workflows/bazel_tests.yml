@@ -21,7 +21,7 @@ jobs:
         run: |
             echo "CC=clang" >> $GITHUB_ENV
             echo "CXX=clang++" >> $GITHUB_ENV
-        if: ${{ matrix.os == 'ubuntu-latest' }} 
+        if: ${{ matrix.os == 'ubuntu-20.04' }} 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
