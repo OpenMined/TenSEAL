@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8]
-        os: [ubuntu-20.04]
+        os: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -23,7 +23,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: .github/workflows/scripts/install_req_ubuntu.sh
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
+        if: ${{ matrix.os == 'ubuntu-latest' }}
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
@@ -47,7 +47,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
-        os: [macos-latest, ubuntu-20.04, windows-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -56,14 +56,9 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Prepare ENV
-        run: |
-            echo "CC=clang" >> $GITHUB_ENV
-            echo "CXX=clang++" >> $GITHUB_ENV
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
       - name: Install dependencies Ubuntu
         run: .github/workflows/scripts/install_req_ubuntu.sh
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
+        if: ${{ matrix.os == 'ubuntu-latest' }}
       - name: Install dependencies MacOS
         run: .github/workflows/scripts/install_req_macos.sh
         if: ${{ matrix.os == 'macos-latest' }}
@@ -94,7 +89,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
-        os: [macos-latest, ubuntu-20.04, windows-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -107,10 +102,10 @@ jobs:
         run: |
             echo "CC=clang" >> $GITHUB_ENV
             echo "CXX=clang++" >> $GITHUB_ENV
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
+        if: ${{ matrix.os == 'ubuntu-latest' }}
       - name: Install dependencies Ubuntu
         run: .github/workflows/scripts/install_req_ubuntu.sh
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
+        if: ${{ matrix.os == 'ubuntu-latest' }}
       - name: Install dependencies MacOS
         run: .github/workflows/scripts/install_req_macos.sh
         if: ${{ matrix.os == 'macos-latest' }}
