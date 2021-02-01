@@ -14,8 +14,7 @@ scl enable llvm-toolset-7.0 bash
 
 echo $PATH
 
-ls -lha /opt/rh/llvm-toolset-7.0/root/usr/bin/
-
+export PATH=${PATH}:/opt/rh/llvm-toolset-7.0/root/usr/bin/
 clang --version
 
 
