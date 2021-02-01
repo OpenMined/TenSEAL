@@ -12,6 +12,10 @@ yum-config-manager --enable rhel-server-rhscl-7-rpms
 yum install llvm-toolset-7.0 -y
 scl enable llvm-toolset-7.0 bash
 
+echo $PATH
+
+ls -lha /opt/rh/llvm-toolset-7.0/root/usr/bin/
+
 clang --version
 
 
