@@ -7,7 +7,10 @@ curl https://github.com/Kitware/CMake/releases/download/v3.17.1/cmake-3.17.1-Lin
 echo "/opt/cmake-3.17.1-Linux-x86_64/bin" >> $GITHUB_PATH
 
 yum makecache -y
-yum install clang -y
+yum install centos-release-scl -y
+yum-config-manager --enable rhel-server-rhscl-7-rpms
+yum install llvm-toolset-7.0 -y
+scl enable llvm-toolset-7.0 bash
 
 clang --version
 
