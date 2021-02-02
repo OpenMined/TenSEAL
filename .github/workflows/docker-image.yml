@@ -7,7 +7,6 @@ on:
   release:
     types: [created]
 
-
 jobs:
   publish:
     name: Build and publish
