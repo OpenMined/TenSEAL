@@ -259,16 +259,15 @@ class TenSEALContext {
 
    private:
     EncryptionParameters _parms;
-    shared_ptr<SEALContext> _context;
-    shared_ptr<PublicKey> _public_key;
-    shared_ptr<SecretKey> _secret_key;
-    shared_ptr<RelinKeys> _relin_keys;
-    shared_ptr<GaloisKeys> _galois_keys;
-    shared_ptr<TenSEALEncoder> encoder_factory;
+    shared_ptr<SEALContext> _context = nullptr;
+    shared_ptr<PublicKey> _public_key = nullptr;
+    shared_ptr<SecretKey> _secret_key = nullptr;
+    shared_ptr<RelinKeys> _relin_keys = nullptr;
+    shared_ptr<GaloisKeys> _galois_keys = nullptr;
+    shared_ptr<TenSEALEncoder> encoder_factory = nullptr;
 
-    shared_ptr<Encryptor> encryptor;
-
-    shared_ptr<sync::ThreadPool> _dispatcher;
+    shared_ptr<Encryptor> encryptor = nullptr;
+    shared_ptr<sync::ThreadPool> _dispatcher = nullptr;
 
     size_t _threads;
     encryption_type _encryption_type;

@@ -56,6 +56,11 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Prepare ENV
+        run: |
+            echo "CC=clang" >> $GITHUB_ENV
+            echo "CXX=clang++" >> $GITHUB_ENV
+        if: ${{ matrix.os == 'ubuntu-latest' }}
       - name: Install dependencies Ubuntu
         run: .github/workflows/scripts/install_req_ubuntu.sh
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -98,6 +103,11 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Prepare ENV
+        run: |
+            echo "CC=clang" >> $GITHUB_ENV
+            echo "CXX=clang++" >> $GITHUB_ENV
+        if: ${{ matrix.os == 'ubuntu-latest' }}
       - name: Install dependencies Ubuntu
         run: .github/workflows/scripts/install_req_ubuntu.sh
         if: ${{ matrix.os == 'ubuntu-latest' }}
