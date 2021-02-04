@@ -368,6 +368,46 @@ TEST_F(TenSEALContextTest, TestContextRegressionRecreateGaloisCrash) {
     SEALSerialize<GaloisKeys>(new_gk);
 }
 
+TEST_P(TenSEALContextTest, TestEncryptionException) {
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
+
+    ctx->global_scale(std::pow(2, 40));
+
+    // Drop encryption key
+    auto buff =
+        ctx->save(/*save_public_key=*/false, /*save_secret_key=*/false,
+                  /*save_galois_keys=*/false, /*save_relin_keys=*/false);
+    auto des = TenSEALContext::Create(buff);
+
+    EXPECT_THROW(CKKSVector::Create(des, std::vector<double>({1, 2, 3})),
+                 std::exception);
+}
+
+TEST_P(TenSEALContextTest, TestDecryptionException) {
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
+
+    ctx->global_scale(std::pow(2, 40));
+
+    // Drop decryption key
+    auto buff =
+        ctx->save(/*save_public_key=*/true, /*save_secret_key=*/false,
+                  /*save_galois_keys=*/false, /*save_relin_keys=*/false);
+    auto des = TenSEALContext::Create(buff);
+
+    if (enc_type == encryption_type::asymmetric) {
+        auto l = CKKSVector::Create(des, std::vector<double>({1, 2, 3}));
+        EXPECT_THROW(l->decrypt(), std::exception);
+    } else
+        EXPECT_THROW(CKKSVector::Create(des, std::vector<double>({1, 2, 3})),
+                     std::exception);
+}
+
 INSTANTIATE_TEST_CASE_P(
     TestContext, TenSEALContextTest,
     ::testing::Values(make_tuple(false, encryption_type::asymmetric),
