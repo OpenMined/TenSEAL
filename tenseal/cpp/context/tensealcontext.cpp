@@ -151,6 +151,9 @@ shared_ptr<TenSEALContext> TenSEALContext::Create(
 
 void TenSEALContext::encrypt(const Plaintext& plain,
                              Ciphertext& destination) const {
+    if (this->encryptor == nullptr)
+        throw invalid_argument("this context doesn't support encryption");
+
     switch (this->_encryption_type) {
         case encryption_type::asymmetric:
             return this->encryptor->encrypt(plain, destination);
@@ -172,6 +175,9 @@ void TenSEALContext::encrypt_zero(Ciphertext& destination) const {
 }
 void TenSEALContext::encrypt_zero(parms_id_type parms_id,
                                   Ciphertext& destination) const {
+    if (this->encryptor == nullptr)
+        throw invalid_argument("this context doesn't support encryption");
+
     switch (this->_encryption_type) {
         case encryption_type::asymmetric:
             return this->encryptor->encrypt_zero(parms_id, destination);
@@ -184,9 +190,8 @@ void TenSEALContext::encrypt_zero(parms_id_type parms_id,
 }
 void TenSEALContext::decrypt(const Ciphertext& encrypted,
                              Plaintext& destination) const {
-    if (is_public()) {
-        throw invalid_argument(
-            "the current context is public, it cannot decrypt");
+    if (this->_secret_key == nullptr) {
+        throw invalid_argument("this context doesn't support decryption");
     }
     return this->decrypt(*this->_secret_key, encrypted, destination);
 }
