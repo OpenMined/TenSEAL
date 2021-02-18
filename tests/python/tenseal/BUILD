@@ -12,7 +12,6 @@ py_test(
         "tensors/test_ckks_vector.py",
         "tensors/test_ckks_tensor.py",
         "tensors/test_plain_tensor.py",
-        "tensors/test_perf.py",
         "tensors/test_serialization.py",
         "tensors/test_regression.py",
             ],
