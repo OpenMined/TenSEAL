@@ -7,12 +7,23 @@ from random import randint
 from PIL import Image
 from typing import Dict
 from pathlib import Path
+import math
 
 rounds = 5
-iterations = 10
+iterations = 5
 
 
 root_path = Path(os.path.dirname(os.path.realpath(__file__))).parents[2] / "tutorials"
+
+
+def convert_size(size_bytes):
+    if size_bytes == 0:
+        return "0B"
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return "%s %s" % (s, size_name[i])
 
 
 def create_ctx():
@@ -90,8 +101,28 @@ def load_parameters(file_path: str) -> dict:
     return parameters
 
 
-@pytest.mark.parametrize("batch_size", [1])
-def test_perf_mnist_prepare(benchmark, batch_size):
+@pytest.fixture
+def params():
+    parameters = load_parameters(root_path / "parameters/ConvMNIST-0.1.pickle")
+    model = ConvMNIST(parameters)
+
+    context = create_ctx()
+    image, orig = load_input()
+    encrypted_image = prepare_input(context, image)
+
+    return model, context, encrypted_image
+
+
+def test_perf_gen_keys(benchmark):
+    def op():
+        return create_ctx()
+
+    benchmark.pedantic(
+        op, rounds=rounds, iterations=iterations,
+    )
+
+
+def test_perf_mnist_prepare_input(benchmark):
     context = create_ctx()
     image, orig = load_input()
 
@@ -103,15 +134,124 @@ def test_perf_mnist_prepare(benchmark, batch_size):
     )
 
 
-@pytest.mark.parametrize("batch_size", [1])
-def test_perf_mnist_eval(benchmark, batch_size):
+def test_perf_mnist_eval_conv(benchmark, params):
+    model, context, encrypted_image = params
 
-    parameters = load_parameters(root_path / "parameters/ConvMNIST-0.1.pickle")
-    model = ConvMNIST(parameters)
+    print("image size ", convert_size(len(encrypted_image.serialize())))
+    print("ctx size ", convert_size(len(context.serialize())))
 
-    context = create_ctx()
-    image, orig = load_input()
-    encrypted_image = prepare_input(context, image)
+    def op():
+        # conv layer
+        channels = []
+        for kernel, bias in zip(model.conv1_weight, model.conv1_bias):
+            y = encrypted_image.conv2d_im2col(kernel, model.windows_nb) + bias
+            channels.append(y)
+        out = ts.CKKSVector.pack_vectors(channels)
+
+    benchmark.pedantic(
+        op, args=(), rounds=rounds, iterations=iterations,
+    )
+
+
+def test_perf_mnist_eval_square1(benchmark, params):
+    model, context, encrypted_image = params
+
+    # conv layer
+    channels = []
+    for kernel, bias in zip(model.conv1_weight, model.conv1_bias):
+        y = encrypted_image.conv2d_im2col(kernel, model.windows_nb) + bias
+        channels.append(y)
+    out = ts.CKKSVector.pack_vectors(channels)
+
+    def op():
+        return out.square()
+
+    benchmark.pedantic(
+        op, args=(), rounds=rounds, iterations=iterations,
+    )
+
+
+def test_perf_mnist_eval_fc1(benchmark, params):
+    model, context, encrypted_image = params
+    # conv layer
+    channels = []
+    for kernel, bias in zip(model.conv1_weight, model.conv1_bias):
+        y = encrypted_image.conv2d_im2col(kernel, model.windows_nb) + bias
+        channels.append(y)
+    out = ts.CKKSVector.pack_vectors(channels)
+    # squaring
+    out.square_()
+
+    def op():
+        # fc1 layer
+        return out.mm(model.fc1_weight) + model.fc1_bias
+
+    benchmark.pedantic(
+        op, args=(), rounds=rounds, iterations=iterations,
+    )
+
+
+def test_perf_mnist_eval_square2(benchmark, params):
+    model, context, encrypted_image = params
+
+    print("image size ", convert_size(len(encrypted_image.serialize())))
+    print("ctx size ", convert_size(len(context.serialize())))
+
+    # conv layer
+    channels = []
+    for kernel, bias in zip(model.conv1_weight, model.conv1_bias):
+        y = encrypted_image.conv2d_im2col(kernel, model.windows_nb) + bias
+        channels.append(y)
+    out = ts.CKKSVector.pack_vectors(channels)
+    # squaring
+    out.square_()
+    # no need to flat
+    # fc1 layer
+    out = out.mm_(model.fc1_weight) + model.fc1_bias
+
+    def op():
+        # squaring
+        out.square()
+
+    benchmark.pedantic(
+        op, args=(), rounds=rounds, iterations=iterations,
+    )
+
+
+def test_perf_mnist_eval_fc2(benchmark, params):
+    model, context, encrypted_image = params
+
+    print("image size ", convert_size(len(encrypted_image.serialize())))
+    print("ctx size ", convert_size(len(context.serialize())))
+
+    # conv layer
+    channels = []
+    for kernel, bias in zip(model.conv1_weight, model.conv1_bias):
+        y = encrypted_image.conv2d_im2col(kernel, model.windows_nb) + bias
+        channels.append(y)
+    out = ts.CKKSVector.pack_vectors(channels)
+    # squaring
+    out.square_()
+    # no need to flat
+    # fc1 layer
+    out = out.mm_(model.fc1_weight) + model.fc1_bias
+    # squaring
+    out.square_()
+
+    def op():
+        # output layer
+        return out.mm(model.fc2_weight) + model.fc2_bias
+
+    benchmark.pedantic(
+        op, args=(), rounds=rounds, iterations=iterations,
+    )
+
+
+def test_perf_mnist_eval_full(benchmark, params):
+    model, context, encrypted_image = params
+
+    print("image size ", convert_size(len(encrypted_image.serialize())))
+    print("ctx size ", convert_size(len(context.serialize())))
 
     def op():
         model(encrypted_image)
