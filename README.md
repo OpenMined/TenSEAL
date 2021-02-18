@@ -151,7 +151,12 @@ For support in using this library, please join the **#lib_tenseal** Slack channe
 ## Tutorials
 
 - [Getting Started](tutorials%2FTutorial%200%20-%20Getting%20Started.ipynb)
-- [Tutorial 1 - Training and Evaluation of Logistic Regression on Encrypted Data](tutorials%2FTutorial%201%20-%20Training%20and%20Evaluation%20of%20Logistic%20Regression%20on%20Encrypted%20Data.ipynb)
+- [Tutorial 1 - Training and Evaluation of Logistic Regression on Encrypted Data](tutorials%2F)
+- [Tutorial 2 - Working with Approximate Numbers](tutorials%2FTutorial%202%20-%20Working%20with%20Approximate%20Numbers.ipynb)
+- [Tutorial 3 - Benchmarks](tutorials%2FTutorial%203%20-%20Benchmarks.ipynb)
+- [Tutorial 4 - Encrypted Convolution on MNIST](tutorials%2FTutorial%204%20-%20Encrypted%20Convolution%20on%20MNIST)
+
+
 
 ## License
 
