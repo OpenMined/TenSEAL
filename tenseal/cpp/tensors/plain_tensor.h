@@ -68,7 +68,7 @@ class PlainTensor {
     /**
      * Broadcast
      * **/
-    PlainTensor<plain_t> broadcast(const vector<size_t>& new_shape) {
+    PlainTensor<plain_t> broadcast(const vector<size_t>& new_shape) const {
         return this->copy().broadcast_inplace(new_shape);
     }
     PlainTensor<plain_t>& broadcast_inplace(const vector<size_t>& new_shape) {
@@ -239,9 +239,11 @@ class PlainTensor {
         vector<plain_t> repeated(size, value);
         return PlainTensor<plain_t>(repeated, shape);
     }
-    PlainTensor<plain_t> copy() { return PlainTensor<plain_t>(this->_data); }
+    PlainTensor<plain_t> copy() const {
+        return PlainTensor<plain_t>(this->_data);
+    }
 
-    std::string save() { return _data.save(); }
+    std::string save() const { return _data.save(); }
 
     void load(const std::string& buf) { _data = TensorStorage<plain_t>(buf); }
 

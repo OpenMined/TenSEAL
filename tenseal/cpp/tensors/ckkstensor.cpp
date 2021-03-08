@@ -223,11 +223,10 @@ void CKKSTensor::perform_plain_op(seal::Ciphertext& ct, seal::Plaintext other,
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::op_inplace(
-    const shared_ptr<CKKSTensor>& operand, OP op) {
-    // TODO implement broadcasting
+    const shared_ptr<CKKSTensor>& raw_operand, OP op) {
+    auto operand = raw_operand;
     if (this->shape() != operand->shape()) {
-        // TODO provide a better message (what are the shapes)
-        throw invalid_argument("Operands don't have the same shape");
+        operand = this->broadcast_or_throw(operand);
     }
 
     size_t n_jobs = this->tenseal_context()->dispatcher_size();
@@ -268,12 +267,12 @@ shared_ptr<CKKSTensor> CKKSTensor::op_inplace(
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(
-    const PlainTensor<double>& operand, OP op) {
-    // TODO implement broadcasting
+    const PlainTensor<double>& raw_operand, OP op) {
     // TODO batched ops
+
+    auto operand = raw_operand;
     if (this->shape() != operand.shape()) {
-        // TODO provide a better message (what are the shapes)
-        throw invalid_argument("Operands don't have the same shape");
+        operand = this->broadcast_or_throw<>(operand);
     }
 
     size_t n_jobs = this->tenseal_context()->dispatcher_size();
@@ -518,8 +517,6 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
             if (this_shape[0] != other_shape[0])
                 throw invalid_argument("can't perform dot: dimension mismatch");
             this->reshape_inplace(vector<size_t>({this_shape[0], 1}));
-            // TODO: remove broadcast when implemented in _mul
-            this->_data.broadcast_inplace(other_shape);
             this->_mul_inplace(other);
             this->sum_inplace();
             return shared_from_this();
@@ -533,8 +530,6 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_inplace(
                 throw invalid_argument("can't perform dot: dimension mismatch");
             auto other_copy =
                 other->reshape(vector<size_t>({1, other_shape[0]}));
-            // TODO: remove broadcast when implemented in _mul
-            other_copy->_data.broadcast_inplace(this_shape);
             this->_mul_inplace(other_copy);
             this->sum_inplace(1);
             return shared_from_this();
@@ -565,8 +560,6 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_plain_inplace(
             if (this_shape[0] != other_shape[0])
                 throw invalid_argument("can't perform dot: dimension mismatch");
             this->reshape_inplace(vector<size_t>({this_shape[0], 1}));
-            // TODO: remove broadcast when implemented in _mul
-            this->_data.broadcast_inplace(other_shape);
             this->_mul_inplace(other);
             this->sum_inplace();
             return shared_from_this();
@@ -580,8 +573,6 @@ shared_ptr<CKKSTensor> CKKSTensor::dot_plain_inplace(
                 throw invalid_argument("can't perform dot: dimension mismatch");
             auto other_copy = other;
             other_copy.reshape_inplace(vector<size_t>({1, other_shape[0]}));
-            // TODO: remove broadcast when implemented in _mul
-            other_copy.broadcast_inplace(this_shape);
             this->_mul_inplace(other_copy);
             this->sum_inplace(1);
             return shared_from_this();
@@ -847,6 +838,17 @@ shared_ptr<CKKSTensor> CKKSTensor::reshape(const vector<size_t>& new_shape) {
 shared_ptr<CKKSTensor> CKKSTensor::reshape_inplace(
     const vector<size_t>& new_shape) {
     this->_data.reshape_inplace(new_shape);
+
+    return shared_from_this();
+}
+
+shared_ptr<CKKSTensor> CKKSTensor::broadcast(
+    const vector<size_t>& other_shape) const {
+    return this->copy()->broadcast_inplace(other_shape);
+}
+shared_ptr<CKKSTensor> CKKSTensor::broadcast_inplace(
+    const vector<size_t>& other_shape) {
+    this->_data.broadcast_inplace(other_shape);
 
     return shared_from_this();
 }
