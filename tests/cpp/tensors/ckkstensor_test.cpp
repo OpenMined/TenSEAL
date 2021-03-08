@@ -193,6 +193,47 @@ TEST_P(CKKSTensorTest, TestCKKSPower) {
     ASSERT_TRUE(are_close(decr.data(), {1, 4, 9, 16, 25, 36}));
 }
 
+TEST_P(CKKSTensorTest, TestAddBroadcasting) {
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
+    ASSERT_TRUE(ctx != nullptr);
+    ctx->generate_galois_keys();
+
+    auto ldata =
+        PlainTensor(vector<double>({1, 2, 3, 4, 5, 6}), vector<size_t>({2, 3}));
+    auto rdata = PlainTensor(vector<double>({11, 22, 33}), vector<size_t>({3}));
+
+    auto l = CKKSTensor::Create(ctx, ldata, std::pow(2, 40));
+    auto r = CKKSTensor::Create(ctx, rdata, std::pow(2, 40));
+
+    // CKKS{3, 2} + CKKS{3}
+    auto res = l->add(r);
+    ASSERT_THAT(res->shape(), ElementsAreArray({2, 3}));
+    auto decr = res->decrypt();
+    for (auto& v : decr) fprintf(stderr, "%lf\n", v);
+    ASSERT_TRUE(are_close(decr.data(), {12, 24, 36, 15, 27, 39}));
+
+    // CKKS{3, 2} + PLAIN{3}
+    res = l->add_plain(rdata);
+    ASSERT_THAT(res->shape(), ElementsAreArray({2, 3}));
+    decr = res->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {12, 24, 36, 15, 27, 39}));
+
+    // CKKS{3} + CKKS{3, 2}
+    res = r->add(l);
+    ASSERT_THAT(res->shape_with_batch(), ElementsAreArray({2, 3}));
+    decr = res->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {12, 24, 36, 15, 27, 39}));
+
+    // CKKS{3} + PLAIN{3, 2}
+    res = r->add_plain(ldata);
+    ASSERT_THAT(res->shape(), ElementsAreArray({2, 3}));
+    decr = res->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {12, 24, 36, 15, 27, 39}));
+}
+
 TEST_P(CKKSTensorTest, TestCKKSTensorPolyval) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
