@@ -20,6 +20,13 @@ SHAPES = [
     [2, 3, 4, 5, 6],
 ]
 
+BROADCAST_SHAPES = [
+    ([2, 3], [2, 1]),
+    ([2, 1], [2, 4]),
+    ([2, 2], [4, 2, 2]),
+    ([2, 2, 3, 4, 5], [2, 3, 4, 5]),
+]
+
 
 def _almost_equal_number(v1, v2, m_pow_ten):
     upper_bound = pow(10, -m_pow_ten)
@@ -313,6 +320,72 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op, reshape_first):
         l_pt = l_pt.reshape(shape)
         right = right.reshape(shape)
         left = left.reshape(shape)
+
+    if op == "add":
+        expected_result = r_t + l_t
+    elif op == "sub":
+        expected_result = r_t - l_t
+    elif op == "mul":
+        expected_result = r_t * l_t
+
+    ## non-inplace
+    if op == "add":
+        result = right + left
+    elif op == "sub":
+        result = right - left
+    elif op == "mul":
+        result = right * left
+
+    np_result = np.array(result.decrypt().tolist())
+    assert np_result.shape == expected_result.shape
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    # right didn't change
+    right_result = np.array(right.decrypt().tolist())
+    assert np.allclose(right_result, r_t, rtol=0, atol=0.01)
+    # left didn't change
+    if plain:
+        left_result = l_t
+    else:
+        left_result = np.array(left.decrypt().tolist())
+    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+
+    # inplace
+    if op == "add":
+        right += left
+    elif op == "sub":
+        right -= left
+    elif op == "mul":
+        right *= left
+
+    np_result = np.array(result.decrypt().tolist())
+    assert np_result.shape == expected_result.shape
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    # right didn't change
+    right_result = np.array(right.decrypt().tolist())
+
+    assert right_result.shape == expected_result.shape
+    assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
+    # left didn't change
+    if plain:
+        left_result = l_t
+    else:
+        left_result = np.array(left.decrypt().tolist())
+    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+
+
+@pytest.mark.parametrize("shape", BROADCAST_SHAPES)
+@pytest.mark.parametrize("plain", [True, False])
+@pytest.mark.parametrize("op", ["add", "sub", "mul"])
+def test_broadcast_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
+    l_t = np.random.randn(*shape[1])
+    r_t = np.random.randn(*shape[0])
+    l_pt = ts.plain_tensor(l_t.flatten().tolist(), shape[1])
+    r_pt = ts.plain_tensor(r_t.flatten().tolist(), shape[0])
+    right = ts.ckks_tensor(context, r_pt)
+    if plain:
+        left = l_pt
+    else:
+        left = ts.ckks_tensor(context, l_pt)
 
     if op == "add":
         expected_result = r_t + l_t
