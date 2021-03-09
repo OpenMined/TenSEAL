@@ -194,6 +194,7 @@ class PlainTensor {
      * Returns the size of the first dimension of the tensor.
      */
     size_t size() const { return _data.size(); }
+    size_t flat_size() const { return _data.flat_size(); }
     /**
      * Checks if the tensor is empty.
      */

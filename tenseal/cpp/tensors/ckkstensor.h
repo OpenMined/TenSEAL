@@ -82,33 +82,28 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
 
     template <class T>
     shared_ptr<T> broadcast_or_throw(const shared_ptr<T>& other) {
-        try {
+        auto this_flat_size = this->_data.flat_size();
+        auto other_flat_size = other->_data.flat_size();
+
+        if (this_flat_size < other_flat_size) {
             this->broadcast_inplace(other->shape());
             return other;
-        } catch (std::exception&) {
-        }
-
-        try {
+        } else {
             return other->broadcast(this->shape());
-        } catch (std::exception&) {
         }
-
-        throw invalid_argument("Cannot broadcast operands");
     }
+
     template <class T>
     T broadcast_or_throw(const T& other) {
-        try {
+        auto this_flat_size = this->_data.flat_size();
+        auto other_flat_size = other.flat_size();
+
+        if (this_flat_size < other_flat_size) {
             this->broadcast_inplace(other.shape());
             return other;
-        } catch (std::exception&) {
-        }
-
-        try {
+        } else {
             return other.broadcast(this->shape());
-        } catch (std::exception&) {
         }
-
-        throw invalid_argument("Cannot broadcast operands");
     }
 
     shared_ptr<CKKSTensor> broadcast(const vector<size_t>& other_shape) const;
