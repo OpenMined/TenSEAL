@@ -140,7 +140,7 @@ class TensorStorage {
      * Broadcast the TensorStorage.
      * @param[in] new shape.
      */
-    TensorStorage<dtype_t> broadcast(const vector<size_t>& new_shape) {
+    TensorStorage<dtype_t> broadcast(const vector<size_t>& new_shape) const {
         return this->copy().broadcast_inplace(new_shape);
     }
 
@@ -353,11 +353,11 @@ class TensorStorage {
         vector<dtype_t> repeated(size, value);
         return TensorStorage<dtype_t>(repeated, shape);
     }
-    TensorStorage<dtype_t> copy() {
+    TensorStorage<dtype_t> copy() const {
         return TensorStorage<dtype_t>(this->_data, this->shape());
     }
 
-    std::string save() {
+    std::string save() const {
         nlohmann::json buf = _data;
         return buf.dump();
     }
