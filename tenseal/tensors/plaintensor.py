@@ -117,6 +117,25 @@ class PlainTensor:
         self.data.reshape_(shape)
         return self
 
+    def broadcast(self, shape: List[int]):
+        "Copies and tries to broadcast the internal representation to a new shape"
+        return PlainTensor(tensor=self.data.broadcast(shape).data(), shape=shape, dtype=self._dtype)
+
+    def broadcast_(self, shape: List[int]):
+        "Tries to broadcast the internal representation to a new shape"
+        self.data.broadcast_(shape)
+        return self
+
+    def transpose(self):
+        "Copies the transpose to a new tensor"
+        new_tensor = PlainTensor(tensor=self.data.data(), shape=self.shape, dtype=self._dtype)
+        return new_tensor.transpose_()
+
+    def transpose_(self):
+        "Tries to transpose the tensor"
+        self.data.transpose_()
+        return self
+
     @classmethod
     def load(cls, data: bytes, dtype: str = "float") -> "PlainTensor":
         """

@@ -124,3 +124,23 @@ class CKKSTensor(AbstractTensor):
         "Changes the internal representation to a new shape"
         self.data.reshape_(shape)
         return self
+
+    def broadcast(self, shape: List[int]):
+        "Copies and tries to broadcast the internal representation to a new shape"
+        result = self.data.broadcast(shape)
+        return self._wrap(result)
+
+    def broadcast_(self, shape: List[int]):
+        "Tries to broadcast the internal representation to a new shape"
+        self.data.broadcast_(shape)
+        return self
+
+    def transpose(self):
+        "Copies the transpose to a new tensor"
+        result = self.data.transpose()
+        return self._wrap(result)
+
+    def transpose_(self):
+        "Tries to transpose the tensor"
+        self.data.transpose_()
+        return self
