@@ -36,6 +36,10 @@ void bind_plain_tensor(py::module &m, const std::string &name) {
         .def("__len__", &type::size)
         .def("empty", &type::empty)
         .def("replicate", &type::replicate)
+        .def("broadcast", &type::broadcast)
+        .def("broadcast_", &type::broadcast_inplace)
+        .def("transpose", &type::transpose)
+        .def("transpose_", &type::transpose_inplace)
         .def("serialize", [](type &obj) { return py::bytes(obj.save()); });
 }
 
@@ -586,6 +590,10 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("data", &CKKSTensor::data)
         .def("reshape", &CKKSTensor::reshape)
         .def("reshape_", &CKKSTensor::reshape_inplace)
+        .def("broadcast", &CKKSTensor::broadcast)
+        .def("broadcast_", &CKKSTensor::broadcast_inplace)
+        .def("transpose", &CKKSTensor::transpose)
+        .def("transpose_", &CKKSTensor::transpose_inplace)
         .def("scale", &CKKSTensor::scale);
 
     py::class_<Ciphertext>(m, "Ciphertext", py::module_local());

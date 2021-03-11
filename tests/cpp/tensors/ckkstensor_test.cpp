@@ -273,6 +273,33 @@ TEST_P(CKKSTensorTest, TestDotBroadcasting) {
     ASSERT_TRUE(are_close(decr.data(), {330, 396, 462}));
 }
 
+TEST_P(CKKSTensorTest, TestTranspose) {
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
+    ASSERT_TRUE(ctx != nullptr);
+    ctx->generate_galois_keys();
+
+    auto ldata =
+        PlainTensor(vector<double>({1, 2, 3, 4, 5, 6}), vector<size_t>({3, 2}));
+
+    auto l = CKKSTensor::Create(ctx, ldata, std::pow(2, 40));
+
+    // Transpose
+    auto res = l->transpose();
+    ASSERT_THAT(res->shape(), ElementsAreArray({2, 3}));
+    ASSERT_THAT(l->shape(), ElementsAreArray({3, 2}));
+    auto decr = res->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {1, 3, 5, 2, 4, 6}));
+
+    // Transpose inplace
+    l->transpose_inplace();
+    ASSERT_THAT(l->shape(), ElementsAreArray({2, 3}));
+    decr = l->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {1, 3, 5, 2, 4, 6}));
+}
+
 TEST_P(CKKSTensorTest, TestCKKSTensorPolyval) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
