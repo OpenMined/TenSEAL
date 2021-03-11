@@ -89,3 +89,42 @@ def test_batch(data, axis):
 
     expected = np.array(data.raw).reshape(int(len(data.raw) / data.shape[axis]), data.shape[axis])
     assert np.array(batch).any() == expected.any()
+
+
+@pytest.mark.parametrize(
+    "data, shape, new_shape",
+    [([i for i in range(10)], [10], [2, 10]), ([i for i in range(9)], [3, 3], [2, 3, 3]),],
+)
+def test_broadcast(data, shape, new_shape):
+    tensor = ts.plain_tensor(data, shape)
+
+    newt = tensor.broadcast(new_shape)
+    assert tensor.shape == shape
+    assert newt.shape == new_shape
+
+    tensor.broadcast_(new_shape)
+    assert tensor.shape == new_shape
+
+
+@pytest.mark.parametrize(
+    "data, shape",
+    [
+        ([i for i in range(6)], [6]),
+        ([i for i in range(6)], [3, 2]),
+        ([i for i in range(12)], [3, 2, 2]),
+        ([i for i in range(2 * 3 * 4 * 5)], [2, 3, 4, 5]),
+    ],
+)
+def test_transpose(data, shape):
+    tensor = ts.plain_tensor(data, shape)
+
+    expected = np.transpose(np.array(data).reshape(shape))
+
+    newt = tensor.transpose()
+    assert tensor.shape == shape
+    assert newt.shape == list(expected.shape)
+    assert np.array(newt.tolist()).any() == expected.any()
+
+    tensor.transpose_()
+    assert tensor.shape == list(expected.shape)
+    assert np.array(tensor.tolist()).any() == expected.any()

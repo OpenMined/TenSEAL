@@ -76,6 +76,16 @@ class PlainTensor {
         return *this;
     }
     /**
+     * Transpose
+     * **/
+    PlainTensor<plain_t> transpose() const {
+        return this->copy().transpose_inplace();
+    }
+    PlainTensor<plain_t>& transpose_inplace() {
+        this->_data.transpose_inplace();
+        return *this;
+    }
+    /**
      * Returns the element at position {idx1, idx2, ..., idxn} in the current
      * shape
      * @param[in] desired position from the tensor.

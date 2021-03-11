@@ -149,6 +149,17 @@ class TensorStorage {
         return *this;
     }
     /**
+     * Transpose the TensorStorage.
+     */
+    TensorStorage<dtype_t> transpose() const {
+        return this->copy().transpose_inplace();
+    }
+
+    TensorStorage<dtype_t>& transpose_inplace() {
+        this->_data = xt::transpose(this->_data);
+        return *this;
+    }
+    /**
      * Returns the element at position {idx1, idx2, ..., idxn} in the current
      * shape
      * @param[in] desired position from the tensor.

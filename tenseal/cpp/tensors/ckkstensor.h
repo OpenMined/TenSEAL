@@ -109,6 +109,9 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     shared_ptr<CKKSTensor> broadcast(const vector<size_t>& other_shape) const;
     shared_ptr<CKKSTensor> broadcast_inplace(const vector<size_t>& other_shape);
 
+    shared_ptr<CKKSTensor> transpose() const;
+    shared_ptr<CKKSTensor> transpose_inplace();
+
     vector<size_t> shape_with_batch() const;
     double scale() const override;
 
