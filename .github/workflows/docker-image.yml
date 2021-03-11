@@ -17,6 +17,7 @@ jobs:
           - 36
           - 37
           - 38
+          - 39
     env:
       IMAGE: openmined/tenseal
 
