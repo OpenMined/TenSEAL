@@ -79,6 +79,36 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     vector<size_t> shape() const;
     shared_ptr<CKKSTensor> reshape(const vector<size_t>& new_shape);
     shared_ptr<CKKSTensor> reshape_inplace(const vector<size_t>& new_shape);
+
+    template <class T>
+    shared_ptr<T> broadcast_or_throw(const shared_ptr<T>& other) {
+        auto this_flat_size = this->_data.flat_size();
+        auto other_flat_size = other->_data.flat_size();
+
+        if (this_flat_size < other_flat_size) {
+            this->broadcast_inplace(other->shape());
+            return other;
+        } else {
+            return other->broadcast(this->shape());
+        }
+    }
+
+    template <class T>
+    T broadcast_or_throw(const T& other) {
+        auto this_flat_size = this->_data.flat_size();
+        auto other_flat_size = other.flat_size();
+
+        if (this_flat_size < other_flat_size) {
+            this->broadcast_inplace(other.shape());
+            return other;
+        } else {
+            return other.broadcast(this->shape());
+        }
+    }
+
+    shared_ptr<CKKSTensor> broadcast(const vector<size_t>& other_shape) const;
+    shared_ptr<CKKSTensor> broadcast_inplace(const vector<size_t>& other_shape);
+
     vector<size_t> shape_with_batch() const;
     double scale() const override;
 
@@ -89,7 +119,7 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
 
     CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
                const PlainTensor<double>& tensor,
-               std::optional<double> scale = {}, bool batch = true);
+               std::optional<double> scale = {}, bool batch = false);
     CKKSTensor(const TenSEALContextProto& ctx, const CKKSTensorProto& tensor);
     CKKSTensor(const shared_ptr<TenSEALContext>& ctx, const string& vec);
     CKKSTensor(const string& vec);
