@@ -6,9 +6,6 @@ on:
       - master
   release:
     types: [created]
-  pull_request:
-    types: [opened, synchronize, reopened]
-
 
 jobs:
   publish:
