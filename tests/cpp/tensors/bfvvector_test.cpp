@@ -137,7 +137,7 @@ TEST_P(BFVVectorTest, TestBFVLazyLoading) {
     EXPECT_THAT(decr.data(), ElementsAreArray({3, 5, 7}));
 }
 
-TEST_F(BFVVectorTest, TestCKKSLazyContextSanityDoubleSerde) {
+TEST_F(BFVVectorTest, TestBFVLazyContextSanityDoubleSerde) {
     auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {},
                                       encryption_type::asymmetric);
     ASSERT_TRUE(ctx != nullptr);
@@ -158,7 +158,7 @@ TEST_F(BFVVectorTest, TestCKKSLazyContextSanityDoubleSerde) {
     EXPECT_THAT(decr.data(), ElementsAreArray({3, 5, 7}));
 }
 
-TEST_F(BFVVectorTest, TestCKKSLazyContextSanityCopy) {
+TEST_F(BFVVectorTest, TestBFVLazyContextSanityCopy) {
     auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {},
                                       encryption_type::asymmetric);
     ASSERT_TRUE(ctx != nullptr);
@@ -176,7 +176,7 @@ TEST_F(BFVVectorTest, TestCKKSLazyContextSanityCopy) {
     EXPECT_THAT(decr.data(), ElementsAreArray({3, 5, 7}));
 }
 
-TEST_F(BFVVectorTest, TestCKKSLazyContextSanityDeepcopy) {
+TEST_F(BFVVectorTest, TestBFVLazyContextSanityDeepcopy) {
     auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {},
                                       encryption_type::asymmetric);
     ASSERT_TRUE(ctx != nullptr);
