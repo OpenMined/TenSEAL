@@ -52,6 +52,16 @@ class TenSEALEncoder {
         auto encoder = this->get<T>();
         encoder->encode(vec, pt);
     }
+    // encode a single int64_t value using BatchEncoder
+    // BatchEncoder doesn't support single value encoding
+    // we have to create a vector of repeated values then encode it
+    template <class T>
+    void encode(int64_t value, Plaintext& pt) {
+        auto encoder = this->get<T>();
+        size_t slot_count = encoder->slot_count();
+        vector<int64_t> vec(slot_count, value);
+        encoder->encode(vec, pt);
+    }
 
     template <class CKKSEncoder>
     void encode(const gsl::span<const double>& vec, Plaintext& pt,
