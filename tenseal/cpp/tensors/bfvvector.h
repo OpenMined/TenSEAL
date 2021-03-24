@@ -122,6 +122,12 @@ class BFVVector
     double scale() const override { throw logic_error("not implemented"); }
 
    private:
+    /*
+    Private evaluation functions to process both scalar and vector arguments.
+    */
+    template <typename T>
+    void _add_plain_inplace(Ciphertext& ct, const T& to_add);
+
     BFVVector(const shared_ptr<TenSEALContext>& ctx, const plain_t& vec);
     BFVVector(const shared_ptr<const BFVVector>&);
     BFVVector(const shared_ptr<TenSEALContext>& ctx, const string& vec);
