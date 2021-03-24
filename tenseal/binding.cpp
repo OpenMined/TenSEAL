@@ -107,6 +107,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              })
         .def("add", &BFVVector::add)
         .def("add_", &BFVVector::add_inplace)
+        .def("add_plain", py::overload_cast<const int64_t &>(
+                              &BFVVector::add_plain, py::const_))
         .def("add_plain",
              [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
                  return obj->add_plain(other);
@@ -115,6 +117,8 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
                  return obj->add_plain_inplace(other);
              })
+        .def("add_plain_",
+             py::overload_cast<const int64_t &>(&BFVVector::add_plain_inplace))
         .def("sub", &BFVVector::sub)
         .def("sub_", &BFVVector::sub_inplace)
         .def("sub_plain",
@@ -137,11 +141,15 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              })
         // python arithmetic
         .def("__add__", &BFVVector::add)
+        .def("__add__", py::overload_cast<const int64_t &>(
+                            &BFVVector::add_plain, py::const_))
         .def("__add__",
              [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
                  return obj->add_plain(other);
              })
         .def("__iadd__", &BFVVector::add_inplace)
+        .def("__iadd__",
+             py::overload_cast<const int64_t &>(&BFVVector::add_plain_inplace))
         .def("__iadd__",
              [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
                  return obj->add_plain_inplace(other);
