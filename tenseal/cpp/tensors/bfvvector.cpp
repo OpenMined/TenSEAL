@@ -244,7 +244,8 @@ shared_ptr<BFVVector> BFVVector::sum_inplace(size_t /*axis=0*/) {
 
 shared_ptr<BFVVector> BFVVector::add_plain_inplace(
     const plain_t::dtype& to_add) {
-    throw std::logic_error("not implemented");
+    for (auto& ct : this->_ciphertexts) this->_add_plain_inplace(ct, to_add);
+    return shared_from_this();
 }
 
 shared_ptr<BFVVector> BFVVector::add_plain_inplace(
@@ -257,12 +258,17 @@ shared_ptr<BFVVector> BFVVector::add_plain_inplace(
 
     for (size_t idx = 0; idx < this->_ciphertexts.size(); ++idx) {
         Plaintext plaintext;
-        this->tenseal_context()->encode<BatchEncoder>(to_add[idx].data_ref(),
-                                                      plaintext);
-        this->tenseal_context()->evaluator->add_plain_inplace(
-            this->_ciphertexts[idx], plaintext);
+        this->_add_plain_inplace(this->_ciphertexts[idx],
+                                 to_add[idx].data_ref());
     }
     return shared_from_this();
+}
+
+template <typename T>
+void BFVVector::_add_plain_inplace(Ciphertext& ct, const T& to_add) {
+    Plaintext plaintext;
+    this->tenseal_context()->encode<BatchEncoder>(to_add, plaintext);
+    this->tenseal_context()->evaluator->add_plain_inplace(ct, plaintext);
 }
 
 shared_ptr<BFVVector> BFVVector::sub_plain_inplace(
