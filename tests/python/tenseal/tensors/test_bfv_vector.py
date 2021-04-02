@@ -396,7 +396,7 @@ def test_mul_plain_inplace(context, vec1, vec2):
 
     second_vec = vec2
     first_vec *= second_vec
-    
+
     if isinstance(vec2, list):
         expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
     elif isinstance(vec2, (float, int)):
