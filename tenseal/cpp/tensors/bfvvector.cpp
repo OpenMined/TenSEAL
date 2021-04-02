@@ -300,14 +300,12 @@ template <typename T>
 void BFVVector::_mul_plain_inplace(Ciphertext& ct, const T& to_mul) {
     Plaintext plaintext;
     this->tenseal_context()->encode<BatchEncoder>(to_mul, plaintext);
-    this->tenseal_context()->evaluator->
-        multiply_plain_inplace(ct, plaintext);
+    this->tenseal_context()->evaluator->multiply_plain_inplace(ct, plaintext);
 }
 
 shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
     const plain_t::dtype& to_mul) {
-    for (auto& ct: this->_ciphertexts)
-        this->_mul_plain_inplace(ct, to_mul);
+    for (auto& ct : this->_ciphertexts) this->_mul_plain_inplace(ct, to_mul);
 
     return shared_from_this();
 }

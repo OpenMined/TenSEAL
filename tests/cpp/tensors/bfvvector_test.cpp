@@ -168,7 +168,6 @@ TEST_P(BFVVectorTest, TestBFVMulPlain) {
 
     r = vector<int64_t>({2, 2, 2});
 
-
     l->mul_plain_inplace(r);
     l->mul_plain_inplace(r);
     l->mul_plain_inplace(r);
