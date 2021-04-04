@@ -14,7 +14,7 @@ using namespace std;
 namespace py = pybind11;
 
 template <typename T>
-void bind_serializable(py::module &m, const std::string &name) {
+void bind_seal_serializable(py::module &m, const std::string &name) {
     /*******************
      * "seal/serializable.h" {
      ***/
@@ -37,17 +37,17 @@ void bind_serializable(py::module &m, const std::string &name) {
 PYBIND11_MODULE(_sealapi_cpp, m) {
     m.doc() = "SEAL library bindings for Python";
 
-    bind_evaluator(m);
-    bind_encrypt_decrypt(m);
-    bind_context(m);
-    bind_encoder_decoder(m);
-    bind_helpers(m);
-    bind_modulus(m);
+    bind_seal_evaluator(m);
+    bind_seal_encrypt_decrypt(m);
+    bind_seal_context(m);
+    bind_seal_encoder_decoder(m);
+    bind_seal_helpers(m);
+    bind_seal_modulus(m);
 
     auto util = m.def_submodule("util");
-    bind_util_namespace(util);
+    bind_seal_util_namespace(util);
 
-    bind_serializable<RelinKeys>(m, "RelinKeys");
-    bind_serializable<GaloisKeys>(m, "GaloisKeys");
-    bind_serializable<Ciphertext>(m, "Ciphertext");
+    bind_seal_serializable<RelinKeys>(m, "RelinKeys");
+    bind_seal_serializable<GaloisKeys>(m, "GaloisKeys");
+    bind_seal_serializable<Ciphertext>(m, "Ciphertext");
 }

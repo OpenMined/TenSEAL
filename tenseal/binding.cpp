@@ -6,11 +6,116 @@
 #include <vector>
 
 #include "tenseal/cpp/tenseal.h"
+#include "tenseal/sealapi/bindings.h"
 
 using namespace tenseal;
 using namespace seal;
 using namespace std;
 namespace py = pybind11;
+
+void bind_globals(py::module &m) {
+    py::enum_<encryption_type>(m, "ENCRYPTION_TYPE")
+        .value("ASYMMETRIC", encryption_type::asymmetric)
+        .value("SYMMETRIC", encryption_type::symmetric);
+}
+
+void bind_sealapi(py::module &m) {
+    // SEAL API
+    bind_seal_encrypt_decrypt(m);
+    bind_seal_context(m);
+}
+
+void bind_context(py::module &m) {
+    m.def(
+        "context", &create_context,
+        R"(create a SEALContext object, checking the validity and properties of encryption_parameters.
+    Args:
+        encryption_parameters : parameters to use to create the SEALContext.)",
+        py::arg("encryption_parameters"));
+
+    py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
+        m, "TenSEALContext")
+        .def_property(
+            "global_scale",
+            py::overload_cast<>(&TenSEALContext::global_scale, py::const_),
+            py::overload_cast<double>(&TenSEALContext::global_scale))
+        .def_property(
+            "auto_relin",
+            py::overload_cast<>(&TenSEALContext::auto_relin, py::const_),
+            py::overload_cast<bool>(&TenSEALContext::auto_relin))
+        .def_property(
+            "auto_rescale",
+            py::overload_cast<>(&TenSEALContext::auto_rescale, py::const_),
+            py::overload_cast<bool>(&TenSEALContext::auto_rescale))
+        .def_property(
+            "auto_mod_switch",
+            py::overload_cast<>(&TenSEALContext::auto_mod_switch, py::const_),
+            py::overload_cast<bool>(&TenSEALContext::auto_mod_switch))
+        .def("new",
+             py::overload_cast<scheme_type, size_t, uint64_t, vector<int>,
+                               encryption_type, optional<size_t>>(
+                 &TenSEALContext::Create),
+             R"(Create a new TenSEALContext object to hold keys and parameters.
+    Args:
+        scheme : define the scheme to be used, either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS.
+        poly_modulus_degree : The degree of the polynomial modulus, must be a power of two.
+        plain_modulus : The plaintext modulus. Is not used if scheme is CKKS.
+        coeff_mod_bit_sizes : List of bit size for each coeffecient modulus.
+            Can be an empty list for BFV, a default value will be given.
+        encryption_type : switch between public key and symmetric encryption. Default set to public key encryption.
+        n_threads : Optional: number of threads to use for multiplications.
+        )")
+        .def("seal_context", &TenSEALContext::seal_context)
+        .def("encryptor", &TenSEALContext::encryptor)
+        .def("decryptor", &TenSEALContext::decryptor)
+        .def("public_key", &TenSEALContext::public_key)
+        .def("has_public_key", &TenSEALContext::has_public_key)
+        .def("secret_key", &TenSEALContext::secret_key)
+        .def("has_secret_key", &TenSEALContext::has_secret_key)
+        .def("relin_keys", &TenSEALContext::relin_keys)
+        .def("has_relin_keys", &TenSEALContext::has_relin_keys)
+        .def("galois_keys", &TenSEALContext::galois_keys)
+        .def("has_galois_keys", &TenSEALContext::has_galois_key)
+        .def("is_public", &TenSEALContext::is_public)
+        .def("is_private", &TenSEALContext::is_private)
+        .def("make_context_public", &TenSEALContext::make_context_public,
+             "Generate Galois and Relinearization keys if needed, then make "
+             "then context public",
+             py::arg("generate_galois_keys") = false,
+             py::arg("generate_relin_keys") = false)
+        .def("generate_galois_keys",
+             py::overload_cast<>(&TenSEALContext::generate_galois_keys),
+             "Generate Galois keys using the secret key")
+        .def("generate_galois_keys",
+             py::overload_cast<const SecretKey &>(
+                 &TenSEALContext::generate_galois_keys),
+             "Generate Galois keys using the secret key")
+        .def("generate_relin_keys",
+             py::overload_cast<>(&TenSEALContext::generate_relin_keys),
+             "Generate Relinearization keys using the secret key")
+        .def("generate_relin_keys",
+             py::overload_cast<const SecretKey &>(
+                 &TenSEALContext::generate_relin_keys),
+             "Generate Relinearization keys using the secret key")
+        .def("serialize",
+             [](const TenSEALContext &obj, bool save_public_key,
+                bool save_secret_key, bool save_galois_keys,
+                bool save_relin_keys) {
+                 return py::bytes(obj.save(save_public_key, save_secret_key,
+                                           save_galois_keys, save_relin_keys));
+             })
+        .def_static("deserialize",
+                    py::overload_cast<const std::string &, optional<size_t>>(
+                        &TenSEALContext::Create),
+                    py::arg("buffer"), py::arg("n_threads") = get_concurrency())
+        .def("copy", &TenSEALContext::copy)
+        .def("__copy__",
+             [](const std::shared_ptr<TenSEALContext> &self) {
+                 return self->copy();
+             })
+        .def("__deepcopy__", [](const std::shared_ptr<TenSEALContext> &self,
+                                py::dict) { return self->copy(); });
+}
 
 template <typename plain_t>
 void bind_plain_tensor(py::module &m, const std::string &name) {
@@ -43,18 +148,7 @@ void bind_plain_tensor(py::module &m, const std::string &name) {
         .def("serialize", [](type &obj) { return py::bytes(obj.save()); });
 }
 
-PYBIND11_MODULE(_tenseal_cpp, m) {
-    m.doc() = "Library for doing homomorphic encryption operations on tensors";
-
-    // globals
-    py::enum_<scheme_type>(m, "SCHEME_TYPE")
-        .value("NONE", scheme_type::none)
-        .value("BFV", scheme_type::bfv)
-        .value("CKKS", scheme_type::ckks);
-    py::enum_<encryption_type>(m, "ENCRYPTION_TYPE")
-        .value("ASYMMETRIC", encryption_type::asymmetric)
-        .value("SYMMETRIC", encryption_type::symmetric);
-
+void bind_bfv_vector(py::module &m) {
     m.def("bfv_parameters", &create_bfv_parameters,
           R"(Create an EncryptionParameters object for the BFV scheme.
     Args:
@@ -63,23 +157,6 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         coeff_mod_bit_sizes : List of bit size for each coeffecient modulus.)",
           py::arg("poly_modulus_degree"), py::arg("plain_modulus"),
           py::arg("coeff_mod_bit_sizes") = vector<int>());
-
-    m.def("ckks_parameters", &create_ckks_parameters,
-          R"(Create an EncryptionParameters object for the CKKS scheme.
-    Args:
-        poly_modulus_degree : The degree of the polynomial modulus, must be a power of two.
-        coeff_mod_bit_sizes : List of bit size for each coeffecient modulus.)",
-          py::arg("poly_modulus_degree"), py::arg("coeff_mod_bit_sizes"));
-
-    m.def(
-        "context", &create_context,
-        R"(create a SEALContext object, checking the validity and properties of encryption_parameters.
-    Args:
-        encryption_parameters : parameters to use to create the SEALContext.)",
-        py::arg("encryption_parameters"));
-
-    bind_plain_tensor<double>(m, "Double");
-    bind_plain_tensor<int64_t>(m, "Int64");
 
     py::class_<BFVVector, std::shared_ptr<BFVVector>>(m, "BFVVector",
                                                       py::module_local())
@@ -183,49 +260,21 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              [](shared_ptr<BFVVector> &obj) { return obj->deepcopy(); })
         .def("__deepcopy__", [](const shared_ptr<BFVVector> &obj,
                                 py::dict) { return obj->deepcopy(); })
+        .def("ciphertext",
+             py::overload_cast<>(&BFVVector::ciphertext, py::const_))
         .def_static(
             "pack_vectors", [](const vector<shared_ptr<BFVVector>> &vectors) {
                 return pack_vectors<BFVVector, BatchEncoder, int64_t>(vectors);
             });
+}
 
-    // CKKSVector utils
-    m.def("im2col_encoding",
-          [](shared_ptr<TenSEALContext> ctx, vector<vector<double>> &raw_input,
-             const size_t kernel_n_rows, const size_t kernel_n_cols,
-             const size_t stride) {
-              vector<vector<double>> view_as_window;
-
-              PlainTensor<double> input(raw_input);
-              size_t windows_nb = input.im2col(view_as_window, kernel_n_rows,
-                                               kernel_n_cols, stride);
-
-              PlainTensor<double> view_as_window_tensor(view_as_window);
-              auto final_vector = view_as_window_tensor.vertical_scan();
-
-              auto ckks_vector = CKKSVector::Create(ctx, final_vector);
-              return make_pair(ckks_vector, windows_nb);
-          });
-
-    m.def("enc_matmul_encoding", [](shared_ptr<TenSEALContext> ctx,
-                                    const vector<vector<double>> &input) {
-        vector<vector<double>> padded_matrix;
-        padded_matrix.reserve(input.size());
-        // calculate the next power of 2
-        size_t plain_vec_size =
-            1 << (static_cast<size_t>(ceil(log2(input[0].size()))));
-
-        for (size_t i = 0; i < input.size(); i++) {
-            // pad the row to the next power of 2
-            vector<double> row(plain_vec_size, 0);
-            copy(input[i].begin(), input[i].end(), row.begin());
-            padded_matrix.push_back(row);
-        }
-
-        PlainTensor<double> padded_tensor(padded_matrix);
-        auto final_vector = padded_tensor.vertical_scan();
-
-        return CKKSVector::Create(ctx, final_vector);
-    });
+void bind_ckks_vector(py::module &m) {
+    m.def("ckks_parameters", &create_ckks_parameters,
+          R"(Create an EncryptionParameters object for the CKKS scheme.
+    Args:
+        poly_modulus_degree : The degree of the polynomial modulus, must be a power of two.
+        coeff_mod_bit_sizes : List of bit size for each coeffecient modulus.)",
+          py::arg("poly_modulus_degree"), py::arg("coeff_mod_bit_sizes"));
 
     py::class_<CKKSVector, std::shared_ptr<CKKSVector>>(m, "CKKSVector",
                                                         py::module_local())
@@ -431,11 +480,53 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              [](shared_ptr<CKKSVector> obj) { return obj->deepcopy(); })
         .def("__deepcopy__", [](shared_ptr<CKKSVector> obj,
                                 py::dict) { return obj->deepcopy(); })
+        .def("ciphertext",
+             py::overload_cast<>(&CKKSVector::ciphertext, py::const_))
         .def_static(
             "pack_vectors", [](const vector<shared_ptr<CKKSVector>> &vectors) {
                 return pack_vectors<CKKSVector, CKKSEncoder, double>(vectors);
             });
 
+    m.def("im2col_encoding",
+          [](shared_ptr<TenSEALContext> ctx, vector<vector<double>> &raw_input,
+             const size_t kernel_n_rows, const size_t kernel_n_cols,
+             const size_t stride) {
+              vector<vector<double>> view_as_window;
+
+              PlainTensor<double> input(raw_input);
+              size_t windows_nb = input.im2col(view_as_window, kernel_n_rows,
+                                               kernel_n_cols, stride);
+
+              PlainTensor<double> view_as_window_tensor(view_as_window);
+              auto final_vector = view_as_window_tensor.vertical_scan();
+
+              auto ckks_vector = CKKSVector::Create(ctx, final_vector);
+              return make_pair(ckks_vector, windows_nb);
+          });
+
+    m.def("enc_matmul_encoding", [](shared_ptr<TenSEALContext> ctx,
+                                    const vector<vector<double>> &input) {
+        vector<vector<double>> padded_matrix;
+        padded_matrix.reserve(input.size());
+        // calculate the next power of 2
+        size_t plain_vec_size =
+            1 << (static_cast<size_t>(ceil(log2(input[0].size()))));
+
+        for (size_t i = 0; i < input.size(); i++) {
+            // pad the row to the next power of 2
+            vector<double> row(plain_vec_size, 0);
+            copy(input[i].begin(), input[i].end(), row.begin());
+            padded_matrix.push_back(row);
+        }
+
+        PlainTensor<double> padded_tensor(padded_matrix);
+        auto final_vector = padded_tensor.vertical_scan();
+
+        return CKKSVector::Create(ctx, final_vector);
+    });
+}
+
+void bind_ckks_tensor(py::module &m) {
     py::class_<CKKSTensor, std::shared_ptr<CKKSTensor>>(m, "CKKSTensor",
                                                         py::module_local())
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
@@ -594,6 +685,7 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
              [](shared_ptr<CKKSTensor> &obj) { return obj->deepcopy(); })
         .def("__deepcopy__", [](const shared_ptr<CKKSTensor> &obj,
                                 py::dict) { return obj->deepcopy(); })
+        .def("ciphertext", &CKKSTensor::data)
         .def("shape", &CKKSTensor::shape)
         .def("data", &CKKSTensor::data)
         .def("reshape", &CKKSTensor::reshape)
@@ -603,115 +695,21 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
         .def("transpose", &CKKSTensor::transpose)
         .def("transpose_", &CKKSTensor::transpose_inplace)
         .def("scale", &CKKSTensor::scale);
+}
 
-    py::class_<Ciphertext>(m, "Ciphertext", py::module_local());
+PYBIND11_MODULE(_tenseal_cpp, m) {
+    m.doc() = "Library for doing homomorphic encryption operations on tensors";
 
-    py::class_<TenSEALContext, std::shared_ptr<TenSEALContext>>(
-        m, "TenSEALContext")
-        .def_property(
-            "global_scale",
-            py::overload_cast<>(&TenSEALContext::global_scale, py::const_),
-            py::overload_cast<double>(&TenSEALContext::global_scale))
-        .def_property(
-            "auto_relin",
-            py::overload_cast<>(&TenSEALContext::auto_relin, py::const_),
-            py::overload_cast<bool>(&TenSEALContext::auto_relin))
-        .def_property(
-            "auto_rescale",
-            py::overload_cast<>(&TenSEALContext::auto_rescale, py::const_),
-            py::overload_cast<bool>(&TenSEALContext::auto_rescale))
-        .def_property(
-            "auto_mod_switch",
-            py::overload_cast<>(&TenSEALContext::auto_mod_switch, py::const_),
-            py::overload_cast<bool>(&TenSEALContext::auto_mod_switch))
-        .def("new",
-             py::overload_cast<scheme_type, size_t, uint64_t, vector<int>,
-                               encryption_type, optional<size_t>>(
-                 &TenSEALContext::Create),
-             R"(Create a new TenSEALContext object to hold keys and parameters.
-    Args:
-        scheme : define the scheme to be used, either SCHEME_TYPE.BFV or SCHEME_TYPE.CKKS.
-        poly_modulus_degree : The degree of the polynomial modulus, must be a power of two.
-        plain_modulus : The plaintext modulus. Is not used if scheme is CKKS.
-        coeff_mod_bit_sizes : List of bit size for each coeffecient modulus.
-            Can be an empty list for BFV, a default value will be given.
-        encryption_type : switch between public key and symmetric encryption. Default set to public key encryption.
-        n_threads : Optional: number of threads to use for multiplications.
-        )")
-        .def("public_key", &TenSEALContext::public_key)
-        .def("has_public_key", &TenSEALContext::has_public_key)
-        .def("secret_key", &TenSEALContext::secret_key)
-        .def("has_secret_key", &TenSEALContext::has_secret_key)
-        .def("relin_keys", &TenSEALContext::relin_keys)
-        .def("has_relin_keys", &TenSEALContext::has_relin_keys)
-        .def("galois_keys", &TenSEALContext::galois_keys)
-        .def("has_galois_keys", &TenSEALContext::has_galois_key)
-        .def("is_public", &TenSEALContext::is_public)
-        .def("is_private", &TenSEALContext::is_private)
-        .def("make_context_public", &TenSEALContext::make_context_public,
-             "Generate Galois and Relinearization keys if needed, then make "
-             "then context public",
-             py::arg("generate_galois_keys") = false,
-             py::arg("generate_relin_keys") = false)
-        .def("generate_galois_keys",
-             py::overload_cast<>(&TenSEALContext::generate_galois_keys),
-             "Generate Galois keys using the secret key")
-        .def("generate_galois_keys",
-             py::overload_cast<const SecretKey &>(
-                 &TenSEALContext::generate_galois_keys),
-             "Generate Galois keys using the secret key")
-        .def("generate_relin_keys",
-             py::overload_cast<>(&TenSEALContext::generate_relin_keys),
-             "Generate Relinearization keys using the secret key")
-        .def("generate_relin_keys",
-             py::overload_cast<const SecretKey &>(
-                 &TenSEALContext::generate_relin_keys),
-             "Generate Relinearization keys using the secret key")
-        .def("serialize",
-             [](const TenSEALContext &obj, bool save_public_key,
-                bool save_secret_key, bool save_galois_keys,
-                bool save_relin_keys) {
-                 return py::bytes(obj.save(save_public_key, save_secret_key,
-                                           save_galois_keys, save_relin_keys));
-             })
-        .def_static("deserialize",
-                    py::overload_cast<const std::string &, optional<size_t>>(
-                        &TenSEALContext::Create),
-                    py::arg("buffer"), py::arg("n_threads") = get_concurrency())
-        .def("copy", &TenSEALContext::copy)
-        .def("__copy__",
-             [](const std::shared_ptr<TenSEALContext> &self) {
-                 return self->copy();
-             })
-        .def("__deepcopy__", [](const std::shared_ptr<TenSEALContext> &self,
-                                py::dict) { return self->copy(); });
-    // SEAL objects
+    bind_globals(m);
 
-    py::class_<KeyGenerator>(m, "KeyGenerator")
-        .def(py::init<const seal::SEALContext &>())
-        .def(
-            "public_key",
-            [](const KeyGenerator &keygen) {
-                PublicKey pk;
-                keygen.create_public_key(pk);
+    bind_sealapi(m);
 
-                return pk;
-            },
-            "get the public key.")
-        .def("secret_key", &KeyGenerator::secret_key, "get the secret key.")
-        .def(
-            "relin_keys",
-            [](KeyGenerator &keygen) {
-                RelinKeys rk;
-                keygen.create_relin_keys(rk);
-                return rk;
-            },
-            "get the relinearization keys.");
+    bind_context(m);
 
-    py::class_<EncryptionParameters>(m, "EncryptionParameters");
-    py::class_<SEALContext, shared_ptr<SEALContext>>(m, "SEALContext");
-    py::class_<PublicKey, std::shared_ptr<PublicKey>>(m, "PublicKey");
-    py::class_<SecretKey, std::shared_ptr<SecretKey>>(m, "SecretKey");
-    py::class_<RelinKeys, std::shared_ptr<RelinKeys>>(m, "RelinKeys");
-    py::class_<GaloisKeys, std::shared_ptr<GaloisKeys>>(m, "GaloisKeys");
+    bind_plain_tensor<double>(m, "Double");
+    bind_plain_tensor<int64_t>(m, "Int64");
+
+    bind_bfv_vector(m);
+    bind_ckks_vector(m);
+    bind_ckks_tensor(m);
 }

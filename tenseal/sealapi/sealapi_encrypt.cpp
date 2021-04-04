@@ -13,7 +13,7 @@ using namespace seal;
 using namespace std;
 namespace py = pybind11;
 
-void bind_encrypt_decrypt(pybind11::module &m) {
+void bind_seal_encrypt_decrypt(pybind11::module &m) {
     /*******************
      * "seal/publickey.h" {
      ***/

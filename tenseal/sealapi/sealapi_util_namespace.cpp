@@ -32,7 +32,7 @@ namespace py = pybind11;
  * **/
 
 template <typename T>
-void bind_pointer(py::module &m, const std::string &name) {
+void bind_seal_pointer(py::module &m, const std::string &name) {
     /*******************
      * "util/pointer.h" {
      ***/
@@ -62,7 +62,7 @@ void bind_pointer(py::module &m, const std::string &name) {
      *******************/
 }
 
-void bind_util_namespace(pybind11::module &m) {
+void bind_seal_util_namespace(pybind11::module &m) {
     m.doc() = "SEAL::util bindings for Python";
 
     py::class_<MemoryPoolHandle>(m, "MemoryPoolHandle", py::module_local());
@@ -550,14 +550,14 @@ void bind_util_namespace(pybind11::module &m) {
     /*******************
      * "util/pointer.h" {
      ***/
-    bind_pointer<Modulus>(m, "Modulus");
-    bind_pointer<std::complex<double>>(m, "ComplexDouble");
-    bind_pointer<std::uint64_t>(m, "UInt64");
-    bind_pointer<GaloisTool>(m, "GaloisTool");
-    bind_pointer<NTTTables>(m, "NTTTables");
-    bind_pointer<RNSTool>(m, "RNSTool");
-    bind_pointer<RNSBase>(m, "RNSBase");
-    bind_pointer<MultiplyUIntModOperand>(m, "MultiplyUIntModOperand");
+    bind_seal_pointer<Modulus>(m, "Modulus");
+    bind_seal_pointer<std::complex<double>>(m, "ComplexDouble");
+    bind_seal_pointer<std::uint64_t>(m, "UInt64");
+    bind_seal_pointer<GaloisTool>(m, "GaloisTool");
+    bind_seal_pointer<NTTTables>(m, "NTTTables");
+    bind_seal_pointer<RNSTool>(m, "RNSTool");
+    bind_seal_pointer<RNSBase>(m, "RNSBase");
+    bind_seal_pointer<MultiplyUIntModOperand>(m, "MultiplyUIntModOperand");
 
     /***
      * } "util/pointer.h"
