@@ -75,7 +75,8 @@ void bind_seal_encrypt_decrypt(pybind11::module &m) {
     /*******************
      * "seal/relinkeys.h" {
      ***/
-    py::class_<RelinKeys, KSwitchKeys>(m, "RelinKeys", py::module_local())
+    py::class_<RelinKeys, std::shared_ptr<RelinKeys>>(m, "RelinKeys",
+                                                      py::module_local())
         .def(py::init<>())
         // KSwitchKeys
         .def("size", &RelinKeys::size)
@@ -109,7 +110,8 @@ void bind_seal_encrypt_decrypt(pybind11::module &m) {
     /*******************
      * "seal/galoiskeys.h" {
      ***/
-    py::class_<GaloisKeys, KSwitchKeys>(m, "GaloisKeys", py::module_local())
+    py::class_<GaloisKeys, std::shared_ptr<GaloisKeys>>(m, "GaloisKeys",
+                                                        py::module_local())
         .def(py::init<>())
         // KSwitchKeys
         .def("size", &GaloisKeys::size)
