@@ -52,7 +52,7 @@ class CKKSVector(AbstractTensor):
     def size(self) -> int:
         return self.data.size()
 
-    def ciphertext(self) -> List["Ciphertext"]:
+    def ciphertext(self) -> List["ts._ts_cpp.Ciphertext"]:
         return self.data.ciphertext()
 
     @classmethod
