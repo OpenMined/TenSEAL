@@ -1,7 +1,7 @@
 black==19.10b0
 bumpversion>=0.5.3
 flake8
-numpy==1.20.2
+numpy
 pytest>=5.4.1
 pytest-benchmark
 pytest-benchmark[histogram]
