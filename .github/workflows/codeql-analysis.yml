@@ -30,6 +30,7 @@ jobs:
       with:
         path: |
             third_party/
+            build/
         key: codeql-${{ runner.os }}-${{ matrix.language }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
         restore-keys: |
           codeql-${{ runner.os }}-${{ matrix.language }}-tensealdeps-
@@ -42,7 +43,9 @@ jobs:
 
     - if: matrix.language == 'cpp' 
       name: Build CPP
-      run: cmake . && make -j
+      run: |
+          mkdir build && cd build
+          cmake .. && make -j
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
