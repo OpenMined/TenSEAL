@@ -28,6 +28,7 @@ jobs:
           publishToken: ${{ secrets.SEMGREP_APP_TOKEN }}
           publishDeployment: ${{ secrets.SEMGREP_DEPLOYMENT_ID }}
           generateSarif: "1"
+          config: p/r2c
 
       # Upload SARIF file generated in previous step
       - name: Upload SARIF file
