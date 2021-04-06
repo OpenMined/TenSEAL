@@ -25,6 +25,15 @@ jobs:
       with:
           submodules: true
 
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: |
+            third_party/
+        key: test-${{ runner.os }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake') }}
+        restore-keys: |
+          test-${{ runner.os }}-tensealdeps-
+
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
       with:
