@@ -17,6 +17,16 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+            path: |
+                third_party/
+            key: test-${{ runner.os }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
+            restore-keys: |
+                test-${{ runner.os }}-tensealdeps-
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
@@ -56,6 +66,16 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+            path: |
+                third_party/
+            key: test-${{ runner.os }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
+            restore-keys: |
+                test-${{ runner.os }}-tensealdeps-
+
       - name: Prepare ENV
         run: |
             echo "CC=clang" >> $GITHUB_ENV
@@ -99,6 +119,16 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+            path: |
+                third_party/
+            key: test-${{ runner.os }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
+            restore-keys: |
+                test-${{ runner.os }}-tensealdeps-
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
