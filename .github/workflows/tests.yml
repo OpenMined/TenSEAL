@@ -23,9 +23,9 @@ jobs:
         with:
             path: |
                 third_party/
-            key: test-${{ runner.os }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
+            key: linter-${{ runner.os }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
             restore-keys: |
-                test-${{ runner.os }}-tensealdeps-
+                linter-${{ runner.os }}-tensealdeps-
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
@@ -72,9 +72,9 @@ jobs:
         with:
             path: |
                 third_party/
-            key: test-${{ runner.os }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
+            key: test-tenseal-${{ runner.os }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
             restore-keys: |
-                test-${{ runner.os }}-tensealdeps-
+                test-tenseal-${{ runner.os }}-tensealdeps-
 
       - name: Prepare ENV
         run: |
@@ -125,9 +125,9 @@ jobs:
         with:
             path: |
                 third_party/
-            key: test-${{ runner.os }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
+            key: test-sealapi-${{ runner.os }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
             restore-keys: |
-                test-${{ runner.os }}-tensealdeps-
+                test-sealapi-${{ runner.os }}-tensealdeps-
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1

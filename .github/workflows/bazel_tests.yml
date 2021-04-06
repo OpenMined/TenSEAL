@@ -20,7 +20,7 @@ jobs:
       - name: Mount bazel cache
         uses: actions/cache@v1
         with:
-            path: "/home/runner/.cache/bazel"
+            path: "$HOME/.cache/bazel"
             key: bazel
       - name: Prepare ENV
         run: |
