@@ -4,4 +4,4 @@ paths:
   - tenseal
   - tests
 paths-ignore:
-  - "third_party/*"
+  - third_party
