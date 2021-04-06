@@ -21,7 +21,7 @@ jobs:
         uses: actions/cache@v1
         with:
             path: "$HOME/.cache/bazel"
-            key: bazel
+            key: bazel-${{ matrix.os }}
       - name: Prepare ENV
         run: |
             echo "CC=clang" >> $GITHUB_ENV
