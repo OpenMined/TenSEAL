@@ -41,7 +41,7 @@ jobs:
     - if: matrix.language == 'cpp' 
       name: Build CPP
       run: |
-          mkdir build && cd build
+          mkdir -p build && cd build
           cmake .. && make -j
 
     - name: Perform CodeQL Analysis

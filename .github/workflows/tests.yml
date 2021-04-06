@@ -17,7 +17,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
-
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
@@ -26,7 +25,6 @@ jobs:
             key: linter-${{ runner.os }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
             restore-keys: |
                 linter-${{ runner.os }}-tensealdeps-
-
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
@@ -66,16 +64,6 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        with:
-            path: |
-                third_party/
-            key: test-tenseal-${{ runner.os }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
-            restore-keys: |
-                test-tenseal-${{ runner.os }}-tensealdeps-
-
       - name: Prepare ENV
         run: |
             echo "CC=clang" >> $GITHUB_ENV
@@ -104,6 +92,14 @@ jobs:
       - name: Test with gtest for Ubuntu/MacOS
         run: .github/workflows/scripts/run_gtest_nix.sh
         if: ${{ matrix.os != 'windows-latest' }}
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+            path: |
+                third_party/
+            key: test-tenseal-${{ runner.os }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
+            restore-keys: |
+                test-tenseal-${{ runner.os }}-tensealdeps-
       - name: Test with gtest for Windows
         run: .github/workflows/scripts/run_gtest_windows.bat
         if: ${{ matrix.os == 'windows-latest' }}
@@ -119,16 +115,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
-
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        with:
-            path: |
-                third_party/
-            key: test-sealapi-${{ runner.os }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
-            restore-keys: |
-                test-sealapi-${{ runner.os }}-tensealdeps-
-
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
