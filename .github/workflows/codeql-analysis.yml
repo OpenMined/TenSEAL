@@ -30,9 +30,9 @@ jobs:
       with:
         path: |
             third_party/
-        key: codeql-${{ runner.os }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
+        key: codeql-${{ runner.os }}-${{ matrix.language }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
         restore-keys: |
-          codeql-${{ runner.os }}-tensealdeps-
+          codeql-${{ runner.os }}-${{ matrix.language }}-tensealdeps-
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
