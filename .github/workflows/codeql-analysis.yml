@@ -29,6 +29,9 @@ jobs:
       uses: github/codeql-action/init@v1
       with:
         languages: ${{ matrix.language }}
+        paths:
+            - tenseal
+            - tests
 
     - if: matrix.language == 'cpp' 
       name: Build CPP
