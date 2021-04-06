@@ -16,6 +16,7 @@ endif()
 
 include(cmake/seal.cmake)
 include(cmake/protobuf.cmake)
+include(cmake/logging.cmake)
 include(cmake/pybind11.cmake)
 include(cmake/xtensor.cmake)
 include(cmake/tenseal.cmake)
