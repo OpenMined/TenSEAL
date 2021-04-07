@@ -18,7 +18,7 @@ namespace py = pybind11;
  *correctly, and we need to return the new value instead.
  * **/
 
-void bind_encoder_decoder(pybind11::module &m) {
+void bind_seal_encoder_decoder(pybind11::module &m) {
     /*******************
      * "seal/intarray.h" {
      ***/

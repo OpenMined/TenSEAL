@@ -1,5 +1,6 @@
 import pytest
 import tenseal as ts
+import numpy as np
 from tenseal.enc_context import GaloisKeys, RelinKeys
 
 
@@ -109,3 +110,26 @@ def test_auto_flags(encryption_type):
     assert context.auto_relin == True
     assert context.auto_rescale == True
     assert context.auto_mod_switch == True
+
+
+def test_seal_context_bindings():
+    context = ts.context(ts.SCHEME_TYPE.BFV, 8192, 1032193)
+
+    bfv_vec = ts.bfv_vector(context, [1, 2, 3, 4])
+
+    assert context.public_key().data is not None
+    assert (
+        context.public_key().data.data().poly_modulus_degree()
+        == context.seal_context().data.key_context_data().parms().poly_modulus_degree()
+    )
+
+    assert context.secret_key().data is not None
+    assert context.secret_key().data.data().coeff_count() == 5 * 8192
+
+    decryptor = context.decryptor().data
+
+    noise_budget = decryptor.invariant_noise_budget(bfv_vec.ciphertext()[0])
+    bfv_vec *= bfv_vec
+    new_noise_budget = decryptor.invariant_noise_budget(bfv_vec.ciphertext()[0])
+
+    assert noise_budget > new_noise_budget

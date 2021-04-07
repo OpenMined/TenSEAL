@@ -19,7 +19,7 @@ namespace py = pybind11;
  *prevent exposing the MemoryPool parameters to python.
  * **/
 
-void bind_evaluator(pybind11::module &m) {
+void bind_seal_evaluator(pybind11::module &m) {
     /*******************
      * "seal/evaluator.h" {
      ***/
