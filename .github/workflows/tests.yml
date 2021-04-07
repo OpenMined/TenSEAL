@@ -25,21 +25,9 @@ jobs:
         run: .github/workflows/scripts/install_req_ubuntu.sh
         if: ${{ matrix.os == 'ubuntu-latest' }}
       - name: Lint with flake8
-        run: |
-          # stop the build if there are Python syntax errors or undefined names
-          flake8 --config=.flake8 .
-          black --check tenseal/ tests/python/
-          # exit-zero treats all errors as warnings.
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
+        run: .github/workflows/scripts/lint_python.sh
       - name: Lint with clang-format
-        run: |
-          # lint files (all .cpp and .h files) inplace
-          find ./tenseal/  \( -iname *.h -o -iname *.cpp \) | xargs clang-format -i -style='file'
-          find ./tests/  \( -iname *.h -o -iname *.cpp \) | xargs clang-format -i -style='file'
-          # print changes
-          git diff
-          # already well formated if 'git diff' doesn't output
-          ! ( git diff |  grep -q ^ ) || return 1
+        run: .github/workflows/scripts/lint_cpp.sh
 
   TenSEAL:
     needs: [Linter]

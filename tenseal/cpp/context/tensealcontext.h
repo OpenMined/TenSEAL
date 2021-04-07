@@ -151,6 +151,11 @@ class TenSEALContext {
      **/
     shared_ptr<SEALContext> seal_context() const;
     /**
+     * @return SEAL encrypt/decrypt primitives.
+     **/
+    shared_ptr<Encryptor> encryptor() const;
+    shared_ptr<Decryptor> decryptor() const;
+    /**
      * Encrypt a Plaintext to a Ciphertext
      * */
     void encrypt(const Plaintext& plain, Ciphertext& destination) const;
@@ -266,7 +271,8 @@ class TenSEALContext {
     shared_ptr<GaloisKeys> _galois_keys = nullptr;
     shared_ptr<TenSEALEncoder> encoder_factory = nullptr;
 
-    shared_ptr<Encryptor> encryptor = nullptr;
+    shared_ptr<Encryptor> _encryptor = nullptr;
+    shared_ptr<Decryptor> _decryptor = nullptr;
     shared_ptr<sync::ThreadPool> _dispatcher = nullptr;
 
     size_t _threads;

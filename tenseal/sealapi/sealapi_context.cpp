@@ -12,7 +12,7 @@ using namespace seal;
 using namespace std;
 namespace py = pybind11;
 
-void bind_context(pybind11::module &m) {
+void bind_seal_context(pybind11::module &m) {
     /*******************
      * "seal/encryptionparams.h" {
      ***/

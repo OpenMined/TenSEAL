@@ -13,7 +13,7 @@ using namespace seal;
 using namespace std;
 namespace py = pybind11;
 
-void bind_encrypt_decrypt(pybind11::module &m) {
+void bind_seal_encrypt_decrypt(pybind11::module &m) {
     /*******************
      * "seal/publickey.h" {
      ***/
@@ -67,7 +67,8 @@ void bind_encrypt_decrypt(pybind11::module &m) {
     /*******************
      * "seal//kswitchkeys.h" {
      ***/
-    py::class_<KSwitchKeys>(m, "KSwitchKeys", py::module_local());
+    py::class_<KSwitchKeys, std::shared_ptr<KSwitchKeys>>(m, "KSwitchKeys",
+                                                          py::module_local());
     /***
      * } "seal//kswitchkeys.h"
      *******************/
@@ -75,7 +76,8 @@ void bind_encrypt_decrypt(pybind11::module &m) {
     /*******************
      * "seal/relinkeys.h" {
      ***/
-    py::class_<RelinKeys, KSwitchKeys>(m, "RelinKeys", py::module_local())
+    py::class_<RelinKeys, KSwitchKeys, std::shared_ptr<RelinKeys>>(
+        m, "RelinKeys", py::module_local())
         .def(py::init<>())
         // KSwitchKeys
         .def("size", &RelinKeys::size)
@@ -109,7 +111,8 @@ void bind_encrypt_decrypt(pybind11::module &m) {
     /*******************
      * "seal/galoiskeys.h" {
      ***/
-    py::class_<GaloisKeys, KSwitchKeys>(m, "GaloisKeys", py::module_local())
+    py::class_<GaloisKeys, KSwitchKeys, std::shared_ptr<GaloisKeys>>(
+        m, "GaloisKeys", py::module_local())
         .def(py::init<>())
         // KSwitchKeys
         .def("size", &GaloisKeys::size)
