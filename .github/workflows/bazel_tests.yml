@@ -20,7 +20,7 @@ jobs:
       - name: Mount bazel cache
         uses: actions/cache@v1
         with:
-            path: "$HOME/.cache/bazel"
+            path: "${HOME}/.cache/bazel"
             key: bazel-${{ matrix.os }}
       - name: Prepare ENV
         run: |
