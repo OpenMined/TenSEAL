@@ -1,10 +1,34 @@
-# TenSEAL
 
-![Tests](https://github.com/OpenMined/TenSEAL/workflows/Tests/badge.svg)
-![Linux Package](https://github.com/OpenMined/TenSEAL/workflows/Linux%20Package/badge.svg)
-![MacOS Package](https://github.com/OpenMined/TenSEAL/workflows/MacOS%20Package/badge.svg)
-![Windows Package](https://github.com/OpenMined/TenSEAL/workflows/Windows%20Package/badge.svg)
-![Docker Image](https://github.com/OpenMined/TenSEAL/workflows/Docker%20Image/badge.svg)
+<h1 align="center">
+  <br>
+  <a href="http://duet.openmined.org/"><img src="https://github.com/OpenMined/design-assets/raw/master/logos/OM/mark-primary-trans.png" alt="TenSEAL" width="200"></a>
+  <br>
+  TenSEAL
+  <br>
+</h1>
+
+<h3 align="center">
+  <br>
+  A library for doing homomorphic encryption operations on tensors
+  <br>
+</h3>
+
+<div align="center">
+
+[![Tests](https://github.com/OpenMined/TenSEAL/workflows/Tests/badge.svg)](https://github.com/OpenMined/TenSEAL/actions?query=branch%3Amaster++)
+[![Linux Package](https://github.com/OpenMined/TenSEAL/workflows/Linux%20Package/badge.svg)](https://github.com/OpenMined/TenSEAL/actions/workflows/pythonpublish-linux.yml)
+[![MacOS Package](https://github.com/OpenMined/TenSEAL/workflows/MacOS%20Package/badge.svg)](https://github.com/OpenMined/TenSEAL/actions/workflows/pythonpublish-macos.yml)
+[![Windows Package](https://github.com/OpenMined/TenSEAL/workflows/Windows%20Package/badge.svg)](https://github.com/OpenMined/TenSEAL/actions/workflows/pythonpublish-windows.yml)
+[![Docker Image](https://github.com/OpenMined/TenSEAL/workflows/Docker%20Image/badge.svg)](https://github.com/OpenMined/TenSEAL/actions/workflows/docker-image.yml)
+
+
+[![Downloads](https://img.shields.io/pypi/dd/tenseal)](https://pypi.org/project/tenseal/)
+[![Version](https://img.shields.io/pypi/v/tenseal)](https://pypi.org/project/tenseal/)
+[![OpenCollective](https://img.shields.io/opencollective/all/openmined)](https://opencollective.com/openmined)
+[![Slack](https://img.shields.io/badge/chat-on%20slack-7A5979.svg)](https://openmined.slack.com/messages/support)
+
+
+</div>
 
 TenSEAL is a library for doing homomorphic encryption operations on tensors, built on top of [Microsoft SEAL](https://github.com/Microsoft/SEAL). It provides ease of use through a Python API, while preserving efficiency by implementing most of its operations using C++.
 
@@ -142,12 +166,6 @@ You can benchmark the implementation at any point by running
 $ bazel run -c opt --spawn_strategy=standalone //tests/cpp/benchmarks:benchmark
 ```
 
-
-## Support
-
-For support in using this library, please join the **#lib_tenseal** Slack channel. If you’d like to follow along with any code changes to the library, please join the **#code_tenseal** Slack channel. [Click here to join our Slack community!](https://slack.openmined.org)
-
-
 ## Tutorials
 
 - [Getting Started](tutorials%2FTutorial%200%20-%20Getting%20Started.ipynb)
@@ -156,7 +174,29 @@ For support in using this library, please join the **#lib_tenseal** Slack channe
 - [Tutorial 3 - Benchmarks](tutorials%2FTutorial%203%20-%20Benchmarks.ipynb)
 - [Tutorial 4 - Encrypted Convolution on MNIST](tutorials%2FTutorial%204%20-%20Encrypted%20Convolution%20on%20MNIST.ipynb)
 
+## Publications
 
+A. Benaissa, B. Retiat, B. Cebere, A.E. Belfedhal, ["TenSEAL: A Library for Encrypted Tensor Operations Using Homomorphic Encryption"](https://arxiv.org/abs/2104.03152), ICLR 2021 Workshop on Distributed and Private Machine Learning (DPML 2021).
+
+```
+@misc{tenseal2021,
+    title={TenSEAL: A Library for Encrypted Tensor Operations Using Homomorphic Encryption}, 
+    author={Ayoub Benaissa and Bilal Retiat and Bogdan Cebere and Alaa Eddine Belfedhal},
+    year={2021},
+    eprint={2104.03152},
+    archivePrefix={arXiv},
+    primaryClass={cs.CR}
+}
+```
+
+## Support
+
+For support in using this library, please join the **#support** Slack channel. [Click here to join our Slack community!](https://slack.openmined.org)
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
 
 ## License
 
