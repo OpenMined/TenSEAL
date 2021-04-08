@@ -7,6 +7,7 @@
   TenSEAL
   <br>
 </h1>
+
 <h3 align="center">
   A library for doing homomorphic encryption operations on tensors
 <h3/>
@@ -29,9 +30,9 @@
 </div>
 
 ---
-
+<p>
 TenSEAL is a library for doing homomorphic encryption operations on tensors, built on top of [Microsoft SEAL](https://github.com/Microsoft/SEAL). It provides ease of use through a Python API, while preserving efficiency by implementing most of its operations using C++.
-
+</p>
 ## Features
 
 - :key: Encryption/Decryption of vectors of integers using BFV
