@@ -171,11 +171,6 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 Please make sure to update tests as appropriate.
 
-## Contributors
-
-Please make sure to fill this section in with **all former and current** contributors to the project. [Documentation on how to do this is located here.](https://github.com/all-contributors/all-contributors)
-
-
 ## License
 
 [Apache License 2.0](https://github.com/OpenMined/TenSEAL/blob/master/LICENSE)
