@@ -1,10 +1,15 @@
 # TenSEAL
 
+![logo](https://github.com/OpenMined/design-assets/blob/master/logos/OM/horizontal-primary-trans.png)
+
 ![Tests](https://github.com/OpenMined/TenSEAL/workflows/Tests/badge.svg)
 ![Linux Package](https://github.com/OpenMined/TenSEAL/workflows/Linux%20Package/badge.svg)
 ![MacOS Package](https://github.com/OpenMined/TenSEAL/workflows/MacOS%20Package/badge.svg)
 ![Windows Package](https://github.com/OpenMined/TenSEAL/workflows/Windows%20Package/badge.svg)
-![Docker Image](https://github.com/OpenMined/TenSEAL/workflows/Docker%20Image/badge.svg)
+![Docker Image](https://github.com/OpenMined/TenSEAL/workflows/Docker%20Image/badge.s![Downloads](https://img.shields.io/pypi/dd/syft)
+![Downloads](https://img.shields.io/pypi/dd/tenseal)
+![Version](https://img.shields.io/pypi/v/tenseal)
+![OpenCollective](https://img.shields.io/opencollective/all/openmined)
 
 TenSEAL is a library for doing homomorphic encryption operations on tensors, built on top of [Microsoft SEAL](https://github.com/Microsoft/SEAL). It provides ease of use through a Python API, while preserving efficiency by implementing most of its operations using C++.
 
@@ -156,6 +161,18 @@ For support in using this library, please join the **#lib_tenseal** Slack channe
 - [Tutorial 3 - Benchmarks](tutorials%2FTutorial%203%20-%20Benchmarks.ipynb)
 - [Tutorial 4 - Encrypted Convolution on MNIST](tutorials%2FTutorial%204%20-%20Encrypted%20Convolution%20on%20MNIST.ipynb)
 
+## Support
+
+For support in using this library, please join the **#support** Slack channel. [Click here to join our Slack community!](https://slack.openmined.org)
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+## Contributors
+
+Please make sure to fill this section in with **all former and current** contributors to the project. [Documentation on how to do this is located here.](https://github.com/all-contributors/all-contributors)
 
 
 ## License
