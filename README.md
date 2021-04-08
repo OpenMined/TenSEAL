@@ -6,8 +6,8 @@
   <br>
   TenSEAL
   <br>
-</h3>
-<h2 align="center">
+</h1>
+<h3 align="center">
   A library for doing homomorphic encryption operations on tensors
 <h3/>
 
