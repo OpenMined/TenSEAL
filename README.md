@@ -6,10 +6,12 @@
 [![MacOS Package](https://github.com/OpenMined/TenSEAL/workflows/MacOS%20Package/badge.svg)](https://github.com/OpenMined/TenSEAL/actions/workflows/pythonpublish-macos.yml)
 [![Windows Package](https://github.com/OpenMined/TenSEAL/workflows/Windows%20Package/badge.svg)](https://github.com/OpenMined/TenSEAL/actions/workflows/pythonpublish-windows.yml)
 [![Docker Image](https://github.com/OpenMined/TenSEAL/workflows/Docker%20Image/badge.svg)](https://github.com/OpenMined/TenSEAL/actions/workflows/docker-image.yml)
+
+
 [![Downloads](https://img.shields.io/pypi/dd/tenseal)](https://pypi.org/project/tenseal/)
 [![Version](https://img.shields.io/pypi/v/tenseal)](https://pypi.org/project/tenseal/)
 ![OpenCollective](https://img.shields.io/opencollective/all/openmined)
-
+[![Slack](https://img.shields.io/badge/chat-on%20slack-7A5979.svg)](https://openmined.slack.com/messages/support)
 # TenSEAL
 
 TenSEAL is a library for doing homomorphic encryption operations on tensors, built on top of [Microsoft SEAL](https://github.com/Microsoft/SEAL). It provides ease of use through a Python API, while preserving efficiency by implementing most of its operations using C++.
