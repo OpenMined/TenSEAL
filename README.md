@@ -6,7 +6,7 @@
 ![Linux Package](https://github.com/OpenMined/TenSEAL/workflows/Linux%20Package/badge.svg)
 ![MacOS Package](https://github.com/OpenMined/TenSEAL/workflows/MacOS%20Package/badge.svg)
 ![Windows Package](https://github.com/OpenMined/TenSEAL/workflows/Windows%20Package/badge.svg)
-![Docker Image](https://github.com/OpenMined/TenSEAL/workflows/Docker%20Image/badge.s![Downloads](https://img.shields.io/pypi/dd/syft)
+![Docker Image](https://github.com/OpenMined/TenSEAL/workflows/Docker%20Image/badge.svg)
 ![Downloads](https://img.shields.io/pypi/dd/tenseal)
 ![Version](https://img.shields.io/pypi/v/tenseal)
 ![OpenCollective](https://img.shields.io/opencollective/all/openmined)
