@@ -19,27 +19,29 @@ class SCHEME_TYPE(Enum):
     CKKS = ts._ts_cpp.SCHEME_TYPE.CKKS
 
 
-class Key(ABC):
+SEAL_PRIMITIVE = Union[
+    ts._ts_cpp.PublicKey,
+    ts._ts_cpp.SecretKey,
+    ts._ts_cpp.GaloisKeys,
+    ts._ts_cpp.RelinKeys,
+    ts._ts_cpp.SEALContext,
+]
+
+
+class SEALPrimitive(ABC):
     """Wrapper class for encryption keys"""
 
     def __init__(self, data):
         self.data = data
 
     @property
-    def data(
-        self,
-    ) -> Union[
-        ts._ts_cpp.PublicKey, ts._ts_cpp.SecretKey, ts._ts_cpp.GaloisKeys, ts._ts_cpp.RelinKeys
-    ]:
+    def data(self,) -> SEAL_PRIMITIVE:
         """Get the wrapped low level key object"""
         return self._data
 
     @data.setter
     def data(
-        self,
-        value: Union[
-            ts._ts_cpp.PublicKey, ts._ts_cpp.SecretKey, ts._ts_cpp.GaloisKeys, ts._ts_cpp.RelinKeys
-        ],
+        self, value: SEAL_PRIMITIVE,
     ):
         """Set the wrapped low level key object"""
         native_type = getattr(ts._ts_cpp, self.__class__.__name__)
@@ -49,10 +51,7 @@ class Key(ABC):
 
     @classmethod
     def _wrap(
-        cls,
-        data: Union[
-            ts._ts_cpp.PublicKey, ts._ts_cpp.SecretKey, ts._ts_cpp.GaloisKeys, ts._ts_cpp.RelinKeys
-        ],
+        cls, data: SEAL_PRIMITIVE,
     ):
         """Return a new key object wrapping the low level key object"""
         return cls(data)
@@ -61,19 +60,31 @@ class Key(ABC):
 # We have a class for every key type, to differentiate between them only
 
 
-class SecretKey(Key):
+class SecretKey(SEALPrimitive):
     pass
 
 
-class PublicKey(Key):
+class PublicKey(SEALPrimitive):
     pass
 
 
-class GaloisKeys(Key):
+class GaloisKeys(SEALPrimitive):
     pass
 
 
-class RelinKeys(Key):
+class RelinKeys(SEALPrimitive):
+    pass
+
+
+class SEALContext(SEALPrimitive):
+    pass
+
+
+class Encryptor(SEALPrimitive):
+    pass
+
+
+class Decryptor(SEALPrimitive):
     pass
 
 
@@ -263,6 +274,15 @@ class Context:
 
     def is_public(self) -> bool:
         return self.data.is_public()
+
+    def seal_context(self) -> SEALContext:
+        return SEALContext(self.data.seal_context())
+
+    def encryptor(self) -> Encryptor:
+        return Encryptor(self.data.encryptor())
+
+    def decryptor(self) -> Decryptor:
+        return Decryptor(self.data.decryptor())
 
     def make_context_public(
         self, generate_galois_keys: bool = False, generate_relin_keys: bool = False

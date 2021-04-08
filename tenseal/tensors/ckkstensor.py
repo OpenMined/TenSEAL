@@ -48,6 +48,9 @@ class CKKSTensor(AbstractTensor):
     def scale(self) -> float:
         return self.data.scale()
 
+    def ciphertext(self) -> List["ts._ts_cpp.Ciphertext"]:
+        return self.data.ciphertext()
+
     def decrypt(self, secret_key: "ts.enc_context.SecretKey" = None) -> "ts.PlainTensor":
         pt = self._decrypt(secret_key=secret_key)
         return ts.PlainTensor(pt.data(), shape=pt.shape(), dtype="float")
