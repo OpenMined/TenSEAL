@@ -178,6 +178,17 @@ $ bazel run -c opt --spawn_strategy=standalone //tests/cpp/benchmarks:benchmark
 
 A. Benaissa, B. Retiat, B. Cebere, A.E. Belfedhal, ["TenSEAL: A Library for Encrypted Tensor Operations Using Homomorphic Encryption"](https://arxiv.org/abs/2104.03152), ICLR 2021 Workshop on Distributed and Private Machine Learning (DPML 2021).
 
+```
+@misc{tenseal2021,
+    title={TenSEAL: A Library for Encrypted Tensor Operations Using Homomorphic Encryption}, 
+    author={Ayoub Benaissa and Bilal Retiat and Bogdan Cebere and Alaa Eddine Belfedhal},
+    year={2021},
+    eprint={2104.03152},
+    archivePrefix={arXiv},
+    primaryClass={cs.CR}
+}
+```
+
 ## Support
 
 For support in using this library, please join the **#support** Slack channel. [Click here to join our Slack community!](https://slack.openmined.org)
