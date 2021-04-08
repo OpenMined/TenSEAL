@@ -1,4 +1,3 @@
-# TenSEAL
 
 ![logo](https://github.com/OpenMined/design-assets/blob/master/logos/OM/horizontal-primary-trans.png)
 
@@ -10,6 +9,8 @@
 ![Downloads](https://img.shields.io/pypi/dd/tenseal)
 ![Version](https://img.shields.io/pypi/v/tenseal)
 ![OpenCollective](https://img.shields.io/opencollective/all/openmined)
+
+# TenSEAL
 
 TenSEAL is a library for doing homomorphic encryption operations on tensors, built on top of [Microsoft SEAL](https://github.com/Microsoft/SEAL). It provides ease of use through a Python API, while preserving efficiency by implementing most of its operations using C++.
 
