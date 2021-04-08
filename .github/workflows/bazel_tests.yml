@@ -17,11 +17,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
-      - name: Mount bazel cache
-        uses: actions/cache@v1
-        with:
-            path: "${HOME}/.cache/bazel"
-            key: bazel-${{ matrix.os }}
       - name: Prepare ENV
         run: |
             echo "CC=clang" >> $GITHUB_ENV
@@ -31,12 +26,12 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
-          #      - name: Run gtest
-          #        timeout-minutes: 30
-          #        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=1500 --jobs 1 //tests/cpp/...
-          #      - name: Run SEALAPI tests
-          #        timeout-minutes: 30
-          #        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=1500 --jobs 1 //tests/python/sealapi/...
-          #      - name: Run TenSEAL tests
-          #        timeout-minutes: 30
-          #        run: bazel test --test_output=all --spawn_strategy=standalone --test_output=streamed --local_sigkill_grace_seconds=30 --test_timeout=1500 --jobs 1 //tests/python/tenseal/...
+      - name: Run gtest
+        timeout-minutes: 30
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=1500 --jobs 1 //tests/cpp/...
+      - name: Run SEALAPI tests
+        timeout-minutes: 30
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=1500 --jobs 1 //tests/python/sealapi/...
+      - name: Run TenSEAL tests
+        timeout-minutes: 30
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_output=streamed --local_sigkill_grace_seconds=30 --test_timeout=1500 --jobs 1 //tests/python/tenseal/...
