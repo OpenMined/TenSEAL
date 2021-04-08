@@ -1,18 +1,11 @@
 
 <h1 align="center">
-
   <br>
-  <a href="http://duet.openmined.org/"><img src="https://github.com/OpenMined/design-assets/raw/master/logos/OM/mark-primary-trans.png" alt="PySyft" width="200"></a>
+  <a href="http://duet.openmined.org/"><img src="https://github.com/OpenMined/design-assets/raw/master/logos/OM/mark-primary-trans.png" alt="TenSEAL" width="200"></a>
   <br>
   TenSEAL
   <br>
 </h1>
-
-<h3 align="center">
-  A library for doing homomorphic encryption operations on tensors
-<h3/>
-
-<br /><br />
 
 <div align="center">
 
