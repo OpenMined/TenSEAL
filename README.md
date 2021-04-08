@@ -9,7 +9,7 @@
 
 <h3 align="center">
   <br>
-  TenSEAL
+  A library for doing homomorphic encryption operations on tensors
   <br>
 </h3>
 
