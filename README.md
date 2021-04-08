@@ -7,6 +7,12 @@
   <br>
 </h1>
 
+<h3 align="center">
+  <br>
+  TenSEAL
+  <br>
+</h3>
+
 <div align="center">
 
 [![Tests](https://github.com/OpenMined/TenSEAL/workflows/Tests/badge.svg)](https://github.com/OpenMined/TenSEAL/actions?query=branch%3Amaster++)
