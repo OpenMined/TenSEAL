@@ -12,6 +12,8 @@
   A library for doing homomorphic encryption operations on tensors
 <h3/>
 
+<br /><br />
+
 <div align="center">
 
 [![Tests](https://github.com/OpenMined/TenSEAL/workflows/Tests/badge.svg)](https://github.com/OpenMined/TenSEAL/actions?query=branch%3Amaster++)
@@ -29,10 +31,8 @@
 
 </div>
 
----
-<p>
 TenSEAL is a library for doing homomorphic encryption operations on tensors, built on top of [Microsoft SEAL](https://github.com/Microsoft/SEAL). It provides ease of use through a Python API, while preserving efficiency by implementing most of its operations using C++.
-</p>
+
 ## Features
 
 - :key: Encryption/Decryption of vectors of integers using BFV
