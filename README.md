@@ -24,7 +24,7 @@
 
 [![Downloads](https://img.shields.io/pypi/dd/tenseal)](https://pypi.org/project/tenseal/)
 [![Version](https://img.shields.io/pypi/v/tenseal)](https://pypi.org/project/tenseal/)
-![OpenCollective](https://img.shields.io/opencollective/all/openmined)
+[![OpenCollective](https://img.shields.io/opencollective/all/openmined)](https://github.com/sponsors/OpenMined)
 [![Slack](https://img.shields.io/badge/chat-on%20slack-7A5979.svg)](https://openmined.slack.com/messages/support)
 
 
