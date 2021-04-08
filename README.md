@@ -148,12 +148,6 @@ You can benchmark the implementation at any point by running
 $ bazel run -c opt --spawn_strategy=standalone //tests/cpp/benchmarks:benchmark
 ```
 
-
-## Support
-
-For support in using this library, please join the **#lib_tenseal** Slack channel. If you’d like to follow along with any code changes to the library, please join the **#code_tenseal** Slack channel. [Click here to join our Slack community!](https://slack.openmined.org)
-
-
 ## Tutorials
 
 - [Getting Started](tutorials%2FTutorial%200%20-%20Getting%20Started.ipynb)
