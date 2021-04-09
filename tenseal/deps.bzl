@@ -34,18 +34,18 @@ def tenseal_deps():
     if "com_xtensorstack_xtensor" not in native.existing_rules():
         http_archive(
             name = "com_xtensorstack_xtensor",
-            sha256 = "b73aacfdef12422f45b27ac43537bd9371ede092df4c14e20d2b8e41b2b5648e",
+            sha256 = "c8377f8ec995762c89dea2fdf4ac06b53ba491a6f0df3421c4719355e42425d2",
             build_file = "//third_party:xtensor.BUILD",
-            strip_prefix = "xtensor-0.22.0/include",
-            urls = ["https://github.com/xtensor-stack/xtensor/archive/0.22.0.tar.gz"],
+            strip_prefix = "xtensor-0.23.4/include",
+            urls = ["https://github.com/xtensor-stack/xtensor/archive/0.23.4.tar.gz"],
         )
     if "com_xtensorstack_xtl" not in native.existing_rules():
         http_archive(
             name = "com_xtensorstack_xtl",
-            sha256 = "aac8bb21e025a26698fed898c1c0f40c83a18846148cb3fbd67bc924f3269743",
+            sha256 = "95c221bdc6eaba592878090916383e5b9390a076828552256693d5d97f78357c",
             build_file = "//third_party:xtl.BUILD",
-            strip_prefix = "xtl-0.6.23/include",
-            urls = ["https://github.com/xtensor-stack/xtl/archive/0.6.23.tar.gz"],
+            strip_prefix = "xtl-0.7.2/include",
+            urls = ["https://github.com/xtensor-stack/xtl/archive/0.7.2.tar.gz"],
         )
     if "com_nlohmann_json" not in native.existing_rules():
         http_archive(
