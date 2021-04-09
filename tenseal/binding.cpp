@@ -209,7 +209,7 @@ void bind_bfv_vector(py::module &m) {
         .def("mul", &BFVVector::mul)
         .def("mul_", &BFVVector::mul_inplace)
         .def("mul_plain", py::overload_cast<const int64_t &>(
-                              &BFVVector::add_plain, py::const_))
+                              &BFVVector::mul_plain, py::const_))
         .def("mul_plain",
              [](shared_ptr<BFVVector> obj, const vector<int64_t> &other) {
                  return obj->mul_plain(other);
