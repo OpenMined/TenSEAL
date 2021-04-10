@@ -359,6 +359,9 @@ def test_mul_inplace(context, vec1, vec2):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
+        ([1, 2, 3, 4], 2),
+        ([1, 2, 3, 4], -2),
+        ([2 for i in range(10000)], [3 for i in range(10000)]),
     ],
 )
 def test_mul_plain(context, vec1, vec2):
@@ -367,8 +370,10 @@ def test_mul_plain(context, vec1, vec2):
     second_vec = vec2
     result = first_vec * second_vec
 
-    expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
-
+    if isinstance(vec2, list):
+        expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
+    elif isinstance(vec2, (float, int)):
+        expected = [v1 * vec2 for v1 in vec1]
     # Decryption
     decrypted_result = result.decrypt()
     assert decrypted_result == expected, "Multiplication of vectors is incorrect."
@@ -387,6 +392,8 @@ def test_mul_plain(context, vec1, vec2):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
+        ([1, 2, 3, 4], 2),
+        ([1, 2, 3, 4], -2),
     ],
 )
 def test_mul_plain_inplace(context, vec1, vec2):
@@ -395,7 +402,10 @@ def test_mul_plain_inplace(context, vec1, vec2):
     second_vec = vec2
     first_vec *= second_vec
 
-    expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
+    if isinstance(vec2, list):
+        expected = [v1 * v2 for v1, v2 in zip(vec1, vec2)]
+    elif isinstance(vec2, (float, int)):
+        expected = [v1 * vec2 for v1 in vec1]
 
     # Decryption
     decrypted_result = first_vec.decrypt()
