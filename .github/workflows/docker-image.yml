@@ -3,7 +3,7 @@ name: Docker Image
 on:
   push:
     branches:
-      - depends_improv
+      - master
   release:
     types: [created]
 
