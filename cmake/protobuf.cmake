@@ -10,8 +10,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(protocolbuffers_protobuf)
 
-message(STATUS ${protocolbuffers_protobuf_SOURCE_DIR})
-
 set(Protobuf_ROOT ${protocolbuffers_protobuf_SOURCE_DIR}/cmake)
 set(Protobuf_DIR ${Protobuf_ROOT}/${CMAKE_INSTALL_LIBDIR}/cmake/protobuf)
 
