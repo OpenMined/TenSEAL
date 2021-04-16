@@ -1,22 +1,33 @@
+include(FetchContent)
+
 add_definitions(-DXTENSOR_USE_XSIMD)
 set(XTENSOR_USE_XSIMD ON)
+set(JSON_BuildTests OFF)
+set(JSON_Install OFF)
 
-include_directories(third_party/json/include/)
-include_directories(third_party/xtl/include)
+FetchContent_Declare(
+  com_nlohmann_json
+  GIT_REPOSITORY https://github.com/nlohmann/json
+  GIT_TAG        v3.9.1
+)
+FetchContent_Declare(
+  com_xtensorstack_xtl
+  GIT_REPOSITORY https://github.com/xtensor-stack/xtl
+  GIT_TAG        0.7.2
+)
+FetchContent_Declare(
+  com_xtensorstack_xsimd
+  GIT_REPOSITORY https://github.com/xtensor-stack/xsimd
+  GIT_TAG        7.4.10
+)
+FetchContent_Declare(
+  com_xtensorstack_xtensor
+  GIT_REPOSITORY https://github.com/xtensor-stack/xtensor
+  GIT_TAG        0.23.5
+)
+FetchContent_MakeAvailable(com_nlohmann_json com_xtensorstack_xtl com_xtensorstack_xsimd com_xtensorstack_xtensor)
 
-add_subdirectory(third_party/xtl)
-set(xtl_DIR
-    "${CMAKE_CURRENT_BINARY_DIR}/third_party/xtl"
-    CACHE STRING "" FORCE)
-
-include_directories(third_party/xsimd/include)
-add_subdirectory(third_party/xsimd)
-set(xsimd_DIR
-    "${CMAKE_CURRENT_BINARY_DIR}/third_party/xsimd"
-    CACHE STRING "" FORCE)
-
-include_directories(third_party/xtensor/include)
-add_subdirectory(third_party/xtensor)
-set(xtensor_DIR
-    "${CMAKE_CURRENT_BINARY_DIR}/third_party/xtensor"
-    CACHE STRING "" FORCE)
+include_directories(${com_nlohmann_json_SOURCE_DIR}/include/)
+include_directories(${com_xtensorstack_xtl_SOURCE_DIR}/include)
+include_directories(${com_xtensorstack_xsimd_SOURCE_DIR}/include)
+include_directories(${com_xtensorstack_xtensor_SOURCE_DIR}/include)
