@@ -1,7 +1,18 @@
+include(FetchContent)
+
 set(Protobuf_USE_STATIC_LIBS ON)
 set(Protobuf_MSVC_STATIC_RUNTIME OFF)
 
-set(Protobuf_ROOT ${CMAKE_SOURCE_DIR}/third_party/protobuf/cmake)
+FetchContent_Declare(
+  protocolbuffers_protobuf
+  GIT_REPOSITORY https://github.com/protocolbuffers/protobuf
+  GIT_TAG        v3.15.8
+)
+FetchContent_MakeAvailable(protocolbuffers_protobuf)
+
+message(STATUS ${protocolbuffers_protobuf_SOURCE_DIR})
+
+set(Protobuf_ROOT ${protocolbuffers_protobuf_SOURCE_DIR}/cmake)
 set(Protobuf_DIR ${Protobuf_ROOT}/${CMAKE_INSTALL_LIBDIR}/cmake/protobuf)
 
 message(STATUS "Setting up protobuf ...")
@@ -26,7 +37,7 @@ endif()
 message(STATUS "Installing protobuf ...")
 if(WIN32)
     execute_process(
-        COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE} 
+        COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
     RESULT_VARIABLE result
     WORKING_DIRECTORY ${Protobuf_ROOT})
     if(result)

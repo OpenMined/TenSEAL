@@ -23,8 +23,7 @@ set(SOURCES
 add_library(tenseal SHARED ${SOURCES})
 pybind11_add_module(_tenseal_cpp ${SEALAPI_SOURCES} ${SOURCES} ${TENSEAL_BASEDIR}/binding.cpp)
 
-find_package(xtensor REQUIRED)
-target_include_directories(_tenseal_cpp PUBLIC ${xtensor_INCLUDE_DIRS})
+target_include_directories(_tenseal_cpp PUBLIC ${com_xtensorstack_xtensor_INCLUDE_DIRS})
 
 target_link_libraries(_sealapi_cpp PRIVATE seal)
 target_link_libraries(_tenseal_cpp PRIVATE seal xtensor)
