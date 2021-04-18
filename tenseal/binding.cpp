@@ -220,6 +220,10 @@ void bind_bfv_vector(py::module &m) {
              })
         .def("mul_plain_",
              py::overload_cast<const int64_t &>(&BFVVector::mul_plain_inplace))
+        .def("dot", &BFVVector::dot)
+        .def("dot", &BFVVector::dot_plain)
+        .def("dot_", &BFVVector::dot_inplace)
+        .def("dot_", &BFVVector::dot_plain_inplace)
         // python arithmetic
         .def("__add__", &BFVVector::add)
         .def("__add__", py::overload_cast<const int64_t &>(

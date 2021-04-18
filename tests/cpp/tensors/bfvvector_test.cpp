@@ -328,6 +328,67 @@ TEST_P(BFVVectorTest, TestBFVAddBigVector) {
     EXPECT_THAT(decr.data(), ElementsAreArray(expected));
 }
 
+TEST_P(BFVVectorTest, TestSum) {
+    auto enc_type = get<1>(GetParam());
+
+    int poly_mod = 8192;
+    int input_size = 100000;
+
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, poly_mod, 1032193, {},
+                                      enc_type);
+    ASSERT_TRUE(ctx != nullptr);
+    ctx->generate_galois_keys();
+
+    auto ldata = PlainTensor(vector<int64_t>({1, 2, 3, 4, 5, 6, 7, 8, 9}));
+
+    auto l = BFVVector::Create(ctx, ldata);
+
+    l->sum_inplace();
+    auto decr = l->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({45}));
+}
+
+TEST_P(BFVVectorTest, TestDot) {
+    auto enc_type = get<1>(GetParam());
+
+    int poly_mod = 8192;
+    int input_size = 100000;
+
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, poly_mod, 1032193, {},
+                                      enc_type);
+    ASSERT_TRUE(ctx != nullptr);
+    ctx->generate_galois_keys();
+
+    vector<int64_t> lraw({1, 2, 3, 4, 5, 6, 7, 8, 9});
+    vector<int64_t> rraw({11, 22, 33, 11, 22, 33, 11, 22, 33});
+
+    int64_t expected = 0;
+    for (auto idx = 0; idx < lraw.size(); ++idx)
+        expected += lraw[idx] * rraw[idx];
+
+    auto ldata = PlainTensor(lraw);
+    auto rdata = PlainTensor(rraw);
+
+    auto l = BFVVector::Create(ctx, ldata);
+    auto r = BFVVector::Create(ctx, rdata);
+
+    auto res = l->dot(r);
+    auto decr = res->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({expected}));
+
+    res = l->dot_plain(rdata);
+    decr = res->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({expected}));
+
+    res = r->dot(l);
+    decr = res->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({expected}));
+
+    res = r->dot_plain(ldata);
+    decr = res->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({expected}));
+}
+
 INSTANTIATE_TEST_CASE_P(
     TestBFVVector, BFVVectorTest,
     ::testing::Values(make_tuple(false, encryption_type::asymmetric),

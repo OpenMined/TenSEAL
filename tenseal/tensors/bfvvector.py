@@ -101,3 +101,25 @@ class BFVVector(AbstractTensor):
         other = self._get_operand(other, dtype="int")
         self.data -= other
         return self
+
+    @classmethod
+    def _dot(cls, other):
+        if isinstance(other, (cls)):
+            return other.data
+        if not isinstance(other, ts.PlainTensor):
+            try:
+                other = ts.plain_tensor(other, dtype="int")
+            except TypeError:
+                raise TypeError(f"can't operate with object of type {type(other)}")
+        if len(other.shape) != 1:
+            raise ValueError("can only operate with a vector")
+        return other.data
+
+    def dot(self, other) -> "BFVVector":
+        other = self._dot(other)
+        return self._wrap(self.data.dot(other))
+
+    def dot_(self, other) -> "BFVVector":
+        other = self._dot(other)
+        self.data.dot_(other)
+        return self
