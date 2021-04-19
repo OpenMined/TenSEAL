@@ -5,6 +5,7 @@ py_test(
     srcs = [
         "main.py",
         "tensors/test_bfv_vector.py",
+        "tensors/test_bfv_tensor.py",
         "tensors/test_ckks_tensor.py",
         "tensors/test_ckks_vector.py",
         "tensors/test_plain_tensor.py",

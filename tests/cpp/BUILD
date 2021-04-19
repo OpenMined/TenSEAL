@@ -8,6 +8,7 @@ cc_test(
     name = "tenseal_cpp_test",
     srcs = [
         "tensealcontext_test.cpp",
+        "tensors/bfvtensor_test.cpp",
         "tensors/bfvvector_test.cpp",
         "tensors/ckkstensor_test.cpp",
         "tensors/ckksvector_test.cpp",

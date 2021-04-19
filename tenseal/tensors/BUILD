@@ -6,6 +6,7 @@ py_library(
         "__init__.py",
         "abstract_tensor.py",
         "bfvvector.py",
+        "bfvtensor.py",
         "ckkstensor.py",
         "ckksvector.py",
         "plaintensor.py",
