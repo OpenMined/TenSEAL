@@ -9,16 +9,7 @@ from skimage.util.shape import view_as_windows
 import tenseal as ts
 
 
-SHAPES = [
-    [1],
-    [2],
-    [10],
-    [2, 2],
-    [3, 5],
-    [2, 3, 4],
-    [2, 3, 4, 5],
-    [2, 3, 4, 5, 6],
-]
+SHAPES = [[1], [2], [10], [2, 2], [3, 5], [2, 3, 4], [2, 3, 4, 5], [2, 3, 4, 5, 6]]
 
 BROADCAST_SHAPES = [
     ([2, 3], [2, 1]),
@@ -28,28 +19,6 @@ BROADCAST_SHAPES = [
 ]
 
 
-def _almost_equal_number(v1, v2, m_pow_ten):
-    upper_bound = pow(10, -m_pow_ten)
-
-    return abs(v1 - v2) <= upper_bound
-
-
-def _almost_equal(vec1, vec2, m_pow_ten):
-    if not isinstance(vec1, list):
-        return _almost_equal_number(vec1, vec2, m_pow_ten)
-
-    if len(vec1) != len(vec2):
-        return False
-
-    for v1, v2 in zip(vec1, vec2):
-        if isinstance(v1, list):
-            if not _almost_equal(v1, v2, m_pow_ten):
-                return False
-        elif not _almost_equal_number(v1, v2, m_pow_ten):
-            return False
-    return True
-
-
 @pytest.fixture(scope="function")
 def context():
     context = ts.context(ts.SCHEME_TYPE.BFV, 8192, 1032193)
@@ -57,9 +26,7 @@ def context():
 
 
 def parallel_context(n_threads):
-    context = ts.context(
-        ts.SCHEME_TYPE.BFV, 8192, 1032193, n_threads=n_threads
-    )
+    context = ts.context(ts.SCHEME_TYPE.BFV, 8192, 1032193, n_threads=n_threads)
     return context
 
 
@@ -165,10 +132,8 @@ def test_sum(context, data, batch, reshape_first, axis, precision):
     plain_ts = result.decrypt()
     decrypted_result = plain_ts.tolist()
 
-    assert _almost_equal(decrypted_result, expected, precision), "Sum of tensor is incorrect."
-    assert _almost_equal(
-        tensor.decrypt().tolist(), orig, precision
-    ), "Something went wrong in memory."
+    assert decrypted_result == expected, "Sum of tensor is incorrect."
+    assert tensor.decrypt().tolist() == orig, "Something went wrong in memory."
 
 
 @pytest.mark.parametrize(
@@ -203,14 +168,12 @@ def test_sum_batch(context, data, reshape_first, precision):
     plain_ts = result.decrypt()
     decrypted_result = plain_ts.tolist()
 
-    assert _almost_equal(decrypted_result, expected, precision), "Sum of tensor is incorrect."
-    assert _almost_equal(
-        tensor.decrypt().tolist(), orig, precision
-    ), "Something went wrong in memory."
+    assert (decrypted_result == expected) == True, "Sum of tensor is incorrect."
+    assert tensor.decrypt().tolist() == orig, "Something went wrong in memory."
 
 
 @pytest.mark.parametrize(
-    "data", [(ts.plain_tensor([i for i in range(8)], shape=[2, 2, 2], dtype="int")),],
+    "data", [(ts.plain_tensor([i for i in range(8)], shape=[2, 2, 2], dtype="int"))]
 )
 @pytest.mark.parametrize("batch", [True, False])
 def test_sum_fail(context, data, batch, precision):
@@ -228,7 +191,11 @@ def test_size(context):
 
 @pytest.mark.parametrize(
     "plain",
-    [ts.plain_tensor([0], dtype="int"), ts.plain_tensor([1, 2, 3], dtype="int"), ts.plain_tensor([1, 2, 3, 4], [2, 2], dtype="int"),],
+    [
+        ts.plain_tensor([0], dtype="int"),
+        ts.plain_tensor([1, 2, 3], dtype="int"),
+        ts.plain_tensor([1, 2, 3, 4], [2, 2], dtype="int"),
+    ],
 )
 @pytest.mark.parametrize("reshape_first", [False, True])
 def test_negate(context, plain, precision, reshape_first):
@@ -243,12 +210,16 @@ def test_negate(context, plain, precision, reshape_first):
 
     result = -tensor
     decrypted_result = result.decrypt().tolist()
-    assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
+    assert (decrypted_result == expected).all() == True, "Decryption of tensor is incorrect"
 
 
 @pytest.mark.parametrize(
     "plain",
-    [ts.plain_tensor([0], dtype="int"), ts.plain_tensor([1, 2, 3], dtype="int"), ts.plain_tensor([1, 2, 3, 4], [2, 2], dtype="int"),],
+    [
+        ts.plain_tensor([0], dtype="int"),
+        ts.plain_tensor([1, 2, 3], dtype="int"),
+        ts.plain_tensor([1, 2, 3, 4], [2, 2], dtype="int"),
+    ],
 )
 def test_negate_inplace(context, plain, precision):
     tensor = ts.bfv_tensor(context, plain)
@@ -257,12 +228,16 @@ def test_negate_inplace(context, plain, precision):
 
     tensor.neg_()
     decrypted_result = tensor.decrypt().tolist()
-    assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
+    assert (decrypted_result == expected).all() == True, "Decryption of tensor is incorrect"
 
 
 @pytest.mark.parametrize(
     "plain",
-    [ts.plain_tensor([0], dtype="int"), ts.plain_tensor([1, 2, 3], dtype="int"), ts.plain_tensor([1, 2, 3, 4], [2, 2], dtype="int"),],
+    [
+        ts.plain_tensor([0], dtype="int"),
+        ts.plain_tensor([1, 2, 3], dtype="int"),
+        ts.plain_tensor([1, 2, 3, 4], [2, 2], dtype="int"),
+    ],
 )
 @pytest.mark.parametrize("reshape_first", [False, True])
 def test_square(context, plain, precision, reshape_first):
@@ -276,15 +251,17 @@ def test_square(context, plain, precision, reshape_first):
     expected = np.square(plain.tolist())
 
     decrypted_result = result.decrypt().tolist()
-    assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
-    assert _almost_equal(
-        tensor.decrypt().tolist(), plain.tolist(), precision
-    ), "Something went wrong in memory."
+    assert (decrypted_result == expected).all() == True, "Decryption of tensor is incorrect"
+    assert tensor.decrypt().tolist() == plain.tolist(), "Something went wrong in memory."
 
 
 @pytest.mark.parametrize(
     "plain",
-    [ts.plain_tensor([0], dtype="int"), ts.plain_tensor([1, 2, 3], dtype="int"), ts.plain_tensor([1, 2, 3, 4], [2, 2], dtype="int"),],
+    [
+        ts.plain_tensor([0], dtype="int"),
+        ts.plain_tensor([1, 2, 3], dtype="int"),
+        ts.plain_tensor([1, 2, 3, 4], [2, 2], dtype="int"),
+    ],
 )
 def test_square_inplace(context, plain, precision):
     tensor = ts.bfv_tensor(context, plain)
@@ -292,7 +269,7 @@ def test_square_inplace(context, plain, precision):
 
     tensor.square_()
     decrypted_result = tensor.decrypt().tolist()
-    assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
+    assert (decrypted_result == expected).all() == True, "Decryption of tensor is incorrect"
 
 
 @pytest.mark.parametrize("shape", SHAPES)
@@ -501,10 +478,8 @@ def test_power(context, plain, power, precision):
 
     new_tensor = tensor ** power
     decrypted_result = new_tensor.decrypt().tolist()
-    assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
-    assert _almost_equal(
-        tensor.decrypt().tolist(), plain.tolist(), precision
-    ), "Something went wrong in memory."
+    assert (decrypted_result == expected).all() == True, "Decryption of tensor is incorrect"
+    assert tensor.decrypt().tolist() == plain.tolist(), "Something went wrong in memory."
 
 
 @pytest.mark.parametrize(
@@ -524,13 +499,13 @@ def test_power_inplace(context, plain, power, precision):
 
     tensor **= power
     decrypted_result = tensor.decrypt().tolist()
-    assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
+    assert (decrypted_result == expected).all() == True, "Decryption of tensor is incorrect"
 
 
 @pytest.mark.parametrize(
     "data, polynom",
     [
-        (ts.plain_tensor([1, 2, 3], dtype="int"), [0, 0, 0,]),
+        (ts.plain_tensor([1, 2, 3], dtype="int"), [0, 0, 0]),
         (ts.plain_tensor([1, 2, 3, 4], [2, 2], dtype="int"), [1, 1]),
         (ts.plain_tensor([1, 2, 3, 4], [2, 2], dtype="int"), [1, 1, 1]),
         (ts.plain_tensor([1, 2, 3, 4, 5, 6], [2, 3], dtype="int"), [3, 2, 4, 5]),
@@ -559,14 +534,15 @@ def test_polynomial(context, data, polynom, reshape_first):
         precision = 1
 
     decrypted_result = result.decrypt().tolist()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Polynomial evaluation is incorrect."
+    assert (decrypted_result == expected).all() == True, "Polynomial evaluation is incorrect."
 
 
 @pytest.mark.parametrize(
     "data, polynom",
-    [(ts.plain_tensor([1, 2, 3, 4], dtype="int"), [0, 1, 1]), (ts.plain_tensor([1, 2, 3, 4], dtype="int"), [0, 1, 0, 1]),],
+    [
+        (ts.plain_tensor([1, 2, 3, 4], dtype="int"), [0, 1, 1]),
+        (ts.plain_tensor([1, 2, 3, 4], dtype="int"), [0, 1, 0, 1]),
+    ],
 )
 def test_polynomial_modswitch_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.BFV, 8192, 1032193)
@@ -578,7 +554,10 @@ def test_polynomial_modswitch_off(context, data, polynom):
 
 @pytest.mark.parametrize(
     "data, polynom",
-    [(ts.plain_tensor([1, 2, 3, 4], dtype="int"), [0, 1, 1]), (ts.plain_tensor([1, 2, 3, 4], dtype="int"), [0, 1, 0, 1]),],
+    [
+        (ts.plain_tensor([1, 2, 3, 4], dtype="int"), [0, 1, 1]),
+        (ts.plain_tensor([1, 2, 3, 4], dtype="int"), [0, 1, 0, 1]),
+    ],
 )
 def test_polynomial_rescale_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.BFV, 8192, 1032193)
@@ -732,7 +711,7 @@ def test_matmul_api(context, plain, arithmetic):
 
 @pytest.mark.parametrize(
     "data, shape, new_shape",
-    [([i for i in range(10)], [10], [2, 10]), ([i for i in range(9)], [3, 3], [2, 3, 3]),],
+    [([i for i in range(10)], [10], [2, 10]), ([i for i in range(9)], [3, 3], [2, 3, 3])],
 )
 def test_broadcast(context, data, shape, new_shape):
     tensor = ts.bfv_tensor(context, ts.plain_tensor(data, shape, dtype="int"))

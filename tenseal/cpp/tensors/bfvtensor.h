@@ -1,7 +1,7 @@
 #ifndef TENSEAL_TENSOR_BFVTENSOR_H
 #define TENSEAL_TENSOR_BFVTENSOR_H
 
-#include "tenseal/cpp/tensors/encrypted_tensor_bfv.h"
+#include "tenseal/cpp/tensors/encrypted_tensor.h"
 #include "tenseal/cpp/tensors/plain_tensor.h"
 #include "tenseal/proto/tensors.pb.h"
 
@@ -10,10 +10,10 @@ namespace tenseal {
 using namespace seal;
 using namespace std;
 
-class BFVTensor : public EncryptedTensorBFV<int64_t, shared_ptr<BFVTensor>>,
-                   public enable_shared_from_this<BFVTensor> {
+class BFVTensor : public EncryptedTensor<int64_t, shared_ptr<BFVTensor>>,
+                  public enable_shared_from_this<BFVTensor> {
    public:
-    using EncryptedTensorBFV<int64_t, shared_ptr<BFVTensor>>::decrypt;
+    using EncryptedTensor<int64_t, shared_ptr<BFVTensor>>::decrypt;
     /**
      * Create a new BFVTensor from an 1D vector.
      * @param[in] input vector.
@@ -26,7 +26,8 @@ class BFVTensor : public EncryptedTensorBFV<int64_t, shared_ptr<BFVTensor>>,
             new BFVTensor(std::forward<Args>(args)...));
     }
 
-    PlainTensor<int64_t> decrypt(const shared_ptr<SecretKey>& sk) const override;
+    PlainTensor<int64_t> decrypt(
+        const shared_ptr<SecretKey>& sk) const override;
 
     shared_ptr<BFVTensor> negate_inplace() override;
     shared_ptr<BFVTensor> square_inplace() override;
@@ -57,7 +58,7 @@ class BFVTensor : public EncryptedTensorBFV<int64_t, shared_ptr<BFVTensor>>,
     shared_ptr<BFVTensor> sum_batch_inplace();
 
     shared_ptr<BFVTensor> polyval_inplace(
-        const vector<int64_t>& coefficients) override;
+        const vector<double>& coefficients) override;
 
     shared_ptr<BFVTensor> dot_inplace(
         const shared_ptr<BFVTensor>& to_mul) override;
@@ -113,30 +114,33 @@ class BFVTensor : public EncryptedTensorBFV<int64_t, shared_ptr<BFVTensor>>,
     shared_ptr<BFVTensor> transpose_inplace();
 
     vector<size_t> shape_with_batch() const;
+    double scale() const override { throw logic_error("not implemented"); }
 
    private:
     TensorStorage<Ciphertext> _data;
     optional<size_t> _batch_size;
 
     BFVTensor(const shared_ptr<TenSEALContext>& ctx,
-               const PlainTensor<int64_t>& tensor, bool batch = false);
+              const PlainTensor<int64_t>& tensor, bool batch = false);
     BFVTensor(const TenSEALContextProto& ctx, const BFVTensorProto& tensor);
     BFVTensor(const shared_ptr<TenSEALContext>& ctx, const string& vec);
     BFVTensor(const string& vec);
     BFVTensor(const shared_ptr<TenSEALContext>& ctx,
-               const BFVTensorProto& tensor);
+              const BFVTensorProto& tensor);
     BFVTensor(const shared_ptr<const BFVTensor>& vec);
 
-    static Ciphertext encrypt(const shared_ptr<TenSEALContext>& ctx, const vector<int64_t>& data);
-    static Ciphertext encrypt(const shared_ptr<TenSEALContext>& ctx, const int64_t data);
+    static Ciphertext encrypt(const shared_ptr<TenSEALContext>& ctx,
+                              const vector<int64_t>& data);
+    static Ciphertext encrypt(const shared_ptr<TenSEALContext>& ctx,
+                              const int64_t data);
 
     enum class OP { ADD, SUB, MUL };
     void perform_op(seal::Ciphertext& ct, seal::Ciphertext other, OP op);
     void perform_plain_op(seal::Ciphertext& ct, seal::Plaintext other, OP op);
     shared_ptr<BFVTensor> op_inplace(const shared_ptr<BFVTensor>& operand,
-                                      OP op);
+                                     OP op);
     shared_ptr<BFVTensor> op_plain_inplace(const PlainTensor<int64_t>& operand,
-                                            OP op);
+                                           OP op);
     shared_ptr<BFVTensor> op_plain_inplace(const int64_t& operand, OP op);
 
     /*
@@ -152,8 +156,7 @@ class BFVTensor : public EncryptedTensorBFV<int64_t, shared_ptr<BFVTensor>>,
     shared_ptr<BFVTensor> _mul_inplace(const shared_ptr<BFVTensor>& to_mul) {
         return this->mul_inplace(to_mul);
     }
-    shared_ptr<BFVTensor> _matmul_inplace(
-        const shared_ptr<BFVTensor>& other) {
+    shared_ptr<BFVTensor> _matmul_inplace(const shared_ptr<BFVTensor>& other) {
         return this->matmul_inplace(other);
     }
     shared_ptr<BFVTensor> _add_inplace(const int64_t& to_add) {

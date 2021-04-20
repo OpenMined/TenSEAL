@@ -98,7 +98,7 @@ def test_encryptionparams_scheme_settings(scheme):
 
 
 @pytest.mark.parametrize(
-    "scheme", [sealapi.SCHEME_TYPE.NONE, sealapi.SCHEME_TYPE.BFV, sealapi.SCHEME_TYPE.CKKS],
+    "scheme", [sealapi.SCHEME_TYPE.NONE, sealapi.SCHEME_TYPE.BFV, sealapi.SCHEME_TYPE.CKKS]
 )
 @pytest.mark.parametrize(
     "sec_level",
@@ -116,9 +116,7 @@ def test_context_failure(scheme, sec_level):
     assert sealctx.parameters_set() is False
 
 
-@pytest.mark.parametrize(
-    "sealctx", [helper_context_bfv(), helper_context_ckks()],
-)
+@pytest.mark.parametrize("sealctx", [helper_context_bfv(), helper_context_ckks()])
 def test_context_sanity(sealctx):
     assert sealctx.parameters_set() is True
 
@@ -186,7 +184,7 @@ def context_asserts(sealctx, sec_level, scheme):
 
 @pytest.mark.parametrize(
     "sec_level",
-    [sealapi.SEC_LEVEL_TYPE.TC128, sealapi.SEC_LEVEL_TYPE.TC192, sealapi.SEC_LEVEL_TYPE.TC256,],
+    [sealapi.SEC_LEVEL_TYPE.TC128, sealapi.SEC_LEVEL_TYPE.TC192, sealapi.SEC_LEVEL_TYPE.TC256],
 )
 def test_context_scheme_bfv_sanity(sec_level):
     poly_modulus_degree = 8192
@@ -207,9 +205,7 @@ def test_context_scheme_bfv_sanity(sec_level):
     context_asserts(sealctx, sec_level, sealapi.SCHEME_TYPE.BFV)
 
 
-@pytest.mark.parametrize(
-    "sec_level", [sealapi.SEC_LEVEL_TYPE.TC128],
-)
+@pytest.mark.parametrize("sec_level", [sealapi.SEC_LEVEL_TYPE.TC128])
 def test_context_scheme_ckks_sanity(sec_level):
     poly_modulus_degree = 8192
     plaintext_modulus = 1032193

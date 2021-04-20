@@ -9,15 +9,6 @@ using namespace ::testing;
 using namespace std;
 
 template <class Iterable>
-bool are_close(const Iterable& l, const std::vector<int64_t>& r) {
-    if (l.size() != r.size()) {
-        return false;
-    }
-    for (size_t idx = 0; idx < l.size(); ++idx) {
-        if (std::abs(l[idx] - r[idx]) > 0.5) return false;
-    }
-    return true;
-}
 
 auto duplicate(shared_ptr<BFVTensor> in) {
     auto vec = in->save();
@@ -36,11 +27,12 @@ TEST_P(BFVTensorTest, TestCreateBFVNoBatching) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, enc_type);
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
-    auto l = BFVTensor::Create(ctx, std::vector<int>{1, 2, 3},
-                                std::pow(2, 40), false);
+    auto l = BFVTensor::Create(ctx, std::vector<int>{1, 2, 3}, std::pow(2, 40),
+                               false);
 
     if (should_serialize_first) {
         l = duplicate(l);
@@ -53,29 +45,31 @@ TEST_P(BFVTensorTest, TestDecryptBFVNoBatching) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, enc_type);
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
-    auto l = BFVTensor::Create(ctx, std::vector<int>{1, 2, 3},
-                                std::pow(2, 40), false);
+    auto l = BFVTensor::Create(ctx, std::vector<int>{1, 2, 3}, std::pow(2, 40),
+                               false);
 
     if (should_serialize_first) {
         l = duplicate(l);
     }
 
     auto decr = l->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {1, 2, 3}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({1, 2, 3}));
 }
 
 TEST_P(BFVTensorTest, TestCreateBFVWithBatching) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, enc_type);
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
-    auto l = BFVTensor::Create(ctx, std::vector<int>{1, 2, 3},
-                                std::pow(2, 40), true);
+    auto l = BFVTensor::Create(ctx, std::vector<int>{1, 2, 3}, std::pow(2, 40),
+                               true);
 
     if (should_serialize_first) {
         l = duplicate(l);
@@ -88,25 +82,27 @@ TEST_P(BFVTensorTest, TestDecryptBFVWithBatching) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, enc_type);
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
-    auto l = BFVTensor::Create(ctx, std::vector<int>{1, 2, 3},
-                                std::pow(2, 40), true);
+    auto l = BFVTensor::Create(ctx, std::vector<int>{1, 2, 3}, std::pow(2, 40),
+                               true);
 
     if (should_serialize_first) {
         l = duplicate(l);
     }
 
     auto decr = l->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {1, 2, 3}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({1, 2, 3}));
 }
 
 TEST_P(BFVTensorTest, TestBFVSumNoBatching) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, enc_type);
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     auto data =
@@ -116,16 +112,15 @@ TEST_P(BFVTensorTest, TestBFVSumNoBatching) {
     l->sum_inplace(0);
     ASSERT_THAT(l->shape(), ElementsAreArray({3}));
     auto decr = l->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {5, 7, 9}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({5, 7, 9}));
 
-    data =
-        PlainTensor(vector<int>({1, 2, 3, 4, 5, 6}), vector<size_t>({2, 3}));
+    data = PlainTensor(vector<int>({1, 2, 3, 4, 5, 6}), vector<size_t>({2, 3}));
     l = BFVTensor::Create(ctx, data, std::pow(2, 40), false);
 
     l->sum_inplace(1);
     ASSERT_THAT(l->shape(), ElementsAreArray({2}));
     decr = l->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {6, 15}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({6, 15}));
 
     data = PlainTensor(vector<int>({1, 2, 3, 4, 5, 6}), vector<size_t>({6}));
     l = BFVTensor::Create(ctx, data, std::pow(2, 40), false);
@@ -133,7 +128,7 @@ TEST_P(BFVTensorTest, TestBFVSumNoBatching) {
     l->sum_inplace();
     ASSERT_THAT(l->shape(), ElementsAreArray(vector<size_t>({})));
     decr = l->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {21}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({21}));
 
     data = PlainTensor(vector<int>({1, 2, 3, 4, 5, 6, 7, 8}),
                        vector<size_t>({2, 2, 2}));
@@ -142,14 +137,15 @@ TEST_P(BFVTensorTest, TestBFVSumNoBatching) {
     l->sum_inplace(1);
     ASSERT_THAT(l->shape(), ElementsAreArray({2, 2}));
     decr = l->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {4, 6, 12, 14}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({4, 6, 12, 14}));
 }
 
 TEST_P(BFVTensorTest, TestBFVSumBatching) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, enc_type);
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
@@ -160,19 +156,20 @@ TEST_P(BFVTensorTest, TestBFVSumBatching) {
     auto res = l->sum(0);
     ASSERT_THAT(res->shape(), ElementsAreArray({3}));
     auto decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {5, 7, 9}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({5, 7, 9}));
 
     res = l->sum(1);
     ASSERT_THAT(res->shape_with_batch(), ElementsAreArray({2}));
     decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {6, 15}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({6, 15}));
 }
 
 TEST_P(BFVTensorTest, TestBFVPower) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, enc_type);
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
@@ -183,13 +180,14 @@ TEST_P(BFVTensorTest, TestBFVPower) {
     auto res = l->power(2);
     ASSERT_THAT(res->shape_with_batch(), ElementsAreArray({2, 3}));
     auto decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {1, 4, 9, 16, 25, 36}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({1, 4, 9, 16, 25, 36}));
 }
 
 TEST_P(BFVTensorTest, TestAddBroadcasting) {
     auto enc_type = get<1>(GetParam());
 
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, enc_type);
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
@@ -204,31 +202,32 @@ TEST_P(BFVTensorTest, TestAddBroadcasting) {
     auto res = l->add(r);
     ASSERT_THAT(res->shape(), ElementsAreArray({2, 3}));
     auto decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {12, 24, 36, 15, 27, 39}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({12, 24, 36, 15, 27, 39}));
 
     // BFV{3, 2} + PLAIN{3}
     res = l->add_plain(rdata);
     ASSERT_THAT(res->shape(), ElementsAreArray({2, 3}));
     decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {12, 24, 36, 15, 27, 39}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({12, 24, 36, 15, 27, 39}));
 
     // BFV{3} + BFV{3, 2}
     res = r->add(l);
     ASSERT_THAT(res->shape_with_batch(), ElementsAreArray({2, 3}));
     decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {12, 24, 36, 15, 27, 39}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({12, 24, 36, 15, 27, 39}));
 
     // BFV{3} + PLAIN{3, 2}
     res = r->add_plain(ldata);
     ASSERT_THAT(res->shape(), ElementsAreArray({2, 3}));
     decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {12, 24, 36, 15, 27, 39}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({12, 24, 36, 15, 27, 39}));
 }
 
 TEST_P(BFVTensorTest, TestDotBroadcasting) {
     auto enc_type = get<1>(GetParam());
 
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, enc_type);
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
@@ -243,31 +242,32 @@ TEST_P(BFVTensorTest, TestDotBroadcasting) {
     auto res = l->dot(r);
     ASSERT_THAT(res->shape(), ElementsAreArray({3}));
     auto decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {154, 352, 550}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({154, 352, 550}));
 
     // BFV 2D @ PLAIN 1D
     res = l->dot_plain(rdata);
     ASSERT_THAT(res->shape(), ElementsAreArray({3}));
     decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {154, 352, 550}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({154, 352, 550}));
 
     // BFV 1D @ BFV 2D
     res = r->dot(l);
     ASSERT_THAT(res->shape_with_batch(), ElementsAreArray({3}));
     decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {330, 396, 462}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({330, 396, 462}));
 
     // BFV 1D @ PLAIN 2D
     res = r->dot_plain(ldata);
     ASSERT_THAT(res->shape(), ElementsAreArray({3}));
     decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {330, 396, 462}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({330, 396, 462}));
 }
 
 TEST_P(BFVTensorTest, TestTranspose) {
     auto enc_type = get<1>(GetParam());
 
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, enc_type);
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
@@ -281,20 +281,21 @@ TEST_P(BFVTensorTest, TestTranspose) {
     ASSERT_THAT(res->shape(), ElementsAreArray({2, 3}));
     ASSERT_THAT(l->shape(), ElementsAreArray({3, 2}));
     auto decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {1, 3, 5, 2, 4, 6}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({1, 3, 5, 2, 4, 6}));
 
     // Transpose inplace
     l->transpose_inplace();
     ASSERT_THAT(l->shape(), ElementsAreArray({2, 3}));
     decr = l->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {1, 3, 5, 2, 4, 6}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({1, 3, 5, 2, 4, 6}));
 }
 
 TEST_P(BFVTensorTest, TestBFVTensorPolyval) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, enc_type);
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
     auto data =
@@ -304,26 +305,27 @@ TEST_P(BFVTensorTest, TestBFVTensorPolyval) {
     auto res = l->polyval({1, 1, 1});
     ASSERT_THAT(res->shape_with_batch(), ElementsAreArray({2, 3}));
     auto decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {3, 7, 13, 21, 31, 43}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({3, 7, 13, 21, 31, 43}));
 }
 
 TEST_P(BFVTensorTest, TestCreateBFVFail) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, enc_type);
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
-    EXPECT_THROW(
-        auto l = BFVTensor::Create(ctx, std::vector<int>({1, 2, 3})),
-        std::exception);
+    EXPECT_THROW(auto l = BFVTensor::Create(ctx, std::vector<int>({1, 2, 3})),
+                 std::exception);
 }
 
 TEST_P(BFVTensorTest, TestBFVReshapeNoBatching) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, enc_type);
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
@@ -333,21 +335,21 @@ TEST_P(BFVTensorTest, TestBFVReshapeNoBatching) {
 
     auto decr = l->decrypt();
     ASSERT_THAT(decr.shape(), ElementsAreArray({2, 2, 2}));
-    ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({1, 2, 3, 4, 5, 6, 7, 8}));
 
     l->reshape_inplace({4, 2});
     ASSERT_THAT(l->shape(), ElementsAreArray({4, 2}));
     ASSERT_THAT(l->shape_with_batch(), ElementsAreArray({4, 2}));
     decr = l->decrypt();
     ASSERT_THAT(decr.shape(), ElementsAreArray({4, 2}));
-    ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({1, 2, 3, 4, 5, 6, 7, 8}));
 
     l->reshape_inplace({2, 2, 2});
     ASSERT_THAT(l->shape(), ElementsAreArray({2, 2, 2}));
     ASSERT_THAT(l->shape_with_batch(), ElementsAreArray({2, 2, 2}));
     decr = l->decrypt();
     ASSERT_THAT(decr.shape(), ElementsAreArray({2, 2, 2}));
-    ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({1, 2, 3, 4, 5, 6, 7, 8}));
 
     auto newt = l->reshape({4, 2});
     ASSERT_THAT(l->shape(), ElementsAreArray({2, 2, 2}));
@@ -358,7 +360,8 @@ TEST_P(BFVTensorTest, TestBFVReshapeBatching) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, enc_type);
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
@@ -370,21 +373,21 @@ TEST_P(BFVTensorTest, TestBFVReshapeBatching) {
     ASSERT_THAT(l->shape_with_batch(), ElementsAreArray({2, 2, 2}));
     auto decr = l->decrypt();
     ASSERT_THAT(decr.shape(), ElementsAreArray({2, 2, 2}));
-    ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({1, 2, 3, 4, 5, 6, 7, 8}));
 
     l->reshape_inplace({4});
     ASSERT_THAT(l->shape(), ElementsAreArray({4}));
     ASSERT_THAT(l->shape_with_batch(), ElementsAreArray({2, 4}));
     decr = l->decrypt();
     ASSERT_THAT(decr.shape(), ElementsAreArray({2, 4}));
-    ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({1, 2, 3, 4, 5, 6, 7, 8}));
 
     l->reshape_inplace({2, 2});
     ASSERT_THAT(l->shape(), ElementsAreArray({2, 2}));
     ASSERT_THAT(l->shape_with_batch(), ElementsAreArray({2, 2, 2}));
     decr = l->decrypt();
     ASSERT_THAT(decr.shape(), ElementsAreArray({2, 2, 2}));
-    ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4, 5, 6, 7, 8}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({1, 2, 3, 4, 5, 6, 7, 8}));
 
     auto newt = l->reshape({4});
     ASSERT_THAT(l->shape(), ElementsAreArray({2, 2}));
@@ -399,8 +402,7 @@ TEST_P(BFVTensorTest, TestEmptyPlaintext) {
         TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
-    EXPECT_THROW(BFVTensor::Create(ctx, std::vector<int>({})),
-                 std::exception);
+    EXPECT_THROW(BFVTensor::Create(ctx, std::vector<int>({})), std::exception);
 }
 
 TEST_F(BFVTensorTest, TestBFVTensorSerializationSize) {
@@ -408,15 +410,13 @@ TEST_F(BFVTensorTest, TestBFVTensorSerializationSize) {
     for (int val = 0.5; val < 1000; ++val) raw_input.push_back(val);
 
     auto input = PlainTensor(raw_input);
-    auto pk_ctx =
-        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193,
-                               encryption_type::asymmetric);
+    auto pk_ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193,
+                                         encryption_type::asymmetric);
     pk_ctx->global_scale(std::pow(2, 40));
     auto pk_vector = BFVTensor::Create(pk_ctx, input);
 
-    auto sym_ctx =
-        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193,
-                               encryption_type::symmetric);
+    auto sym_ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193,
+                                          encryption_type::symmetric);
     sym_ctx->global_scale(std::pow(2, 40));
     auto sym_vector = BFVTensor::Create(sym_ctx, input);
 
@@ -436,8 +436,7 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(true, encryption_type::symmetric)));
 
 TEST_F(BFVTensorTest, TestBFVLazyContext) {
-    auto ctx =
-        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193);
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193);
     ASSERT_TRUE(ctx != nullptr);
 
     ctx->global_scale(std::pow(2, 40));
@@ -456,12 +455,11 @@ TEST_F(BFVTensorTest, TestBFVLazyContext) {
     auto res = newl->add(r);
 
     auto decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {6, 8, 10, 12}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({6, 8, 10, 12}));
 }
 
 TEST_F(BFVTensorTest, TestBFVLazyContextSanityintSerde) {
-    auto ctx =
-        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193);
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193);
     ASSERT_TRUE(ctx != nullptr);
 
     ctx->global_scale(std::pow(2, 40));
@@ -481,12 +479,11 @@ TEST_F(BFVTensorTest, TestBFVLazyContextSanityintSerde) {
     auto res = newl->add(r);
 
     auto decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {6, 8, 10, 12}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({6, 8, 10, 12}));
 }
 
 TEST_F(BFVTensorTest, TestBFVLazyContextSanityCopy) {
-    auto ctx =
-        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193);
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193);
     ASSERT_TRUE(ctx != nullptr);
 
     ctx->global_scale(std::pow(2, 40));
@@ -503,12 +500,11 @@ TEST_F(BFVTensorTest, TestBFVLazyContextSanityCopy) {
     cpy->link_tenseal_context(ctx);
     auto res = cpy->add(r);
     auto decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {6, 8, 10, 12}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({6, 8, 10, 12}));
 }
 
 TEST_F(BFVTensorTest, TestBFVLazyContextSanityDeepcopy) {
-    auto ctx =
-        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193);
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193);
     ASSERT_TRUE(ctx != nullptr);
 
     ctx->global_scale(std::pow(2, 40));
@@ -525,7 +521,7 @@ TEST_F(BFVTensorTest, TestBFVLazyContextSanityDeepcopy) {
     cpy->link_tenseal_context(ctx);
     auto res = cpy->add(r);
     auto decr = res->decrypt();
-    ASSERT_TRUE(are_close(decr.data(), {6, 8, 10, 12}));
+    EXPECT_THAT(decr.data(), ElementsAreArray({6, 8, 10, 12}));
 }
 
 }  // namespace

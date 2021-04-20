@@ -713,18 +713,15 @@ void bind_ckks_tensor(py::module &m) {
 
 void bind_bfv_tensor(py::module &m) {
     py::class_<BFVTensor, std::shared_ptr<BFVTensor>>(m, "BFVTensor",
-                                                        py::module_local())
-        .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
-                         const PlainTensor<int64_t> &tensor,
-                         bool batch) {
-                 return BFVTensor::Create(ctx, tensor, batch);
-             }),
-             py::arg("ctx"), py::arg("tensor"),
-             py::arg("batch") = true)
+                                                      py::module_local())
         .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
                          const PlainTensor<int64_t> &tensor, bool batch) {
-                 return BFVTensor::Create(ctx, tensor,
-                                           batch);
+                 return BFVTensor::Create(ctx, tensor, batch);
+             }),
+             py::arg("ctx"), py::arg("tensor"), py::arg("batch") = true)
+        .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
+                         const PlainTensor<int64_t> &tensor, bool batch) {
+                 return BFVTensor::Create(ctx, tensor, batch);
              }),
              py::arg("ctx"), py::arg("tensor"), py::arg("batch") = true)
         .def(py::init(

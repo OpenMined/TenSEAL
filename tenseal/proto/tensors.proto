@@ -16,7 +16,7 @@ message BFVTensorProto {
     // The serialized ciphertexts
     repeated bytes ciphertexts = 2;
     // Optional batch size. Exists only if batching is enabled
-    uint32 batch_size = 4;
+    uint32 batch_size = 3;
 };
 
 //CKKSVector parameters

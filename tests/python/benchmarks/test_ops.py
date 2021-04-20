@@ -134,9 +134,7 @@ def test_perf_ckks_im2col_encoding(benchmark, image_shape):
             ctx, img.reshape(image_shape).tolist(), kernel_shape[0], kernel_shape[1], stride
         )
 
-    benchmark.pedantic(
-        op, rounds=rounds, iterations=iterations,
-    )
+    benchmark.pedantic(op, rounds=rounds, iterations=iterations)
 
 
 @pytest.mark.parametrize("image_shape", [[8, 8], [16, 16], [28, 28]])
@@ -164,6 +162,4 @@ def test_perf_ckks_conv_eval(benchmark, image_shape):
             enc_channels.append(y)
         ts.CKKSVector.pack_vectors(enc_channels)
 
-    benchmark.pedantic(
-        op, rounds=rounds, iterations=iterations,
-    )
+    benchmark.pedantic(op, rounds=rounds, iterations=iterations)

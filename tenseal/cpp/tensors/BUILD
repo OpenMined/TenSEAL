@@ -21,7 +21,6 @@ cc_library(
         "ckkstensor.h",
         "ckksvector.h",
         "encrypted_tensor.h",
-        "encrypted_tensor_bfv.h",
         "encrypted_vector.h",
         "plain_tensor.h",
     ],

@@ -128,6 +128,7 @@ def lazy_ckks_tensor_from(data: bytes) -> CKKSTensor:
     """Load a CKKSTensor from a protocol buffer"""
     return CKKSTensor.lazy_load(data)
 
+
 def bfv_tensor(*args, **kwargs) -> BFVTensor:
     """Constructor function for tenseal.BFVTensor"""
     return BFVTensor(*args, **kwargs)

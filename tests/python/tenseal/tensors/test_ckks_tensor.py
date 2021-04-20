@@ -9,16 +9,7 @@ from skimage.util.shape import view_as_windows
 import tenseal as ts
 
 
-SHAPES = [
-    [1],
-    [2],
-    [10],
-    [2, 2],
-    [3, 5],
-    [2, 3, 4],
-    [2, 3, 4, 5],
-    [2, 3, 4, 5, 6],
-]
+SHAPES = [[1], [2], [10], [2, 2], [3, 5], [2, 3, 4], [2, 3, 4, 5], [2, 3, 4, 5, 6]]
 
 BROADCAST_SHAPES = [
     ([2, 3], [2, 1]),
@@ -211,9 +202,7 @@ def test_sum_batch(context, data, reshape_first, precision):
     ), "Something went wrong in memory."
 
 
-@pytest.mark.parametrize(
-    "data", [(ts.plain_tensor([i for i in range(8)], shape=[2, 2, 2])),],
-)
+@pytest.mark.parametrize("data", [(ts.plain_tensor([i for i in range(8)], shape=[2, 2, 2]))])
 @pytest.mark.parametrize("batch", [True, False])
 def test_sum_fail(context, data, batch, precision):
     context.generate_galois_keys()
@@ -230,7 +219,7 @@ def test_size(context):
 
 @pytest.mark.parametrize(
     "plain",
-    [ts.plain_tensor([0]), ts.plain_tensor([1, 2, 3]), ts.plain_tensor([1, 2, 3, 4], [2, 2]),],
+    [ts.plain_tensor([0]), ts.plain_tensor([1, 2, 3]), ts.plain_tensor([1, 2, 3, 4], [2, 2])],
 )
 @pytest.mark.parametrize("reshape_first", [False, True])
 def test_negate(context, plain, precision, reshape_first):
@@ -250,7 +239,7 @@ def test_negate(context, plain, precision, reshape_first):
 
 @pytest.mark.parametrize(
     "plain",
-    [ts.plain_tensor([0]), ts.plain_tensor([1, 2, 3]), ts.plain_tensor([1, 2, 3, 4], [2, 2]),],
+    [ts.plain_tensor([0]), ts.plain_tensor([1, 2, 3]), ts.plain_tensor([1, 2, 3, 4], [2, 2])],
 )
 def test_negate_inplace(context, plain, precision):
     tensor = ts.ckks_tensor(context, plain)
@@ -264,7 +253,7 @@ def test_negate_inplace(context, plain, precision):
 
 @pytest.mark.parametrize(
     "plain",
-    [ts.plain_tensor([0]), ts.plain_tensor([1, 2, 3]), ts.plain_tensor([1, 2, 3, 4], [2, 2]),],
+    [ts.plain_tensor([0]), ts.plain_tensor([1, 2, 3]), ts.plain_tensor([1, 2, 3, 4], [2, 2])],
 )
 @pytest.mark.parametrize("reshape_first", [False, True])
 def test_square(context, plain, precision, reshape_first):
@@ -286,7 +275,7 @@ def test_square(context, plain, precision, reshape_first):
 
 @pytest.mark.parametrize(
     "plain",
-    [ts.plain_tensor([0]), ts.plain_tensor([1, 2, 3]), ts.plain_tensor([1, 2, 3, 4], [2, 2]),],
+    [ts.plain_tensor([0]), ts.plain_tensor([1, 2, 3]), ts.plain_tensor([1, 2, 3, 4], [2, 2])],
 )
 def test_square_inplace(context, plain, precision):
     tensor = ts.ckks_tensor(context, plain)
@@ -534,7 +523,7 @@ def test_power_inplace(context, plain, power, precision):
 @pytest.mark.parametrize(
     "data, polynom",
     [
-        (ts.plain_tensor([1, 2, 3]), [0, 0, 0,]),
+        (ts.plain_tensor([1, 2, 3]), [0, 0, 0]),
         (ts.plain_tensor([1, 2, 3, 4], [2, 2]), [1, 1]),
         (ts.plain_tensor([1, 2, 3, 4], [2, 2]), [1, 1, 1]),
         (ts.plain_tensor([1, 2, 3, 4, 5, 6], [2, 3]), [3, 2, 4, 5]),
@@ -568,7 +557,7 @@ def test_polynomial(context, data, polynom, reshape_first):
 
 @pytest.mark.parametrize(
     "data, polynom",
-    [(ts.plain_tensor([1, 2, 3, 4]), [0, 1, 1]), (ts.plain_tensor([1, 2, 3, 4]), [0, 1, 0, 1]),],
+    [(ts.plain_tensor([1, 2, 3, 4]), [0, 1, 1]), (ts.plain_tensor([1, 2, 3, 4]), [0, 1, 0, 1])],
 )
 def test_polynomial_modswitch_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
@@ -582,7 +571,7 @@ def test_polynomial_modswitch_off(context, data, polynom):
 
 @pytest.mark.parametrize(
     "data, polynom",
-    [(ts.plain_tensor([1, 2, 3, 4]), [0, 1, 1]), (ts.plain_tensor([1, 2, 3, 4]), [0, 1, 0, 1]),],
+    [(ts.plain_tensor([1, 2, 3, 4]), [0, 1, 1]), (ts.plain_tensor([1, 2, 3, 4]), [0, 1, 0, 1])],
 )
 def test_polynomial_rescale_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
@@ -738,7 +727,7 @@ def test_matmul_api(context, plain, arithmetic):
 
 @pytest.mark.parametrize(
     "data, shape, new_shape",
-    [([i for i in range(10)], [10], [2, 10]), ([i for i in range(9)], [3, 3], [2, 3, 3]),],
+    [([i for i in range(10)], [10], [2, 10]), ([i for i in range(9)], [3, 3], [2, 3, 3])],
 )
 def test_broadcast(context, data, shape, new_shape):
     tensor = ts.ckks_tensor(context, ts.plain_tensor(data, shape))
