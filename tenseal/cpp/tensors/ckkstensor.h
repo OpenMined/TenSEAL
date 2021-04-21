@@ -15,10 +15,11 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
    public:
     using EncryptedTensor<double, shared_ptr<CKKSTensor>>::decrypt;
     /**
-     * Create a new CKKSTensor from an 1D vector.
-     * @param[in] input vector.
-     * @param[in] input vector.
-     * @param[in] input vector.
+     * Create a new CKKSTensor from a tensor of any shape.
+     * @param[in] TenSEAL context.
+     * @param[in] tensor.
+     * @param[in] scale.
+     * @param[in] batch.
      */
     template <typename... Args>
     static shared_ptr<CKKSTensor> Create(Args&&... args) {
