@@ -8,8 +8,6 @@ namespace {
 using namespace ::testing;
 using namespace std;
 
-template <class Iterable>
-
 auto duplicate(shared_ptr<BFVTensor> in) {
     auto vec = in->save();
 
@@ -31,8 +29,7 @@ TEST_P(BFVTensorTest, TestCreateBFVNoBatching) {
         TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
-    auto l = BFVTensor::Create(ctx, std::vector<int>{1, 2, 3}, std::pow(2, 40),
-                               false);
+    auto l = BFVTensor::Create(ctx, std::vector<int64_t>{1, 2, 3}, false);
 
     if (should_serialize_first) {
         l = duplicate(l);
@@ -49,8 +46,7 @@ TEST_P(BFVTensorTest, TestDecryptBFVNoBatching) {
         TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
-    auto l = BFVTensor::Create(ctx, std::vector<int>{1, 2, 3}, std::pow(2, 40),
-                               false);
+    auto l = BFVTensor::Create(ctx, std::vector<int64_t>{1, 2, 3}, false);
 
     if (should_serialize_first) {
         l = duplicate(l);
@@ -68,8 +64,7 @@ TEST_P(BFVTensorTest, TestCreateBFVWithBatching) {
         TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
-    auto l = BFVTensor::Create(ctx, std::vector<int>{1, 2, 3}, std::pow(2, 40),
-                               true);
+    auto l = BFVTensor::Create(ctx, std::vector<int64_t>{1, 2, 3}, true);
 
     if (should_serialize_first) {
         l = duplicate(l);
@@ -86,8 +81,7 @@ TEST_P(BFVTensorTest, TestDecryptBFVWithBatching) {
         TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
-    auto l = BFVTensor::Create(ctx, std::vector<int>{1, 2, 3}, std::pow(2, 40),
-                               true);
+    auto l = BFVTensor::Create(ctx, std::vector<int64_t>{1, 2, 3}, true);
 
     if (should_serialize_first) {
         l = duplicate(l);
@@ -98,41 +92,42 @@ TEST_P(BFVTensorTest, TestDecryptBFVWithBatching) {
 }
 
 TEST_P(BFVTensorTest, TestBFVSumNoBatching) {
-    auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
     auto ctx =
         TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
-    auto data =
-        PlainTensor(vector<int>({1, 2, 3, 4, 5, 6}), vector<size_t>({2, 3}));
-    auto l = BFVTensor::Create(ctx, data, std::pow(2, 40), false);
+    auto data = PlainTensor(vector<int64_t>({1, 2, 3, 4, 5, 6}),
+                            vector<size_t>({2, 3}));
+    auto l = BFVTensor::Create(ctx, data, false);
 
     l->sum_inplace(0);
     ASSERT_THAT(l->shape(), ElementsAreArray({3}));
     auto decr = l->decrypt();
     EXPECT_THAT(decr.data(), ElementsAreArray({5, 7, 9}));
 
-    data = PlainTensor(vector<int>({1, 2, 3, 4, 5, 6}), vector<size_t>({2, 3}));
-    l = BFVTensor::Create(ctx, data, std::pow(2, 40), false);
+    data = PlainTensor(vector<int64_t>({1, 2, 3, 4, 5, 6}),
+                       vector<size_t>({2, 3}));
+    l = BFVTensor::Create(ctx, data, false);
 
     l->sum_inplace(1);
     ASSERT_THAT(l->shape(), ElementsAreArray({2}));
     decr = l->decrypt();
     EXPECT_THAT(decr.data(), ElementsAreArray({6, 15}));
 
-    data = PlainTensor(vector<int>({1, 2, 3, 4, 5, 6}), vector<size_t>({6}));
-    l = BFVTensor::Create(ctx, data, std::pow(2, 40), false);
+    data =
+        PlainTensor(vector<int64_t>({1, 2, 3, 4, 5, 6}), vector<size_t>({6}));
+    l = BFVTensor::Create(ctx, data, false);
 
     l->sum_inplace();
     ASSERT_THAT(l->shape(), ElementsAreArray(vector<size_t>({})));
     decr = l->decrypt();
     EXPECT_THAT(decr.data(), ElementsAreArray({21}));
 
-    data = PlainTensor(vector<int>({1, 2, 3, 4, 5, 6, 7, 8}),
+    data = PlainTensor(vector<int64_t>({1, 2, 3, 4, 5, 6, 7, 8}),
                        vector<size_t>({2, 2, 2}));
-    l = BFVTensor::Create(ctx, data, std::pow(2, 40), false);
+    l = BFVTensor::Create(ctx, data, false);
 
     l->sum_inplace(1);
     ASSERT_THAT(l->shape(), ElementsAreArray({2, 2}));
@@ -141,7 +136,6 @@ TEST_P(BFVTensorTest, TestBFVSumNoBatching) {
 }
 
 TEST_P(BFVTensorTest, TestBFVSumBatching) {
-    auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
     auto ctx =
@@ -149,9 +143,9 @@ TEST_P(BFVTensorTest, TestBFVSumBatching) {
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
-    auto data =
-        PlainTensor(vector<int>({1, 2, 3, 4, 5, 6}), vector<size_t>({2, 3}));
-    auto l = BFVTensor::Create(ctx, data, std::pow(2, 40), true);
+    auto data = PlainTensor(vector<int64_t>({1, 2, 3, 4, 5, 6}),
+                            vector<size_t>({2, 3}));
+    auto l = BFVTensor::Create(ctx, data, true);
 
     auto res = l->sum(0);
     ASSERT_THAT(res->shape(), ElementsAreArray({3}));
@@ -165,7 +159,6 @@ TEST_P(BFVTensorTest, TestBFVSumBatching) {
 }
 
 TEST_P(BFVTensorTest, TestBFVPower) {
-    auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
     auto ctx =
@@ -173,9 +166,9 @@ TEST_P(BFVTensorTest, TestBFVPower) {
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
-    auto data =
-        PlainTensor(vector<int>({1, 2, 3, 4, 5, 6}), vector<size_t>({2, 3}));
-    auto l = BFVTensor::Create(ctx, data, std::pow(2, 40), true);
+    auto data = PlainTensor(vector<int64_t>({1, 2, 3, 4, 5, 6}),
+                            vector<size_t>({2, 3}));
+    auto l = BFVTensor::Create(ctx, data, true);
 
     auto res = l->power(2);
     ASSERT_THAT(res->shape_with_batch(), ElementsAreArray({2, 3}));
@@ -191,12 +184,13 @@ TEST_P(BFVTensorTest, TestAddBroadcasting) {
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
-    auto ldata =
-        PlainTensor(vector<int>({1, 2, 3, 4, 5, 6}), vector<size_t>({2, 3}));
-    auto rdata = PlainTensor(vector<int>({11, 22, 33}), vector<size_t>({3}));
+    auto ldata = PlainTensor(vector<int64_t>({1, 2, 3, 4, 5, 6}),
+                             vector<size_t>({2, 3}));
+    auto rdata =
+        PlainTensor(vector<int64_t>({11, 22, 33}), vector<size_t>({3}));
 
-    auto l = BFVTensor::Create(ctx, ldata, std::pow(2, 40));
-    auto r = BFVTensor::Create(ctx, rdata, std::pow(2, 40));
+    auto l = BFVTensor::Create(ctx, ldata);
+    auto r = BFVTensor::Create(ctx, rdata);
 
     // BFV{3, 2} + BFV{3}
     auto res = l->add(r);
@@ -231,12 +225,13 @@ TEST_P(BFVTensorTest, TestDotBroadcasting) {
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
-    auto ldata = PlainTensor(vector<int>({1, 2, 3, 4, 5, 6, 7, 8, 9}),
+    auto ldata = PlainTensor(vector<int64_t>({1, 2, 3, 4, 5, 6, 7, 8, 9}),
                              vector<size_t>({3, 3}));
-    auto rdata = PlainTensor(vector<int>({11, 22, 33}), vector<size_t>({3}));
+    auto rdata =
+        PlainTensor(vector<int64_t>({11, 22, 33}), vector<size_t>({3}));
 
-    auto l = BFVTensor::Create(ctx, ldata, std::pow(2, 40));
-    auto r = BFVTensor::Create(ctx, rdata, std::pow(2, 40));
+    auto l = BFVTensor::Create(ctx, ldata);
+    auto r = BFVTensor::Create(ctx, rdata);
 
     // BFV 2D @ BFV 1D
     auto res = l->dot(r);
@@ -271,10 +266,10 @@ TEST_P(BFVTensorTest, TestTranspose) {
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
-    auto ldata =
-        PlainTensor(vector<int>({1, 2, 3, 4, 5, 6}), vector<size_t>({3, 2}));
+    auto ldata = PlainTensor(vector<int64_t>({1, 2, 3, 4, 5, 6}),
+                             vector<size_t>({3, 2}));
 
-    auto l = BFVTensor::Create(ctx, ldata, std::pow(2, 40));
+    auto l = BFVTensor::Create(ctx, ldata);
 
     // Transpose
     auto res = l->transpose();
@@ -291,16 +286,15 @@ TEST_P(BFVTensorTest, TestTranspose) {
 }
 
 TEST_P(BFVTensorTest, TestBFVTensorPolyval) {
-    auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
     auto ctx =
         TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
-    auto data =
-        PlainTensor(vector<int>({1, 2, 3, 4, 5, 6}), vector<size_t>({2, 3}));
-    auto l = BFVTensor::Create(ctx, data, std::pow(2, 40), true);
+    auto data = PlainTensor(vector<int64_t>({1, 2, 3, 4, 5, 6}),
+                            vector<size_t>({2, 3}));
+    auto l = BFVTensor::Create(ctx, data, true);
 
     auto res = l->polyval({1, 1, 1});
     ASSERT_THAT(res->shape_with_batch(), ElementsAreArray({2, 3}));
@@ -308,20 +302,7 @@ TEST_P(BFVTensorTest, TestBFVTensorPolyval) {
     EXPECT_THAT(decr.data(), ElementsAreArray({3, 7, 13, 21, 31, 43}));
 }
 
-TEST_P(BFVTensorTest, TestCreateBFVFail) {
-    auto should_serialize_first = get<0>(GetParam());
-    auto enc_type = get<1>(GetParam());
-
-    auto ctx =
-        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
-    ASSERT_TRUE(ctx != nullptr);
-
-    EXPECT_THROW(auto l = BFVTensor::Create(ctx, std::vector<int>({1, 2, 3})),
-                 std::exception);
-}
-
 TEST_P(BFVTensorTest, TestBFVReshapeNoBatching) {
-    auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
     auto ctx =
@@ -329,9 +310,9 @@ TEST_P(BFVTensorTest, TestBFVReshapeNoBatching) {
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
-    auto data = PlainTensor(vector<int>({1, 2, 3, 4, 5, 6, 7, 8}),
+    auto data = PlainTensor(vector<int64_t>({1, 2, 3, 4, 5, 6, 7, 8}),
                             vector<size_t>({2, 2, 2}));
-    auto l = BFVTensor::Create(ctx, data, std::pow(2, 40), false);
+    auto l = BFVTensor::Create(ctx, data, false);
 
     auto decr = l->decrypt();
     ASSERT_THAT(decr.shape(), ElementsAreArray({2, 2, 2}));
@@ -357,7 +338,6 @@ TEST_P(BFVTensorTest, TestBFVReshapeNoBatching) {
 }
 
 TEST_P(BFVTensorTest, TestBFVReshapeBatching) {
-    auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
     auto ctx =
@@ -365,9 +345,9 @@ TEST_P(BFVTensorTest, TestBFVReshapeBatching) {
     ASSERT_TRUE(ctx != nullptr);
     ctx->generate_galois_keys();
 
-    auto data = PlainTensor(vector<int>({1, 2, 3, 4, 5, 6, 7, 8}),
+    auto data = PlainTensor(vector<int64_t>({1, 2, 3, 4, 5, 6, 7, 8}),
                             vector<size_t>({2, 2, 2}));
-    auto l = BFVTensor::Create(ctx, data, std::pow(2, 40), true);
+    auto l = BFVTensor::Create(ctx, data, true);
 
     ASSERT_THAT(l->shape(), ElementsAreArray({2, 2}));
     ASSERT_THAT(l->shape_with_batch(), ElementsAreArray({2, 2, 2}));
@@ -395,29 +375,27 @@ TEST_P(BFVTensorTest, TestBFVReshapeBatching) {
 }
 
 TEST_P(BFVTensorTest, TestEmptyPlaintext) {
-    auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
     auto ctx =
         TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
     ASSERT_TRUE(ctx != nullptr);
 
-    EXPECT_THROW(BFVTensor::Create(ctx, std::vector<int>({})), std::exception);
+    EXPECT_THROW(BFVTensor::Create(ctx, std::vector<int64_t>({})),
+                 std::exception);
 }
 
 TEST_F(BFVTensorTest, TestBFVTensorSerializationSize) {
-    vector<int> raw_input;
+    vector<int64_t> raw_input;
     for (int val = 0.5; val < 1000; ++val) raw_input.push_back(val);
 
     auto input = PlainTensor(raw_input);
-    auto pk_ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193,
+    auto pk_ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {},
                                          encryption_type::asymmetric);
-    pk_ctx->global_scale(std::pow(2, 40));
     auto pk_vector = BFVTensor::Create(pk_ctx, input);
 
-    auto sym_ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193,
+    auto sym_ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {},
                                           encryption_type::symmetric);
-    sym_ctx->global_scale(std::pow(2, 40));
     auto sym_vector = BFVTensor::Create(sym_ctx, input);
 
     auto pk_buffer = pk_vector->save();
@@ -436,15 +414,13 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(true, encryption_type::symmetric)));
 
 TEST_F(BFVTensorTest, TestBFVLazyContext) {
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193);
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
-    ctx->global_scale(std::pow(2, 40));
-
     auto l = BFVTensor::Create(
-        ctx, PlainTensor(std::vector<int>({1, 2, 3, 4}), {2, 2}));
+        ctx, PlainTensor(std::vector<int64_t>({1, 2, 3, 4}), {2, 2}));
     auto r = BFVTensor::Create(
-        ctx, PlainTensor(std::vector<int>({5, 6, 7, 8}), {2, 2}));
+        ctx, PlainTensor(std::vector<int64_t>({5, 6, 7, 8}), {2, 2}));
 
     auto buffer = l->save();
     auto newl = BFVTensor::Create(buffer);
@@ -459,15 +435,13 @@ TEST_F(BFVTensorTest, TestBFVLazyContext) {
 }
 
 TEST_F(BFVTensorTest, TestBFVLazyContextSanityintSerde) {
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193);
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
-    ctx->global_scale(std::pow(2, 40));
-
     auto l = BFVTensor::Create(
-        ctx, PlainTensor(std::vector<int>({1, 2, 3, 4}), {2, 2}));
+        ctx, PlainTensor(std::vector<int64_t>({1, 2, 3, 4}), {2, 2}));
     auto r = BFVTensor::Create(
-        ctx, PlainTensor(std::vector<int>({5, 6, 7, 8}), {2, 2}));
+        ctx, PlainTensor(std::vector<int64_t>({5, 6, 7, 8}), {2, 2}));
 
     // int serde
     auto buffer = l->save();
@@ -483,15 +457,13 @@ TEST_F(BFVTensorTest, TestBFVLazyContextSanityintSerde) {
 }
 
 TEST_F(BFVTensorTest, TestBFVLazyContextSanityCopy) {
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193);
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
-    ctx->global_scale(std::pow(2, 40));
-
     auto l = BFVTensor::Create(
-        ctx, PlainTensor(std::vector<int>({1, 2, 3, 4}), {2, 2}));
+        ctx, PlainTensor(std::vector<int64_t>({1, 2, 3, 4}), {2, 2}));
     auto r = BFVTensor::Create(
-        ctx, PlainTensor(std::vector<int>({5, 6, 7, 8}), {2, 2}));
+        ctx, PlainTensor(std::vector<int64_t>({5, 6, 7, 8}), {2, 2}));
 
     auto buffer = l->save();
     auto newl = BFVTensor::Create(buffer);
@@ -504,15 +476,13 @@ TEST_F(BFVTensorTest, TestBFVLazyContextSanityCopy) {
 }
 
 TEST_F(BFVTensorTest, TestBFVLazyContextSanityDeepcopy) {
-    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193);
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {});
     ASSERT_TRUE(ctx != nullptr);
 
-    ctx->global_scale(std::pow(2, 40));
-
     auto l = BFVTensor::Create(
-        ctx, PlainTensor(std::vector<int>({1, 2, 3, 4}), {2, 2}));
+        ctx, PlainTensor(std::vector<int64_t>({1, 2, 3, 4}), {2, 2}));
     auto r = BFVTensor::Create(
-        ctx, PlainTensor(std::vector<int>({5, 6, 7, 8}), {2, 2}));
+        ctx, PlainTensor(std::vector<int64_t>({5, 6, 7, 8}), {2, 2}));
 
     auto buffer = l->save();
     auto newl = BFVTensor::Create(buffer);

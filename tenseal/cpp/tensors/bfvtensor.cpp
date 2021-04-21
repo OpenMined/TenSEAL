@@ -5,9 +5,18 @@ namespace tenseal {
 using namespace seal;
 using namespace std;
 
+void BFVTensor::prepare_context(const shared_ptr<TenSEALContext>& ctx) {
+    this->link_tenseal_context(ctx);
+    this->tenseal_context()->auto_rescale(false);
+    this->tenseal_context()->auto_mod_switch(false);
+}
+
 BFVTensor::BFVTensor(const shared_ptr<TenSEALContext>& ctx,
                      const PlainTensor<int64_t>& tensor, bool batch) {
-    this->link_tenseal_context(ctx);
+    if (tensor.empty()) {
+        throw invalid_argument("Attempting to encrypt an empty tensor");
+    }
+    this->prepare_context(ctx);
 
     vector<Ciphertext> enc_data;
     vector<size_t> enc_shape = tensor.shape();
@@ -29,7 +38,7 @@ BFVTensor::BFVTensor(const shared_ptr<TenSEALContext>& ctx,
 
 BFVTensor::BFVTensor(const shared_ptr<TenSEALContext>& ctx,
                      const string& tensor) {
-    this->link_tenseal_context(ctx);
+    this->prepare_context(ctx);
     this->load(tensor);
 }
 
@@ -43,12 +52,12 @@ BFVTensor::BFVTensor(const TenSEALContextProto& ctx,
 
 BFVTensor::BFVTensor(const shared_ptr<TenSEALContext>& ctx,
                      const BFVTensorProto& tensor) {
-    this->link_tenseal_context(ctx);
+    this->prepare_context(ctx);
     this->load_proto(tensor);
 }
 
 BFVTensor::BFVTensor(const shared_ptr<const BFVTensor>& tensor) {
-    this->link_tenseal_context(tensor->tenseal_context());
+    this->prepare_context(tensor->tenseal_context());
     this->_data = TensorStorage<Ciphertext>(tensor->data(), tensor->shape());
     this->_batch_size = tensor->_batch_size;
 }
@@ -163,7 +172,6 @@ shared_ptr<BFVTensor> BFVTensor::power_inplace(unsigned int power) {
 
 void BFVTensor::perform_op(seal::Ciphertext& ct, seal::Ciphertext other,
                            OP op) {
-    this->auto_same_mod(other, ct);
     switch (op) {
         case OP::ADD:
             this->tenseal_context()->evaluator->add_inplace(ct, other);
@@ -182,7 +190,6 @@ void BFVTensor::perform_op(seal::Ciphertext& ct, seal::Ciphertext other,
 
 void BFVTensor::perform_plain_op(seal::Ciphertext& ct, seal::Plaintext other,
                                  OP op) {
-    this->auto_same_mod(other, ct);
     switch (op) {
         case OP::ADD:
             this->tenseal_context()->evaluator->add_plain_inplace(ct, other);
@@ -439,7 +446,53 @@ shared_ptr<BFVTensor> BFVTensor::sum_batch_inplace() {
 
 shared_ptr<BFVTensor> BFVTensor::polyval_inplace(
     const vector<double>& coefficients) {
-    throw std::logic_error("not implemented");
+    if (coefficients.size() == 0) {
+        throw invalid_argument(
+            "the coefficients vector need to have at least one element");
+    }
+
+    int degree = static_cast<int>(coefficients.size()) - 1;
+    while (degree >= 0) {
+        if (coefficients[degree] == 0.0)
+            degree--;
+        else
+            break;
+    }
+
+    if (degree == -1) {
+        auto zeros =
+            PlainTensor<int64_t>::repeat_value(0, this->shape_with_batch());
+        *this =
+            BFVTensor(this->tenseal_context(), zeros, _batch_size.has_value());
+        return shared_from_this();
+    }
+
+    // pre-compute squares of x
+    auto x = this->copy();
+
+    int max_square = static_cast<int>(floor(log2(degree)));
+    vector<shared_ptr<BFVTensor>> x_squares;
+    x_squares.reserve(max_square + 1);
+    x_squares.push_back(x->copy());  // x
+    for (int i = 1; i <= max_square; i++) {
+        x->square_inplace();
+        x_squares.push_back(x->copy());  // x^(2^i)
+    }
+
+    auto cst_coeff = PlainTensor<int64_t>::repeat_value(
+        coefficients[0], this->shape_with_batch());
+    auto result = BFVTensor::Create(this->tenseal_context(), cst_coeff,
+                                    _batch_size.has_value());
+
+    // coefficients[1] * x + ... + coefficients[degree] * x^(degree)
+    for (int i = 1; i <= degree; i++) {
+        if (coefficients[i] == 0.0) continue;
+        x = compute_polynomial_term(i, coefficients[i], x_squares);
+        result->add_inplace(x);
+    }
+
+    this->_data = TensorStorage<Ciphertext>(result->data(), result->shape());
+    return shared_from_this();
 }
 
 shared_ptr<BFVTensor> BFVTensor::dot_inplace(

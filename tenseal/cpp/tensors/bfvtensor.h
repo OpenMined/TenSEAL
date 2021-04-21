@@ -184,6 +184,8 @@ class BFVTensor : public EncryptedTensor<int64_t, shared_ptr<BFVTensor>>,
     void load_proto(const BFVTensorProto& buffer);
     BFVTensorProto save_proto() const;
     void clear();
+
+    void prepare_context(const shared_ptr<TenSEALContext>& ctx);
 };
 
 }  // namespace tenseal
