@@ -16,9 +16,9 @@ class BFVTensor : public EncryptedTensor<int64_t, shared_ptr<BFVTensor>>,
     using EncryptedTensor<int64_t, shared_ptr<BFVTensor>>::decrypt;
     /**
      * Create a new BFVTensor from a tensor of any shape.
-     * @param[in] input vector.
-     * @param[in] input vector.
-     * @param[in] input vector.
+     * @param[in] TenSEAL context.
+     * @param[in] tensor.
+     * @param[in] batch.
      */
     template <typename... Args>
     static shared_ptr<BFVTensor> Create(Args&&... args) {
