@@ -277,8 +277,8 @@ def test_square_inplace(context, plain, precision):
 @pytest.mark.parametrize("op", ["add", "sub", "mul"])
 @pytest.mark.parametrize("reshape_first", [False, True])
 def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op, reshape_first):
-    r_t = np.random.randint(0, 110, *shape)
-    l_t = np.random.randint(0, 100, *shape)
+    r_t = np.random.randint(0, 110, *[shape], dtype=np.int64)
+    l_t = np.random.randint(0, 100, *[shape], dtype=np.int64)
     r_pt = ts.plain_tensor(r_t.flatten().tolist(), shape, dtype="int")
     l_pt = ts.plain_tensor(l_t.flatten().tolist(), shape, dtype="int")
     right = ts.bfv_tensor(context, r_pt)
@@ -313,16 +313,16 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op, reshape_first):
 
     np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
-    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0)
     # right didn't change
     right_result = np.array(right.decrypt().tolist())
-    assert np.allclose(right_result, r_t, rtol=0, atol=0.01)
+    assert np.allclose(right_result, r_t, rtol=0, atol=0)
     # left didn't change
     if plain:
         left_result = l_t
     else:
         left_result = np.array(left.decrypt().tolist())
-    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+    assert np.allclose(left_result, l_t, rtol=0, atol=0)
 
     # inplace
     if op == "add":
@@ -334,26 +334,26 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op, reshape_first):
 
     np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
-    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0)
     # right didn't change
     right_result = np.array(right.decrypt().tolist())
 
     assert right_result.shape == expected_result.shape
-    assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
+    assert np.allclose(right_result, expected_result, rtol=0, atol=0)
     # left didn't change
     if plain:
         left_result = l_t
     else:
         left_result = np.array(left.decrypt().tolist())
-    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+    assert np.allclose(left_result, l_t, rtol=0, atol=0)
 
 
 @pytest.mark.parametrize("shape", BROADCAST_SHAPES)
 @pytest.mark.parametrize("plain", [True, False])
 @pytest.mark.parametrize("op", ["add", "sub", "mul"])
 def test_broadcast_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
-    l_t = np.random.randint(0, 100, *shape[1])
-    r_t = np.random.randint(0, 100, *shape[0])
+    l_t = np.random.randint(0, 100, *[shape[1]], dtype=np.int64)
+    r_t = np.random.randint(0, 100, *[shape[0]], dtype=np.int64)
     l_pt = ts.plain_tensor(l_t.flatten().tolist(), shape[1], dtype="int")
     r_pt = ts.plain_tensor(r_t.flatten().tolist(), shape[0], dtype="int")
     right = ts.bfv_tensor(context, r_pt)
@@ -379,16 +379,16 @@ def test_broadcast_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
 
     np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
-    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0)
     # right didn't change
     right_result = np.array(right.decrypt().tolist())
-    assert np.allclose(right_result, r_t, rtol=0, atol=0.01)
+    assert np.allclose(right_result, r_t, rtol=0, atol=0)
     # left didn't change
     if plain:
         left_result = l_t
     else:
         left_result = np.array(left.decrypt().tolist())
-    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+    assert np.allclose(left_result, l_t, rtol=0, atol=0)
 
     # inplace
     if op == "add":
@@ -400,27 +400,27 @@ def test_broadcast_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
 
     np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
-    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0)
     # right didn't change
     right_result = np.array(right.decrypt().tolist())
 
     assert right_result.shape == expected_result.shape
-    assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
+    assert np.allclose(right_result, expected_result, rtol=0, atol=0)
     # left didn't change
     if plain:
         left_result = l_t
     else:
         left_result = np.array(left.decrypt().tolist())
-    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+    assert np.allclose(left_result, l_t, rtol=0, atol=0)
 
 
 @pytest.mark.parametrize("shape", SHAPES)
 @pytest.mark.parametrize("op", ["add", "sub", "mul"])
 def test_add_sub_mul_scalar(context, shape, op):
-    r_t = np.random.randint(0, 100, *shape)
+    r_t = np.random.randint(0, 100, *[shape], dtype=np.int64)
     r_pt = ts.plain_tensor(r_t.flatten().tolist(), shape, dtype="int")
     right = ts.bfv_tensor(context, r_pt)
-    left = np.random.randint(0, 100, size=1)[0]
+    left = np.random.randint(0, 100, size=1, dtype=np.int64)[0]
 
     if op == "add":
         expected_result = r_t + left
@@ -439,10 +439,10 @@ def test_add_sub_mul_scalar(context, shape, op):
 
     np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
-    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0)
     # right didn't change
     right_result = np.array(right.decrypt().tolist())
-    assert np.allclose(right_result, r_t, rtol=0, atol=0.01)
+    assert np.allclose(right_result, r_t, rtol=0, atol=0)
 
     # inplace
     if op == "add":
@@ -454,11 +454,11 @@ def test_add_sub_mul_scalar(context, shape, op):
 
     np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
-    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0)
     # right didn't change
     right_result = np.array(right.decrypt().tolist())
     assert right_result.shape == expected_result.shape
-    assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
+    assert np.allclose(right_result, expected_result, rtol=0, atol=0)
 
 
 @pytest.mark.parametrize(
@@ -478,7 +478,7 @@ def test_power(context, plain, power, precision):
 
     new_tensor = tensor ** power
     decrypted_result = new_tensor.decrypt().tolist()
-    assert (decrypted_result == expected).all() == True, "Decryption of tensor is incorrect"
+    assert (decrypted_result == expected) == True, "Decryption of tensor is incorrect"
     assert tensor.decrypt().tolist() == plain.tolist(), "Something went wrong in memory."
 
 
@@ -499,7 +499,7 @@ def test_power_inplace(context, plain, power, precision):
 
     tensor **= power
     decrypted_result = tensor.decrypt().tolist()
-    assert (decrypted_result == expected).all() == True, "Decryption of tensor is incorrect"
+    assert (decrypted_result == expected) == True, "Decryption of tensor is incorrect"
 
 
 @pytest.mark.parametrize(
@@ -534,37 +534,7 @@ def test_polynomial(context, data, polynom, reshape_first):
         precision = 1
 
     decrypted_result = result.decrypt().tolist()
-    assert (decrypted_result == expected).all() == True, "Polynomial evaluation is incorrect."
-
-
-@pytest.mark.parametrize(
-    "data, polynom",
-    [
-        (ts.plain_tensor([1, 2, 3, 4], dtype="int"), [0, 1, 1]),
-        (ts.plain_tensor([1, 2, 3, 4], dtype="int"), [0, 1, 0, 1]),
-    ],
-)
-def test_polynomial_modswitch_off(context, data, polynom):
-    context = ts.context(ts.SCHEME_TYPE.BFV, 8192, 1032193)
-
-    ct = ts.bfv_tensor(context, data)
-    with pytest.raises(ValueError) as e:
-        result = ct.polyval(polynom)
-
-
-@pytest.mark.parametrize(
-    "data, polynom",
-    [
-        (ts.plain_tensor([1, 2, 3, 4], dtype="int"), [0, 1, 1]),
-        (ts.plain_tensor([1, 2, 3, 4], dtype="int"), [0, 1, 0, 1]),
-    ],
-)
-def test_polynomial_rescale_off(context, data, polynom):
-    context = ts.context(ts.SCHEME_TYPE.BFV, 8192, 1032193)
-
-    ct = ts.bfv_tensor(context, data)
-    with pytest.raises(ValueError) as e:
-        result = ct.polyval(polynom)
+    assert (decrypted_result == expected) == True, "Polynomial evaluation is incorrect."
 
 
 @pytest.mark.parametrize(
@@ -604,8 +574,8 @@ def test_polynomial_rescale_off(context, data, polynom):
 def test_dot(context, shapes, plain):
     r_shape = shapes[0]
     l_shape = shapes[1]
-    r_t = np.random.randint(0, 100, *r_shape)
-    l_t = np.random.randint(0, 100, *l_shape)
+    r_t = np.random.randint(0, 100, *[r_shape], dtype=np.int64)
+    l_t = np.random.randint(0, 100, *[l_shape], dtype=np.int64)
     r_pt = ts.plain_tensor(r_t.flatten().tolist(), r_shape, dtype="int")
     l_pt = ts.plain_tensor(l_t.flatten().tolist(), l_shape, dtype="int")
     right = ts.bfv_tensor(context, r_pt)
@@ -621,34 +591,34 @@ def test_dot(context, shapes, plain):
 
     np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
-    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0)
     # right didn't change
     right_result = np.array(right.decrypt().tolist())
-    assert np.allclose(right_result, r_t, rtol=0, atol=0.01)
+    assert np.allclose(right_result, r_t, rtol=0, atol=0)
     # left didn't change
     if plain:
         left_result = l_t
     else:
         left_result = np.array(left.decrypt().tolist())
-    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+    assert np.allclose(left_result, l_t, rtol=0, atol=0)
 
     # inplace
     right.dot_(left)
 
     np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
-    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0)
     # right didn't change
     right_result = np.array(right.decrypt().tolist())
 
     assert right_result.shape == expected_result.shape
-    assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
+    assert np.allclose(right_result, expected_result, rtol=0, atol=0)
     # left didn't change
     if plain:
         left_result = l_t
     else:
         left_result = np.array(left.decrypt().tolist())
-    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+    assert np.allclose(left_result, l_t, rtol=0, atol=0)
 
 
 # this test only test the python API for matmul
@@ -656,8 +626,8 @@ def test_dot(context, shapes, plain):
 @pytest.mark.parametrize("plain", [True, False])
 @pytest.mark.parametrize("arithmetic", [True, False])
 def test_matmul_api(context, plain, arithmetic):
-    r_t = np.random.randint(0, 100, size=(2, 2))
-    l_t = np.random.randint(0, 100, size=(2, 2))
+    r_t = np.random.randint(0, 100, size=(2, 2), dtype=np.int64)
+    l_t = np.random.randint(0, 100, size=(2, 2), dtype=np.int64)
     r_pt = ts.plain_tensor(r_t.flatten().tolist(), (2, 2), dtype="int")
     l_pt = ts.plain_tensor(l_t.flatten().tolist(), (2, 2), dtype="int")
     right = ts.bfv_tensor(context, r_pt)
@@ -676,16 +646,16 @@ def test_matmul_api(context, plain, arithmetic):
 
     np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
-    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0)
     # right didn't change
     right_result = np.array(right.decrypt().tolist())
-    assert np.allclose(right_result, r_t, rtol=0, atol=0.01)
+    assert np.allclose(right_result, r_t, rtol=0, atol=0)
     # left didn't change
     if plain:
         left_result = l_t
     else:
         left_result = np.array(left.decrypt().tolist())
-    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+    assert np.allclose(left_result, l_t, rtol=0, atol=0)
 
     # inplace
     if arithmetic:
@@ -695,18 +665,18 @@ def test_matmul_api(context, plain, arithmetic):
 
     np_result = np.array(result.decrypt().tolist())
     assert np_result.shape == expected_result.shape
-    assert np.allclose(np_result, expected_result, rtol=0, atol=0.01)
+    assert np.allclose(np_result, expected_result, rtol=0, atol=0)
     # right didn't change
     right_result = np.array(right.decrypt().tolist())
 
     assert right_result.shape == expected_result.shape
-    assert np.allclose(right_result, expected_result, rtol=0, atol=0.01)
+    assert np.allclose(right_result, expected_result, rtol=0, atol=0)
     # left didn't change
     if plain:
         left_result = l_t
     else:
         left_result = np.array(left.decrypt().tolist())
-    assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
+    assert np.allclose(left_result, l_t, rtol=0, atol=0)
 
 
 @pytest.mark.parametrize(
@@ -742,9 +712,9 @@ def test_transpose(context, data, shape):
     assert tensor.shape == shape
     assert newt.shape == list(expected.shape)
     result = np.array(newt.decrypt().tolist())
-    assert np.allclose(result, expected, rtol=0, atol=0.01)
+    assert np.allclose(result, expected, rtol=0, atol=0)
 
     tensor.transpose_()
     assert tensor.shape == list(expected.shape)
     result = np.array(tensor.decrypt().tolist())
-    assert np.allclose(result, expected, rtol=0, atol=0.01)
+    assert np.allclose(result, expected, rtol=0, atol=0)
