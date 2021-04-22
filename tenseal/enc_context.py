@@ -40,9 +40,7 @@ class SEALPrimitive(ABC):
         return self._data
 
     @data.setter
-    def data(
-        self, value: SEAL_PRIMITIVE,
-    ):
+    def data(self, value: SEAL_PRIMITIVE):
         """Set the wrapped low level key object"""
         native_type = getattr(ts._ts_cpp, self.__class__.__name__)
         if not isinstance(value, native_type):
@@ -50,9 +48,7 @@ class SEALPrimitive(ABC):
         self._data = value
 
     @classmethod
-    def _wrap(
-        cls, data: SEAL_PRIMITIVE,
-    ):
+    def _wrap(cls, data: SEAL_PRIMITIVE):
         """Return a new key object wrapping the low level key object"""
         return cls(data)
 

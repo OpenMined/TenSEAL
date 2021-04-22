@@ -5,7 +5,7 @@ try:
     import _tenseal_cpp as _ts_cpp
 except ImportError:
     import tenseal._tenseal_cpp as _ts_cpp
-from tenseal.tensors import CKKSTensor, CKKSVector, BFVVector, PlainTensor
+from tenseal.tensors import CKKSTensor, CKKSVector, BFVVector, BFVTensor, PlainTensor
 
 from tenseal.enc_context import Context, SCHEME_TYPE, ENCRYPTION_TYPE
 from tenseal.version import __version__
@@ -129,6 +129,22 @@ def lazy_ckks_tensor_from(data: bytes) -> CKKSTensor:
     return CKKSTensor.lazy_load(data)
 
 
+def bfv_tensor(*args, **kwargs) -> BFVTensor:
+    """Constructor function for tenseal.BFVTensor"""
+    return BFVTensor(*args, **kwargs)
+
+
+def bfv_tensor_from(context: Context, data: bytes) -> BFVTensor:
+    """Load a BFVTensor from a protocol buffer.
+    Requires the context to be linked with."""
+    return BFVTensor.load(context, data)
+
+
+def lazy_bfv_tensor_from(data: bytes) -> BFVTensor:
+    """Load a BFVTensor from a protocol buffer"""
+    return BFVTensor.lazy_load(data)
+
+
 __all__ = [
     "bfv_vector",
     "bfv_vector_from",
@@ -139,6 +155,9 @@ __all__ = [
     "ckks_tensor",
     "ckks_tensor_from",
     "lazy_ckks_tensor_from",
+    "bfv_tensor",
+    "bfv_tensor_from",
+    "lazy_bfv_tensor_from",
     "context",
     "context_from",
     "im2col_encoding",

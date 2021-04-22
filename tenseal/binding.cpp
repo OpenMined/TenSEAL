@@ -711,6 +711,173 @@ void bind_ckks_tensor(py::module &m) {
         .def("scale", &CKKSTensor::scale);
 }
 
+void bind_bfv_tensor(py::module &m) {
+    py::class_<BFVTensor, std::shared_ptr<BFVTensor>>(m, "BFVTensor",
+                                                      py::module_local())
+        .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
+                         const PlainTensor<int64_t> &tensor, bool batch) {
+                 return BFVTensor::Create(ctx, tensor, batch);
+             }),
+             py::arg("ctx"), py::arg("tensor"), py::arg("batch") = true)
+        .def(py::init([](const shared_ptr<TenSEALContext> &ctx,
+                         const PlainTensor<int64_t> &tensor, bool batch) {
+                 return BFVTensor::Create(ctx, tensor, batch);
+             }),
+             py::arg("ctx"), py::arg("tensor"), py::arg("batch") = true)
+        .def(py::init(
+            [](const shared_ptr<TenSEALContext> &ctx, const std::string &data) {
+                return BFVTensor::Create(ctx, data);
+            }))
+        .def(py::init(
+            [](const std::string &data) { return BFVTensor::Create(data); }))
+        .def("decrypt",
+             [](shared_ptr<BFVTensor> obj) { return obj->decrypt(); })
+        .def("decrypt",
+             [](shared_ptr<BFVTensor> obj, const shared_ptr<SecretKey> &sk) {
+                 return obj->decrypt(sk);
+             })
+        .def("sum", &BFVTensor::sum, py::arg("axis") = 0)
+        .def("sum_", &BFVTensor::sum_inplace, py::arg("axis") = 0)
+        .def("sum_batch", &BFVTensor::sum_batch)
+        .def("sum_batch_", &BFVTensor::sum_batch_inplace)
+        .def("neg", &BFVTensor::negate)
+        .def("neg_", &BFVTensor::negate_inplace)
+        .def("square", &BFVTensor::square)
+        .def("square_", &BFVTensor::square_inplace)
+        .def("pow", &BFVTensor::power)
+        .def("pow_", &BFVTensor::power_inplace)
+        .def("add", &BFVTensor::add)
+        .def("add_", &BFVTensor::add_inplace)
+        .def("sub", &BFVTensor::sub)
+        .def("sub_", &BFVTensor::sub_inplace)
+        .def("mul", &BFVTensor::mul)
+        .def("mul_", &BFVTensor::mul_inplace)
+        .def("add_plain", py::overload_cast<const int64_t &>(
+                              &BFVTensor::add_plain, py::const_))
+        .def("add_plain", py::overload_cast<const PlainTensor<int64_t> &>(
+                              &BFVTensor::add_plain, py::const_))
+        .def("sub_plain", py::overload_cast<const int64_t &>(
+                              &BFVTensor::sub_plain, py::const_))
+        .def("sub_plain", py::overload_cast<const PlainTensor<int64_t> &>(
+                              &BFVTensor::sub_plain, py::const_))
+        .def("mul_plain", py::overload_cast<const int64_t &>(
+                              &BFVTensor::mul_plain, py::const_))
+        .def("mul_plain", py::overload_cast<const PlainTensor<int64_t> &>(
+                              &BFVTensor::mul_plain, py::const_))
+        .def("add_plain_",
+             py::overload_cast<const int64_t &>(&BFVTensor::add_plain_inplace))
+        .def("add_plain_", py::overload_cast<const PlainTensor<int64_t> &>(
+                               &BFVTensor::add_plain_inplace))
+        .def("sub_plain_",
+             py::overload_cast<const int64_t &>(&BFVTensor::sub_plain_inplace))
+        .def("sub_plain_", py::overload_cast<const PlainTensor<int64_t> &>(
+                               &BFVTensor::sub_plain_inplace))
+        .def("mul_plain_",
+             py::overload_cast<const int64_t &>(&BFVTensor::mul_plain_inplace))
+        .def("mul_plain_", py::overload_cast<const PlainTensor<int64_t> &>(
+                               &BFVTensor::mul_plain_inplace))
+        .def("polyval", &BFVTensor::polyval)
+        .def("polyval_", &BFVTensor::polyval_inplace)
+        .def("dot", &BFVTensor::dot)
+        .def("dot_", &BFVTensor::dot_inplace)
+        .def("dot", &BFVTensor::dot_plain)
+        .def("dot_", &BFVTensor::dot_plain_inplace)
+        .def("matmul", &BFVTensor::matmul)
+        .def("matmul_", &BFVTensor::matmul_inplace)
+        .def("matmul", &BFVTensor::matmul_plain)
+        .def("matmul_", &BFVTensor::matmul_plain_inplace)
+        .def("mm", &BFVTensor::matmul)
+        .def("mm_", &BFVTensor::matmul_inplace)
+        .def("mm", &BFVTensor::matmul_plain)
+        .def("mm_", &BFVTensor::matmul_plain_inplace)
+        // python arithmetic
+        .def("__add__", &BFVTensor::add)
+        .def("__add__", py::overload_cast<const int64_t &>(
+                            &BFVTensor::add_plain, py::const_))
+        .def("__add__", py::overload_cast<const PlainTensor<int64_t> &>(
+                            &BFVTensor::add_plain, py::const_))
+        .def("__radd__", py::overload_cast<const int64_t &>(
+                             &BFVTensor::add_plain, py::const_))
+        .def("__radd__", py::overload_cast<const PlainTensor<int64_t> &>(
+                             &BFVTensor::add_plain, py::const_))
+        .def("__iadd__", &BFVTensor::add_inplace)
+        .def("__iadd__",
+             py::overload_cast<const int64_t &>(&BFVTensor::add_plain_inplace))
+        .def("__iadd__", py::overload_cast<const PlainTensor<int64_t> &>(
+                             &BFVTensor::add_plain_inplace))
+        .def("__mul__", &BFVTensor::mul)
+        .def("__mul__", py::overload_cast<const int64_t &>(
+                            &BFVTensor::mul_plain, py::const_))
+        .def("__mul__", py::overload_cast<const PlainTensor<int64_t> &>(
+                            &BFVTensor::mul_plain, py::const_))
+        .def("__rmul__", py::overload_cast<const int64_t &>(
+                             &BFVTensor::mul_plain, py::const_))
+        .def("__rmul__", py::overload_cast<const PlainTensor<int64_t> &>(
+                             &BFVTensor::mul_plain, py::const_))
+        .def("__imul__", &BFVTensor::mul_inplace)
+        .def("__imul__",
+             py::overload_cast<const int64_t &>(&BFVTensor::mul_plain_inplace))
+        .def("__imul__", py::overload_cast<const PlainTensor<int64_t> &>(
+                             &BFVTensor::mul_plain_inplace))
+        .def("__matmul__", &BFVTensor::matmul)
+        .def("__matmul__", &BFVTensor::matmul_plain)
+        .def("__imatmul__", &BFVTensor::matmul_inplace)
+        .def("__imatmul__", &BFVTensor::matmul_plain_inplace)
+        .def("__sub__", &BFVTensor::sub)
+        .def("__sub__", py::overload_cast<const int64_t &>(
+                            &BFVTensor::sub_plain, py::const_))
+        .def("__sub__", py::overload_cast<const PlainTensor<int64_t> &>(
+                            &BFVTensor::sub_plain, py::const_))
+        /*
+        Since subtraction operation is anticommutative, right subtraction
+        operator need to negate the vector then do an addition with left
+        operand.
+        */
+        .def("__rsub__",
+             [](shared_ptr<BFVTensor> other, const int64_t left_operand) {
+                 // vec should be a copy so it might be safe to do inplace
+                 auto vec = other->copy();
+                 vec->negate_inplace();
+                 vec->add_plain_inplace(left_operand);
+                 return vec;
+             })
+        .def("__rsub__",
+             [](shared_ptr<BFVTensor> other,
+                const vector<int64_t> &left_operand) {
+                 // vec should be a copy so it might be safe to do inplace
+                 auto vec = other->copy();
+                 vec->negate_inplace();
+                 vec->add_plain_inplace(left_operand);
+                 return vec;
+             })
+        .def("__isub__", &BFVTensor::sub_inplace)
+        .def("__isub__",
+             py::overload_cast<const int64_t &>(&BFVTensor::sub_plain_inplace))
+        .def("__isub__", py::overload_cast<const PlainTensor<int64_t> &>(
+                             &BFVTensor::sub_plain_inplace))
+        .def("__neg__", &BFVTensor::negate)
+        .def("__pow__", &BFVTensor::power)
+        .def("__ipow__", &BFVTensor::power_inplace)
+        .def("context", &BFVTensor::tenseal_context)
+        .def("link_context", &BFVTensor::link_tenseal_context)
+        .def("serialize",
+             [](shared_ptr<BFVTensor> &obj) { return py::bytes(obj->save()); })
+        .def("copy", &BFVTensor::deepcopy)
+        .def("__copy__",
+             [](shared_ptr<BFVTensor> &obj) { return obj->deepcopy(); })
+        .def("__deepcopy__", [](const shared_ptr<BFVTensor> &obj,
+                                py::dict) { return obj->deepcopy(); })
+        .def("ciphertext", &BFVTensor::data)
+        .def("shape", &BFVTensor::shape)
+        .def("data", &BFVTensor::data)
+        .def("reshape", &BFVTensor::reshape)
+        .def("reshape_", &BFVTensor::reshape_inplace)
+        .def("broadcast", &BFVTensor::broadcast)
+        .def("broadcast_", &BFVTensor::broadcast_inplace)
+        .def("transpose", &BFVTensor::transpose)
+        .def("transpose_", &BFVTensor::transpose_inplace);
+}
+
 PYBIND11_MODULE(_tenseal_cpp, m) {
     m.doc() = "Library for doing homomorphic encryption operations on tensors";
 
@@ -726,4 +893,5 @@ PYBIND11_MODULE(_tenseal_cpp, m) {
     bind_bfv_vector(m);
     bind_ckks_vector(m);
     bind_ckks_tensor(m);
+    bind_bfv_tensor(m);
 }

@@ -93,7 +93,7 @@ def test_batch(data, axis):
 
 @pytest.mark.parametrize(
     "data, shape, new_shape",
-    [([i for i in range(10)], [10], [2, 10]), ([i for i in range(9)], [3, 3], [2, 3, 3]),],
+    [([i for i in range(10)], [10], [2, 10]), ([i for i in range(9)], [3, 3], [2, 3, 3])],
 )
 def test_broadcast(data, shape, new_shape):
     tensor = ts.plain_tensor(data, shape)

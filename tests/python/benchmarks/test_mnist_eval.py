@@ -117,9 +117,7 @@ def test_perf_gen_keys(benchmark):
     def op():
         return create_ctx()
 
-    benchmark.pedantic(
-        op, rounds=rounds, iterations=iterations,
-    )
+    benchmark.pedantic(op, rounds=rounds, iterations=iterations)
 
 
 def test_perf_mnist_prepare_input(benchmark):
@@ -129,9 +127,7 @@ def test_perf_mnist_prepare_input(benchmark):
     def op():
         return prepare_input(context, image)
 
-    benchmark.pedantic(
-        op, rounds=rounds, iterations=iterations,
-    )
+    benchmark.pedantic(op, rounds=rounds, iterations=iterations)
 
 
 def test_perf_mnist_eval_conv(benchmark, params):
@@ -148,9 +144,7 @@ def test_perf_mnist_eval_conv(benchmark, params):
             channels.append(y)
         out = ts.CKKSVector.pack_vectors(channels)
 
-    benchmark.pedantic(
-        op, args=(), rounds=rounds, iterations=iterations,
-    )
+    benchmark.pedantic(op, args=(), rounds=rounds, iterations=iterations)
 
 
 def test_perf_mnist_eval_square1(benchmark, params):
@@ -166,9 +160,7 @@ def test_perf_mnist_eval_square1(benchmark, params):
     def op():
         return out.square()
 
-    benchmark.pedantic(
-        op, args=(), rounds=rounds, iterations=iterations,
-    )
+    benchmark.pedantic(op, args=(), rounds=rounds, iterations=iterations)
 
 
 def test_perf_mnist_eval_fc1(benchmark, params):
@@ -186,9 +178,7 @@ def test_perf_mnist_eval_fc1(benchmark, params):
         # fc1 layer
         return out.mm(model.fc1_weight) + model.fc1_bias
 
-    benchmark.pedantic(
-        op, args=(), rounds=rounds, iterations=iterations,
-    )
+    benchmark.pedantic(op, args=(), rounds=rounds, iterations=iterations)
 
 
 def test_perf_mnist_eval_square2(benchmark, params):
@@ -213,9 +203,7 @@ def test_perf_mnist_eval_square2(benchmark, params):
         # squaring
         out.square()
 
-    benchmark.pedantic(
-        op, args=(), rounds=rounds, iterations=iterations,
-    )
+    benchmark.pedantic(op, args=(), rounds=rounds, iterations=iterations)
 
 
 def test_perf_mnist_eval_fc2(benchmark, params):
@@ -242,9 +230,7 @@ def test_perf_mnist_eval_fc2(benchmark, params):
         # output layer
         return out.mm(model.fc2_weight) + model.fc2_bias
 
-    benchmark.pedantic(
-        op, args=(), rounds=rounds, iterations=iterations,
-    )
+    benchmark.pedantic(op, args=(), rounds=rounds, iterations=iterations)
 
 
 def test_perf_mnist_eval_full(benchmark, params):
@@ -256,6 +242,4 @@ def test_perf_mnist_eval_full(benchmark, params):
     def op():
         model(encrypted_image)
 
-    benchmark.pedantic(
-        op, rounds=rounds, iterations=iterations,
-    )
+    benchmark.pedantic(op, rounds=rounds, iterations=iterations)

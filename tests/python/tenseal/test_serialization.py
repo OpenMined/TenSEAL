@@ -27,7 +27,7 @@ def recreate(ctx):
     return ts.context_from(proto)
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate])
 @pytest.mark.parametrize(
     "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]
 )
@@ -52,7 +52,7 @@ def test_context_recreation(duplicate, encryption_type):
     assert orig_context.is_private() is True, "original TenSEALContext should stay private"
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate])
 @pytest.mark.parametrize(
     "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]
 )
@@ -80,7 +80,7 @@ def test_generate_galois_keys(duplicate, encryption_type):
     assert exc_info.type is ValueError, "orginal context shouldn't have Galois keys"
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate])
 @pytest.mark.parametrize(
     "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]
 )
@@ -104,7 +104,7 @@ def test_generate_relin_keys(duplicate, encryption_type):
     assert isinstance(context.relin_keys(), RelinKeys), "Relin keys should be set"
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate])
 @pytest.mark.parametrize("encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC])
 def test_generate_galois_relin_keys(duplicate, encryption_type):
     orig_public_context = ctx(encryption_type)
@@ -121,7 +121,7 @@ def test_generate_galois_relin_keys(duplicate, encryption_type):
     assert exc_info.type is ValueError, "orginal context shouldn't have Galois keys"
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate])
 @pytest.mark.parametrize("scale", [0, 1, 2, 2 ** 40])
 @pytest.mark.parametrize(
     "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]
@@ -138,7 +138,7 @@ def test_global_scale(duplicate, scale, encryption_type):
     assert context.global_scale == scale
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate])
 @pytest.mark.parametrize(
     "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]
 )
@@ -195,7 +195,7 @@ def test_auto_flags(duplicate, encryption_type):
     assert context.auto_mod_switch == True
 
 
-@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate,])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate])
 @pytest.mark.parametrize(
     "vec1, vec2",
     [

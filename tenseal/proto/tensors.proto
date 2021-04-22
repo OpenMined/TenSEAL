@@ -9,6 +9,16 @@ message BFVVectorProto {
     repeated bytes ciphertexts = 2;
 };
 
+//BFVTensor parameters
+message BFVTensorProto {
+    // The shape of the encrypted tensor
+    repeated uint32 shape = 1;
+    // The serialized ciphertexts
+    repeated bytes ciphertexts = 2;
+    // Optional batch size. Exists only if batching is enabled
+    uint32 batch_size = 3;
+};
+
 //CKKSVector parameters
 message CKKSVectorProto {
     // The size of the chunks of the encrypted vector

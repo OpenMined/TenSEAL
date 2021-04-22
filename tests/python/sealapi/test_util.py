@@ -78,7 +78,7 @@ def test_util_baseconverter_sanity():
 
 @pytest.mark.parametrize(
     "test, out",
-    [([0, 0], [0, 0, 0]), ([1, 1], [1, 3, 2]), ([1, 2], [2, 1, 0]), ([3, 3], [0, 3, 3]),],
+    [([0, 0], [0, 0, 0]), ([1, 1], [1, 3, 2]), ([1, 2], [2, 1, 0]), ([3, 3], [0, 3, 3])],
 )
 def test_util_baseconverter_conversion(test, out):
     base1 = util.RNSBase([sealapi.Modulus(2), sealapi.Modulus(3)])
@@ -148,9 +148,7 @@ def test_util_pointer():
     assert util.PointerModulus() is not None
 
 
-@pytest.mark.parametrize(
-    "params", [helper_params_bfv(), helper_params_ckks(),],
-)
+@pytest.mark.parametrize("params", [helper_params_bfv(), helper_params_ckks()])
 def test_util_rlwe(params):
     generator = sealapi.Blake2xbPRNGFactory.DefaultFactory().create()
     assert (
