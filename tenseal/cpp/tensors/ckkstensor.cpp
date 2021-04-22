@@ -65,6 +65,7 @@ CKKSTensor::CKKSTensor(const shared_ptr<const CKKSTensor>& tensor) {
 CKKSTensor::CKKSTensor(const shared_ptr<const CKKSTensor>& tensor, const vector<pair<size_t, size_t>>& pairs) {
     this->link_tenseal_context(tensor->tenseal_context());
     this->_init_scale = tensor->scale();
+    this->_data = TensorStorage<Ciphertext>(tensor->data(), tensor->shape());
     this->_data = this->_data.subscript(pairs);
     this->_batch_size = tensor->_batch_size;
 }
