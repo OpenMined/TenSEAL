@@ -80,6 +80,8 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     shared_ptr<CKKSTensor> reshape(const vector<size_t>& new_shape);
     shared_ptr<CKKSTensor> reshape_inplace(const vector<size_t>& new_shape);
 
+    CKKSTensor subscript(const vector<pair<size_t, size_t>>& pairs);
+
     template <class T>
     shared_ptr<T> broadcast_or_throw(const shared_ptr<T>& other) {
         auto this_flat_size = this->_data.flat_size();
@@ -129,6 +131,7 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
                const CKKSTensorProto& tensor);
     CKKSTensor(const shared_ptr<const CKKSTensor>& vec);
+    CKKSTensor(const shared_ptr<const CKKSTensor>& vec, const vector<pair<size_t, size_t>>& pairs);
 
     static Ciphertext encrypt(const shared_ptr<TenSEALContext>& ctx,
                               const double scale, const vector<double>& data);

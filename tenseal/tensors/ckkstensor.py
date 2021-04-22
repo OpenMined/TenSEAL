@@ -52,6 +52,13 @@ class CKKSTensor(AbstractTensor):
         pt = self._decrypt(secret_key=secret_key)
         return ts.PlainTensor(pt.data(), shape=pt.shape(), dtype="float")
 
+    def __getitem__(self, item) -> "CKKSTensor":
+        if isinstance(item, slice):
+            return self._wrap(self.data.subscript([(item.start, item.stop)]))
+
+        slices = [(s.start, s.stop) for s in item]
+        return self._wrap(self.data.subscript(slices))
+
     def add(self, other) -> "CKKSTensor":
         other = self._get_operand(other, dtype="float")
         result = self.data + other
