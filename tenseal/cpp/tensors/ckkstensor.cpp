@@ -62,7 +62,8 @@ CKKSTensor::CKKSTensor(const shared_ptr<const CKKSTensor>& tensor) {
     this->_batch_size = tensor->_batch_size;
 }
 
-CKKSTensor::CKKSTensor(const shared_ptr<const CKKSTensor>& tensor, const vector<pair<size_t, size_t>>& pairs) {
+CKKSTensor::CKKSTensor(const shared_ptr<const CKKSTensor>& tensor,
+                       const vector<pair<size_t, size_t>>& pairs) {
     this->link_tenseal_context(tensor->tenseal_context());
     this->_init_scale = tensor->scale();
     this->_data = TensorStorage<Ciphertext>(tensor->data(), tensor->shape());
@@ -740,7 +741,7 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_plain_inplace(
     return shared_from_this();
 }
 
-CKKSTensor CKKSTensor::subscript(const vector<pair<size_t, size_t>> &pairs) {
+CKKSTensor CKKSTensor::subscript(const vector<pair<size_t, size_t>>& pairs) {
     CKKSTensor newTensor = CKKSTensor(this->copy(), pairs);
     return newTensor;
 }

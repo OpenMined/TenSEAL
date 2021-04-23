@@ -131,7 +131,8 @@ class CKKSTensor : public EncryptedTensor<double, shared_ptr<CKKSTensor>>,
     CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
                const CKKSTensorProto& tensor);
     CKKSTensor(const shared_ptr<const CKKSTensor>& vec);
-    CKKSTensor(const shared_ptr<const CKKSTensor>& vec, const vector<pair<size_t, size_t>>& pairs);
+    CKKSTensor(const shared_ptr<const CKKSTensor>& vec,
+               const vector<pair<size_t, size_t>>& pairs);
 
     static Ciphertext encrypt(const shared_ptr<TenSEALContext>& ctx,
                               const double scale, const vector<double>& data);

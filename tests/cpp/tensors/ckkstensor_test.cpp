@@ -309,7 +309,7 @@ TEST_P(CKKSTensorTest, TestSubscript) {
     ctx->generate_galois_keys();
 
     auto ldata =
-            PlainTensor(vector<double>({1, 2, 3, 4, 5, 6}), vector<size_t>({3, 2}));
+        PlainTensor(vector<double>({1, 2, 3, 4, 5, 6}), vector<size_t>({3, 2}));
     // 1 2
     // 3 4
     // 5 6
@@ -317,14 +317,14 @@ TEST_P(CKKSTensorTest, TestSubscript) {
     auto l = CKKSTensor::Create(ctx, ldata, std::pow(2, 40));
 
     // One slice
-    const std::vector<std::pair<size_t, size_t>> vec1 = { {0, 2} };
+    const std::vector<std::pair<size_t, size_t>> vec1 = {{0, 2}};
     auto res = l->subscript(vec1);
     ASSERT_THAT(res.shape(), ElementsAreArray({2, 2}));
     auto decr = res.decrypt();
     ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4}));
 
     // Two slices
-    const std::vector<std::pair<size_t, size_t>> vec2 = { {0, 2}, {1, 2}};
+    const std::vector<std::pair<size_t, size_t>> vec2 = {{0, 2}, {1, 2}};
     res = l->subscript(vec2);
     ASSERT_THAT(res.shape(), ElementsAreArray({2, 1}));
     decr = res.decrypt();
