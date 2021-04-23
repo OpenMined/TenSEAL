@@ -53,10 +53,17 @@ class CKKSTensor(AbstractTensor):
         return ts.PlainTensor(pt.data(), shape=pt.shape(), dtype="float")
 
     def __getitem__(self, item) -> "CKKSTensor":
+        slices = []
         if isinstance(item, slice):
-            return self._wrap(self.data.subscript([(item.start, item.stop)]))
+            start = 0 if item.start is None else item.start
+            stop = self.data.shape()[0] if item.stop is None else item.stop
+            slices = [(start, stop)]
+        else:
+            for i, slice_ in enumerate(item):
+                start = 0 if slice_.start is None else slice_.start
+                stop = self.data.shape()[i] if slice_.stop is None else slice_.stop
+                slices.append((start, stop))
 
-        slices = [(s.start, s.stop) for s in item]
         return self._wrap(self.data.subscript(slices))
 
     def add(self, other) -> "CKKSTensor":

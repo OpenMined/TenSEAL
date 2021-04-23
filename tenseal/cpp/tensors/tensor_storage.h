@@ -382,10 +382,11 @@ class TensorStorage {
 
     TensorStorage<dtype_t> subscript(const vector<pair<size_t, size_t>>& pairs) {
         xt::xstrided_slice_vector slices;
-        std::vector<size_t> shape;
+        std::vector<size_t> shape = this->shape();
+        int index = 0;
         for(auto pair : pairs) {
             slices.push_back(xt::range(pair.first, pair.second));
-            shape.push_back(pair.second - pair.first);
+            shape[index++] = pair.second - pair.first;
         }
         xt::xarray<dtype_t> _sliced_data = xt::strided_view(this->_data, slices);
         std::vector<dtype_t> dummy_data(_sliced_data.begin(), _sliced_data.end());
