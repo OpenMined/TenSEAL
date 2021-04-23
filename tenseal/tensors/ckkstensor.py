@@ -54,7 +54,11 @@ class CKKSTensor(AbstractTensor):
 
     def __getitem__(self, item) -> "CKKSTensor":
         slices = []
-        if isinstance(item, slice):
+        if isinstance(item, int):
+            start = item
+            stop = item + 1
+            slices = [(start, stop)]
+        elif isinstance(item, slice):
             start = 0 if item.start is None else item.start
             stop = self.data.shape()[0] if item.stop is None else item.stop
             slices = [(start, stop)]
