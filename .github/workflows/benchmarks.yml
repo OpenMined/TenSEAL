@@ -1,0 +1,40 @@
+name: Benchmarks
+on:
+  push:
+      branches: [master]
+  pull_request:
+      types: [opened, synchronize, reopened]
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.8]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: .github/workflows/scripts/install_req_ubuntu.sh
+      - name: Build the library for Ubuntu/MacOS
+        run: .github/workflows/scripts/build_nix.sh
+      - name: Run benchmarks
+        run: |
+          pytest tests/python/benchmarks/ --cov-fail-under 0 --benchmark-json pytest_benchmarks_output.json
+      - name: Store benchmark result
+        uses: rhysd/github-action-benchmark@v1
+        with:
+          name: Python-Benchmarks
+          tool: "pytest"
+          output-file-path: pytest_benchmarks_output.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          # Show alert with commit comment on detecting possible performance regression
+          alert-threshold: "200%"
+          comment-on-alert: true
+          fail-on-alert: true

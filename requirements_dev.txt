@@ -4,8 +4,11 @@ flake8
 numpy
 pytest>=5.4.1
 pytest-benchmark
+pytest-cov
 pytest-benchmark[histogram]
 setuptools>=41.0.0
 pygal
 pygaljs
 scikit-image
+torch
+torchvision
