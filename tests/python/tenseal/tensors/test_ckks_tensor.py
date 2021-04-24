@@ -126,6 +126,7 @@ def test_reshape_batching(context, data, new_shape):
     tensor.reshape_(new_shape)
     assert tensor.shape == new_shape
 
+
 @pytest.mark.parametrize(
     "data, slices, new_shape",
     [
@@ -134,10 +135,18 @@ def test_reshape_batching(context, data, new_shape):
         ([0, 1, 2, 3, 4, 5], [slice(None, 4, None)], [4]),
         ([[0, 1, 2], [0, 1, 2], [0, 1, 2]], [slice(1, 3, None), slice(0, 2, None)], [2, 2]),
         ([[0, 1, 2], [0, 1, 2], [0, 1, 2]], [slice(1, None, None), slice(0, 2, None)], [2, 2]),
-        ([[0, 1, 2], [0, 1, 2], [0, 1, 2]], [slice(1, None, None), slice(None, None, None)], [2, 3]),
-        ([[0, 1, 2], [0, 1, 2], [0, 1, 2]], [slice(None, None, None), slice(None, None, None)], [3, 3]),
+        (
+            [[0, 1, 2], [0, 1, 2], [0, 1, 2]],
+            [slice(1, None, None), slice(None, None, None)],
+            [2, 3],
+        ),
+        (
+            [[0, 1, 2], [0, 1, 2], [0, 1, 2]],
+            [slice(None, None, None), slice(None, None, None)],
+            [3, 3],
+        ),
         ([[0, 1, 2], [0, 1, 2], [0, 1, 2]], 1, [1, 3]),
-    ]
+    ],
 )
 def test_subscript(context, data, slices, new_shape):
     tensor = ts.ckks_tensor(context, data)
@@ -147,9 +156,14 @@ def test_subscript(context, data, slices, new_shape):
 
     assert new_tensor.shape == new_shape
     if isinstance(slices, int):
-        assert _almost_equal(new_tensor.decrypt().tolist(), [plain_data.__getitem__(slices).tolist()], 1)
+        assert _almost_equal(
+            new_tensor.decrypt().tolist(), [plain_data.__getitem__(slices).tolist()], 1
+        )
     else:
-        assert _almost_equal(new_tensor.decrypt().tolist(), plain_data.__getitem__(slices).tolist(), 1)
+        assert _almost_equal(
+            new_tensor.decrypt().tolist(), plain_data.__getitem__(slices).tolist(), 1
+        )
+
 
 @pytest.mark.parametrize(
     "data, axis",
@@ -558,7 +572,14 @@ def test_power_inplace(context, plain, power, precision):
 @pytest.mark.parametrize(
     "data, polynom",
     [
-        (ts.plain_tensor([1, 2, 3]), [0, 0, 0,]),
+        (
+            ts.plain_tensor([1, 2, 3]),
+            [
+                0,
+                0,
+                0,
+            ],
+        ),
         (ts.plain_tensor([1, 2, 3, 4], [2, 2]), [1, 1]),
         (ts.plain_tensor([1, 2, 3, 4], [2, 2]), [1, 1, 1]),
         (ts.plain_tensor([1, 2, 3, 4, 5, 6], [2, 3]), [3, 2, 4, 5]),
@@ -592,7 +613,10 @@ def test_polynomial(context, data, polynom, reshape_first):
 
 @pytest.mark.parametrize(
     "data, polynom",
-    [(ts.plain_tensor([1, 2, 3, 4]), [0, 1, 1]), (ts.plain_tensor([1, 2, 3, 4]), [0, 1, 0, 1]),],
+    [
+        (ts.plain_tensor([1, 2, 3, 4]), [0, 1, 1]),
+        (ts.plain_tensor([1, 2, 3, 4]), [0, 1, 0, 1]),
+    ],
 )
 def test_polynomial_modswitch_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
@@ -606,7 +630,10 @@ def test_polynomial_modswitch_off(context, data, polynom):
 
 @pytest.mark.parametrize(
     "data, polynom",
-    [(ts.plain_tensor([1, 2, 3, 4]), [0, 1, 1]), (ts.plain_tensor([1, 2, 3, 4]), [0, 1, 0, 1]),],
+    [
+        (ts.plain_tensor([1, 2, 3, 4]), [0, 1, 1]),
+        (ts.plain_tensor([1, 2, 3, 4]), [0, 1, 0, 1]),
+    ],
 )
 def test_polynomial_rescale_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
@@ -762,7 +789,10 @@ def test_matmul_api(context, plain, arithmetic):
 
 @pytest.mark.parametrize(
     "data, shape, new_shape",
-    [([i for i in range(10)], [10], [2, 10]), ([i for i in range(9)], [3, 3], [2, 3, 3]),],
+    [
+        ([i for i in range(10)], [10], [2, 10]),
+        ([i for i in range(9)], [3, 3], [2, 3, 3]),
+    ],
 )
 def test_broadcast(context, data, shape, new_shape):
     tensor = ts.ckks_tensor(context, ts.plain_tensor(data, shape))
