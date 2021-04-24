@@ -3,16 +3,8 @@ import tenseal as ts
 import numpy as np
 
 
-PLAIN_VEC = [
-    [0],
-    [-1],
-    [1],
-    [73, 81, 90],
-    [-73, -81, -90],
-]
-PLAIN_EMPTY_VEC = [
-    [],
-]
+PLAIN_VEC = [[0], [-1], [1], [73, 81, 90], [-73, -81, -90]]
+PLAIN_EMPTY_VEC = [[]]
 COEFF_MOD_BIT_SIZES = [60, 40, 40, 60]
 
 
@@ -170,7 +162,7 @@ def test_ckks_tensor_encryption_decryption_matrix(batch, encryption_type):
 
 @pytest.mark.parametrize("batch", [False, True])
 @pytest.mark.parametrize(
-    "shape", [[1], [2], [10], [2, 2], [3, 5], [2, 3, 4], [2, 3, 4, 5], [2, 3, 4, 5, 6],]
+    "shape", [[1], [2], [10], [2, 2], [3, 5], [2, 3, 4], [2, 3, 4, 5], [2, 3, 4, 5, 6]]
 )
 @pytest.mark.parametrize(
     "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]

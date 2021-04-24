@@ -296,9 +296,18 @@ shared_ptr<BFVVector> BFVVector::sub_plain_inplace(
     return shared_from_this();
 }
 
+template <typename T>
+void BFVVector::_mul_plain_inplace(Ciphertext& ct, const T& to_mul) {
+    Plaintext plaintext;
+    this->tenseal_context()->encode<BatchEncoder>(to_mul, plaintext);
+    this->tenseal_context()->evaluator->multiply_plain_inplace(ct, plaintext);
+}
+
 shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
-    const plain_t::dtype& to_sub) {
-    throw std::logic_error("not implemented");
+    const plain_t::dtype& to_mul) {
+    for (auto& ct : this->_ciphertexts) this->_mul_plain_inplace(ct, to_mul);
+
+    return shared_from_this();
 }
 
 shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
@@ -312,12 +321,9 @@ shared_ptr<BFVVector> BFVVector::mul_plain_inplace(
 
     for (size_t idx = 0; idx < this->_ciphertexts.size(); ++idx) {
         Plaintext plaintext;
-        this->tenseal_context()->encode<BatchEncoder>(to_mul[idx].data_ref(),
-                                                      plaintext);
-
         try {
-            this->tenseal_context()->evaluator->multiply_plain_inplace(
-                this->_ciphertexts[idx], plaintext);
+            this->_mul_plain_inplace(this->_ciphertexts[idx],
+                                     to_mul[idx].data_ref());
         } catch (const std::logic_error& e) {
             if (strcmp(e.what(), "result ciphertext is transparent") == 0) {
                 // replace by encryption of zero

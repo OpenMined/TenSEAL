@@ -1,6 +1,7 @@
 #ifndef TENSEAL_TENSOR_API_H
 #define TENSEAL_TENSOR_API_H
 
+#include "tenseal/cpp/tensors/bfvtensor.h"
 #include "tenseal/cpp/tensors/bfvvector.h"
 #include "tenseal/cpp/tensors/ckkstensor.h"
 #include "tenseal/cpp/tensors/ckksvector.h"

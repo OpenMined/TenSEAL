@@ -6,9 +6,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils import *
 
 
-@pytest.mark.parametrize(
-    "ctx", [helper_context_bfv(1024)],
-)
+@pytest.mark.parametrize("ctx", [helper_context_bfv(1024)])
 def test_batchencoder(ctx):
     poly_modulus_degree = helper_poly_modulus_degree(ctx)
     enc_out = sealapi.Plaintext()

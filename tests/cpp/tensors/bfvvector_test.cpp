@@ -141,6 +141,47 @@ TEST_P(BFVVectorTest, TestBFVAddPlain) {
     EXPECT_THAT(decr.data(), ElementsAreArray({9, 14, 19}));
 }
 
+TEST_P(BFVVectorTest, TestBFVMulPlain) {
+    auto should_serialize_first = get<0>(GetParam());
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
+    ASSERT_TRUE(ctx != nullptr);
+
+    auto l = BFVVector::Create(ctx, vector<int64_t>({1, 2, 3}));
+    auto r = vector<int64_t>({2, 3, 4});
+
+    // scalar operation
+    auto mul = l->mul_plain(2);
+    ASSERT_THAT(mul->ciphertext_size(), ElementsAreArray({2}));
+
+    auto decr = mul->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({2, 4, 6}));
+
+    // element-wise operation
+    mul = l->mul_plain(r);
+    ASSERT_THAT(mul->ciphertext_size(), ElementsAreArray({2}));
+
+    decr = mul->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({2, 6, 12}));
+
+    r = vector<int64_t>({2, 2, 2});
+
+    l->mul_plain_inplace(r);
+    l->mul_plain_inplace(r);
+    l->mul_plain_inplace(r);
+    l->mul_plain_inplace(r);
+
+    if (should_serialize_first) {
+        l = duplicate(l);
+    }
+
+    ASSERT_THAT(l->ciphertext_size(), ElementsAreArray({2}));
+    decr = l->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({16, 32, 48}));
+}
+
 TEST_P(BFVVectorTest, TestEmptyPlaintext) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
@@ -285,6 +326,67 @@ TEST_P(BFVVectorTest, TestBFVAddBigVector) {
 
     auto decr = add->decrypt();
     EXPECT_THAT(decr.data(), ElementsAreArray(expected));
+}
+
+TEST_P(BFVVectorTest, TestSum) {
+    auto enc_type = get<1>(GetParam());
+
+    int poly_mod = 8192;
+    int input_size = 100000;
+
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, poly_mod, 1032193, {},
+                                      enc_type);
+    ASSERT_TRUE(ctx != nullptr);
+    ctx->generate_galois_keys();
+
+    auto ldata = PlainTensor(vector<int64_t>({1, 2, 3, 4, 5, 6, 7, 8, 9}));
+
+    auto l = BFVVector::Create(ctx, ldata);
+
+    l->sum_inplace();
+    auto decr = l->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({45}));
+}
+
+TEST_P(BFVVectorTest, TestDot) {
+    auto enc_type = get<1>(GetParam());
+
+    int poly_mod = 8192;
+    int input_size = 100000;
+
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, poly_mod, 1032193, {},
+                                      enc_type);
+    ASSERT_TRUE(ctx != nullptr);
+    ctx->generate_galois_keys();
+
+    vector<int64_t> lraw({1, 2, 3, 4, 5, 6, 7, 8, 9});
+    vector<int64_t> rraw({11, 22, 33, 11, 22, 33, 11, 22, 33});
+
+    int64_t expected = 0;
+    for (auto idx = 0; idx < lraw.size(); ++idx)
+        expected += lraw[idx] * rraw[idx];
+
+    auto ldata = PlainTensor(lraw);
+    auto rdata = PlainTensor(rraw);
+
+    auto l = BFVVector::Create(ctx, ldata);
+    auto r = BFVVector::Create(ctx, rdata);
+
+    auto res = l->dot(r);
+    auto decr = res->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({expected}));
+
+    res = l->dot_plain(rdata);
+    decr = res->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({expected}));
+
+    res = r->dot(l);
+    decr = res->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({expected}));
+
+    res = r->dot_plain(ldata);
+    decr = res->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({expected}));
 }
 
 INSTANTIATE_TEST_CASE_P(

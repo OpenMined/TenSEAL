@@ -7,7 +7,7 @@ from utils import *
 
 
 @pytest.mark.parametrize(
-    "check", [sealapi.is_metadata_valid_for, sealapi.is_data_valid_for, sealapi.is_valid_for],
+    "check", [sealapi.is_metadata_valid_for, sealapi.is_data_valid_for, sealapi.is_valid_for]
 )
 def test_valcheck(check):
     ctx = helper_context_bfv(8192)
@@ -39,12 +39,7 @@ def test_valcheck(check):
     gk = sealapi.GaloisKeys()
     keygen.create_galois_keys(gk)
 
-    for key in [
-        pk,
-        keygen.secret_key(),
-        gk,
-        rk,
-    ]:
+    for key in [pk, keygen.secret_key(), gk, rk]:
         assert check(key, ctx) is True
         assert check(key, other_ctx) is False
         assert check(key, invalid_ctx) is False

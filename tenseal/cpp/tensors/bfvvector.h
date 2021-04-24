@@ -128,6 +128,9 @@ class BFVVector
     template <typename T>
     void _add_plain_inplace(Ciphertext& ct, const T& to_add);
 
+    template <typename T>
+    void _mul_plain_inplace(Ciphertext& ct, const T& to_mul);
+
     BFVVector(const shared_ptr<TenSEALContext>& ctx, const plain_t& vec);
     BFVVector(const shared_ptr<const BFVVector>&);
     BFVVector(const shared_ptr<TenSEALContext>& ctx, const string& vec);

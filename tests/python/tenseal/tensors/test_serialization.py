@@ -61,9 +61,7 @@ def recreate_bfv(vec):
 @pytest.mark.parametrize(
     "plain_vec", [[0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
 )
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
-)
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks])
 def test_ckks_vector_sanity(plain_vec, precision, duplicate):
     context = ckks_context()
     orig = ts.ckks_vector(context, plain_vec)
@@ -76,9 +74,7 @@ def test_ckks_vector_sanity(plain_vec, precision, duplicate):
 @pytest.mark.parametrize(
     "plain_vec", [[0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
 )
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
-)
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks])
 def test_negate(plain_vec, precision, duplicate):
     context = ckks_context()
     ckks_vec = ts.ckks_vector(context, plain_vec)
@@ -90,12 +86,8 @@ def test_negate(plain_vec, precision, duplicate):
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of vector is incorrect"
 
 
-@pytest.mark.parametrize(
-    "plain_vec, power, precision", [([0], 3, 1), ([1, -2, 3, -4], 8, -1),],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
-)
+@pytest.mark.parametrize("plain_vec, power, precision", [([0], 3, 1), ([1, -2, 3, -4], 8, -1)])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks])
 def test_power(plain_vec, power, precision, duplicate):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 60])
     context.global_scale = pow(2, 40)
@@ -111,12 +103,8 @@ def test_power(plain_vec, power, precision, duplicate):
     ), "Something went wrong in memory."
 
 
-@pytest.mark.parametrize(
-    "plain_vec", [[0], [1, -4, 3, 5],],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
-)
+@pytest.mark.parametrize("plain_vec", [[0], [1, -4, 3, 5]])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks])
 def test_square(plain_vec, precision, duplicate):
     context = ckks_context()
     ckks_vec = ts.ckks_vector(context, plain_vec)
@@ -132,11 +120,9 @@ def test_square(plain_vec, precision, duplicate):
 
 
 @pytest.mark.parametrize(
-    "vec1, vec2", [([0], [0]), ([1, 2], [-73, -10]), ([1, 0, -2, 0, -8, 4, 73], [81,]),],
+    "vec1, vec2", [([0], [0]), ([1, 2], [-73, -10]), ([1, 0, -2, 0, -8, 4, 73], [81])]
 )
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
-)
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks])
 def test_add(vec1, vec2, precision, duplicate):
     context = ckks_context()
     first_vec = ts.ckks_vector(context, vec1)
@@ -162,11 +148,9 @@ def test_add(vec1, vec2, precision, duplicate):
 
 
 @pytest.mark.parametrize(
-    "vec1, vec2", [([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]), ([1, 0, -2, 0, -8, 4, 73], [81,]),],
+    "vec1, vec2", [([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]), ([1, 0, -2, 0, -8, 4, 73], [81])]
 )
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
-)
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks])
 def test_sub(vec1, vec2, precision, duplicate):
     context = ckks_context()
     first_vec = ts.ckks_vector(context, vec1)
@@ -192,12 +176,8 @@ def test_sub(vec1, vec2, precision, duplicate):
     assert _almost_equal(second_vec.decrypt(), vec2, precision), "Something went wrong in memory."
 
 
-@pytest.mark.parametrize(
-    "vec1, vec2", [([0], [0]), ([1, 0, -2, 0, -8, 4, 73], [81,]),],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
-)
+@pytest.mark.parametrize("vec1, vec2", [([0], [0]), ([1, 0, -2, 0, -8, 4, 73], [81])])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks])
 def test_mul(vec1, vec2, precision, duplicate):
     context = ckks_context()
     first_vec = ts.ckks_vector(context, vec1)
@@ -223,12 +203,8 @@ def test_mul(vec1, vec2, precision, duplicate):
     assert _almost_equal(second_vec.decrypt(), vec2, precision), "Something went wrong in memory."
 
 
-@pytest.mark.parametrize(
-    "vec1, vec2", [([0], [0]), ([1, 2, 3, 4, 5], [5, 4, 3, 2, 1]),],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
-)
+@pytest.mark.parametrize("vec1, vec2", [([0], [0]), ([1, 2, 3, 4, 5], [5, 4, 3, 2, 1])])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks])
 def test_dot_product(vec1, vec2, precision, duplicate):
     context = ckks_context()
     context.generate_galois_keys()
@@ -250,12 +226,8 @@ def test_dot_product(vec1, vec2, precision, duplicate):
     assert _almost_equal(second_vec.decrypt(), vec2, precision), "Something went wrong in memory."
 
 
-@pytest.mark.parametrize(
-    "vec1, vec2", [([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks,],
-)
+@pytest.mark.parametrize("vec1, vec2", [([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1])])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks])
 def test_mul_without_global_scale(vec1, vec2, precision, duplicate):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
     scale = 2 ** 40
@@ -300,12 +272,8 @@ def test_ckksvector_lazy_load(precision):
     ), "Something went wrong in memory."
 
 
-@pytest.mark.parametrize(
-    "vec1, vec2", [([1], [1]), ([-1], [1]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
-)
+@pytest.mark.parametrize("vec1, vec2", [([1], [1]), ([-1], [1]), ([1, 2, 3, 4], [4, 3, 2, 1])])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv])
 def test_add(vec1, vec2, duplicate):
     context = bfv_context()
     first_vec = ts.bfv_vector(context, vec1)
@@ -325,12 +293,8 @@ def test_add(vec1, vec2, duplicate):
     assert second_vec.decrypt() == vec2, "Something went wrong in memory."
 
 
-@pytest.mark.parametrize(
-    "vec1, vec2", [([1], [0]), ([-1], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
-)
+@pytest.mark.parametrize("vec1, vec2", [([1], [0]), ([-1], [0]), ([1, 2, 3, 4], [4, 3, 2, 1])])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv])
 def test_add_inplace(vec1, vec2, duplicate):
     context = bfv_context()
     first_vec = ts.bfv_vector(context, vec1)
@@ -347,12 +311,8 @@ def test_add_inplace(vec1, vec2, duplicate):
     assert second_vec.decrypt() == vec2, "Something went wrong in memory."
 
 
-@pytest.mark.parametrize(
-    "vec1, vec2", [([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
-)
+@pytest.mark.parametrize("vec1, vec2", [([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1])])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv])
 def test_add_plain(vec1, vec2, duplicate):
     context = bfv_context()
     first_vec = ts.bfv_vector(context, vec1)
@@ -370,12 +330,8 @@ def test_add_plain(vec1, vec2, duplicate):
     assert first_vec.decrypt() == vec1, "Something went wrong in memory."
 
 
-@pytest.mark.parametrize(
-    "vec1, vec2", [([1], [0]), ([-1], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
-)
+@pytest.mark.parametrize("vec1, vec2", [([1], [0]), ([-1], [0]), ([1, 2, 3, 4], [4, 3, 2, 1])])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv])
 def test_add_plain_inplace(vec1, vec2, duplicate):
     context = bfv_context()
     first_vec = ts.bfv_vector(context, vec1)
@@ -391,12 +347,8 @@ def test_add_plain_inplace(vec1, vec2, duplicate):
     assert decrypted_result == expected, "Addition of vectors is incorrect."
 
 
-@pytest.mark.parametrize(
-    "vec1, vec2", [([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
-)
+@pytest.mark.parametrize("vec1, vec2", [([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1])])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv])
 def test_sub(vec1, vec2, duplicate):
     context = bfv_context()
     first_vec = ts.bfv_vector(context, vec1)
@@ -413,12 +365,8 @@ def test_sub(vec1, vec2, duplicate):
     assert second_vec.decrypt() == vec2, "Something went wrong in memory."
 
 
-@pytest.mark.parametrize(
-    "vec1, vec2", [([-1], [-1]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
-)
+@pytest.mark.parametrize("vec1, vec2", [([-1], [-1]), ([1, 2, 3, 4], [4, 3, 2, 1])])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv])
 def test_sub_inplace(vec1, vec2, duplicate):
     context = bfv_context()
     first_vec = ts.bfv_vector(context, vec1)
@@ -435,12 +383,8 @@ def test_sub_inplace(vec1, vec2, duplicate):
     assert second_vec.decrypt() == vec2, "Something went wrong in memory."
 
 
-@pytest.mark.parametrize(
-    "vec1, vec2", [([-1], [1]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
-)
+@pytest.mark.parametrize("vec1, vec2", [([-1], [1]), ([1, 2, 3, 4], [4, 3, 2, 1])])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv])
 def test_sub_plain(vec1, vec2, duplicate):
     context = bfv_context()
     first_vec = ts.bfv_vector(context, vec1)
@@ -458,12 +402,8 @@ def test_sub_plain(vec1, vec2, duplicate):
     assert first_vec.decrypt() == vec1, "Something went wrong in memory."
 
 
-@pytest.mark.parametrize(
-    "vec1, vec2", [([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
-)
+@pytest.mark.parametrize("vec1, vec2", [([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1])])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv])
 def test_sub_plain_inplace(vec1, vec2, duplicate):
     context = bfv_context()
     first_vec = ts.bfv_vector(context, vec1)
@@ -478,12 +418,8 @@ def test_sub_plain_inplace(vec1, vec2, duplicate):
     assert decrypted_result == expected, "Substraction of vectors is incorrect."
 
 
-@pytest.mark.parametrize(
-    "vec1, vec2", [([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
-)
+@pytest.mark.parametrize("vec1, vec2", [([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1])])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv])
 def test_mul(vec1, vec2, duplicate):
     context = bfv_context()
     first_vec = ts.bfv_vector(context, vec1)
@@ -502,12 +438,8 @@ def test_mul(vec1, vec2, duplicate):
     assert second_vec.decrypt() == vec2, "Something went wrong in memory."
 
 
-@pytest.mark.parametrize(
-    "vec1, vec2", [([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
-)
+@pytest.mark.parametrize("vec1, vec2", [([0], [0]), ([1, 2, 3, 4], [4, 3, 2, 1])])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv])
 def test_mul_inplace(vec1, vec2, duplicate):
     context = bfv_context()
     first_vec = ts.bfv_vector(context, vec1)
@@ -524,12 +456,8 @@ def test_mul_inplace(vec1, vec2, duplicate):
     assert second_vec.decrypt() == vec2, "Something went wrong in memory."
 
 
-@pytest.mark.parametrize(
-    "vec1, vec2", [([-1], [1]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
-)
+@pytest.mark.parametrize("vec1, vec2", [([-1], [1]), ([1, 2, 3, 4], [4, 3, 2, 1])])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv])
 def test_mul_plain(vec1, vec2, duplicate):
     context = bfv_context()
     first_vec = ts.bfv_vector(context, vec1)
@@ -547,12 +475,8 @@ def test_mul_plain(vec1, vec2, duplicate):
     assert first_vec.decrypt() == vec1, "Something went wrong in memory."
 
 
-@pytest.mark.parametrize(
-    "vec1, vec2", [([-1], [1]), ([1, 2, 3, 4], [4, 3, 2, 1]),],
-)
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv,],
-)
+@pytest.mark.parametrize("vec1, vec2", [([-1], [1]), ([1, 2, 3, 4], [4, 3, 2, 1])])
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_bfv])
 def test_mul_plain_inplace(vec1, vec2, duplicate):
     context = bfv_context()
     first_vec = ts.bfv_vector(context, vec1)
@@ -591,9 +515,7 @@ def test_bfvvector_lazy_load():
 @pytest.mark.parametrize(
     "plain_vec", [[0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52]]
 )
-@pytest.mark.parametrize(
-    "duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks_tensor,],
-)
+@pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks_tensor])
 def test_ckks_tensor_sanity(plain_vec, precision, duplicate):
     context = ckks_context()
     plain_tensor = ts.plain_tensor(plain_vec)

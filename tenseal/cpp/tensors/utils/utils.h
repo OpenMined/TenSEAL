@@ -29,7 +29,6 @@ void replicate_vector(vector<T>& vec, size_t final_size) {
 
 /*
 Sum the values in the vector.
-IMPORTANT: Tested only with CKKS.
 */
 Ciphertext& sum_vector(shared_ptr<TenSEALContext> tenseal_context,
                        Ciphertext& vector, size_t size);

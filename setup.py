@@ -62,7 +62,7 @@ class CMakeBuild(build_ext):
             build_args += ["--", "/m"]
         else:
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
-            build_args += ["--", "-j2"]
+            build_args += ["--", "-j"]
 
         env = os.environ.copy()
         env["CXXFLAGS"] = '{} -DVERSION_INFO=\\"{}\\"'.format(
@@ -77,8 +77,8 @@ class CMakeBuild(build_ext):
 setuptools.setup(
     name="tenseal",
     version=find_version(),
-    author="Ayoub Benaissa",
-    author_email="ayouben9@gmail.com",
+    author="OpenMined",
+    author_email="info@openmined.org",
     description="A Library for Homomorphic Encryption Operations on Tensors",
     license="Apache-2.0",
     keywords="homomorphic encryption tensor deep learning privacy secure",

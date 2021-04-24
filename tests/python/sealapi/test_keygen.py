@@ -8,9 +8,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils import *
 
 
-@pytest.mark.parametrize(
-    "ctx", [helper_context_bfv(8192), helper_context_ckks(8192)],
-)
+@pytest.mark.parametrize("ctx", [helper_context_bfv(8192), helper_context_ckks(8192)])
 def test_keygenerator_publickey(ctx):
     keygen = sealapi.KeyGenerator(ctx)
     public_key = sealapi.PublicKey()
@@ -27,9 +25,7 @@ def test_keygenerator_publickey(ctx):
     tmp_file(save_load)
 
 
-@pytest.mark.parametrize(
-    "ctx", [helper_context_bfv(8192), helper_context_ckks(8192)],
-)
+@pytest.mark.parametrize("ctx", [helper_context_bfv(8192), helper_context_ckks(8192)])
 def test_keygenerator_secretkey(ctx):
     keygen = sealapi.KeyGenerator(ctx)
     secret_key = keygen.secret_key()
@@ -52,9 +48,7 @@ def test_keygenerator_secretkey(ctx):
     tmp_file(save_load)
 
 
-@pytest.mark.parametrize(
-    "ctx", [helper_context_bfv(8192), helper_context_ckks(8192)],
-)
+@pytest.mark.parametrize("ctx", [helper_context_bfv(8192), helper_context_ckks(8192)])
 def test_keygenerator_relinkeys(ctx):
     poly_modulus_degree = helper_poly_modulus_degree(ctx)
 
@@ -84,9 +78,7 @@ def test_keygenerator_relinkeys(ctx):
     tmp_file(save_load)
 
 
-@pytest.mark.parametrize(
-    "ctx", [helper_context_bfv(8192), helper_context_ckks(8192)],
-)
+@pytest.mark.parametrize("ctx", [helper_context_bfv(8192), helper_context_ckks(8192)])
 def test_keygenerator_galoiskeys(ctx):
     poly_modulus_degree = helper_poly_modulus_degree(ctx)
 
@@ -121,9 +113,7 @@ def test_keygenerator_galoiskeys(ctx):
     tmp_file(save_load)
 
 
-@pytest.mark.parametrize(
-    "ctx", [helper_context_bfv(8192), helper_context_ckks(8192)],
-)
+@pytest.mark.parametrize("ctx", [helper_context_bfv(8192), helper_context_ckks(8192)])
 def test_keygenerator_galoiskeys_with_steps(ctx):
     ctx_data = ctx.key_context_data()
     parms = ctx_data.parms()

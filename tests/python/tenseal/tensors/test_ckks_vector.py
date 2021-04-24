@@ -43,15 +43,7 @@ def precision():
 
 @pytest.mark.parametrize(
     "plain_vec",
-    [
-        [0],
-        [-1],
-        [1],
-        [21, 81, 90],
-        [-73, -81, -90],
-        [-11, 82, -43, 52],
-        [i for i in range(100000)],
-    ],
+    [[0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52], [i for i in range(100000)]],
 )
 def test_negate(context, plain_vec, precision):
     ckks_vec = ts.ckks_vector(context, plain_vec)
@@ -64,15 +56,7 @@ def test_negate(context, plain_vec, precision):
 
 @pytest.mark.parametrize(
     "plain_vec",
-    [
-        [0],
-        [-1],
-        [1],
-        [21, 81, 90],
-        [-73, -81, -90],
-        [-11, 82, -43, 52],
-        [i for i in range(100000)],
-    ],
+    [[0], [-1], [1], [21, 81, 90], [-73, -81, -90], [-11, 82, -43, 52], [i for i in range(100000)]],
 )
 def test_negate_inplace(context, plain_vec, precision):
     ckks_vec = ts.ckks_vector(context, plain_vec)
@@ -208,11 +192,11 @@ def test_square_inplace(context, plain_vec, precision):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
-        ([1, 2, 3, 4], [2,]),
-        ([1, 0, -2, 73], [-5,]),
-        ([1, 2, 3, 4, 5], [1,]),
-        ([1, 0, -2, 0, -8, 4, 73], [81,]),
-        ([2 * i for i in range(100000)], [81,]),
+        ([1, 2, 3, 4], [2]),
+        ([1, 0, -2, 73], [-5]),
+        ([1, 2, 3, 4, 5], [1]),
+        ([1, 0, -2, 0, -8, 4, 73], [81]),
+        ([2 * i for i in range(100000)], [81]),
         ([2 * i for i in range(100000)], [3 * i for i in range(100000)]),
         ([2 for i in range(1000000)], [3 for i in range(1000000)]),
     ],
@@ -250,10 +234,10 @@ def test_add(context, vec1, vec2, precision):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
-        ([1, 2, 3, 4], [2,]),
-        ([1, 0, -2, 73], [-5,]),
-        ([1, 2, 3, 4, 5], [1,]),
-        ([1, 0, -2, 0, -8, 4, 73], [81,]),
+        ([1, 2, 3, 4], [2]),
+        ([1, 0, -2, 73], [-5]),
+        ([1, 2, 3, 4, 5], [1]),
+        ([1, 0, -2, 0, -8, 4, 73], [81]),
         ([2 * i for i in range(100000)], [3 * i for i in range(100000)]),
     ],
 )
@@ -383,11 +367,11 @@ def test_add_plain_inplace(context, vec1, vec2, precision):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
-        ([1, 2, 3, 4], [2,]),
-        ([1, 0, -2, 73], [-5,]),
-        ([1, 2, 3, 4, 5], [1,]),
-        ([1, 0, -2, 0, -8, 4, 73], [81,]),
-        ([2 * i for i in range(100000)], [81,]),
+        ([1, 2, 3, 4], [2]),
+        ([1, 0, -2, 73], [-5]),
+        ([1, 2, 3, 4, 5], [1]),
+        ([1, 0, -2, 0, -8, 4, 73], [81]),
+        ([2 * i for i in range(100000)], [81]),
         ([2 * i for i in range(100000)], [3 * i for i in range(100000)]),
     ],
 )
@@ -425,10 +409,10 @@ def test_sub(context, vec1, vec2, precision):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
-        ([1, 2, 3, 4], [2,]),
-        ([1, 0, -2, 73], [-5,]),
-        ([1, 2, 3, 4, 5], [1,]),
-        ([1, 0, -2, 0, -8, 4, 73], [81,]),
+        ([1, 2, 3, 4], [2]),
+        ([1, 0, -2, 73], [-5]),
+        ([1, 2, 3, 4, 5], [1]),
+        ([1, 0, -2, 0, -8, 4, 73], [81]),
     ],
 )
 def test_sub_inplace(context, vec1, vec2, precision):
@@ -565,11 +549,11 @@ def test_sub_plain_inplace(context, vec1, vec2, precision):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
-        ([1, 2, 3, 4], [2,]),
-        ([1, 0, -2, 73], [-5,]),
-        ([1, 2, 3, 4, 5], [1,]),
-        ([1, 0, -2, 0, -8, 4, 73], [81,]),
-        ([2 for i in range(100000)], [3,]),
+        ([1, 2, 3, 4], [2]),
+        ([1, 0, -2, 73], [-5]),
+        ([1, 2, 3, 4, 5], [1]),
+        ([1, 0, -2, 0, -8, 4, 73], [81]),
+        ([2 for i in range(100000)], [3]),
         ([2 for i in range(10000)], [3 for i in range(10000)]),
     ],
 )
@@ -607,10 +591,10 @@ def test_mul(context, vec1, vec2, precision):
         ([1, 2, 3, 4], [4, 3, 2, 1]),
         ([-1, -2], [-73, -10]),
         ([1, 2], [-73, -10]),
-        ([1, 2, 3, 4], [2,]),
-        ([1, 0, -2, 73], [-5,]),
-        ([1, 2, 3, 4, 5], [1,]),
-        ([1, 0, -2, 0, -8, 4, 73], [81,]),
+        ([1, 2, 3, 4], [2]),
+        ([1, 0, -2, 73], [-5]),
+        ([1, 2, 3, 4, 5], [1]),
+        ([1, 0, -2, 0, -8, 4, 73], [81]),
     ],
 )
 def test_mul_inplace(context, vec1, vec2, precision):
@@ -1040,7 +1024,7 @@ def test_vec_plain_matrix_mul_depth2(context, vec, matrix1, matrix2, precision):
 
 @pytest.mark.parametrize(
     "matrix_shape, vector_size",
-    [((1, 1), 1), ((2, 1), 1), ((3, 2), 2), ((4, 4), 4), ((9, 7), 7), ((16, 12), 12),],
+    [((1, 1), 1), ((2, 1), 1), ((3, 2), 2), ((4, 4), 4), ((9, 7), 7), ((16, 12), 12)],
 )
 def test_enc_matmul_plain(context, matrix_shape, vector_size, precision):
     def generate_input(matrix_shape, vector_size):
@@ -1063,7 +1047,7 @@ def test_enc_matmul_plain(context, matrix_shape, vector_size, precision):
 
 @pytest.mark.parametrize(
     "matrix_shape, vector_size",
-    [((1, 1), 1), ((2, 1), 1), ((3, 2), 2), ((4, 4), 4), ((9, 7), 7), ((16, 12), 12),],
+    [((1, 1), 1), ((2, 1), 1), ((3, 2), 2), ((4, 4), 4), ((9, 7), 7), ((16, 12), 12)],
 )
 def test_enc_matmul_plain_inplace(context, matrix_shape, vector_size, precision):
     def generate_input(matrix_shape, vector_size):
@@ -1186,7 +1170,7 @@ def test_polynomial_modswitch_off(context, data, polynom):
 
 
 @pytest.mark.parametrize(
-    "data, polynom", [([0, 1, 2, 3, 4], [0, 1, 1]), ([0, 1, 2, 3, 4], [0, -1, 1]),],
+    "data, polynom", [([0, 1, 2, 3, 4], [0, 1, 1]), ([0, 1, 2, 3, 4], [0, -1, 1])]
 )
 def test_polynomial_rescale_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
@@ -1279,7 +1263,7 @@ def test_conv2d_im2col_inplace(context, input_size, kernel_size, stride):
 
 @pytest.mark.parametrize(
     "poly_mod_degree, coeff_mod_bit_sizes, max_depth",
-    [(8192, [30, 20, 20, 30], 2), (8192, [60, 40, 40, 60], 2), (16384, [40, 21, 21, 21, 40], 3),],
+    [(8192, [30, 20, 20, 30], 2), (8192, [60, 40, 40, 60], 2), (16384, [40, 21, 21, 21, 40], 3)],
 )
 def test_depth_max(poly_mod_degree, coeff_mod_bit_sizes, max_depth):
     context = ts.context(ts.SCHEME_TYPE.CKKS, poly_mod_degree, 0, coeff_mod_bit_sizes)

@@ -9,4 +9,5 @@ and have different functionalities.
 from tenseal.tensors.ckkstensor import CKKSTensor
 from tenseal.tensors.ckksvector import CKKSVector
 from tenseal.tensors.bfvvector import BFVVector
+from tenseal.tensors.bfvtensor import BFVTensor
 from tenseal.tensors.plaintensor import PlainTensor

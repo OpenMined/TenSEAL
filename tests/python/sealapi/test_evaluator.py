@@ -194,12 +194,8 @@ def test_evaluator_plain(scheme, ctx, left):
         is_close_enough(out[: len(left)], expected)
 
 
-@pytest.mark.parametrize(
-    "scheme, ctx", [(sealapi.SCHEME_TYPE.BFV, helper_context_bfv(8192)),],
-)
-@pytest.mark.parametrize(
-    "exp, left", [(2, [2, 3, 4, 5]), (3, [i for i in range(50)]),],
-)
+@pytest.mark.parametrize("scheme, ctx", [(sealapi.SCHEME_TYPE.BFV, helper_context_bfv(8192))])
+@pytest.mark.parametrize("exp, left", [(2, [2, 3, 4, 5]), (3, [i for i in range(50)])])
 def test_evaluator_exp(scheme, ctx, exp, left):
     evaluator, encryptor, decryptor, relin_keys = helper_generate_evaluator(ctx)
     expected = [i ** exp for i in left]
@@ -243,7 +239,7 @@ def test_evaluator_exp(scheme, ctx, exp, left):
     ],
 )
 @pytest.mark.parametrize(
-    "many", [[[7, 3], [2, 5]], [[2 * i for i in range(100)], [7 * i for i in range(100)]],],
+    "many", [[[7, 3], [2, 5]], [[2 * i for i in range(100)], [7 * i for i in range(100)]]]
 )
 def test_evaluator_add_many(scheme, ctx, many):
     evaluator, encryptor, decryptor, _ = helper_generate_evaluator(ctx)
@@ -271,11 +267,9 @@ def test_evaluator_add_many(scheme, ctx, many):
     is_close_enough(out[: len(many[0])], expected)
 
 
+@pytest.mark.parametrize("scheme, ctx", [(sealapi.SCHEME_TYPE.BFV, helper_context_bfv(8192))])
 @pytest.mark.parametrize(
-    "scheme, ctx", [(sealapi.SCHEME_TYPE.BFV, helper_context_bfv(8192)),],
-)
-@pytest.mark.parametrize(
-    "many", [[[7, 3], [2, 5]], [[2 * i for i in range(100)], [7 * i for i in range(100)]],],
+    "many", [[[7, 3], [2, 5]], [[2 * i for i in range(100)], [7 * i for i in range(100)]]]
 )
 def test_evaluator_multiply_many(scheme, ctx, many):
     evaluator, encryptor, decryptor, relin_keys = helper_generate_evaluator(ctx)
@@ -303,9 +297,7 @@ def test_evaluator_multiply_many(scheme, ctx, many):
     is_close_enough(out[: len(many[0])], expected)
 
 
-@pytest.mark.parametrize(
-    "scheme, ctx", [(sealapi.SCHEME_TYPE.BFV, helper_context_bfv(8192)),],
-)
+@pytest.mark.parametrize("scheme, ctx", [(sealapi.SCHEME_TYPE.BFV, helper_context_bfv(8192))])
 @pytest.mark.parametrize(
     "left, right",
     [
@@ -502,12 +494,8 @@ def test_evaluator_mod_switch():
     assert plain_next.parms_id() == ctx.last_parms_id()
 
 
-@pytest.mark.parametrize(
-    "scheme, ctx", [(sealapi.SCHEME_TYPE.CKKS, helper_context_ckks(8192)),],
-)
-@pytest.mark.parametrize(
-    "left", [[10, 100, 500, 600], [i for i in range(200)],],
-)
+@pytest.mark.parametrize("scheme, ctx", [(sealapi.SCHEME_TYPE.CKKS, helper_context_ckks(8192))])
+@pytest.mark.parametrize("left", [[10, 100, 500, 600], [i for i in range(200)]])
 def test_evaluator_rescale(scheme, ctx, left):
     evaluator, encryptor, _, relin_keys = helper_generate_evaluator(ctx)
 
@@ -581,9 +569,7 @@ def test_evaluator_rescale(scheme, ctx, left):
         # CKKS already in NTT form
     ],
 )
-@pytest.mark.parametrize(
-    "left", [[10, 100, 500, 600], [i for i in range(200)],],
-)
+@pytest.mark.parametrize("left", [[10, 100, 500, 600], [i for i in range(200)]])
 def test_evaluator_transform_ntt(scheme, ctx, left):
     evaluator, encryptor, _, _ = helper_generate_evaluator(ctx)
 
