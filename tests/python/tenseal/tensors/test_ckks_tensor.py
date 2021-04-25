@@ -143,7 +143,7 @@ def test_subscript(context, data, slices, new_shape):
     tensor = ts.ckks_tensor(context, data)
     plain_data = np.array(data)
 
-    new_tensor = tensor.__getitem__(slices)
+    new_tensor = tensor[slices]
 
     assert new_tensor.shape == new_shape
     if isinstance(slices, int):

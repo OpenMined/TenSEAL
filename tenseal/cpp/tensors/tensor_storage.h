@@ -385,7 +385,7 @@ class TensorStorage {
         xt::xstrided_slice_vector slices;
         std::vector<size_t> shape = this->shape();
         int index = 0;
-        for (auto pair : pairs) {
+        for (auto& pair : pairs) {
             slices.push_back(xt::range(pair.first, pair.second));
             shape[index++] = pair.second - pair.first;
         }
