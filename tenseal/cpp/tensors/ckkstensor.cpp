@@ -27,21 +27,23 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
         size = tensor.flat_size();
     }
     enc_data.resize(size);
-    
+
     auto worker_func = [&](size_t start, size_t end) -> bool {
-        if(batch){
+        if (batch) {
             for (size_t i = start; i < end; i++) {
-                enc_data[i] = CKKSTensor::encrypt(ctx, this->_init_scale, data.at(i));
+                enc_data[i] =
+                    CKKSTensor::encrypt(ctx, this->_init_scale, data.at(i));
             }
-        }else{
+        } else {
             for (size_t i = start; i < end; i++) {
-                enc_data[i] = CKKSTensor::encrypt(ctx, this->_init_scale, tensor.flat_at(i));
+                enc_data[i] = CKKSTensor::encrypt(ctx, this->_init_scale,
+                                                  tensor.flat_at(i));
             }
         }
 
         return true;
     };
-    
+
     size_t n_jobs = this->tenseal_context()->dispatcher_size();
     if (n_jobs == 1) {
         worker_func(0, size);
@@ -66,7 +68,7 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
 
         if (fail) throw invalid_argument(fail.value());
     }
-    
+
     _data = TensorStorage<Ciphertext>(enc_data, enc_shape);
 }
 
