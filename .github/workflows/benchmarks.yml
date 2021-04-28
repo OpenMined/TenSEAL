@@ -23,6 +23,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Prepare ENV
         run: |
+            echo "benchmarks/${{ runner.os }}"
             echo "CC=clang" >> $GITHUB_ENV
             echo "CXX=clang++" >> $GITHUB_ENV
         if: ${{ matrix.os == 'ubuntu-latest' }}
