@@ -1,3 +1,3 @@
 theme: jekyll-theme-cayman
-title: PySyft
-description: PySyft is a Python library for secure and private Deep Learning. PySyft decouples private data from model training, using Federated Learning, Differential Privacy, and Encrypted Computation (like Multi-Party Computation (MPC) and Homomorphic Encryption (HE) within the main Deep Learning frameworks like PyTorch and TensorFlow.
+title: TenSEAL
+description: TenSEAL is a library for doing homomorphic encryption operations on tensors, built on top of Microsoft SEAL. It provides ease of use through a Python API, while preserving efficiency by implementing most of its operations using C++.
