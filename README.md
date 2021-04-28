@@ -166,6 +166,8 @@ You can benchmark the implementation at any point by running
 $ bazel run -c opt --spawn_strategy=standalone //tests/cpp/benchmarks:benchmark
 ```
 
+The benchmarks from every PR merge are uploaded [here](https://openmined.github.io/TenSEAL/benchmarks/).
+
 ## Tutorials
 
 - [Getting Started](tutorials%2FTutorial%200%20-%20Getting%20Started.ipynb)

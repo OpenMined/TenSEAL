@@ -1,0 +1,7 @@
+name: "CodeQL config"
+
+paths:
+  - tenseal
+  - tests
+paths-ignore:
+  - third_party

@@ -1,0 +1,46 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'cpp', 'python' ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+          submodules: true
+
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: |
+            third_party/
+            build/
+        key: codeql-${{ runner.os }}-${{ matrix.language }}-tensealdeps-${{ hashFiles('third_party/SEAL/cmake/SEALConfig.cmake','.gitmodules') }}
+        restore-keys: |
+          codeql-${{ runner.os }}-${{ matrix.language }}-tensealdeps-
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        languages: ${{ matrix.language }}
+        config-file: ./.github/codeql/codeql-config.yml
+
+    - if: matrix.language == 'cpp' 
+      name: Build CPP
+      run: |
+          mkdir -p build && cd build
+          cmake .. && make -j
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1
