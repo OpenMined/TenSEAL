@@ -300,6 +300,37 @@ TEST_P(CKKSTensorTest, TestTranspose) {
     ASSERT_TRUE(are_close(decr.data(), {1, 3, 5, 2, 4, 6}));
 }
 
+TEST_P(CKKSTensorTest, TestSubscript) {
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
+    ASSERT_TRUE(ctx != nullptr);
+    ctx->generate_galois_keys();
+
+    auto ldata =
+        PlainTensor(vector<double>({1, 2, 3, 4, 5, 6}), vector<size_t>({3, 2}));
+    // 1 2
+    // 3 4
+    // 5 6
+
+    auto l = CKKSTensor::Create(ctx, ldata, std::pow(2, 40));
+
+    // One slice
+    const std::vector<std::pair<size_t, size_t>> vec1 = {{0, 2}};
+    auto res = l->subscript(vec1);
+    ASSERT_THAT(res.shape(), ElementsAreArray({2, 2}));
+    auto decr = res.decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {1, 2, 3, 4}));
+
+    // Two slices
+    const std::vector<std::pair<size_t, size_t>> vec2 = {{0, 2}, {1, 2}};
+    res = l->subscript(vec2);
+    ASSERT_THAT(res.shape(), ElementsAreArray({2, 1}));
+    decr = res.decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {2, 4}));
+}
+
 TEST_P(CKKSTensorTest, TestCKKSTensorPolyval) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());

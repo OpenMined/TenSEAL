@@ -5,7 +5,10 @@
 #include "tenseal/cpp/utils/helpers.h"
 #include "xtensor/xadapt.hpp"
 #include "xtensor/xarray.hpp"
+#include "xtensor/xio.hpp"
 #include "xtensor/xjson.hpp"
+#include "xtensor/xstrided_view.hpp"
+#include "xtensor/xview.hpp"
 
 namespace tenseal {
 
@@ -375,6 +378,23 @@ class TensorStorage {
 
     void load(const std::string& buf) {
         xt::from_json(nlohmann::json::parse(buf), _data);
+    }
+
+    TensorStorage<dtype_t> subscript(
+        const vector<pair<size_t, size_t>>& pairs) {
+        xt::xstrided_slice_vector slices;
+        std::vector<size_t> shape = this->shape();
+        int index = 0;
+        for (auto& pair : pairs) {
+            slices.push_back(xt::range(pair.first, pair.second));
+            shape[index++] = pair.second - pair.first;
+        }
+        xt::xarray<dtype_t> _sliced_data =
+            xt::strided_view(this->_data, slices);
+        std::vector<dtype_t> dummy_data(_sliced_data.begin(),
+                                        _sliced_data.end());
+
+        return TensorStorage<dtype_t>(dummy_data, shape);
     }
 
    private:

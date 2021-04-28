@@ -682,6 +682,7 @@ void bind_ckks_tensor(py::module &m) {
                  vec->add_plain_inplace(left_operand);
                  return vec;
              })
+        .def("subscript", &CKKSTensor::subscript)
         .def("__isub__", &CKKSTensor::sub_inplace)
         .def("__isub__",
              py::overload_cast<const double &>(&CKKSTensor::sub_plain_inplace))
