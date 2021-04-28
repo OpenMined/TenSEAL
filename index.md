@@ -1,203 +1,148 @@
+---
+title: PySyft
+description: PySyft decouples private data from model training, using Federated Learning, Differential Privacy, and Encrypted Computation (like Multi-Party Computation (MPC) and Homomorphic Encryption (HE) within the main Deep Learning frameworks like PyTorch and TensorFlow.
+layout: template
+filename: index
+--- 
 
 <h1 align="center">
   <br>
-  <a href="http://duet.openmined.org/"><img src="https://github.com/OpenMined/design-assets/raw/master/logos/OM/mark-primary-trans.png" alt="TenSEAL" width="200"></a>
+  <a href="http://duet.openmined.org/"><img src="https://raw.githubusercontent.com/OpenMined/PySyft/dev/docs/img/logo_big.png" alt="PySyft" width="200"></a>
   <br>
-  TenSEAL
+  A library for computing on data<br /> you do not own and cannot see
   <br>
 </h1>
-
-<h3 align="center">
-  <br>
-  A library for doing homomorphic encryption operations on tensors
-  <br>
-</h3>
-
 <div align="center">
-
-[![Tests](https://github.com/OpenMined/TenSEAL/workflows/Tests/badge.svg)](https://github.com/OpenMined/TenSEAL/actions?query=branch%3Amaster++)
-[![Linux Package](https://github.com/OpenMined/TenSEAL/workflows/Linux%20Package/badge.svg)](https://github.com/OpenMined/TenSEAL/actions/workflows/pythonpublish-linux.yml)
-[![MacOS Package](https://github.com/OpenMined/TenSEAL/workflows/MacOS%20Package/badge.svg)](https://github.com/OpenMined/TenSEAL/actions/workflows/pythonpublish-macos.yml)
-[![Windows Package](https://github.com/OpenMined/TenSEAL/workflows/Windows%20Package/badge.svg)](https://github.com/OpenMined/TenSEAL/actions/workflows/pythonpublish-windows.yml)
-[![Docker Image](https://github.com/OpenMined/TenSEAL/workflows/Docker%20Image/badge.svg)](https://github.com/OpenMined/TenSEAL/actions/workflows/docker-image.yml)
-
-
-[![Downloads](https://img.shields.io/pypi/dd/tenseal)](https://pypi.org/project/tenseal/)
-[![Version](https://img.shields.io/pypi/v/tenseal)](https://pypi.org/project/tenseal/)
-[![OpenCollective](https://img.shields.io/opencollective/all/openmined)](https://opencollective.com/openmined)
-[![Slack](https://img.shields.io/badge/chat-on%20slack-7A5979.svg)](https://openmined.slack.com/messages/support)
-
-
+  <a href=""><img src="https://github.com/OpenMined/PySyft/workflows/Tests/badge.svg?branch=master" /></a> <a href=""><img src="https://github.com/OpenMined/PySyft/workflows/Tutorials/badge.svg" /></a> <a href="https://openmined.slack.com/messages/lib_pysyft"><img src="https://img.shields.io/badge/chat-on%20slack-7A5979.svg" /></a> <a href="https://mybinder.org/v2/gh/OpenMined/PySyft/master"><img src="https://mybinder.org/badge.svg" /></a> <a href="http://colab.research.google.com/github/OpenMined/PySyft/blob/master"><img src="https://colab.research.google.com/assets/colab-badge.svg" /></a><br /><br />
 </div>
 
-TenSEAL is a library for doing homomorphic encryption operations on tensors, built on top of [Microsoft SEAL](https://github.com/Microsoft/SEAL). It provides ease of use through a Python API, while preserving efficiency by implementing most of its operations using C++.
+PySyft is a Python library for secure and private Deep Learning. PySyft decouples
+private data from model training, using
+[Federated Learning](https://ai.googleblog.com/2017/04/federated-learning-collaborative.html),
+[Differential Privacy](https://en.wikipedia.org/wiki/Differential_privacy),
+and Encrypted Computation (like
+[Multi-Party Computation (MPC)](https://en.wikipedia.org/wiki/Secure_multi-party_computation)
+and  [Homomorphic Encryption (HE)](https://en.wikipedia.org/wiki/Homomorphic_encryption)
+within the main Deep Learning frameworks like PyTorch and TensorFlow. Join the movement on
+[Slack](http://slack.openmined.org/).
 
-## Features
+## FAQ 0.2.x ➡️ 0.3.x
+We have compiled a list of [FAQs](docs/FAQ_0.2.x.md) relating to the change from 0.2.x to 0.3.x+ [here](docs/FAQ_0.2.x.md).
 
-- :key: Encryption/Decryption of vectors of integers using BFV
-- :old_key: Encryption/Decryption of vectors of real numbers using CKKS
-- :fire: Element-wise addition, substraction and multiplication of encrypted-encrypted vectors and encrypted-plain vectors
-- :cyclone: Dot product and vector-matrix multiplication
-- :zap: Complete SEAL API under `tenseal.sealapi`
+_**Important note about PySyft 0.2.x:** The PySyft 0.2.x codebase is now in its own branch [here](https://github.com/OpenMined/PySyft/tree/syft_0.2.x), but OpenMined will not offer official support for this version range. If you're getting started with PySyft for the first time, please ignore this message and read on!_
 
-## Usage
+## PySyft in Detail
 
-We show the basic operations over encrypted data, more advanced usage for machine learning applications can be found on our [tutorial section](#tutorials)
+A more detailed explanation of PySyft can be found in the
+[white paper on Arxiv](https://arxiv.org/abs/1811.04017).
 
-```python
-import tenseal as ts
+PySyft has also been explained in videos on YouTube:
+ - [PriCon Sep 2020 Duet Demo](https://www.youtube.com/watch?v=DppXfA6C8L8&ab_channel=OpenMined)
+ - [Introduction to Privacy-Preserving AI using PySyft by @iamtrask](https://www.youtube.com/watch?v=NJBBE_SN90A)
+ - [Introduction to PySyft codebase by @andreiliphd](https://www.youtube.com/watch?v=1Zw08_4ufHw)
+ - [Differential Privacy & Federated Learning explained using PySyft by Jordan Harrod](https://www.youtube.com/watch?v=MOcTGM_UteM)
 
-# Setup TenSEAL context
-context = ts.context(
-            ts.SCHEME_TYPE.CKKS,
-            poly_modulus_degree=8192,
-            coeff_mod_bit_sizes=[60, 40, 40, 60]
-          )
-context.generate_galois_keys()
-context.global_scale = 2**40
+## Pre-Installation
 
-v1 = [0, 1, 2, 3, 4]
-v2 = [4, 3, 2, 1, 0]
+PySyft is available on PyPI and Conda.
 
-# encrypted vectors
-enc_v1 = ts.ckks_vector(context, v1)
-enc_v2 = ts.ckks_vector(context, v2)
+We recommend that you install PySyft within a virtual environment like
+[Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/overview.html),
+due to its ease of use. If you are using Windows, we suggest installing
+[Anaconda and using the Anaconda
+Prompt](https://docs.anaconda.com/anaconda/user-guide/getting-started/) to
+work from the command line.
 
-result = enc_v1 + enc_v2
-result.decrypt() # ~ [4, 4, 4, 4, 4]
-
-result = enc_v1.dot(enc_v2)
-result.decrypt() # ~ [10]
-
-matrix = [
-  [73, 0.5, 8],
-  [81, -5, 66],
-  [-100, -78, -2],
-  [0, 9, 17],
-  [69, 11 , 10],
-]
-result = enc_v1.matmul(matrix)
-result.decrypt() # ~ [157, -90, 153]
+```bash
+$ conda create -n pysyft python=3.8
+$ conda activate pysyft
+$ conda install jupyter notebook
 ```
+
+## Version Support
+
+We support **Linux**, **MacOS** and **Windows** and the following Python and Torch versions.
+
+Python | Torch 1.5 | Torch 1.6 | Torch 1.7
+--- | --- | --- | ---
+3.6 | ✅ | ✅ | ✅
+3.7 | ✅ | ✅ | ✅
+3.8 | ✅ | ✅ | ✅
 
 ## Installation
 
-#### Using pip
+### Pip
+```bash
+$ pip install syft
+```
+
+This will auto-install PyTorch and other dependencies as required, to run the
+examples and tutorials. For more information on building from source see the contribution guide [here](https://github.com/OpenMined/PySyft/tree/master/CONTRIBUTING.md).
+
+## Documentation
+The latest official documentation is hosted here: [https://pysyft.readthedocs.io/](https://pysyft.readthedocs.io/en/latest/index.html#)
+
+## Duet Examples
+
+All the examples can be played with by launching Jupyter Notebook and navigating to
+the examples/duet folder.
 
 ```bash
-$ pip install tenseal
-```
-This installs the last packaged version on [pypi](https://pypi.org/project/tenseal/). If your platform doesn't have a ready package, please open an [issue](https://github.com/OpenMined/TenSEAL/issues) to let us know.
-
-#### Build from Source
-
-Supported platforms and their requirements are listed below: (this are only required for building TenSEAL from source)
-- **Linux:** A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0).
-- **MacOS:** Xcode toolchain (>= 9.3)
-- **Windows:** Microsoft Visual Studio (>= 10.0.40219.1, Visual Studio 2010 SP1 or later).
-
-If you want to install tenseal from the repository, you should first make sure to have the requirements for your platform (listed above) and [CMake (3.12 or higher)](https://cmake.org/install/) installed, then get the third party libraries (if you didn't already) by running the following command from the root directory of the project
-
-```bash
-$ git submodule init
-$ git submodule update
+$ jupyter notebook
 ```
 
-TenSEAL uses [Protocol Buffers](https://developers.google.com/protocol-buffers/docs/downloads) for serialization, and you will need the protocol buffer compiler too.
+## WebRTC Signaling Server
+To facilitate peer-to-peer connections through firewalls we utilise WebRTC and a
+signaling server. After connection, no traffic is sent to this server.
 
-
-If you are on Windows, you will first need to build SEAL library using Visual Studio, you should use the solution file `SEAL.sln` in `third_party/SEAL` to build the project `native\src\SEAL.vcxproj` with `Configuration=Release` and `Platform=x64`. For more details check the instructions in [Building Microsoft SEAL](https://github.com/microsoft/SEAL#windows)
-
-You can then trigger the build and the installation
-
-```bash
-$ pip install .
+If you want to run your own signaling server simply run the command:
+```
+$ syft-network
 ```
 
-#### Use Docker
+Then update your duet notebooks to use the new `network_url=http://localhost:5000`
 
-You can use our [Docker image](https://hub.docker.com/r/openmined/tenseal) for a ready to use environment with TenSEAL installed
+## Try out the Tutorials
 
-```bash
-$ docker container run --interactive --tty openmined/tenseal
-```
+A comprehensive list of Duet Examples can be found
+[here](https://github.com/OpenMined/PySyft/tree/master/examples/duet)
 
-**Note:** `openmined/tenseal` points to the image from the last release, use `openmined/tenseal:dev` for the image built from the master branch.
+These tutorials cover how to operate common network types over the Duet API.
 
+## Start Contributing
 
-You can also build your custom image, this might be handy for developers working on the project
+The guide for contributors can be found [here](https://github.com/OpenMined/PySyft/tree/master/CONTRIBUTING.md).
+It covers all that you need to know to start contributing code to PySyft today.
 
-```bash
-$ docker build -t tenseal -f docker-images/Dockerfile-py38 .
-```
+Also, join the rapidly growing community of 7000+ on [Slack](http://slack.openmined.org).
+The slack community is very friendly and great about quickly answering questions about the use and development of PySyft!
 
-To interactively run this docker image as a container after it has been built you can run
+## Troubleshooting
 
-```bash
-$ docker container run -it tenseal
-```
+The latest version of PySyft is 0.3.0 however this software is still Beta. If you find
+a bug please file it in the GitHub issues.
 
-#### Using Bazel
-To use this library in another Bazel project, add the following in your WORKSPACE file:
-
-```load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
-
-git_repository(
-   name = "org_openmined_tenseal",
-   remote = "https://github.com/OpenMined/TenSEAL",
-   branch = "master",
-   init_submodules = True,
-)
-
-load("@org_openmined_tenseal//tenseal:preload.bzl", "tenseal_preload")
-
-tenseal_preload()
-
-load("@org_openmined_tenseal//tenseal:deps.bzl", "tenseal_deps")
-
-tenseal_deps()
-```
-
-## Benchmarks
-
-You can benchmark the implementation at any point by running
-
-```bash
-$ bazel run -c opt --spawn_strategy=standalone //tests/cpp/benchmarks:benchmark
-```
-
-## Tutorials
-
-- [Getting Started](tutorials%2FTutorial%200%20-%20Getting%20Started.ipynb)
-- [Tutorial 1 - Training and Evaluation of Logistic Regression on Encrypted Data](tutorials%2FTutorial%201%20-%20Training%20and%20Evaluation%20of%20Logistic%20Regression%20on%20Encrypted%20Data.ipynb)
-- [Tutorial 2 - Working with Approximate Numbers](tutorials%2FTutorial%202%20-%20Working%20with%20Approximate%20Numbers.ipynb)
-- [Tutorial 3 - Benchmarks](tutorials%2FTutorial%203%20-%20Benchmarks.ipynb)
-- [Tutorial 4 - Encrypted Convolution on MNIST](tutorials%2FTutorial%204%20-%20Encrypted%20Convolution%20on%20MNIST.ipynb)
-
-## Publications
-
-A. Benaissa, B. Retiat, B. Cebere, A.E. Belfedhal, ["TenSEAL: A Library for Encrypted Tensor Operations Using Homomorphic Encryption"](https://arxiv.org/abs/2104.03152), ICLR 2021 Workshop on Distributed and Private Machine Learning (DPML 2021).
-
-```
-@misc{tenseal2021,
-    title={TenSEAL: A Library for Encrypted Tensor Operations Using Homomorphic Encryption}, 
-    author={Ayoub Benaissa and Bilal Retiat and Bogdan Cebere and Alaa Eddine Belfedhal},
-    year={2021},
-    eprint={2104.03152},
-    archivePrefix={arXiv},
-    primaryClass={cs.CR}
-}
-```
+## Organizational Contributions
+We are very grateful for contributions to PySyft from the following organizations!
+[<img src="https://github.com/udacity/private-ai/blob/master/udacity-logo-vert-white.png?raw=true" alt="Udacity" width="200"/>](https://udacity.com/) | [<img src="https://raw.githubusercontent.com/coMindOrg/federated-averaging-tutorials/master/images/comindorg_logo.png" alt="coMind" width="200" height="130"/>](https://github.com/coMindOrg/federated-averaging-tutorials) | [<img src="https://i.ibb.co/vYwcG9N/arkhn-logo.png" alt="Arkhn" width="200" height="150"/>](http://ark.hn) | [<img src="https://raw.githubusercontent.com/dropoutlabs/files/master/dropout-labs-logo-white-2500.png" alt="Dropout Labs" width="200"/>](https://dropoutlabs.com/)
 
 ## Support
+For support in using this library, please join the **#lib_pysyft** Slack channel. [Click here to join our Slack community!](https://slack.openmined.org)
 
-For support in using this library, please join the **#support** Slack channel. [Click here to join our Slack community!](https://slack.openmined.org)
-
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
+## Disclaimer
+This software is in early beta. Use at your own risk.
 
 ## License
+[Apache License 2.0](https://github.com/OpenMined/PySyft/blob/master/LICENSE)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmatthew-mcateer%2FPySyft.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmatthew-mcateer%2FPySyft?ref=badge_large)
 
-[Apache License 2.0](https://github.com/OpenMined/TenSEAL/blob/master/LICENSE)
+## For more details, check [PySyft](https://github.com/OpenMined/PySyft) on GitHub
+
+## Want to Use PySyft?
+If you would like to become a user of PySyft, please progress to our User Documentation.
+
+## Want to Develop PySyft?
+If you would like to become a developer of PySyft, please see our
+[Contributor Documentation](CONTRIBUTING.md).
+This documentation will help you set up your development environment, give you a roadmap
+for learning the codebase, and help you find your first project to contribute.
