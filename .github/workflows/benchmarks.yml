@@ -55,7 +55,7 @@ jobs:
           output-file-path: pytest_benchmarks_output.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: true
-          benchmark-data-dir-path: format("{benchmarks/{0}}", ${{ runner.os }})
+          benchmark-data-dir-path: "benchmarks/${{ runner.os }}"
           # Show alert with commit comment on detecting possible performance regression
           alert-threshold: "200%"
           comment-on-alert: true
