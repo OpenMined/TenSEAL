@@ -139,7 +139,8 @@ $ docker container run -it tenseal
 #### Using Bazel
 To use this library in another Bazel project, add the following in your WORKSPACE file:
 
-```load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+```
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 git_repository(
    name = "org_openmined_tenseal",
