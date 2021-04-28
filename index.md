@@ -5,7 +5,6 @@ layout: template
 filename: index
 --- 
 
-
 <h1 align="center">
   <br>
   <a href="http://duet.openmined.org/"><img src="https://github.com/OpenMined/design-assets/raw/master/logos/OM/mark-primary-trans.png" alt="TenSEAL" width="200"></a>
