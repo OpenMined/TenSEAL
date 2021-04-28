@@ -4,8 +4,6 @@ on:
       branches: [master]
   release:
     types: [created]
-  pull_request:
-      types: [opened, synchronize, reopened]
 
 jobs:
   benchmark:
