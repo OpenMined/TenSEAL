@@ -28,7 +28,7 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
     }
     enc_data.resize(size);
 
-    auto worker_func = [&](size_t start, size_t end) -> bool {
+    task_t worker_func = [&](size_t start, size_t end) -> bool {
         if (batch) {
             for (size_t i = start; i < end; i++) {
                 enc_data[i] =
@@ -44,30 +44,7 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
         return true;
     };
 
-    size_t n_jobs = this->tenseal_context()->dispatcher_size();
-    if (n_jobs == 1) {
-        worker_func(0, size);
-    } else {
-        size_t batch_size = (size + n_jobs - 1) / n_jobs;
-        vector<future<bool>> futures;
-        for (size_t i = 0; i < n_jobs; i++) {
-            futures.push_back(
-                this->tenseal_context()->dispatcher()->enqueue_task(
-                    worker_func, i * batch_size,
-                    std::min((i + 1) * batch_size, size)));
-        }
-        // waiting
-        optional<string> fail;
-        for (size_t i = 0; i < n_jobs; i++) {
-            try {
-                futures[i].get();
-            } catch (std::exception& e) {
-                fail = e.what();
-            }
-        }
-
-        if (fail) throw invalid_argument(fail.value());
-    }
+    this->dispatch_jobs(worker_func, size);
 
     _data = TensorStorage<Ciphertext>(enc_data, enc_shape);
 }
@@ -274,9 +251,7 @@ shared_ptr<CKKSTensor> CKKSTensor::op_inplace(
         operand = this->broadcast_or_throw(operand);
     }
 
-    size_t n_jobs = this->tenseal_context()->dispatcher_size();
-
-    auto worker_func = [&](size_t start, size_t end) -> bool {
+    task_t worker_func = [&](size_t start, size_t end) -> bool {
         for (size_t i = start; i < end; i++) {
             this->perform_op(this->_data.flat_ref_at(i),
                              operand->_data.flat_ref_at(i), op);
@@ -284,29 +259,7 @@ shared_ptr<CKKSTensor> CKKSTensor::op_inplace(
         return true;
     };
 
-    if (n_jobs == 1) {
-        worker_func(0, this->_data.flat_size());
-    } else {
-        size_t batch_size = (this->_data.flat_size() + n_jobs - 1) / n_jobs;
-        vector<future<bool>> futures;
-        for (size_t i = 0; i < n_jobs; i++) {
-            futures.push_back(
-                this->tenseal_context()->dispatcher()->enqueue_task(
-                    worker_func, i * batch_size,
-                    std::min((i + 1) * batch_size, this->_data.flat_size())));
-        }
-        // waiting
-        optional<string> fail;
-        for (size_t i = 0; i < futures.size(); i++) {
-            try {
-                futures[i].get();
-            } catch (std::exception& e) {
-                fail = e.what();
-            }
-        }
-
-        if (fail) throw invalid_argument(fail.value());
-    }
+    this->dispatch_jobs(worker_func, this->_data.flat_size());
 
     return shared_from_this();
 }
@@ -320,9 +273,7 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(
         operand = this->broadcast_or_throw<>(operand);
     }
 
-    size_t n_jobs = this->tenseal_context()->dispatcher_size();
-
-    auto worker_func = [&](size_t start, size_t end) -> bool {
+    task_t worker_func = [&](size_t start, size_t end) -> bool {
         Plaintext plaintext;
         for (size_t i = start; i < end; i++) {
             this->tenseal_context()->encode<CKKSEncoder>(
@@ -332,72 +283,25 @@ shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(
         return true;
     };
 
-    if (n_jobs == 1) {
-        worker_func(0, this->_data.flat_size());
-    } else {
-        size_t batch_size = (this->_data.flat_size() + n_jobs - 1) / n_jobs;
-        vector<future<bool>> futures;
-        for (size_t i = 0; i < n_jobs; i++) {
-            futures.push_back(
-                this->tenseal_context()->dispatcher()->enqueue_task(
-                    worker_func, i * batch_size,
-                    std::min((i + 1) * batch_size, this->_data.flat_size())));
-        }
-        // waiting
-        optional<string> fail;
-        for (size_t i = 0; i < futures.size(); i++) {
-            try {
-                futures[i].get();
-            } catch (std::exception& e) {
-                fail = e.what();
-            }
-        }
-
-        if (fail) {
-            throw invalid_argument(fail.value());
-        }
-    }
+    this->dispatch_jobs(worker_func, this->_data.flat_size());
 
     return shared_from_this();
 }
 
 shared_ptr<CKKSTensor> CKKSTensor::op_plain_inplace(const double& operand,
                                                     OP op) {
-    size_t n_jobs = this->tenseal_context()->dispatcher_size();
     Plaintext plaintext;
     this->tenseal_context()->encode<CKKSEncoder>(operand, plaintext,
                                                  this->_init_scale);
 
-    auto worker_func = [&](size_t start, size_t end) -> bool {
+    task_t worker_func = [&](size_t start, size_t end) -> bool {
         for (size_t i = start; i < end; i++) {
             this->perform_plain_op(this->_data.flat_ref_at(i), plaintext, op);
         }
         return true;
     };
 
-    if (n_jobs == 1) {
-        worker_func(0, this->_data.flat_size());
-    } else {
-        size_t batch_size = (this->_data.flat_size() + n_jobs - 1) / n_jobs;
-        vector<future<bool>> futures;
-        for (size_t i = 0; i < n_jobs; i++) {
-            futures.push_back(
-                this->tenseal_context()->dispatcher()->enqueue_task(
-                    worker_func, i * batch_size,
-                    std::min((i + 1) * batch_size, this->_data.flat_size())));
-        }
-        // waiting
-        std::optional<std::string> fail;
-        for (size_t i = 0; i < futures.size(); i++) {
-            try {
-                futures[i].get();
-            } catch (std::exception& e) {
-                fail = e.what();
-            }
-        }
-
-        if (fail) throw invalid_argument(fail.value());
-    }
+    this->dispatch_jobs(worker_func, this->_data.flat_size());
 
     return shared_from_this();
 }
@@ -651,9 +555,7 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
     vector<Ciphertext> new_data;
     new_data.resize(new_shape[0] * new_shape[1]);
 
-    size_t n_jobs = this->tenseal_context()->dispatcher_size();
-
-    auto worker_func = [&](size_t start, size_t end) -> bool {
+    task_t worker_func = [&](size_t start, size_t end) -> bool {
         vector<Ciphertext> to_sum;
         to_sum.resize(this_shape[1]);
         for (size_t i = start; i < end; i++) {
@@ -674,31 +576,7 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_inplace(
         return true;
     };
 
-    if (n_jobs == 1) {
-        worker_func(0, new_size);
-    } else {
-        size_t batch_size = (new_size + n_jobs - 1) / n_jobs;
-        vector<future<bool>> futures;
-        for (size_t i = 0; i < n_jobs; i++) {
-            futures.push_back(
-                this->tenseal_context()->dispatcher()->enqueue_task(
-                    worker_func, i * batch_size,
-                    std::min((i + 1) * batch_size, new_size)));
-        }
-        // waiting
-        optional<string> fail;
-        for (size_t i = 0; i < futures.size(); i++) {
-            try {
-                futures[i].get();
-            } catch (std::exception& e) {
-                fail = e.what();
-            }
-        }
-
-        if (fail) {
-            throw invalid_argument(fail.value());
-        }
-    }
+    this->dispatch_jobs(worker_func, new_size);
 
     this->_data = TensorStorage(new_data, new_shape);
     return shared_from_this();
@@ -721,9 +599,7 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_plain_inplace(
     vector<Ciphertext> new_data;
     new_data.resize(new_shape[0] * new_shape[1]);
 
-    size_t n_jobs = this->tenseal_context()->dispatcher_size();
-
-    auto worker_func = [&](size_t start, size_t end) -> bool {
+    task_t worker_func = [&](size_t start, size_t end) -> bool {
         vector<Ciphertext> to_sum;
         to_sum.resize(this_shape[1]);
         for (size_t i = start; i < end; i++) {
@@ -747,31 +623,7 @@ shared_ptr<CKKSTensor> CKKSTensor::matmul_plain_inplace(
         return true;
     };
 
-    if (n_jobs == 1) {
-        worker_func(0, new_size);
-    } else {
-        size_t batch_size = (new_size + n_jobs - 1) / n_jobs;
-        vector<future<bool>> futures;
-        for (size_t i = 0; i < n_jobs; i++) {
-            futures.push_back(
-                this->tenseal_context()->dispatcher()->enqueue_task(
-                    worker_func, i * batch_size,
-                    std::min((i + 1) * batch_size, new_size)));
-        }
-        // waiting
-        optional<string> fail;
-        for (size_t i = 0; i < futures.size(); i++) {
-            try {
-                futures[i].get();
-            } catch (std::exception& e) {
-                fail = e.what();
-            }
-        }
-
-        if (fail) {
-            throw invalid_argument(fail.value());
-        }
-    }
+    this->dispatch_jobs(worker_func, new_size);
 
     this->_data = TensorStorage(new_data, new_shape);
     return shared_from_this();
