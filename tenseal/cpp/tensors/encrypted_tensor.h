@@ -12,6 +12,8 @@ namespace tenseal {
 using namespace seal;
 using namespace std;
 
+using task_t = std::function<bool(size_t, size_t)>;
+
 /**
  * EncryptedTensor<plain_data_t, encrypted_t> interface - A
  *generic API for encrypted tensor operations.
@@ -268,6 +270,38 @@ class EncryptedTensor {
 
    protected:
     optional<string> _lazy_buffer;
+
+    void dispatch_jobs(task_t& worker_func, size_t total_tasks) {
+        size_t n_jobs =
+            std::min(total_tasks, this->tenseal_context()->dispatcher_size());
+
+        if (n_jobs == 1) {
+            worker_func(0, total_tasks);
+            return;
+        }
+
+        size_t batch_size = (total_tasks + n_jobs - 1) / n_jobs;
+        vector<future<bool>> futures;
+        for (size_t i = 0; i < n_jobs; i++) {
+            futures.push_back(
+                this->tenseal_context()->dispatcher()->enqueue_task(
+                    worker_func, i * batch_size,
+                    std::min((i + 1) * batch_size, total_tasks)));
+        }
+
+        std::optional<std::string> fail;
+        for (size_t i = 0; i < futures.size(); i++) {
+            try {
+                futures[i].get();
+            } catch (std::exception& e) {
+                fail = e.what();
+            }
+        }
+
+        if (fail) {
+            throw invalid_argument(fail.value());
+        }
+    }
 
    private:
     shared_ptr<TenSEALContext> _context;
