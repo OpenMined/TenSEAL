@@ -4,6 +4,7 @@
 #include <any>
 #include <map>
 #include <optional>
+#include <shared_mutex>
 #include <typeindex>
 #include <vector>
 
@@ -25,9 +26,10 @@ class TenSEALEncoder {
     template <typename T>
     shared_ptr<T> get() {
         const type_index& tidx = type_index(typeid(T));
-        if (_encoders.find(tidx) == _encoders.end()) return create<T>();
 
-        return any_cast<shared_ptr<T>>(_encoders[tidx]);
+        if (!has_encoder(tidx)) return create_encoder<T>();
+
+        return get_encoder<T>(tidx);
     }
 
     double unwrap_scale(optional<double> optscale = {}) {
@@ -118,10 +120,25 @@ class TenSEALEncoder {
    private:
     // Can throw exception in case of invalid parameters
     template <typename T>
-    shared_ptr<T> create() {
+    shared_ptr<T> create_encoder() {
+        std::unique_lock lock(mutex_);
+
         const type_index& tidx = type_index(typeid(T));
 
         _encoders[tidx] = make_shared<T>(*this->_context);
+
+        return any_cast<shared_ptr<T>>(_encoders[tidx]);
+    }
+
+    bool has_encoder(const type_index& tidx) {
+        std::shared_lock lock(mutex_);
+
+        return _encoders.find(tidx) != _encoders.end();
+    }
+
+    template <typename T>
+    shared_ptr<T> get_encoder(const type_index& tidx) {
+        std::shared_lock lock(mutex_);
 
         return any_cast<shared_ptr<T>>(_encoders[tidx]);
     }
@@ -140,6 +157,10 @@ class TenSEALEncoder {
     Stores a global scale used across ciphertext encrypted using CKKS.
     */
     optional<double> _scale;
+    /*
+    Read/write lock
+    */
+    std::shared_mutex mutex_;
 };
 
 }  // namespace tenseal
