@@ -1,0 +1,60 @@
+name: Benchmarks
+on:
+  push:
+      branches: [master]
+  release:
+    types: [created]
+
+jobs:
+  benchmark:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: [3.8]
+        os: [macos-latest, ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Prepare ENV
+        run: |
+            echo "CC=clang" >> $GITHUB_ENV
+            echo "CXX=clang++" >> $GITHUB_ENV
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+      - name: Install dependencies Ubuntu
+        run: .github/workflows/scripts/install_req_ubuntu.sh
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+      - name: Install dependencies MacOS
+        run: .github/workflows/scripts/install_req_macos.sh
+        if: ${{ matrix.os == 'macos-latest' }}
+      - name: Install dependencies Windows
+        run: .github/workflows/scripts/install_req_windows.bat
+        if: ${{ matrix.os == 'windows-latest' }}
+      - name: Install dependencies Windows - msbuild
+        uses: microsoft/setup-msbuild@v1.0.2
+        if: ${{ matrix.os == 'windows-latest' }}
+      - name: Build the library for Ubuntu/MacOS
+        run: .github/workflows/scripts/build_nix.sh
+        if: ${{ matrix.os != 'windows-latest' }}
+      - name: Build the library for Windows
+        run: .github/workflows/scripts/build_windows.bat
+        if: ${{ matrix.os == 'windows-latest' }}
+      - name: Run benchmarks
+        run: |
+          pytest tests/python/benchmarks/ --cov-fail-under 0 --benchmark-json pytest_benchmarks_output.json
+      - name: Store benchmark result
+        uses: rhysd/github-action-benchmark@v1
+        with:
+          name: Python-Benchmarks
+          tool: "pytest"
+          output-file-path: pytest_benchmarks_output.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          benchmark-data-dir-path: "benchmarks/${{ runner.os }}"
+          # Show alert with commit comment on detecting possible performance regression
+          alert-threshold: "200%"
+          comment-on-alert: true
+          fail-on-alert: true
