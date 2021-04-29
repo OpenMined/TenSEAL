@@ -272,7 +272,8 @@ class EncryptedTensor {
     optional<string> _lazy_buffer;
 
     void dispatch_jobs(task_t& worker_func, size_t total_tasks) {
-        size_t n_jobs = this->tenseal_context()->dispatcher_size();
+        size_t n_jobs =
+            std::min(total_tasks, this->tenseal_context()->dispatcher_size());
 
         if (n_jobs == 1) {
             worker_func(0, total_tasks);
