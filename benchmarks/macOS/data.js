@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1619772470250,
+  "lastUpdate": 1619781693587,
   "repoUrl": "https://github.com/OpenMined/TenSEAL",
   "entries": {
     "Python-Benchmarks": [
@@ -7089,6 +7089,653 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.0008465099493166857",
             "extra": "mean: 59.98617232000015 msec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogdan.cebere@gmail.com",
+            "name": "Bogdan Cebere",
+            "username": "bcebere"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "26a70959169d83c86b98983a3330c7537c3651bb",
+          "message": "Windows benchmarks (#293)\n\n* Update benchmarks.yml",
+          "timestamp": "2021-04-30T14:00:36+03:00",
+          "tree_id": "da4ced2f6c4dc254d46d0e7da1c583bd1e06fae1",
+          "url": "https://github.com/OpenMined/TenSEAL/commit/26a70959169d83c86b98983a3330c7537c3651bb"
+        },
+        "date": 1619781692188,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/python/benchmarks/test_mnist_eval.py::test_perf_gen_keys",
+            "value": 0.9075048325678688,
+            "unit": "iter/sec",
+            "range": "stddev: 0.011009459237621786",
+            "extra": "mean: 1.10192250676 sec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_mnist_eval.py::test_perf_mnist_prepare_input",
+            "value": 82.66525041473578,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0003543893112361535",
+            "extra": "mean: 12.096981439999864 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_mnist_eval.py::test_perf_mnist_eval_conv",
+            "value": 4.27206198521338,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00141630988345818",
+            "extra": "mean: 234.07900060000003 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_mnist_eval.py::test_perf_mnist_eval_square1",
+            "value": 118.43114658052971,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00010868648013836058",
+            "extra": "mean: 8.44372472000032 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_mnist_eval.py::test_perf_mnist_eval_fc1",
+            "value": 0.4339543466224481,
+            "unit": "iter/sec",
+            "range": "stddev: 0.014097213964027265",
+            "extra": "mean: 2.30438986908 sec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_mnist_eval.py::test_perf_mnist_eval_square2",
+            "value": 231.62945624383443,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00003493532685308447",
+            "extra": "mean: 4.317240199999901 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_mnist_eval.py::test_perf_mnist_eval_fc2",
+            "value": 3.9938193498483847,
+            "unit": "iter/sec",
+            "range": "stddev: 0.01663206639091675",
+            "extra": "mean: 250.38688843999978 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_mnist_eval.py::test_perf_mnist_eval_full",
+            "value": 0.3580957020821723,
+            "unit": "iter/sec",
+            "range": "stddev: 0.051892782851118195",
+            "extra": "mean: 2.7925495731599983 sec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_bfv[256-bfv_test-add]",
+            "value": 6704.904288813257,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00001313776670531756",
+            "extra": "mean: 149.14456000042264 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_bfv[256-bfv_test-multiply]",
+            "value": 44.721253940240324,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00010656180404249382",
+            "extra": "mean: 22.36073258000033 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_bfv[1024-bfv_test-add]",
+            "value": 6865.084072546513,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0000028860039058988668",
+            "extra": "mean: 145.6646400004047 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_bfv[1024-bfv_test-multiply]",
+            "value": 44.51294234497018,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0001396216082550374",
+            "extra": "mean: 22.465376300000912 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_bfv[4096-bfv_test-add]",
+            "value": 6916.043519622642,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0000034235222323907855",
+            "extra": "mean: 144.5913399999199 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_bfv[4096-bfv_test-multiply]",
+            "value": 44.48071049686485,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00017024375282913298",
+            "extra": "mean: 22.481655280000155 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_bfv[8192-bfv_test-add]",
+            "value": 6891.827257736615,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0000026021589966587915",
+            "extra": "mean: 145.0993999998218 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_bfv[8192-bfv_test-multiply]",
+            "value": 44.16185118849,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0005419889422668112",
+            "extra": "mean: 22.64397830000007 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_bfv[16384-bfv_test-add]",
+            "value": 3658.364642227991,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000010798572427292984",
+            "extra": "mean: 273.3461799999759 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_bfv[16384-bfv_test-multiply]",
+            "value": 22.262760294445968,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00038664097023513334",
+            "extra": "mean: 44.91805987999953 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[256-ckks_test-add]",
+            "value": 12399.182249144993,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0000011447790443869226",
+            "extra": "mean: 80.65047999991748 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[256-ckks_test-multiply]",
+            "value": 222.84924571656032,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00006177685923000881",
+            "extra": "mean: 4.487338500000533 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[256-ckks_test-negate]",
+            "value": 14579.206202956677,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0000015426625333103105",
+            "extra": "mean: 68.59084000041094 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[256-ckks_test-square]",
+            "value": 235.12737416516978,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000014635800153452724",
+            "extra": "mean: 4.253013939999732 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[256-ckks_test-sub]",
+            "value": 12492.492012374198,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000001893292378500728",
+            "extra": "mean: 80.04807999952847 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[256-ckks_test-dot]",
+            "value": 49.733029269437694,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00007799666537580605",
+            "extra": "mean: 20.107361540000284 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[256-ckks_test-polyval]",
+            "value": 91.61876184250568,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00009553942911672674",
+            "extra": "mean: 10.914794959999767 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[1024-ckks_test-add]",
+            "value": 12317.227737062009,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0000013625900571010133",
+            "extra": "mean: 81.18709999905604 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[1024-ckks_test-multiply]",
+            "value": 224.8856974589692,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000020725675676427656",
+            "extra": "mean: 4.446703420000517 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[1024-ckks_test-negate]",
+            "value": 14164.52664289322,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000007150964986617857",
+            "extra": "mean: 70.59889999936786 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[1024-ckks_test-square]",
+            "value": 233.59375735822692,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000016599323107370515",
+            "extra": "mean: 4.280936319999569 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[1024-ckks_test-sub]",
+            "value": 12494.873978032703,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0000011712901270678806",
+            "extra": "mean: 80.03281999947376 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[1024-ckks_test-dot]",
+            "value": 40.6356544400188,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0006642394224300926",
+            "extra": "mean: 24.608930599999894 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[1024-ckks_test-polyval]",
+            "value": 90.99612241317479,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00009721032888871533",
+            "extra": "mean: 10.98947925999994 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[4096-ckks_test-add]",
+            "value": 12178.111208979704,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0000017086945812869144",
+            "extra": "mean: 82.11454000047524 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[4096-ckks_test-multiply]",
+            "value": 224.46286440581403,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000020014353949110904",
+            "extra": "mean: 4.455079919999889 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[4096-ckks_test-negate]",
+            "value": 14699.280646629319,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0000015800971155178075",
+            "extra": "mean: 68.03053999988151 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[4096-ckks_test-square]",
+            "value": 232.68035732758216,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00004517144096788607",
+            "extra": "mean: 4.297741380000275 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[4096-ckks_test-sub]",
+            "value": 12523.732473116166,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000001793565226188017",
+            "extra": "mean: 79.84839999949145 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[4096-ckks_test-dot]",
+            "value": 35.71907370303395,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0002147072716549136",
+            "extra": "mean: 27.99624671999993 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[4096-ckks_test-polyval]",
+            "value": 89.0267378898417,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0004494343427037788",
+            "extra": "mean: 11.232580499999472 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[8192-ckks_test-add]",
+            "value": 6535.955401734277,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0000028864838669380017",
+            "extra": "mean: 152.9998200010141 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[8192-ckks_test-multiply]",
+            "value": 110.84456417293521,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00006846889187198738",
+            "extra": "mean: 9.021642219999533 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[8192-ckks_test-negate]",
+            "value": 7525.7999473875625,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000010568458855446067",
+            "extra": "mean: 132.87623999985954 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[8192-ckks_test-square]",
+            "value": 116.22468418335916,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00001817917904714008",
+            "extra": "mean: 8.604024240000285 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[8192-ckks_test-sub]",
+            "value": 6086.8377490224975,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000005175082898918246",
+            "extra": "mean: 164.2889199996489 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[8192-ckks_test-dot]",
+            "value": 17.906162216852824,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00059576690955544",
+            "extra": "mean: 55.846696119999706 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[8192-ckks_test-polyval]",
+            "value": 45.72066344900062,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0001621371843040268",
+            "extra": "mean: 21.871948579999412 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[16384-ckks_test-add]",
+            "value": 3248.93361875983,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000016409318478278006",
+            "extra": "mean: 307.7933000002986 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[16384-ckks_test-multiply]",
+            "value": 55.690042056896104,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00006984421748047473",
+            "extra": "mean: 17.95653160000029 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[16384-ckks_test-negate]",
+            "value": 4045.9575462529365,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000005057637802005179",
+            "extra": "mean: 247.16028000000279 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[16384-ckks_test-square]",
+            "value": 58.04584443612045,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0001343349690602445",
+            "extra": "mean: 17.227762119999852 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[16384-ckks_test-sub]",
+            "value": 3377.5463152816237,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000006405219450821996",
+            "extra": "mean: 296.07291999980134 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[16384-ckks_test-dot]",
+            "value": 8.974662308510066,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00040728128516011666",
+            "extra": "mean: 111.42480526000043 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_ops[16384-ckks_test-polyval]",
+            "value": 22.86176119418104,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00009312324242041306",
+            "extra": "mean: 43.7411620000006 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[256-ckks_test-add]",
+            "value": 1234.6271328520882,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000006591469972998286",
+            "extra": "mean: 809.961140000155 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[256-ckks_test-multiply]",
+            "value": 549.6729011995841,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000013741669306360746",
+            "extra": "mean: 1.819263780000142 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[256-ckks_test-sub]",
+            "value": 1245.0451560444053,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000004735000016715768",
+            "extra": "mean: 803.1837200002201 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[256-ckks_test-dot]",
+            "value": 57.27291483423352,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00019896352231713147",
+            "extra": "mean: 17.46026028000017 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[1024-ckks_test-add]",
+            "value": 1147.3985857998714,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000013153985339279505",
+            "extra": "mean: 871.5367199994262 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[1024-ckks_test-multiply]",
+            "value": 533.1179252585284,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00002112505452016995",
+            "extra": "mean: 1.8757576000001563 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[1024-ckks_test-sub]",
+            "value": 1073.400523196685,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00007342154529840815",
+            "extra": "mean: 931.6187000001719 usec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[1024-ckks_test-dot]",
+            "value": 46.92959774736556,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0000331681974121287",
+            "extra": "mean: 21.308514199999422 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[4096-ckks_test-add]",
+            "value": 894.2368385192574,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0000068458306693691166",
+            "extra": "mean: 1.118271980000145 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[4096-ckks_test-multiply]",
+            "value": 469.1708579887576,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000007368059779990281",
+            "extra": "mean: 2.1314196800005902 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[4096-ckks_test-sub]",
+            "value": 894.3902235276958,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000004258033010087256",
+            "extra": "mean: 1.1180802000001222 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[4096-ckks_test-dot]",
+            "value": 39.3648865116278,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00008663287501424626",
+            "extra": "mean: 25.40335025999923 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[8192-ckks_test-add]",
+            "value": 459.310677558133,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000003856344743368083",
+            "extra": "mean: 2.1771756000021014 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[8192-ckks_test-multiply]",
+            "value": 236.1078620045999,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00015349312281644396",
+            "extra": "mean: 4.235352399999783 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[8192-ckks_test-sub]",
+            "value": 461.29798902569127,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00001641071903418147",
+            "extra": "mean: 2.167796140000746 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[8192-ckks_test-dot]",
+            "value": 19.555864485370986,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0009431791405096128",
+            "extra": "mean: 51.13555581999776 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[16384-ckks_test-add]",
+            "value": 222.14421109905763,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00006332031436968275",
+            "extra": "mean: 4.501580280001463 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[16384-ckks_test-multiply]",
+            "value": 118.19020957926315,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00003069404189029499",
+            "extra": "mean: 8.46093769999925 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[16384-ckks_test-sub]",
+            "value": 230.98009960927868,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00002654197890975093",
+            "extra": "mean: 4.329377299999351 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_plain_ops[16384-ckks_test-dot]",
+            "value": 9.850064314655247,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0004625232709456652",
+            "extra": "mean: 101.52217976000088 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_matmul[matrix_shape0]",
+            "value": 54.51296042036038,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0013799563266500068",
+            "extra": "mean: 18.34426148000034 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_matmul[matrix_shape1]",
+            "value": 38.30029551374114,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0013034945794674479",
+            "extra": "mean: 26.109459120001475 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_matmul[matrix_shape2]",
+            "value": 25.003678566194278,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0006564834550145552",
+            "extra": "mean: 39.99411516000009 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_matmul[matrix_shape3]",
+            "value": 12.31192415468602,
+            "unit": "iter/sec",
+            "range": "stddev: 0.005207814283460049",
+            "extra": "mean: 81.22207280000111 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_enc_matmul[matrix_shape0]",
+            "value": 566.8619060000933,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00001534828045345304",
+            "extra": "mean: 1.764098080000167 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_enc_matmul[matrix_shape1]",
+            "value": 271.4159080153904,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00002732304108089239",
+            "extra": "mean: 3.6843824199991104 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_enc_matmul[matrix_shape2]",
+            "value": 74.99471126047892,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00007876081281220059",
+            "extra": "mean: 13.334273619998385 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_enc_matmul[matrix_shape3]",
+            "value": 105.14319039991037,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000025663702945073408",
+            "extra": "mean: 9.510839419999684 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_im2col_encoding[image_shape0]",
+            "value": 175.1564041595551,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00002515134524847008",
+            "extra": "mean: 5.709183199999189 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_im2col_encoding[image_shape1]",
+            "value": 159.71712793347444,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000042450187595560785",
+            "extra": "mean: 6.261069260001477 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_im2col_encoding[image_shape2]",
+            "value": 120.25628287850405,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00026332875672628895",
+            "extra": "mean: 8.315573839998933 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_im2col_encoding[image_shape3]",
+            "value": 18.182274378388694,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0014984627261975922",
+            "extra": "mean: 54.99862003999851 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_im2col_encoding[image_shape4]",
+            "value": 1.1167931435017115,
+            "unit": "iter/sec",
+            "range": "stddev: 0.003935852928083747",
+            "extra": "mean: 895.4209701399975 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_conv_eval[image_shape0]",
+            "value": 16.666952877137614,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000606841328940587",
+            "extra": "mean: 59.99896965999824 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_conv_eval[image_shape1]",
+            "value": 16.67922374257566,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0006169593042615631",
+            "extra": "mean: 59.95482855999967 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/python/benchmarks/test_ops.py::test_perf_ckks_conv_eval[image_shape2]",
+            "value": 16.593598718287076,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0005877547781890114",
+            "extra": "mean: 60.264202899998054 msec\nrounds: 5"
           }
         ]
       }
