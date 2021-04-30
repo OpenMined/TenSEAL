@@ -1,6 +1,8 @@
-### Benchmarks
 
 <div align="center">
+
+### Benchmarks
+
 
 [Linux benchmarks](https://openmined.github.io/TenSEAL/benchmarks/Linux)
 
