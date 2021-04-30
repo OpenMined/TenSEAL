@@ -2,14 +2,14 @@ name: Benchmarks
 on:
   push:
       branches: [master]
-
+    
 jobs:
   benchmark:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         python-version: [3.8]
-        os: [macos-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v2
