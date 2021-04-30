@@ -1,6 +1,4 @@
 
-<div align="center">
-
 ### Benchmarks
 
 
@@ -11,6 +9,4 @@
 
 
 [Windows benchmarks](https://openmined.github.io/TenSEAL/benchmarks/Windows/) 
-
-</div>
 
