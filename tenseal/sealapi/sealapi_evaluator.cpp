@@ -94,13 +94,13 @@ void bind_seal_evaluator(pybind11::module &m) {
                 Plaintext &dst) { e.transform_to_ntt(in, parms_id, dst); })
         .def("mod_switch_to_next",
              py::overload_cast<const Plaintext &, Plaintext &>(
-                 &Evaluator::mod_switch_to_next))
+                 &Evaluator::mod_switch_to_next, py::const_))
         .def("mod_switch_to_next_inplace",
              py::overload_cast<Plaintext &>(
-                 &Evaluator::mod_switch_to_next_inplace))
+                 &Evaluator::mod_switch_to_next_inplace, py::const_))
         .def("mod_switch_to_inplace",
              py::overload_cast<Plaintext &, parms_id_type>(
-                 &Evaluator::mod_switch_to_inplace))
+                 &Evaluator::mod_switch_to_inplace, py::const_))
         .def("mod_switch_to_inplace",
              [](Evaluator &e, Ciphertext &enc, parms_id_type parms_id) {
                  e.mod_switch_to_inplace(enc, parms_id);
@@ -110,7 +110,7 @@ void bind_seal_evaluator(pybind11::module &m) {
                 Ciphertext &dst) { e.mod_switch_to(enc, parms_id, dst); })
         .def("mod_switch_to",
              py::overload_cast<const Plaintext &, parms_id_type, Plaintext &>(
-                 &Evaluator::mod_switch_to))
+                 &Evaluator::mod_switch_to, py::const_))
 
         .def("rescale_to_next",
              [](Evaluator &e, const Ciphertext &enc, Ciphertext &dst) {
@@ -131,16 +131,16 @@ void bind_seal_evaluator(pybind11::module &m) {
 
         .def("transform_to_ntt_inplace",
              py::overload_cast<Ciphertext &>(
-                 &Evaluator::transform_to_ntt_inplace))
+                 &Evaluator::transform_to_ntt_inplace, py::const_))
         .def("transform_to_ntt",
              py::overload_cast<const Ciphertext &, Ciphertext &>(
-                 &Evaluator::transform_to_ntt))
+                 &Evaluator::transform_to_ntt, py::const_))
         .def("transform_from_ntt_inplace",
              py::overload_cast<Ciphertext &>(
-                 &Evaluator::transform_from_ntt_inplace))
+                 &Evaluator::transform_from_ntt_inplace, py::const_))
         .def("transform_from_ntt",
              py::overload_cast<const Ciphertext &, Ciphertext &>(
-                 &Evaluator::transform_from_ntt))
+                 &Evaluator::transform_from_ntt, py::const_))
 
         .def("apply_galois_inplace",
              [](Evaluator &e, Ciphertext &encrypted, std::uint32_t galois_elt,
