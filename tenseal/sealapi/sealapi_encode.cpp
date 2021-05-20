@@ -63,10 +63,10 @@ void bind_seal_encoder_decoder(pybind11::module &m) {
         .def(py::init<const SEALContext &>())
         .def("encode",
              py::overload_cast<const std::vector<std::uint64_t> &, Plaintext &>(
-                 &BatchEncoder::encode))
+                 &BatchEncoder::encode, py::const_))
         .def("encode",
              py::overload_cast<const std::vector<std::int64_t> &, Plaintext &>(
-                 &BatchEncoder::encode))
+                 &BatchEncoder::encode, py::const_))
         .def("decode_uint64",
              [](BatchEncoder &b, const Plaintext &plain) {
                  std::vector<std::uint64_t> destination;
