@@ -44,6 +44,11 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Check LongPathsEnabled
+        run: |
+            git config --system core.longpaths true
+            (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
+        if: ${{ matrix.os == 'windows-latest' }}
       - name: Prepare ENV
         run: |
             echo "CC=clang" >> $GITHUB_ENV
@@ -68,7 +73,7 @@ jobs:
         run: .github/workflows/scripts/build_windows.bat
         if: ${{ matrix.os == 'windows-latest' }}
       - name: Test with pytest
-        run: pytest -v ./tests/python/tenseal
+        run: pytest -m "not slow" -v ./tests/python/tenseal
       - name: Test with gtest for Ubuntu/MacOS
         run: .github/workflows/scripts/run_gtest_nix.sh
         if: ${{ matrix.os != 'windows-latest' }}
@@ -96,6 +101,11 @@ jobs:
             echo "CC=clang" >> $GITHUB_ENV
             echo "CXX=clang++" >> $GITHUB_ENV
         if: ${{ matrix.os == 'ubuntu-latest' }}
+      - name: Check LongPathsEnabled
+        run: |
+            git config --system core.longpaths true
+            (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
+        if: ${{ matrix.os == 'windows-latest' }}
       - name: Install dependencies Ubuntu
         run: .github/workflows/scripts/install_req_ubuntu.sh
         if: ${{ matrix.os == 'ubuntu-latest' }}

@@ -328,6 +328,7 @@ def test_square_inplace(context, plain, precision):
 @pytest.mark.parametrize("plain", [True, False])
 @pytest.mark.parametrize("op", ["add", "sub", "mul"])
 @pytest.mark.parametrize("reshape_first", [False, True])
+@pytest.mark.slow
 def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op, reshape_first):
     r_t = np.random.randn(*shape)
     l_t = np.random.randn(*shape)
@@ -403,6 +404,7 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op, reshape_first):
 @pytest.mark.parametrize("shape", BROADCAST_SHAPES)
 @pytest.mark.parametrize("plain", [True, False])
 @pytest.mark.parametrize("op", ["add", "sub", "mul"])
+@pytest.mark.slow
 def test_broadcast_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
     l_t = np.random.randn(*shape[1])
     r_t = np.random.randn(*shape[0])
@@ -468,6 +470,7 @@ def test_broadcast_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
 
 @pytest.mark.parametrize("shape", SHAPES)
 @pytest.mark.parametrize("op", ["add", "sub", "mul"])
+@pytest.mark.slow
 def test_add_sub_mul_scalar(context, shape, op):
     r_t = np.random.randn(*shape)
     r_pt = ts.plain_tensor(r_t.flatten().tolist(), shape)
@@ -705,10 +708,11 @@ def test_dot(context, shapes, plain):
     assert np.allclose(left_result, l_t, rtol=0, atol=0.01)
 
 
-# this test only test the python API for matmul
-# a previous test already test different shapes
+# this test only tests the python API for matmul
+# a previous test already tests different shapes
 @pytest.mark.parametrize("plain", [True, False])
 @pytest.mark.parametrize("arithmetic", [True, False])
+@pytest.mark.slow
 def test_matmul_api(context, plain, arithmetic):
     r_t = np.random.randn(2, 2)
     l_t = np.random.randn(2, 2)
