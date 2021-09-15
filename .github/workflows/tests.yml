@@ -35,7 +35,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
-        os: [macos-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -72,7 +72,7 @@ jobs:
         run: .github/workflows/scripts/build_windows.bat
         if: ${{ matrix.os == 'windows-latest' }}
       - name: Test with pytest
-        run: pytest -v ./tests/python/tenseal
+        run: pytest -m "not slow" -v ./tests/python/tenseal
       - name: Test with gtest for Ubuntu/MacOS
         run: .github/workflows/scripts/run_gtest_nix.sh
         if: ${{ matrix.os != 'windows-latest' }}
@@ -86,7 +86,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
-        os: [macos-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v2
         with:
