@@ -5,10 +5,9 @@ import subprocess
 import re
 import setuptools
 
-from setuptools import Extension
+from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
-from skbuild import setup
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
