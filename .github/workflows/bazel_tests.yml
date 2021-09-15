@@ -2,7 +2,7 @@ name: Bazel Tests
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
     types: [opened, synchronize, reopened]
 
