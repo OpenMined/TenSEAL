@@ -16,3 +16,6 @@ exclude = '''
     | third_party
 )
 '''
+
+[tool.pytest.ini_options]
+markers = 'slow: mark a test as slow.'

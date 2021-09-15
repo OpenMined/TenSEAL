@@ -351,6 +351,7 @@ def test_add_sub_mul_tensor_ct_pt(context, shape, plain, op, reshape_first):
 @pytest.mark.parametrize("shape", BROADCAST_SHAPES)
 @pytest.mark.parametrize("plain", [True, False])
 @pytest.mark.parametrize("op", ["add", "sub", "mul"])
+@pytest.mark.slow
 def test_broadcast_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
     l_t = np.random.randint(0, 100, *[shape[1]], dtype=np.int64)
     r_t = np.random.randint(0, 100, *[shape[0]], dtype=np.int64)
@@ -416,6 +417,7 @@ def test_broadcast_add_sub_mul_tensor_ct_pt(context, shape, plain, op):
 
 @pytest.mark.parametrize("shape", SHAPES)
 @pytest.mark.parametrize("op", ["add", "sub", "mul"])
+@pytest.mark.slow
 def test_add_sub_mul_scalar(context, shape, op):
     r_t = np.random.randint(0, 100, *[shape], dtype=np.int64)
     r_pt = ts.plain_tensor(r_t.flatten().tolist(), shape, dtype="int")
@@ -512,6 +514,7 @@ def test_power_inplace(context, plain, power, precision):
     ],
 )
 @pytest.mark.parametrize("reshape_first", [False, True])
+@pytest.mark.slow
 def test_polynomial(context, data, polynom, reshape_first):
     context = ts.context(ts.SCHEME_TYPE.BFV, 8192, 1032193)
 
@@ -571,6 +574,7 @@ def test_polynomial(context, data, polynom, reshape_first):
     ],
 )
 @pytest.mark.parametrize("plain", [True, False])
+@pytest.mark.slow
 def test_dot(context, shapes, plain):
     r_shape = shapes[0]
     l_shape = shapes[1]
@@ -621,10 +625,11 @@ def test_dot(context, shapes, plain):
     assert np.allclose(left_result, l_t, rtol=0, atol=0)
 
 
-# this test only test the python API for matmul
-# a previous test already test different shapes
+# this test only tests the python API for matmul
+# a previous test already tests different shapes
 @pytest.mark.parametrize("plain", [True, False])
 @pytest.mark.parametrize("arithmetic", [True, False])
+@pytest.mark.slow
 def test_matmul_api(context, plain, arithmetic):
     r_t = np.random.randint(0, 100, size=(2, 2), dtype=np.int64)
     l_t = np.random.randint(0, 100, size=(2, 2), dtype=np.int64)
