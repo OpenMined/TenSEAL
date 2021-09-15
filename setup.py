@@ -5,10 +5,10 @@ import subprocess
 import re
 import setuptools
 
-from setuptools import setup, Extension
+from setuptools import Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
-
+from skbuild import setup
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -48,6 +48,7 @@ class CMakeBuild(build_ext):
     def build_extension(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         cmake_args = [
+            "-DSEAL_USE_INTEL_HEXL=ON",
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
             "-DPYTHON_EXECUTABLE=" + sys.executable,
         ]
