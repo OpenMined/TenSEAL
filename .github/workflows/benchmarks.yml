@@ -2,6 +2,9 @@ name: Benchmarks
 on:
   push:
       branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
     
 jobs:
   benchmark:
