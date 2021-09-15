@@ -2,7 +2,7 @@ name: Bazel Tests
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -28,5 +28,5 @@ jobs:
         timeout-minutes: 30
         run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=1500 --jobs 1 //tests/python/sealapi/...
       - name: Run TenSEAL tests
-        timeout-minutes: 60
-        run: bazel test --test_output=all --spawn_strategy=standalone --test_output=streamed --local_sigkill_grace_seconds=30 --test_timeout=2500 //tests/python/tenseal/...
+        timeout-minutes: 120
+        run: bazel test --test_output=all --spawn_strategy=standalone --test_output=streamed --local_sigkill_grace_seconds=30 --test_timeout=4000 //tests/python/tenseal/...

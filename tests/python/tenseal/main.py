@@ -5,4 +5,8 @@ import os
 import pytest
 
 if __name__ == "__main__":
-    sys.exit(pytest.main(["-s", "-v", "-x", os.path.dirname(os.path.abspath(__file__))]))
+    sys.exit(
+        pytest.main(
+            ["-m", "not slow", "-s", "-v", "-x", os.path.dirname(os.path.abspath(__file__))]
+        )
+    )
