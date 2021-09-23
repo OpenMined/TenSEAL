@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
 project(tenseal)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_OBJECT_PATH_MAX 400)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
