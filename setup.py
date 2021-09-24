@@ -47,9 +47,7 @@ class CMakeBuild(build_ext):
 
     def build_extension(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
-        hexl = "OFF" if platform.system() == "Windows" else "ON"
         cmake_args = [
-            "-DSEAL_USE_INTEL_HEXL=" + hexl,
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
             "-DPYTHON_EXECUTABLE=" + sys.executable,
         ]
