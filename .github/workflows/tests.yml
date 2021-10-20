@@ -66,9 +66,6 @@ jobs:
       - name: Install dependencies Windows - msbuild
         uses: microsoft/setup-msbuild@v1.0.3
         if: ${{ matrix.os == 'windows-latest' }}
-      - name: Prepare dependencies Windows - msbuild
-        run: msbuild.exe /p:TrackFileAccess=false
-        if: ${{ matrix.os == 'windows-latest' }}
       - name: Build the library for Ubuntu/MacOS
         run: .github/workflows/scripts/build_nix.sh
         if: ${{ matrix.os != 'windows-latest' }}
@@ -120,9 +117,6 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
       - name: Install dependencies Windows - msbuild
         uses: microsoft/setup-msbuild@v1.0.3
-        if: ${{ matrix.os == 'windows-latest' }}
-      - name: Prepare dependencies Windows - msbuild
-        run: msbuild.exe /p:TrackFileAccess=false
         if: ${{ matrix.os == 'windows-latest' }}
       - name: Build the library for Ubuntu/MacOS
         run: .github/workflows/scripts/build_nix.sh
