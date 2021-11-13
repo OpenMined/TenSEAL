@@ -7,7 +7,7 @@ set(SEAL_USE_INTEL_HEXL ON)
 FetchContent_Declare(
   com_microsoft_seal
   GIT_REPOSITORY https://github.com/microsoft/SEAL
-  GIT_TAG        7ba34a956015efdd09321f6a4b3c7b09695c9bc4 #v3.7
+  GIT_TAG        6bfac481aae4057ea887d42eb0f24371e9b4c4f9 #v3.7.1
 )
 FetchContent_MakeAvailable(com_microsoft_seal)
 
