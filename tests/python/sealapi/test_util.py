@@ -123,7 +123,7 @@ def test_util_croots():
 
 
 def test_util_polyarithsmallmod():
-    assert util.modulo_poly_coeffs([5, 6, 7, 8, 9], 5, sealapi.Modulus(2)) == [1, 0, 1, 0, 1]
+    assert util.modulo_poly_coeffs([5, 6, 7, 8, 9], 5, sealapi.Modulus(2)) == [3, 4, 5, 6, 7]
     assert util.negate_poly_coeffmod([1, 2], 2, sealapi.Modulus(5)) == [4, 3]
     assert util.add_poly_coeffmod([1, 2], [1, 2], 2, sealapi.Modulus(5)) == [2, 4]
     assert util.sub_poly_coeffmod([1, 2], [1, 2], 2, sealapi.Modulus(5)) == [0, 0]
