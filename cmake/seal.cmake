@@ -2,7 +2,7 @@ include(FetchContent)
 
 set(SEAL_BUILD_DEPS ON)
 set(SEAL_USE_MSGSL ON)
-set(SEAL_USE_INTEL_HEXL ON)
+set(SEAL_USE_INTEL_HEXL OFF)
 
 FetchContent_Declare(
   com_microsoft_seal
