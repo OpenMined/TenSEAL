@@ -23,8 +23,8 @@ def test_serialization_sanity():
     header = sealapi.Serialization.SEALHeader()
     assert header.magic == 0xA15E
     assert header.header_size == 0x10
-    assert header.version_major == 3
-    assert header.version_minor == 0x7
+    assert header.version_major == 4
+    assert header.version_minor == 0
     assert header.compr_mode == sealapi.COMPR_MODE_TYPE.NONE
     assert header.size == 0
     assert header.reserved == 0
