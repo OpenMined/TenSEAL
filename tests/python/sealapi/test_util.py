@@ -122,21 +122,6 @@ def test_util_croots():
     assert croot.get_root(5) != 0
 
 
-def test_util_polyarithsmallmod():
-    assert util.modulo_poly_coeffs([5, 6, 7, 8, 9], 5, sealapi.Modulus(2)) == [1, 0, 1, 0, 1]
-    assert util.negate_poly_coeffmod([1, 2], 2, sealapi.Modulus(5)) == [4, 3]
-    assert util.add_poly_coeffmod([1, 2], [1, 2], 2, sealapi.Modulus(5)) == [2, 4]
-    assert util.sub_poly_coeffmod([1, 2], [1, 2], 2, sealapi.Modulus(5)) == [0, 0]
-    assert util.multiply_poly_scalar_coeffmod([1, 2], 2, 3, sealapi.Modulus(5)) == [3, 1]
-    assert util.dyadic_product_coeffmod([5, 7], [2, 3], 2, sealapi.Modulus(5), 4) == [0, 1, 0, 0]
-    assert util.poly_infty_norm_coeffmod([5, 7], 2, sealapi.Modulus(5)) == 2
-    assert util.negacyclic_shift_poly_coeffmod([4, 3], 2, 1, sealapi.Modulus(5)) == [2, 4]
-    assert util.negacyclic_multiply_poly_mono_coeffmod([4, 3], 2, 2, 1, sealapi.Modulus(5)) == [
-        4,
-        3,
-    ]
-
-
 def test_util_polycore():
     assert util.poly_to_hex_string([1, 2], 2, 1) == "2x^1 + 1"
     assert util.poly_to_dec_string([1, 2], 2, 1) == "2x^1 + 1"
