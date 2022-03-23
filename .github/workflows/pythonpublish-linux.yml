@@ -12,6 +12,7 @@ jobs:
           - cp37-cp37m
           - cp38-cp38
           - cp39-cp39
+          - cp10-cp10
 
     runs-on: ubuntu-latest
     container: quay.io/pypa/manylinux2014_x86_64
