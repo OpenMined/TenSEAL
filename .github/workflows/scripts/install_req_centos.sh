@@ -17,5 +17,5 @@ clang --version
 
 
 # install python dependencies
-python3-pip install --upgrade pip
-python3-pip install setuptools wheel twine auditwheel
+python3 -m pip install --upgrade pip
+python3 -m pip install setuptools wheel twine auditwheel
