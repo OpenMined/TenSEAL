@@ -64,7 +64,8 @@ void bind_seal_modulus(pybind11::module &m) {
     py::class_<CoeffModulus>(m, "CoeffModulus")
         .def_static("MaxBitCount", &CoeffModulus::MaxBitCount)
         .def_static("BFVDefault", &CoeffModulus::BFVDefault)
-        .def_static("Create", &CoeffModulus::Create);
+        .def_static("Create", py::overload_cast<std::size_t, std::vector<int>>(
+                                  &CoeffModulus::Create));
 
     py::class_<PlainModulus>(m, "PlainModulus")
         .def_static("Batching", py::overload_cast<std::size_t, int>(
