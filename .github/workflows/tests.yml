@@ -3,6 +3,9 @@ name: Tests
 on:
   push:
     branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
 jobs:
   Linter:
     runs-on: ${{ matrix.os }}
