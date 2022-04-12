@@ -5,7 +5,7 @@ set -e
 yum makecache -y
 yum install centos-release-scl -y
 yum-config-manager --enable rhel-server-rhscl-7-rpms
-yum install llvm-toolset-7.0 python3 python-devel -y
+yum install llvm-toolset-7.0 python3 python3-devel -y
 scl enable llvm-toolset-7.0 bash
 export CC=/opt/rh/llvm-toolset-7.0/root/usr/bin/clang
 export CPP=/opt/rh/llvm-toolset-7.0/root/usr/bin/clang-cpp
@@ -17,5 +17,5 @@ clang --version
 
 
 # install python dependencies
-python -m pip install --upgrade pip
-pip install setuptools wheel twine auditwheel
+python3 -m pip install --upgrade pip
+python3 -m pip install setuptools wheel twine auditwheel
