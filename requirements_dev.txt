@@ -1,12 +1,12 @@
-black==19.10b0
-bumpversion>=0.5.3
+black==22.3.0
+bumpversion
 flake8
 numpy
-pytest>=5.4.1
+pytest
 pytest-benchmark
 pytest-cov
 pytest-benchmark[histogram]
-setuptools>=41.0.0
+setuptools
 pygal
 pygaljs
 scikit-image
