@@ -95,7 +95,7 @@ Supported platforms and their requirements are listed below: (this are only requ
 - **MacOS:** Xcode toolchain (>= 9.3)
 - **Windows:** Microsoft Visual Studio (>= 10.0.40219.1, Visual Studio 2010 SP1 or later).
 
-If you want to install tenseal from the repository, you should first make sure to have the requirements for your platform (listed above) and [CMake (3.12 or higher)](https://cmake.org/install/) installed, then get the third party libraries (if you didn't already) by running the following command from the root directory of the project
+If you want to install tenseal from the repository, you should first make sure to have the requirements for your platform (listed above) and [CMake (3.14 or higher)](https://cmake.org/install/) installed, then get the third party libraries (if you didn't already) by running the following command from the root directory of the project
 
 ```bash
 $ git submodule init
