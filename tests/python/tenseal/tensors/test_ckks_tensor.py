@@ -532,7 +532,7 @@ def test_power(context, plain, power, precision):
     tensor = ts.ckks_tensor(context, plain)
     expected = np.array([np.power(v, power) for v in plain.raw]).reshape(plain.shape).tolist()
 
-    new_tensor = tensor ** power
+    new_tensor = tensor**power
     decrypted_result = new_tensor.decrypt().tolist()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
     assert _almost_equal(
@@ -602,7 +602,7 @@ def test_polynomial(context, data, polynom, reshape_first):
 )
 def test_polynomial_modswitch_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
-    context.global_scale = 2 ** 40
+    context.global_scale = 2**40
     context.auto_mod_switch = False
 
     ct = ts.ckks_tensor(context, data)
@@ -616,7 +616,7 @@ def test_polynomial_modswitch_off(context, data, polynom):
 )
 def test_polynomial_rescale_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
-    context.global_scale = 2 ** 40
+    context.global_scale = 2**40
     context.auto_rescale = False
 
     ct = ts.ckks_tensor(context, data)

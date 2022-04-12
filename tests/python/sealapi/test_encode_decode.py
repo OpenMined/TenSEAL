@@ -25,7 +25,7 @@ def test_ckks_encoder(testcase):
     encoder = sealapi.CKKSEncoder(ctx)
 
     plaintext = sealapi.Plaintext()
-    encoder.encode(testcase, 2 ** 40, plaintext)
+    encoder.encode(testcase, 2**40, plaintext)
     out = encoder.decode_double(plaintext)
 
     is_close_enough(out, testcase)
@@ -41,7 +41,7 @@ def test_ckks_encoder(testcase):
     plaintext = sealapi.Plaintext()
     ciphertext = sealapi.Ciphertext(ctx)
 
-    encoder.encode(testcase, 2 ** 40, plaintext)
+    encoder.encode(testcase, 2**40, plaintext)
     encryptor.encrypt(plaintext, ciphertext)
 
     plaintext_out = sealapi.Plaintext()

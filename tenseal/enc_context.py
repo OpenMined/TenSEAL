@@ -35,7 +35,9 @@ class SEALPrimitive(ABC):
         self.data = data
 
     @property
-    def data(self,) -> SEAL_PRIMITIVE:
+    def data(
+        self,
+    ) -> SEAL_PRIMITIVE:
         """Get the wrapped low level key object"""
         return self._data
 
