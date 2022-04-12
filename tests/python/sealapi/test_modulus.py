@@ -12,7 +12,7 @@ def test_modulus():
     assert testcase.uint64_count() == 1
     assert testcase.value() == 1023
     assert testcase.data() == 1023
-    assert testcase.const_ratio()[2] == (2 ** 128) % 1023
+    assert testcase.const_ratio()[2] == (2**128) % 1023
     assert not testcase.is_zero()
     assert not testcase.is_prime()
 

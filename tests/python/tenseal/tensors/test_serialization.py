@@ -95,7 +95,7 @@ def test_power(plain_vec, power, precision, duplicate):
     ckks_vec = duplicate(ckks_vec)
 
     expected = [np.power(v, power) for v in plain_vec]
-    new_vec = ckks_vec ** power
+    new_vec = ckks_vec**power
     decrypted_result = new_vec.decrypt()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of vector is incorrect"
     assert _almost_equal(
@@ -230,7 +230,7 @@ def test_dot_product(vec1, vec2, precision, duplicate):
 @pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate_ckks])
 def test_mul_without_global_scale(vec1, vec2, precision, duplicate):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
-    scale = 2 ** 40
+    scale = 2**40
 
     first_vec = ts.ckks_vector(context, vec1, scale=scale)
     first_vec = duplicate(first_vec)
