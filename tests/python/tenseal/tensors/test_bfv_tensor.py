@@ -478,7 +478,7 @@ def test_power(context, plain, power, precision):
     tensor = ts.bfv_tensor(context, plain)
     expected = np.array([np.power(v, power) for v in plain.raw]).reshape(plain.shape).tolist()
 
-    new_tensor = tensor ** power
+    new_tensor = tensor**power
     decrypted_result = new_tensor.decrypt().tolist()
     assert (decrypted_result == expected) == True, "Decryption of tensor is incorrect"
     assert tensor.decrypt().tolist() == plain.tolist(), "Something went wrong in memory."

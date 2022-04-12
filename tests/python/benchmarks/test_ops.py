@@ -9,7 +9,7 @@ iterations = 10
 
 def bfv_test(input_size):
     ctx = ts.context(ts.SCHEME_TYPE.BFV, 8192, 1032193)
-    l, r = [i for i in range(input_size)], [i ** 2 for i in range(input_size)]
+    l, r = [i for i in range(input_size)], [i**2 for i in range(input_size)]
     return ts.bfv_vector(ctx, l), ts.bfv_vector(ctx, r)
 
 
@@ -18,7 +18,7 @@ def ckks_context(n_threads=None):
         ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60], n_threads=n_threads
     )
     ctx.generate_galois_keys()
-    ctx.global_scale = 2 ** 40
+    ctx.global_scale = 2**40
 
     return ctx
 
@@ -27,7 +27,7 @@ def ckks_test(input_size, n_threads=None):
     ctx = ckks_context(n_threads)
 
     l, r = [np.random.randn(input_size), np.random.randn(input_size)]
-    scale = 2 ** 40
+    scale = 2**40
 
     return ts.ckks_vector(ctx, l, scale), ts.ckks_vector(ctx, r, scale)
 
@@ -40,7 +40,7 @@ def helper_perf(op, left, right, opt=None):
     elif op == "negate":
         return -left
     elif op == "square":
-        return left ** 2
+        return left**2
     elif op == "sub":
         return left - right
     elif op == "dot":

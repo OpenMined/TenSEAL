@@ -198,7 +198,7 @@ def test_evaluator_plain(scheme, ctx, left):
 @pytest.mark.parametrize("exp, left", [(2, [2, 3, 4, 5]), (3, [i for i in range(50)])])
 def test_evaluator_exp(scheme, ctx, exp, left):
     evaluator, encryptor, decryptor, relin_keys = helper_generate_evaluator(ctx)
-    expected = [i ** exp for i in left]
+    expected = [i**exp for i in left]
 
     # exponentiate in place
     cleft = sealapi.Ciphertext(ctx)
