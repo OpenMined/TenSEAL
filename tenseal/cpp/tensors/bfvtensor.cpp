@@ -372,7 +372,7 @@ shared_ptr<BFVTensor> BFVTensor::sum_batch_inplace() {
 }
 
 shared_ptr<BFVTensor> BFVTensor::polyval_inplace(
-    const vector<double>& coefficients) {
+    const vector<int64_t>& coefficients) {
     if (coefficients.size() == 0) {
         throw invalid_argument(
             "the coefficients vector need to have at least one element");
@@ -380,7 +380,7 @@ shared_ptr<BFVTensor> BFVTensor::polyval_inplace(
 
     int degree = static_cast<int>(coefficients.size()) - 1;
     while (degree >= 0) {
-        if (coefficients[degree] == 0.0)
+        if (coefficients[degree] == 0)
             degree--;
         else
             break;
@@ -413,7 +413,7 @@ shared_ptr<BFVTensor> BFVTensor::polyval_inplace(
 
     // coefficients[1] * x + ... + coefficients[degree] * x^(degree)
     for (int i = 1; i <= degree; i++) {
-        if (coefficients[i] == 0.0) continue;
+        if (coefficients[i] == 0) continue;
         x = compute_polynomial_term(i, coefficients[i], x_squares);
         result->add_inplace(x);
     }
