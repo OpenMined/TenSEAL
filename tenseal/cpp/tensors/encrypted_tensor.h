@@ -142,10 +142,11 @@ class EncryptedTensor {
      * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
      *x^i
      **/
-    encrypted_t polyval(const vector<double>& coefficients) const {
+    encrypted_t polyval(const vector<plain_data_t>& coefficients) const {
         return this->copy()->polyval_inplace(coefficients);
     };
-    virtual encrypted_t polyval_inplace(const vector<double>& coefficients) = 0;
+    virtual encrypted_t polyval_inplace(
+        const vector<plain_data_t>& coefficients) = 0;
     /**
      * Load/Save the Tensor from/to a serialized protobuffer.
      **/

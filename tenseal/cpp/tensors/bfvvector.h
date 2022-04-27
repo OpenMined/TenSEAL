@@ -93,7 +93,7 @@ class BFVVector
      * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
      *x^i
      **/
-    encrypted_t polyval_inplace(const vector<double>& coefficients) override;
+    encrypted_t polyval_inplace(const vector<int64_t>& coefficients) override;
 
     /*
      * Image Block to Columns.
