@@ -243,12 +243,20 @@ shared_ptr<CKKSVector> CKKSVector::dot_plain_inplace(const plain_t& to_mul) {
 
 shared_ptr<CKKSVector> CKKSVector::sum_inplace(size_t /*axis = 0*/) {
     vector<Ciphertext> interm_sum;
-    // TODO use multithreading for the sum
-    for (size_t idx = 0; idx < this->_ciphertexts.size(); ++idx) {
-        Ciphertext out = this->_ciphertexts[idx];
-        sum_vector(this->tenseal_context(), out, this->_sizes[idx]);
-        interm_sum.push_back(out);
-    }
+    size_t size = this->_ciphertexts.size();
+    interm_sum.resize(size);
+
+    task_t worker_func = [&](size_t start, size_t end) -> bool {
+        for (size_t idx = start; idx < end; ++idx) {
+            Ciphertext out = this->_ciphertexts[idx];
+            sum_vector(this->tenseal_context(), out, this->_sizes[idx]);
+            interm_sum[idx] = out;
+        }
+        return true;
+    };
+
+    this->dispatch_jobs(worker_func, size);
+
     Ciphertext result;
     tenseal_context()->evaluator->add_many(interm_sum, result);
 
