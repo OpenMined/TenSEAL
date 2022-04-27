@@ -183,7 +183,6 @@ TEST_P(BFVVectorTest, TestBFVMulPlain) {
 }
 
 TEST_P(BFVVectorTest, TestEmptyPlaintext) {
-    auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
     auto ctx =
@@ -195,7 +194,6 @@ TEST_P(BFVVectorTest, TestEmptyPlaintext) {
 }
 
 TEST_P(BFVVectorTest, TestBFVLazyLoading) {
-    bool should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
 
     auto ctx =
@@ -332,7 +330,6 @@ TEST_P(BFVVectorTest, TestSum) {
     auto enc_type = get<1>(GetParam());
 
     int poly_mod = 8192;
-    int input_size = 100000;
 
     auto ctx = TenSEALContext::Create(scheme_type::bfv, poly_mod, 1032193, {},
                                       enc_type);
@@ -352,7 +349,6 @@ TEST_P(BFVVectorTest, TestDot) {
     auto enc_type = get<1>(GetParam());
 
     int poly_mod = 8192;
-    int input_size = 100000;
 
     auto ctx = TenSEALContext::Create(scheme_type::bfv, poly_mod, 1032193, {},
                                       enc_type);
@@ -387,6 +383,24 @@ TEST_P(BFVVectorTest, TestDot) {
     res = r->dot_plain(ldata);
     decr = res->decrypt();
     EXPECT_THAT(decr.data(), ElementsAreArray({expected}));
+}
+
+TEST_P(BFVVectorTest, TestBFVVectorPolyval) {
+    auto enc_type = get<1>(GetParam());
+
+    int poly_mod = 8192;
+
+    auto ctx = TenSEALContext::Create(scheme_type::bfv, poly_mod, 1032193, {},
+                                      enc_type);
+    ASSERT_TRUE(ctx != nullptr);
+
+    auto data = PlainTensor(vector<int64_t>({1, 2, 3, 4, 5, 6}));
+    auto l = BFVVector::Create(ctx, data);
+
+    auto res = l->polyval({1, 1, 1});
+
+    auto decr = res->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({3, 7, 13, 21, 31, 43}));
 }
 
 INSTANTIATE_TEST_CASE_P(

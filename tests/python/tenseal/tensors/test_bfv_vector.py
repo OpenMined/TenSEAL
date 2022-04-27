@@ -1,7 +1,10 @@
-import tenseal as ts
-import pytest
 import copy
 import pickle
+import pytest
+
+import numpy as np
+
+import tenseal as ts
 
 
 @pytest.fixture(scope="module")
@@ -596,3 +599,40 @@ def test_sum_inplace(context, vec1):
     # Decryption
     decrypted_result = result.decrypt()
     assert decrypted_result == expected, "Sum of vector is incorrect."
+
+
+@pytest.mark.parametrize(
+    "data, polynom",
+    [
+        # null polynom
+        ([0, 1, 2, 3, 4], [0]),
+        ([0, 1, 2, 3, 4], [0, 0]),
+        ([0, 1, 2, 3, 4], [0, 0, 0]),
+        # power of two coeff
+        ([0, 1, 2, 3, 4], [0, 1, 1]),
+        ([0, 1, 2, 3, 4], [0, 1, 1, 0, 1]),
+        # random coeff
+        ([0, 1, 2, 3, 4], [-4, -2, 5]),
+        ([0, 0, 0, 0, 0], [0, 0, 0, 1]),
+        ([0, 1, 2, 3, 4], [0, 0, 0, 1]),
+        ([0, 1, 2, 3, 4], [3, 2, 4, 5]),
+        ([0, -1, -2, -3, -4], [-3, -2, -4, -5, 1]),
+        ([2 for i in range(1000)], [-3, -2, -4, -5, 1]),
+        # Evaluation requiring modular arithmetic
+        ([1000000], [1, 1, 1]),
+    ],
+)
+def test_polynomial(context, data, polynom):
+    modulus = 1032193
+    context = ts.context(ts.SCHEME_TYPE.BFV, 8192, modulus)
+    context.generate_galois_keys()
+
+    ct = ts.bfv_vector(context, data)
+    expected = [np.polyval(polynom[::-1], x) % modulus for x in data]
+    result = ct.polyval(polynom)
+
+    # Beware, values might be negative
+    # compute `value % modulus` to get the expected value
+    decrypted_result = result.decrypt()
+
+    assert [x % modulus for x in decrypted_result] == expected
