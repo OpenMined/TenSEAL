@@ -636,6 +636,9 @@ def test_polynomial(context, data, polynom):
 
     polyval = np.polynomial.polynomial.polyval
 
-    expected = [np.polynomial.polynomial.polyval(x, np.array(polynom).astype(object)) % modulus for x in data]
+    expected = [
+        np.polynomial.polynomial.polyval(x, np.array(polynom).astype(object)) % modulus
+        for x in data
+    ]
 
     assert [x % modulus for x in decrypted_result] == expected
