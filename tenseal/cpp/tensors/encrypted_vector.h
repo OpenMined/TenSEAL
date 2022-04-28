@@ -131,6 +131,17 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
             this->_ciphertexts[0], steps, galois_keys);
     }
 
+    /**
+     * Polynomial evaluation with `this` as variable.
+     * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
+     *x^i
+     **/
+    encrypted_t polyval(const vector<plain_t>& coefficients) const {
+        return this->copy()->polyval_inplace(coefficients);
+    };
+    virtual encrypted_t polyval_inplace(
+        const vector<plain_t>& coefficients) = 0;
+
     /*
     Perform encrypted_vector-plain_matrix multiplication using a variant of the
     diagonal method of Halevi and Shoup [1].

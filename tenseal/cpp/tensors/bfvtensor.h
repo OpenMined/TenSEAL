@@ -58,7 +58,7 @@ class BFVTensor : public EncryptedTensor<int64_t, shared_ptr<BFVTensor>>,
     shared_ptr<BFVTensor> sum_batch_inplace();
 
     shared_ptr<BFVTensor> polyval_inplace(
-        const vector<double>& coefficients) override;
+        const vector<int64_t>& coefficients) override;
 
     shared_ptr<BFVTensor> dot_inplace(
         const shared_ptr<BFVTensor>& to_mul) override;
