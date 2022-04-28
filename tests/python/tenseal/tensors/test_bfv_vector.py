@@ -628,11 +628,14 @@ def test_polynomial(context, data, polynom):
     context.generate_galois_keys()
 
     ct = ts.bfv_vector(context, data)
-    expected = [np.polyval(polynom[::-1], x) % modulus for x in data]
     result = ct.polyval(polynom)
 
     # Beware, values might be negative
     # compute `value % modulus` to get the expected value
     decrypted_result = result.decrypt()
+
+    polyval = np.polynomial.polynomial.polyval
+
+    expected = [np.polynomial.polynomial.polyval(x, np.array(polynom).astype(object)) % modulus for x in data]
 
     assert [x % modulus for x in decrypted_result] == expected
