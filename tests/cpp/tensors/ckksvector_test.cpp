@@ -195,6 +195,25 @@ TEST_P(CKKSVectorTest, TestCKKSMulNoRelin) {
     ASSERT_TRUE(are_close(decr.data(), {4, 8, 12}));
 }
 
+TEST_P(CKKSVectorTest, TestCKKSSum) {
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
+    ASSERT_TRUE(ctx != nullptr);
+
+    ctx->generate_galois_keys();
+    ctx->global_scale(std::pow(2, 40));
+
+    auto l = CKKSVector::Create(
+        ctx, std::vector<double>({1, 2, 3, 4, 5, 6, 7, 8, 9}));
+
+    l->sum_inplace();
+
+    auto decr = l->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {45}));
+}
+
 TEST_P(CKKSVectorTest, TestCKKSReplicateFirstSlot) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());
