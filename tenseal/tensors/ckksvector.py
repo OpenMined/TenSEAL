@@ -51,7 +51,7 @@ class CKKSVector(AbstractTensor):
 
     def size(self) -> int:
         return self.data.size()
-    
+
     @property
     def shape(self) -> List[int]:
         return [self.size()]
