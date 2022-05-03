@@ -1282,3 +1282,9 @@ def test_size(context):
     for size in range(1, 10):
         vec = ts.ckks_vector(context, [1] * size)
         assert vec.size() == size, "Size of encrypted vector is incorrect."
+
+
+def test_shape(context):
+    for size in range(1, 10):
+        vec = ts.ckks_vector(context, [1] * size)
+        assert vec.shape == [size], "Shape of encrypted vector is incorrect."
