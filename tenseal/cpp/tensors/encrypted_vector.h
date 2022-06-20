@@ -186,28 +186,33 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
                 auto diag = matrix.get_diagonal(
                     -local_i,
                     this->tenseal_context()->template slot_count<encoder_t>());
-                replicate_vector(
-                    diag,
-                    this->tenseal_context()->template slot_count<encoder_t>());
+                bool is_diag_nonzero = std::any_of(
+                    diag.begin(), diag.end(),
+                    [](plain_t x){return x != 0;});
+                if (is_diag_nonzero) {
+                    replicate_vector(
+                        diag,
+                        this->tenseal_context()->template slot_count<encoder_t>());
 
-                rotate(diag.begin(), diag.begin() + diag.size() - local_i,
-                       diag.end());
+                    rotate(diag.begin(), diag.begin() + diag.size() - local_i,
+                        diag.end());
 
-                this->tenseal_context()->template encode<encoder_t>(diag,
-                                                                    pt_diag);
+                    this->tenseal_context()->template encode<encoder_t>(diag,
+                                                                        pt_diag);
 
-                if (this->_ciphertexts[0].parms_id() != pt_diag.parms_id()) {
-                    this->set_to_same_mod(pt_diag, _ciphertexts[0]);
+                    if (this->_ciphertexts[0].parms_id() != pt_diag.parms_id()) {
+                        this->set_to_same_mod(pt_diag, _ciphertexts[0]);
+                    }
+                    this->tenseal_context()->evaluator->multiply_plain(
+                        this->_ciphertexts[0], pt_diag, ct);
+
+                    this->tenseal_context()->evaluator->rotate_vector_inplace(
+                        ct, local_i, *this->tenseal_context()->galois_keys());
+
+                    // accumulate thread results
+                    this->tenseal_context()->evaluator->add_inplace(thread_result,
+                                                                    ct);
                 }
-                this->tenseal_context()->evaluator->multiply_plain(
-                    this->_ciphertexts[0], pt_diag, ct);
-
-                this->tenseal_context()->evaluator->rotate_vector_inplace(
-                    ct, local_i, *this->tenseal_context()->galois_keys());
-
-                // accumulate thread results
-                this->tenseal_context()->evaluator->add_inplace(thread_result,
-                                                                ct);
             }
             return thread_result;
         };
