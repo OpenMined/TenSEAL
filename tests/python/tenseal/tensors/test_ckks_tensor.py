@@ -121,19 +121,39 @@ def test_reshape_batching(context, data, new_shape):
 @pytest.mark.parametrize(
     "data, slices, new_shape",
     [
-        ([0, 1, 2, 3, 4, 5], [slice(1, 4, None)], [3]),
-        ([0, 1, 2, 3, 4, 5], [slice(1, None, None)], [5]),
-        ([0, 1, 2, 3, 4, 5], [slice(None, 4, None)], [4]),
-        ([[0, 1, 2], [0, 1, 2], [0, 1, 2]], [slice(1, 3, None), slice(0, 2, None)], [2, 2]),
-        ([[0, 1, 2], [0, 1, 2], [0, 1, 2]], [slice(1, None, None), slice(0, 2, None)], [2, 2]),
+        ([0, 1, 2, 3, 4, 5], (slice(1, 4, None),), [3]),
+        ([0, 1, 2, 3, 4, 5], (slice(1, None, None),), [5]),
+        ([0, 1, 2, 3, 4, 5], (slice(None, 4, None),), [4]),
         (
             [[0, 1, 2], [0, 1, 2], [0, 1, 2]],
-            [slice(1, None, None), slice(None, None, None)],
+            (
+                slice(1, 3, None),
+                slice(0, 2, None),
+            ),
+            [2, 2],
+        ),
+        (
+            [[0, 1, 2], [0, 1, 2], [0, 1, 2]],
+            (
+                slice(1, None, None),
+                slice(0, 2, None),
+            ),
+            [2, 2],
+        ),
+        (
+            [[0, 1, 2], [0, 1, 2], [0, 1, 2]],
+            (
+                slice(1, None, None),
+                slice(None, None, None),
+            ),
             [2, 3],
         ),
         (
             [[0, 1, 2], [0, 1, 2], [0, 1, 2]],
-            [slice(None, None, None), slice(None, None, None)],
+            (
+                slice(None, None, None),
+                slice(None, None, None),
+            ),
             [3, 3],
         ),
         ([[0, 1, 2], [0, 1, 2], [0, 1, 2]], 1, [1, 3]),
