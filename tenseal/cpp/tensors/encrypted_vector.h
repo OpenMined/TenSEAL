@@ -186,6 +186,9 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
                 auto diag = matrix.get_diagonal(
                     -local_i,
                     this->tenseal_context()->template slot_count<encoder_t>());
+                
+                // don't add zero diagonals to (a) improve performance and (b)
+                // avoid transparent ciphertext issues
                 bool is_diag_nonzero = std::any_of(
                     diag.begin(), diag.end(), [](plain_t x) { return x != 0; });
                 if (is_diag_nonzero) {
