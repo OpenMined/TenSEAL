@@ -83,7 +83,7 @@ def test_intarray():
     assert int_arr[0] == 3
     assert int_arr.at(3) == 3
     assert int_arr.empty() is False
-    assert int_arr.max_size() == 2 ** 64 - 1
+    assert int_arr.max_size() == 2**64 - 1
     assert int_arr.size() == 4
     assert int_arr.capacity() == 4
 

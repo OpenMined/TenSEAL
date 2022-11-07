@@ -7,7 +7,7 @@ def test_context_make_public_crash():
     poly_mod_degree = 8192
     coeff_mod_bit_sizes = [40, 21, 21, 21, 21, 21, 21, 40]
     ctx = ts.context(ts.SCHEME_TYPE.CKKS, poly_mod_degree, -1, coeff_mod_bit_sizes)
-    ctx.global_scale = 2 ** 21
+    ctx.global_scale = 2**21
     ctx.generate_galois_keys()
 
     ctx_copy = ctx.copy()
@@ -20,7 +20,7 @@ def test_ckks_vector_matmul_exception():
         ts.SCHEME_TYPE.CKKS, poly_modulus_degree=16384, coeff_mod_bit_sizes=[60, 40, 40, 40, 60]
     )
     context.generate_galois_keys()
-    context.global_scale = 2 ** 40
+    context.global_scale = 2**40
 
     x = np.random.rand(10)
     crypt_x = ts.ckks_vector(context, x)

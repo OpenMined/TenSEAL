@@ -228,12 +228,20 @@ shared_ptr<BFVVector> BFVVector::dot_plain_inplace(
 
 shared_ptr<BFVVector> BFVVector::sum_inplace(size_t /*axis=0*/) {
     vector<Ciphertext> interm_sum;
-    // TODO use multithreading for sum
-    for (size_t idx = 0; idx < this->_ciphertexts.size(); ++idx) {
-        Ciphertext out = this->_ciphertexts[idx];
-        sum_vector(this->tenseal_context(), out, this->_sizes[idx]);
-        interm_sum.push_back(out);
-    }
+    size_t size = this->_ciphertexts.size();
+    interm_sum.resize(size);
+
+    task_t worker_func = [&](size_t start, size_t end) -> bool {
+        for (size_t idx = start; idx < end; ++idx) {
+            Ciphertext out = this->_ciphertexts[idx];
+            sum_vector(this->tenseal_context(), out, this->_sizes[idx]);
+            interm_sum[idx] = out;
+        }
+        return true;
+    };
+
+    this->dispatch_jobs(worker_func, size);
+
     Ciphertext result;
     tenseal_context()->evaluator->add_many(interm_sum, result);
 
@@ -343,8 +351,57 @@ shared_ptr<BFVVector> BFVVector::matmul_plain_inplace(
 }
 
 shared_ptr<BFVVector> BFVVector::polyval_inplace(
-    const vector<double>& coefficients) {
-    throw std::logic_error("not implemented");
+    const vector<int64_t>& coefficients) {
+    if (coefficients.size() == 0) {
+        throw invalid_argument(
+            "the coefficients vector need to have at least one element");
+    }
+
+    int degree = static_cast<int>(coefficients.size()) - 1;
+    while (degree >= 0) {
+        if (coefficients[degree] == 0)
+            degree--;
+        else
+            break;
+    }
+
+    // null polynomial: output should be an encrypted 0
+    // we can multiply by 0, or return the encryption of zero
+    if (degree == -1) {
+        // we set the vector to the encryption of zero
+        for (auto& ct : this->_ciphertexts) {
+            this->tenseal_context()->encrypt_zero(ct);
+        }
+        return shared_from_this();
+    }
+
+    // set result accumulator to the constant coefficient
+    vector<int64_t> cst_coeff(this->size(), coefficients[0]);
+    auto result = BFVVector::Create(this->tenseal_context(), cst_coeff);
+
+    // pre-compute squares of x
+    auto x = this->copy();
+
+    int max_square = static_cast<int>(floor(log2(degree)));
+    vector<shared_ptr<BFVVector>> x_squares;
+    x_squares.reserve(max_square + 1);
+    x_squares.push_back(x->copy());  // x
+    for (int i = 1; i <= max_square; i++) {
+        x->square_inplace();
+        x_squares.push_back(x->copy());  // x^(2^i)
+    }
+
+    // coefficients[1] * x + ... + coefficients[degree] * x^(degree)
+    for (int i = 1; i <= degree; i++) {
+        if (coefficients[i] == 0) continue;
+        x = compute_polynomial_term(
+            i, coefficients[i],
+            x_squares);  // currently takes a double, allow int64
+        result->add_inplace(x);
+    }
+
+    this->_ciphertexts = result->ciphertext();
+    return shared_from_this();
 }
 
 shared_ptr<BFVVector> BFVVector::conv2d_im2col_inplace(

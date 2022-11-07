@@ -122,7 +122,7 @@ def test_generate_galois_relin_keys(duplicate, encryption_type):
 
 
 @pytest.mark.parametrize("duplicate", [deep_copy, simple_copy, internal_copy, recreate])
-@pytest.mark.parametrize("scale", [0, 1, 2, 2 ** 40])
+@pytest.mark.parametrize("scale", [0, 1, 2, 2**40])
 @pytest.mark.parametrize(
     "encryption_type", [ts.ENCRYPTION_TYPE.ASYMMETRIC, ts.ENCRYPTION_TYPE.SYMMETRIC]
 )

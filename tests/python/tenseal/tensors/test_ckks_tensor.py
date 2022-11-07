@@ -121,19 +121,39 @@ def test_reshape_batching(context, data, new_shape):
 @pytest.mark.parametrize(
     "data, slices, new_shape",
     [
-        ([0, 1, 2, 3, 4, 5], [slice(1, 4, None)], [3]),
-        ([0, 1, 2, 3, 4, 5], [slice(1, None, None)], [5]),
-        ([0, 1, 2, 3, 4, 5], [slice(None, 4, None)], [4]),
-        ([[0, 1, 2], [0, 1, 2], [0, 1, 2]], [slice(1, 3, None), slice(0, 2, None)], [2, 2]),
-        ([[0, 1, 2], [0, 1, 2], [0, 1, 2]], [slice(1, None, None), slice(0, 2, None)], [2, 2]),
+        ([0, 1, 2, 3, 4, 5], (slice(1, 4, None),), [3]),
+        ([0, 1, 2, 3, 4, 5], (slice(1, None, None),), [5]),
+        ([0, 1, 2, 3, 4, 5], (slice(None, 4, None),), [4]),
         (
             [[0, 1, 2], [0, 1, 2], [0, 1, 2]],
-            [slice(1, None, None), slice(None, None, None)],
+            (
+                slice(1, 3, None),
+                slice(0, 2, None),
+            ),
+            [2, 2],
+        ),
+        (
+            [[0, 1, 2], [0, 1, 2], [0, 1, 2]],
+            (
+                slice(1, None, None),
+                slice(0, 2, None),
+            ),
+            [2, 2],
+        ),
+        (
+            [[0, 1, 2], [0, 1, 2], [0, 1, 2]],
+            (
+                slice(1, None, None),
+                slice(None, None, None),
+            ),
             [2, 3],
         ),
         (
             [[0, 1, 2], [0, 1, 2], [0, 1, 2]],
-            [slice(None, None, None), slice(None, None, None)],
+            (
+                slice(None, None, None),
+                slice(None, None, None),
+            ),
             [3, 3],
         ),
         ([[0, 1, 2], [0, 1, 2], [0, 1, 2]], 1, [1, 3]),
@@ -532,7 +552,7 @@ def test_power(context, plain, power, precision):
     tensor = ts.ckks_tensor(context, plain)
     expected = np.array([np.power(v, power) for v in plain.raw]).reshape(plain.shape).tolist()
 
-    new_tensor = tensor ** power
+    new_tensor = tensor**power
     decrypted_result = new_tensor.decrypt().tolist()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
     assert _almost_equal(
@@ -602,7 +622,7 @@ def test_polynomial(context, data, polynom, reshape_first):
 )
 def test_polynomial_modswitch_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
-    context.global_scale = 2 ** 40
+    context.global_scale = 2**40
     context.auto_mod_switch = False
 
     ct = ts.ckks_tensor(context, data)
@@ -616,7 +636,7 @@ def test_polynomial_modswitch_off(context, data, polynom):
 )
 def test_polynomial_rescale_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
-    context.global_scale = 2 ** 40
+    context.global_scale = 2**40
     context.auto_rescale = False
 
     ct = ts.ckks_tensor(context, data)

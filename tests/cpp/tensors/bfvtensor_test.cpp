@@ -387,7 +387,7 @@ TEST_P(BFVTensorTest, TestEmptyPlaintext) {
 
 TEST_F(BFVTensorTest, TestBFVTensorSerializationSize) {
     vector<int64_t> raw_input;
-    for (int val = 0.5; val < 1000; ++val) raw_input.push_back(val);
+    for (int val = 0; val < 1000; ++val) raw_input.push_back(val);
 
     auto input = PlainTensor(raw_input);
     auto pk_ctx = TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {},

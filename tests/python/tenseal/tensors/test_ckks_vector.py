@@ -93,7 +93,7 @@ def test_power(context, plain_vec, power, precision):
     ckks_vec = ts.ckks_vector(context, plain_vec)
 
     expected = [np.power(v, power) for v in plain_vec]
-    new_vec = ckks_vec ** power
+    new_vec = ckks_vec**power
     decrypted_result = new_vec.decrypt()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of vector is incorrect"
     assert _almost_equal(
@@ -929,7 +929,7 @@ def test_sum_inplace(context, vec1, precision):
 )
 def test_mul_without_global_scale(vec1, vec2, precision):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, coeff_mod_bit_sizes=[60, 40, 40, 60])
-    scale = 2 ** 40
+    scale = 2**40
 
     first_vec = ts.ckks_vector(context, vec1, scale=scale)
     second_vec = ts.ckks_vector(context, vec2, scale=scale)
@@ -1159,7 +1159,7 @@ def test_high_degree_polynomial(data, polynom, precision):
 )
 def test_polynomial_modswitch_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
-    context.global_scale = 2 ** 40
+    context.global_scale = 2**40
     context.auto_mod_switch = False
 
     ct = ts.ckks_vector(context, data)
@@ -1174,7 +1174,7 @@ def test_polynomial_modswitch_off(context, data, polynom):
 )
 def test_polynomial_rescale_off(context, data, polynom):
     context = ts.context(ts.SCHEME_TYPE.CKKS, 8192, 0, [60, 40, 40, 60])
-    context.global_scale = 2 ** 40
+    context.global_scale = 2**40
     context.auto_rescale = False
 
     ct = ts.ckks_vector(context, data)
@@ -1282,3 +1282,9 @@ def test_size(context):
     for size in range(1, 10):
         vec = ts.ckks_vector(context, [1] * size)
         assert vec.size() == size, "Size of encrypted vector is incorrect."
+
+
+def test_shape(context):
+    for size in range(1, 10):
+        vec = ts.ckks_vector(context, [1] * size)
+        assert vec.shape == [size], "Shape of encrypted vector is incorrect."

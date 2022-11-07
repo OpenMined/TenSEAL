@@ -10,6 +10,8 @@ namespace tenseal {
 using namespace seal;
 using namespace std;
 
+using task_t = std::function<bool(size_t, size_t)>;
+
 /**
  * EncryptedVector<plain_t> interface - Specializes EncryptedTensor interface
  *for vectors.
@@ -129,6 +131,17 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
             this->_ciphertexts[0], steps, galois_keys);
     }
 
+    /**
+     * Polynomial evaluation with `this` as variable.
+     * p(x) = coefficients[0] + coefficients[1] * x + ... + coefficients[i] *
+     *x^i
+     **/
+    encrypted_t polyval(const vector<plain_t>& coefficients) const {
+        return this->copy()->polyval_inplace(coefficients);
+    };
+    virtual encrypted_t polyval_inplace(
+        const vector<plain_t>& coefficients) = 0;
+
     /*
     Perform encrypted_vector-plain_matrix multiplication using a variant of the
     diagonal method of Halevi and Shoup [1].
@@ -173,28 +186,36 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
                 auto diag = matrix.get_diagonal(
                     -local_i,
                     this->tenseal_context()->template slot_count<encoder_t>());
-                replicate_vector(
-                    diag,
-                    this->tenseal_context()->template slot_count<encoder_t>());
 
-                rotate(diag.begin(), diag.begin() + diag.size() - local_i,
-                       diag.end());
+                // don't add zero diagonals to (a) improve performance and (b)
+                // avoid transparent ciphertext issues
+                bool is_diag_nonzero = std::any_of(
+                    diag.begin(), diag.end(), [](plain_t x) { return x != 0; });
+                if (is_diag_nonzero) {
+                    replicate_vector(diag,
+                                     this->tenseal_context()
+                                         ->template slot_count<encoder_t>());
 
-                this->tenseal_context()->template encode<encoder_t>(diag,
-                                                                    pt_diag);
+                    rotate(diag.begin(), diag.begin() + diag.size() - local_i,
+                           diag.end());
 
-                if (this->_ciphertexts[0].parms_id() != pt_diag.parms_id()) {
-                    this->set_to_same_mod(pt_diag, _ciphertexts[0]);
+                    this->tenseal_context()->template encode<encoder_t>(
+                        diag, pt_diag);
+
+                    if (this->_ciphertexts[0].parms_id() !=
+                        pt_diag.parms_id()) {
+                        this->set_to_same_mod(pt_diag, _ciphertexts[0]);
+                    }
+                    this->tenseal_context()->evaluator->multiply_plain(
+                        this->_ciphertexts[0], pt_diag, ct);
+
+                    this->tenseal_context()->evaluator->rotate_vector_inplace(
+                        ct, local_i, *this->tenseal_context()->galois_keys());
+
+                    // accumulate thread results
+                    this->tenseal_context()->evaluator->add_inplace(
+                        thread_result, ct);
                 }
-                this->tenseal_context()->evaluator->multiply_plain(
-                    this->_ciphertexts[0], pt_diag, ct);
-
-                this->tenseal_context()->evaluator->rotate_vector_inplace(
-                    ct, local_i, *this->tenseal_context()->galois_keys());
-
-                // accumulate thread results
-                this->tenseal_context()->evaluator->add_inplace(thread_result,
-                                                                ct);
             }
             return thread_result;
         };
@@ -235,6 +256,38 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
    protected:
     std::vector<size_t> _sizes;
     std::vector<Ciphertext> _ciphertexts;
+
+    void dispatch_jobs(task_t& worker_func, size_t total_tasks) {
+        size_t n_jobs =
+            std::min(total_tasks, this->tenseal_context()->dispatcher_size());
+
+        if (n_jobs == 1) {
+            worker_func(0, total_tasks);
+            return;
+        }
+
+        size_t batch_size = (total_tasks + n_jobs - 1) / n_jobs;
+        vector<future<bool>> futures;
+        for (size_t i = 0; i < n_jobs; i++) {
+            futures.push_back(
+                this->tenseal_context()->dispatcher()->enqueue_task(
+                    worker_func, i * batch_size,
+                    std::min((i + 1) * batch_size, total_tasks)));
+        }
+
+        std::optional<std::string> fail;
+        for (size_t i = 0; i < futures.size(); i++) {
+            try {
+                futures[i].get();
+            } catch (std::exception& e) {
+                fail = e.what();
+            }
+        }
+
+        if (fail) {
+            throw invalid_argument(fail.value());
+        }
+    }
 };
 
 }  // namespace tenseal

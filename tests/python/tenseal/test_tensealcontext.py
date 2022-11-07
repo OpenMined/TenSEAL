@@ -65,7 +65,7 @@ def test_global_scale(encryption_type):
     # global scale shouldn't be set at first
     with pytest.raises(ValueError) as e:
         scale = context.global_scale
-    for scale in [0, 1, 2, 2 ** 40]:
+    for scale in [0, 1, 2, 2**40]:
         context.global_scale = scale
         assert context.global_scale == scale
 

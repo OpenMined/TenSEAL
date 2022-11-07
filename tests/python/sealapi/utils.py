@@ -50,7 +50,7 @@ def helper_encode(scheme, ctx, test):
     plaintext = sealapi.Plaintext()
     if scheme == sealapi.SCHEME_TYPE.CKKS:
         encoder = sealapi.CKKSEncoder(ctx)
-        encoder.encode(test, 2 ** 40, plaintext)
+        encoder.encode(test, 2**40, plaintext)
     else:
         encoder = sealapi.BatchEncoder(ctx)
         encoder.encode(test, plaintext)
