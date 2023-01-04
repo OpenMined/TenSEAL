@@ -1,0 +1,14 @@
+black==22.3.0
+bumpversion
+flake8
+numpy
+pytest
+pytest-benchmark
+pytest-cov
+pytest-benchmark[histogram]
+setuptools
+pygal
+pygaljs
+scikit-image
+torch
+torchvision
