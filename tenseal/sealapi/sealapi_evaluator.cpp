@@ -43,14 +43,24 @@ void bind_seal_evaluator(pybind11::module &m) {
         .def("multiply",
              [](Evaluator &e, const Ciphertext &e1, const Ciphertext &e2,
                 Ciphertext &dst) { e.multiply(e1, e2, dst); })
-        .def("add_plain_inplace", &Evaluator::add_plain_inplace)
-        .def("sub_plain_inplace", &Evaluator::sub_plain_inplace)
+        .def("add_plain_inplace",
+             [](Evaluator &e, Ciphertext &l, const Plaintext &r) {
+                 e.add_plain_inplace(l, r);
+             })
+        .def("sub_plain_inplace",
+             [](Evaluator &e, Ciphertext &l, const Plaintext &r) {
+                 e.sub_plain_inplace(l, r);
+             })
         .def("multiply_plain_inplace",
              [](Evaluator &e, Ciphertext &enc, const Plaintext &p) {
                  e.multiply_plain_inplace(enc, p);
              })
-        .def("add_plain", &Evaluator::add_plain)
-        .def("sub_plain", &Evaluator::sub_plain)
+        .def("add_plain",
+             [](Evaluator &e, const Ciphertext &e1, const Plaintext &e2,
+                Ciphertext &dst) { e.add_plain(e1, e2, dst); })
+        .def("sub_plain",
+             [](Evaluator &e, const Ciphertext &e1, const Plaintext &e2,
+                Ciphertext &dst) { e.sub_plain(e1, e2, dst); })
         .def("multiply_plain",
              [](Evaluator &e, const Ciphertext &enc, const Plaintext &p,
                 Ciphertext &out) { e.multiply_plain(enc, p, out); })
