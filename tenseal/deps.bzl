@@ -77,6 +77,6 @@ def tenseal_deps():
     # Install pip requirements for Python tests.
     pip_parse(
         name = "org_openmined_tenseal_python_deps",
-        requirements_lock = "@org_openmined_tenseal//:requirements_dev.txt",
+        requirements_lock = "@org_openmined_tenseal//:requirements_dev.lock",
     )
 
