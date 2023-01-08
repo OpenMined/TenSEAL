@@ -25,9 +25,9 @@ def tenseal_deps():
         http_archive(
             name = "com_microsoft_seal",
             build_file = "//third_party:seal.BUILD",
-            sha256 = "337e847b01827adc2d3fd9ac8b79038651c425f8c723110522d33a3d169de0f9",
-            strip_prefix = "SEAL-4.1.0",
-            urls = ["https://github.com/microsoft/SEAL/archive/v4.1.0.tar.gz"],
+            sha256 = "cb2d608656c09877e3c9dd260a9887094e4cfa8a9fe4127dac2ade0a4c172122",
+            strip_prefix = "SEAL-4.1.1",
+            urls = ["https://github.com/microsoft/SEAL/archive/v4.1.1.tar.gz"],
         )
 
     if "com_xtensorstack_xtensor" not in native.existing_rules():
