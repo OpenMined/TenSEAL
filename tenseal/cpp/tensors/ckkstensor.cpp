@@ -764,6 +764,14 @@ shared_ptr<CKKSTensor> CKKSTensor::transpose_inplace() {
 
     return shared_from_this();
 }
+shared_ptr<CKKSTensor> CKKSTensor::transpose(const vector<size_t>& permutation) const {
+    return this->copy()->transpose_inplace(permutation);
+}
+shared_ptr<CKKSTensor> CKKSTensor::transpose_inplace(const vector<size_t>& permutation) {
+    this->_data.transpose_inplace(permutation);
+
+    return shared_from_this();
+}
 
 double CKKSTensor::scale() const { return _init_scale; }
 }  // namespace tenseal

@@ -156,12 +156,23 @@ class CKKSTensor(AbstractTensor):
         self.data.broadcast_(shape)
         return self
 
-    def transpose(self):
+    def transpose(self, axes: List[int] = None) -> "CKKSTensor":
         "Copies the transpose to a new tensor"
-        result = self.data.transpose()
+        result = None
+        if axes is None:
+            result = self.data.transpose()
+        elif isinstance(axes, list) and all(isinstance(x, int) for x in axes):
+            result = self.data.transpose(axes)
+        else:
+            raise TypeError("axes must be a list of integers")
         return self._wrap(result)
 
-    def transpose_(self):
+    def transpose_(self, axes: List[int] = None) -> "CKKSTensor":
         "Tries to transpose the tensor"
-        self.data.transpose_()
+        if axes is None:
+            self.data.transpose_()
+        elif isinstance(axes, list) and all(isinstance(x, int) for x in axes):
+            self.data.transpose_(axes)
+        else:
+            raise TypeError("axes must be a list of integers")
         return self
