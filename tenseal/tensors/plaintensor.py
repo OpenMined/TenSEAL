@@ -128,14 +128,13 @@ class PlainTensor:
 
     def transpose(self, axes: List[int] = None):
         "Copies the transpose to a new tensor"
-        new_tensor = None
+        new_tensor = PlainTensor(tensor=self.data.data(), shape=self.shape, dtype=self._dtype)
         if axes is None:
-            new_tensor = PlainTensor(tensor=self.data.data(), shape=self.shape, dtype=self._dtype)
+            return new_tensor.transpose_()
         elif isinstance(axes, list) and all(isinstance(x, int) for x in axes):
-            new_tensor = PlainTensor(tensor=self.data.data(), shape=self.shape, dtype=self._dtype)
+            return new_tensor.transpose_(axes)
         else:
-            raise TypeError("axes must be a list of integers")
-        return new_tensor.transpose_()
+            raise TypeError("transpose axes must be a list of integers")
 
     def transpose_(self, axes: List[int] = None):
         "Tries to transpose the tensor"
@@ -143,6 +142,8 @@ class PlainTensor:
             self.data.transpose_()
         elif isinstance(axes, list) and all(isinstance(x, int) for x in axes):
             self.data.transpose_(axes)
+        else:
+            raise TypeError("transpose axes must be a list of integers")
         return self
 
     @classmethod
