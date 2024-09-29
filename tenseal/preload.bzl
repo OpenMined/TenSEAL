@@ -31,27 +31,27 @@ def tenseal_preload():
 
 
     if "pybind11_bazel" not in native.existing_rules():
-        pybind11_bazel_rev = "3946bd0164dc97a154b3136df180f3743cd2cbae"
+        pybind11_bazel_rev = "faf56fb3df11287f26dbc66fdedf60a2fc2c6631"
         http_archive(
             name = "pybind11_bazel",
             strip_prefix = "pybind11_bazel-" + pybind11_bazel_rev,
             urls = ["https://github.com/pybind/pybind11_bazel/archive/" + pybind11_bazel_rev + ".zip"],
-            sha256 = "2e92ae0484dedeb12f6d207487c1ae8a8eb1fccd34b4ec00f1bcee1559824d75",
+            sha256 = "a185aa68c93b9f62c80fcb3aadc3c83c763854750dc3f38be1dadcb7be223837",
         )
 
     if "pybind11" not in native.existing_rules():
         http_archive(
             name = "pybind11",
             build_file = "@pybind11_bazel//:pybind11.BUILD",
-            strip_prefix = "pybind11-2.12.0",
+            strip_prefix = "pybind11-2.10.1",
             urls = ["https://github.com/pybind/pybind11/archive/v2.10.1.zip"],
-            sha256 = "411f77380c43798506b39ec594fc7f2b532a13c4db674fcf2b1ca344efaefb68",
+            sha256 = "fcf94065efcfd0a7a828bacf118fa11c43f6390d0c805e3e6342ac119f2e9976",
         )
 
     if "rules_python" not in native.existing_rules():
         http_archive(
             name = "rules_python",
-            sha256 = "ca77768989a7f311186a29747e3e95c936a41dffac779aff6b443db22290d913",
-            strip_prefix = "rules_python-0.36.0",
-            url = "https://github.com/bazelbuild/rules_python/releases/download/0.36.0/rules_python-0.36.0.tar.gz",
+            sha256 = "497ca47374f48c8b067d786b512ac10a276211810f4a580178ee9b9ad139323a",
+            strip_prefix = "rules_python-0.16.1",
+            url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.16.1.tar.gz",
         )

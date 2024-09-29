@@ -2,6 +2,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
 load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
 
+load("@pybind11_bazel//:python_configure.bzl", "python_configure")
 load("@rules_python//python:pip.bzl", "pip_parse")
 
 
@@ -69,6 +70,9 @@ def tenseal_deps():
     rules_proto_toolchains()
 
     rules_foreign_cc_dependencies()
+
+    # Configure python3 for pybind11.
+    python_configure(name = "local_config_python", python_version = "3")
 
     # Install pip requirements for Python tests.
     pip_parse(
