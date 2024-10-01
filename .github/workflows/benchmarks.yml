@@ -12,9 +12,9 @@ jobs:
         os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3
+        uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3 # v5.2.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: Prepare ENV
@@ -32,7 +32,7 @@ jobs:
         run: .github/workflows/scripts/install_req_windows.bat
         if: ${{ matrix.os == 'windows-latest' }}
       - name: Install dependencies Windows - msbuild
-        uses: microsoft/setup-msbuild@v1.0.2
+        uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2
         if: ${{ matrix.os == 'windows-latest' }}
       - name: Build the library for Ubuntu/MacOS
         run: .github/workflows/scripts/build_nix.sh
@@ -44,7 +44,7 @@ jobs:
         run: |
           pytest tests/python/benchmarks/ --cov-fail-under 0 --benchmark-json pytest_benchmarks_output.json
       - name: Store benchmark result
-        uses: rhysd/github-action-benchmark@v1
+        uses: benchmark-action/github-action-benchmark@4de1bed97a47495fc4c5404952da0499e31f5c29 # v1.20.3
         with:
           name: Python-Benchmarks
           tool: "pytest"
