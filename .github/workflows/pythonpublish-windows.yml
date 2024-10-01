@@ -1,6 +1,7 @@
 name: Windows Package
 
 on:
+  workflow_dispatch:
   release:
     types: [published]
 
