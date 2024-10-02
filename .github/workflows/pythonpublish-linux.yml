@@ -17,13 +17,7 @@ jobs:
           - cp312-cp312
 
     runs-on: ubuntu-latest
-    container: quay.io/pypa/manylinux2014_x86_64
-    
-    # node20 can't run on manylinux2014 as it requires newer version of GLIBC
-    # https://github.blog/changelog/2024-03-07-github-actions-all-actions-will-run-on-node20-instead-of-node16-by-default/
-    env:
-      ACTIONS_RUNNER_FORCE_ACTIONS_NODE_VERSION: node16
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+    container: quay.io/pypa/manylinux_2_28_x86_64
 
     steps:
       - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
@@ -33,9 +27,9 @@ jobs:
         run: |
             echo "/opt/python/${{ matrix.python-version }}/bin" >> $GITHUB_PATH
       - name: Install dependencies
-        run: .github/workflows/scripts/install_req_centos.sh
+        run: .github/workflows/scripts/install_req_manylinux.sh
       - name: Build and publish
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-        run: .github/workflows/scripts/release_centos.sh
+        run: .github/workflows/scripts/release_manylinux.sh
