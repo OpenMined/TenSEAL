@@ -826,3 +826,27 @@ def test_transpose(context, data, shape):
     assert tensor.shape == list(expected.shape)
     result = np.array(tensor.decrypt().tolist())
     assert np.allclose(result, expected, rtol=0, atol=0.01)
+
+@pytest.mark.parametrize(
+    "data, shape, axes",
+    [
+        ([i for i in range(6)], [1, 2, 3], [0, 2, 1]),
+        ([i for i in range(12)], [2, 2, 3], [0, 2, 1]),
+        ([i for i in range(2 * 3 * 4 * 5)], [2, 3, 4, 5], [0, 3, 2, 1]),
+    ],
+)
+def test_transpose_with_axes(context, data, shape, axes):
+    tensor = ts.ckks_tensor(context, ts.plain_tensor(data, shape))
+
+    expected = np.transpose(np.array(data).reshape(shape), axes)
+
+    newt = tensor.transpose(axes)
+    assert tensor.shape == shape
+    assert newt.shape == list(expected.shape)
+    result = np.array(newt.decrypt().tolist())
+    assert np.allclose(result, expected, rtol=0, atol=0.01)
+
+    tensor.transpose_(axes)
+    assert tensor.shape == list(expected.shape)
+    result = np.array(tensor.decrypt().tolist())
+    assert np.allclose(result, expected, rtol=0, atol=0.01)
