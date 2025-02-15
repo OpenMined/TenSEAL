@@ -8,10 +8,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - cp38-cp38
-          - cp39-cp39
-          - cp310-cp310
-          - cp311-cp311
           - cp312-cp312
 
     runs-on: ubuntu-latest
@@ -23,7 +19,7 @@ jobs:
           submodules: true
       - name: Prepare ENV
         run: |
-            echo "/opt/python/${{ matrix.python-version }}/bin" >> $GITHUB_PATH
+          echo "/opt/python/${{ matrix.python-version }}/bin" >> $GITHUB_PATH
       - name: Install dependencies
         run: .github/workflows/scripts/install_req_manylinux.sh
       - name: Build and publish
