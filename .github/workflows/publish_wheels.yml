@@ -1,0 +1,54 @@
+name: Build and Publish
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ${{ matrix.target[0] }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - [ubuntu-latest, manylinux_x86_64]
+          - [windows-latest, win_amd64]
+          - [macos-13, macosx_x86_64]
+          - [macos-14, macosx_arm64]
+        python:
+          - cp39
+          - cp310
+          - cp311
+          - cp312
+          - cp313
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: true
+
+      - name: Setup msbuild
+        uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2
+        if: matrix.target[0] == 'windows-latest'
+
+      - name: Build wheels using cibuildwheel
+        uses: pypa/cibuildwheel@ee63bf16da6cddfb925f542f2c7b59ad50e93969 # v2.22.0
+        env:
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+          CIBW_BUILD: ${{ matrix.python }}-${{ matrix.target[1] }}
+          CIBW_BUILD_VERBOSITY: 1
+        with:
+          package-dir: .
+          output-dir: wheelhouse
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: TenSEAL-${{ matrix.python }}-${{ matrix.target[0] }}
+          path: ./wheelhouse/*.whl
+
+      - name: Publish wheels to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: ./wheelhouse/
+          user: ${{ secrets.PYPI_USERNAME }}
+          password: ${{ secrets.PYPI_PASSWORD }}
