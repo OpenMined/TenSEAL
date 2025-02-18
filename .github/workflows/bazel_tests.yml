@@ -6,13 +6,12 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
-
 jobs:
   BAZEL:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ['3.9']
+        python-version: ["3.9"]
         os: [macos-latest, ubuntu-latest]
     steps:
       - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
@@ -24,7 +23,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Run gtest
         timeout-minutes: 40
-        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=1500 //tests/cpp/...
+        run:
+          bazel test --test_output=all --spawn_strategy=standalone --test_timeout=1500 //tests/cpp/...
           #      - name: Run SEALAPI tests
           #        timeout-minutes: 30
           #        run: bazel test --test_output=all --spawn_strategy=standalone --test_timeout=1500 --jobs 1 //tests/python/sealapi/...

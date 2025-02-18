@@ -1,8 +1,8 @@
 name: Benchmarks
 on:
   push:
-      branches: [main]
-    
+    branches: [main]
+
 jobs:
   benchmark:
     runs-on: ${{ matrix.os }}
@@ -19,8 +19,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Prepare ENV
         run: |
-            echo "CC=clang" >> $GITHUB_ENV
-            echo "CXX=clang++" >> $GITHUB_ENV
+          echo "CC=clang" >> $GITHUB_ENV
+          echo "CXX=clang++" >> $GITHUB_ENV
         if: ${{ matrix.os == 'ubuntu-latest' }}
       - name: Install dependencies Ubuntu
         run: .github/workflows/scripts/install_req_ubuntu.sh
