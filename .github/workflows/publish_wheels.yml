@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  publish:
     runs-on: ${{ matrix.target[0] }}
     strategy:
       fail-fast: false
