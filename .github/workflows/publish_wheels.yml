@@ -46,9 +46,16 @@ jobs:
           name: TenSEAL-${{ matrix.python }}-${{ matrix.target[0] }}
           path: ./wheelhouse/*.whl
 
-      - name: Publish wheels to PyPI
-        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
+      - name: Set up Python
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
         with:
-          packages-dir: ./wheelhouse/
-          user: ${{ secrets.PYPI_USERNAME }}
-          password: ${{ secrets.PYPI_PASSWORD }}
+          python-version: "3.13"
+
+      - name: Install twine
+        run: python -m pip install --upgrade twine
+
+      - name: Publish wheels to PyPI
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: twine upload --repository testpypi --skip-existing --verbose wheelhouse/*.whl
