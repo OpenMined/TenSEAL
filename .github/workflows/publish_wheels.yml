@@ -10,10 +10,10 @@ jobs:
       fail-fast: false
       matrix:
         target:
-          - [ubuntu-latest, manylinux_x86_64]
-          - [windows-latest, win_amd64]
-          - [macos-13, macosx_x86_64]
-          - [macos-14, macosx_arm64]
+          - [ubuntu-latest, manylinux_x86_64, ""]
+          - [windows-latest, win_amd64, ""]
+          - [macos-13, macosx_x86_64, "13.0"]
+          - [macos-14, macosx_arm64, "14.0"]
         python:
           - cp39
           - cp310
@@ -34,6 +34,7 @@ jobs:
         uses: pypa/cibuildwheel@ee63bf16da6cddfb925f542f2c7b59ad50e93969 # v2.22.0
         env:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.target[2] }}
           CIBW_BUILD: ${{ matrix.python }}-${{ matrix.target[1] }}
           CIBW_BUILD_VERBOSITY: 1
         with:
