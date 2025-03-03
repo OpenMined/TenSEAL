@@ -300,6 +300,34 @@ TEST_P(CKKSTensorTest, TestTranspose) {
     ASSERT_TRUE(are_close(decr.data(), {1, 3, 5, 2, 4, 6}));
 }
 
+TEST_P(CKKSTensorTest, TestTransposeWithAxes) {
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx = TenSEALContext::Create(scheme_type::ckks, 8192, -1,
+                                      {60, 40, 40, 60}, enc_type);
+    ASSERT_TRUE(ctx != nullptr);
+    ctx->generate_galois_keys();
+
+    auto ldata =
+        PlainTensor(vector<double>({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}),
+                    vector<size_t>({2, 3, 2}));
+
+    auto l = CKKSTensor::Create(ctx, ldata, std::pow(2, 40));
+
+    // Transpose with specified axes
+    auto res = l->transpose({0, 2, 1});
+    ASSERT_THAT(res->shape(), ElementsAreArray({2, 2, 3}));
+    ASSERT_THAT(l->shape(), ElementsAreArray({2, 3, 2}));
+    auto decr = res->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {1, 3, 5, 2, 4, 6, 7, 9, 11, 8, 10, 12}));
+
+    // Transpose inplace with specified axes
+    l->transpose_inplace({0, 2, 1});
+    ASSERT_THAT(l->shape(), ElementsAreArray({2, 2, 3}));
+    decr = l->decrypt();
+    ASSERT_TRUE(are_close(decr.data(), {1, 3, 5, 2, 4, 6, 7, 9, 11, 8, 10, 12}));
+}
+
 TEST_P(CKKSTensorTest, TestSubscript) {
     auto enc_type = get<1>(GetParam());
 

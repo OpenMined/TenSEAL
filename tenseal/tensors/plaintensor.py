@@ -126,14 +126,24 @@ class PlainTensor:
         self.data.broadcast_(shape)
         return self
 
-    def transpose(self):
+    def transpose(self, axes: List[int] = None):
         "Copies the transpose to a new tensor"
         new_tensor = PlainTensor(tensor=self.data.data(), shape=self.shape, dtype=self._dtype)
-        return new_tensor.transpose_()
+        if axes is None:
+            return new_tensor.transpose_()
+        elif isinstance(axes, list) and all(isinstance(x, int) for x in axes):
+            return new_tensor.transpose_(axes)
+        else:
+            raise TypeError("transpose axes must be a list of integers")
 
-    def transpose_(self):
+    def transpose_(self, axes: List[int] = None):
         "Tries to transpose the tensor"
-        self.data.transpose_()
+        if axes is None:
+            self.data.transpose_()
+        elif isinstance(axes, list) and all(isinstance(x, int) for x in axes):
+            self.data.transpose_(axes)
+        else:
+            raise TypeError("transpose axes must be a list of integers")
         return self
 
     @classmethod
