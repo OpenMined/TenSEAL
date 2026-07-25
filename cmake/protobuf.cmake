@@ -25,7 +25,7 @@ endif()
 
 message(STATUS "Building protobuf ...")
 execute_process(
-  COMMAND ${CMAKE_COMMAND} --build .
+  COMMAND ${CMAKE_COMMAND} --build . --config Release
   RESULT_VARIABLE result
   WORKING_DIRECTORY ${Protobuf_ROOT})
 if(result)
@@ -35,7 +35,7 @@ endif()
 message(STATUS "Installing protobuf ...")
 if(WIN32)
     execute_process(
-        COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} --build . --target install --config Release
     RESULT_VARIABLE result
     WORKING_DIRECTORY ${Protobuf_ROOT})
     if(result)
