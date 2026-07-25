@@ -30,6 +30,21 @@ Homepage = "https://github.com/OpenMined/TenSEAL"
 Repository = "https://github.com/OpenMined/TenSEAL"
 Issues = "https://github.com/OpenMined/TenSEAL/issues"
 
+[dependency-groups]
+# Install with `uv sync --group dev`, or `pip install --group dev`.
+# black and flake8 are gone: ruff replaces both, via pre-commit.
+dev = [
+    "numpy",
+    "pre-commit",
+    "pytest",
+    "pytest-benchmark[histogram]",
+    "pytest-cov",
+    "scikit-image",
+    "setuptools",
+    "torch",
+    "torchvision",
+]
+
 [tool.setuptools.dynamic]
 version = { attr = "tenseal.version.__version__" }
 

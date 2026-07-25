@@ -153,9 +153,11 @@ $ git submodule update
 You can build and install the library (with Python bindings) locally by running:
 
 ```bash
-$ pip install -r requirements_dev.txt
+$ pip install --group dev
 $ pip install .
 ```
+
+Development dependencies are declared as a [PEP 735](https://peps.python.org/pep-0735/) group in `pyproject.toml` and pinned in `uv.lock`. If you use [uv](https://docs.astral.sh/uv/), `uv sync --group dev` installs the locked set instead.
 
 This will trigger the build of the C++ library as well as the Python bindings. Please refer to [this section](https://github.com/OpenMined/TenSEAL#build-from-source) for more information about the dependencies required to build TenSEAL.
 

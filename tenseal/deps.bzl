@@ -75,6 +75,10 @@ def tenseal_deps():
     python_configure(name = "local_config_python", python_version = "3")
 
     # Install pip requirements for Python tests.
+    # FIXME: requirements_dev.lock is gone; dev dependencies now live in the
+    # PEP 735 group in pyproject.toml, locked in uv.lock, which pip_parse cannot
+    # read. The Bazel build is already non-functional and runs on demand only;
+    # wiring this up belongs to the bzlmod migration.
     pip_parse(
         name = "org_openmined_tenseal_python_deps",
         requirements_lock = "@org_openmined_tenseal//:requirements_dev.lock",

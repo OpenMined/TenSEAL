@@ -13,7 +13,7 @@ wget https://github.com/Kitware/CMake/releases/download/v3.17.0/${cmake_install}
 sh ${cmake_install} --skip-license --prefix=/usr/local/ --exclude-subdir
 
 python -m pip install --upgrade pip
-pip install -r requirements_dev.txt
+pip install --group dev
 pip install setuptools wheel twine auditwheel
 
 cmake --version
