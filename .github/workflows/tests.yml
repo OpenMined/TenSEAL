@@ -16,13 +16,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
         with:
-          python-version: "3.13"
-      - name: Install dependencies
-        run: .github/workflows/scripts/install_req_ubuntu.sh
-      - name: Lint with flake8
-        run: .github/workflows/scripts/lint_python.sh
-      - name: Lint with clang-format
-        run: .github/workflows/scripts/lint_cpp.sh
+          python-version: "3.14"
+      # ruff (python) and clang-format (c++) both run from .pre-commit-config.yaml,
+      # so a clean `pre-commit run --all-files` locally means a green job here.
+      - name: Lint with pre-commit
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
 
   Build:
     needs: [Linter]

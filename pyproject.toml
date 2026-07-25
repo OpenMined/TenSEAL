@@ -1,18 +1,30 @@
-[tool.black]
-target-version = ['py36', 'py37']
+[tool.ruff]
 line-length = 100
-exclude = '''
-(
-    \.git
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | \.eggs\/
-    | build
-    | dist
-    | tutorials
-    | venv\/
-    | test_serde_full\.py
-    | third_party
-)
-'''
+target-version = "py311"
+extend-exclude = ["build", "dist", "third_party", "tutorials"]
+
+[tool.ruff.lint]
+# Ruff's default set: pyflakes (F) plus the pycodestyle errors that catch real
+# defects rather than style (E4 imports, E7 statements, E9 syntax). This is a
+# superset of the flake8 config it replaces, which selected only
+# E901,E999,F821,F822,F823.
+select = ["E4", "E7", "E9", "F"]
+
+[tool.ruff.lint.per-file-ignores]
+# Re-exports: these modules exist to widen the public API surface.
+"__init__.py" = ["F401"]
+# The test suites are built on `from ... import *` helpers, and assert against
+# pybind11 objects where comparing to True/None is deliberate.
+"tests/**" = ["E711", "E712", "E741", "F403", "F405", "F841"]
+# FIXME: the CKKS test_add/test_sub/test_mul here are shadowed by BFV
+# redefinitions of the same name and never run. Un-shadowing them changes which
+# tests execute, so it is tracked separately from the lint migration.
+"tests/python/tenseal/tensors/test_serialization.py" = [
+    "E711",
+    "E712",
+    "E741",
+    "F403",
+    "F405",
+    "F811",
+    "F841",
+]
