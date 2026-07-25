@@ -10,33 +10,47 @@ jobs:
       fail-fast: false
       matrix:
         target:
-          - [ubuntu-latest, manylinux_x86_64, ""]
-          - [windows-latest, win_amd64, ""]
-          - [macos-13, macosx_x86_64, "13.0"]
+          - [ubuntu-24.04, manylinux_x86_64, ""]
+          - [windows-2022, win_amd64, ""]
           - [macos-14, macosx_arm64, "14.0"]
         python:
-          - cp39
-          - cp310
           - cp311
           - cp312
           - cp313
+          - cp314
 
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: true
 
+      - name: Check LongPathsEnabled
+        run: |
+          git config --system core.longpaths true
+          (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
+        if: ${{ startsWith(matrix.target[0], 'windows') }}
+
       - name: Setup msbuild
         uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2
-        if: matrix.target[0] == 'windows-latest'
+        if: ${{ startsWith(matrix.target[0], 'windows') }}
+
+      # Pin the macOS toolchain to Xcode 15.4 (AppleClang 15), the macos-14
+      # default, so the (old) SEAL/xtensor build stays stable across image bumps.
+      - name: Select Xcode 15.4 (macOS)
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+        if: ${{ startsWith(matrix.target[0], 'macos') }}
 
       - name: Build wheels using cibuildwheel
-        uses: pypa/cibuildwheel@ee63bf16da6cddfb925f542f2c7b59ad50e93969 # v2.22.0
+        uses: pypa/cibuildwheel@298ed2fb2c105540f5ed055e8a6ad78d82dd3a7e # v3.3.1
         env:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.target[2] }}
           CIBW_BUILD: ${{ matrix.python }}-${{ matrix.target[1] }}
           CIBW_BUILD_VERBOSITY: 1
+          # Use the runner's built-in CMake (4.x on macos-14) and let it accept
+          # the old protobuf/json cmake_minimum_required floors, instead of
+          # installing an older CMake by hand.
+          CIBW_ENVIRONMENT: "CMAKE_POLICY_VERSION_MINIMUM=3.5"
         with:
           package-dir: .
           output-dir: wheelhouse
