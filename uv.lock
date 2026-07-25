@@ -1180,6 +1180,10 @@ wheels = [
 [[package]]
 name = "tenseal"
 source = { editable = "." }
+dependencies = [
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "numpy", version = "2.5.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -1196,6 +1200,7 @@ dev = [
 ]
 
 [package.metadata]
+requires-dist = [{ name = "numpy" }]
 
 [package.metadata.requires-dev]
 dev = [

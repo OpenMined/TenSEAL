@@ -9,6 +9,10 @@ readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
+# tenseal.tensors.plaintensor imports numpy at module scope, so importing
+# tenseal fails without it. Previously undeclared, which made a bare
+# `pip install tenseal` produce an unimportable package.
+dependencies = ["numpy"]
 authors = [{ name = "OpenMined", email = "info@openmined.org" }]
 keywords = ["homomorphic", "encryption", "tensor", "deep learning", "privacy", "secure"]
 classifiers = [
