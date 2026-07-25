@@ -181,7 +181,7 @@ A. Benaissa, B. Retiat, B. Cebere, A.E. Belfedhal, ["TenSEAL: A Library for Encr
 
 ```
 @misc{tenseal2021,
-    title={TenSEAL: A Library for Encrypted Tensor Operations Using Homomorphic Encryption}, 
+    title={TenSEAL: A Library for Encrypted Tensor Operations Using Homomorphic Encryption},
     author={Ayoub Benaissa and Bilal Retiat and Bogdan Cebere and Alaa Eddine Belfedhal},
     year={2021},
     eprint={2104.03152},

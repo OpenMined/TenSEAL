@@ -251,7 +251,7 @@ class EncryptedVector : public EncryptedTensor<plain_t, encrypted_t> {
         return result;
     }
 
-    virtual ~EncryptedVector(){};
+    virtual ~EncryptedVector() {};
 
    protected:
     std::vector<size_t> _sizes;

@@ -21,7 +21,7 @@ class TenSEALEncoder {
     TenSEALEncoder() = delete;
     TenSEALEncoder(TenSEALEncoder&) = delete;
     TenSEALEncoder(const shared_ptr<SEALContext>& context)
-        : _context(context){};
+        : _context(context) {};
 
     template <typename T>
     shared_ptr<T> get() {

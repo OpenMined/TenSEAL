@@ -1,5 +1,5 @@
-import sys, os
-import pytest
+import sys
+import os
 import tenseal.sealapi as sealapi
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))

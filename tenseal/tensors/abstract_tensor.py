@@ -1,4 +1,5 @@
 """Abstract tensor class that implements common tensor methods"""
+
 from typing import List, Union
 import tenseal as ts
 from abc import ABC

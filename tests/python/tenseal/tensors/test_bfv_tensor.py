@@ -1,10 +1,6 @@
-import copy
-import pickle
-import math
 import pytest
 
 import numpy as np
-from skimage.util.shape import view_as_windows
 
 import tenseal as ts
 

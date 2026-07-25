@@ -1,5 +1,5 @@
-import sys, os
-import pytest
+import sys
+import os
 import tenseal.sealapi as sealapi
 
 from pathlib import Path

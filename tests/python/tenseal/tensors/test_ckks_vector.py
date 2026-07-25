@@ -1,5 +1,3 @@
-import copy
-import pickle
 import math
 import pytest
 
@@ -96,9 +94,9 @@ def test_power(context, plain_vec, power, precision):
     new_vec = ckks_vec**power
     decrypted_result = new_vec.decrypt()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of vector is incorrect"
-    assert _almost_equal(
-        ckks_vec.decrypt(), plain_vec, precision
-    ), "Something went wrong in memory."
+    assert _almost_equal(ckks_vec.decrypt(), plain_vec, precision), (
+        "Something went wrong in memory."
+    )
 
 
 @pytest.mark.parametrize(
@@ -153,9 +151,9 @@ def test_square(context, plain_vec, precision):
     new_vec = ckks_vec.square()
     decrypted_result = new_vec.decrypt()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of vector is incorrect"
-    assert _almost_equal(
-        ckks_vec.decrypt(), plain_vec, precision
-    ), "Something went wrong in memory."
+    assert _almost_equal(ckks_vec.decrypt(), plain_vec, precision), (
+        "Something went wrong in memory."
+    )
 
 
 @pytest.mark.parametrize(
@@ -390,9 +388,9 @@ def test_sub(context, vec1, vec2, precision):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Substraction of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Substraction of vectors is incorrect."
+    )
     assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
     assert _almost_equal(second_vec.decrypt(), vec2, precision), "Something went wrong in memory."
 
@@ -430,9 +428,9 @@ def test_sub_inplace(context, vec1, vec2, precision):
 
     # Decryption
     decrypted_result = first_vec.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Substraction of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Substraction of vectors is incorrect."
+    )
     assert _almost_equal(second_vec.decrypt(), vec2, precision), "Something went wrong in memory."
 
 
@@ -465,9 +463,9 @@ def test_sub_plain(context, vec1, vec2, precision):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Substraction of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Substraction of vectors is incorrect."
+    )
     assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
 
 
@@ -498,9 +496,9 @@ def test_rsub_plain(context, vec1, vec2, precision):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Substraction of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Substraction of vectors is incorrect."
+    )
     assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
 
 
@@ -532,9 +530,9 @@ def test_sub_plain_inplace(context, vec1, vec2, precision):
 
     # Decryption
     decrypted_result = first_vec.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Substraction of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Substraction of vectors is incorrect."
+    )
 
 
 @pytest.mark.parametrize(
@@ -572,9 +570,9 @@ def test_mul(context, vec1, vec2, precision):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Multiplication of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Multiplication of vectors is incorrect."
+    )
     assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
     assert _almost_equal(second_vec.decrypt(), vec2, precision), "Something went wrong in memory."
 
@@ -612,9 +610,9 @@ def test_mul_inplace(context, vec1, vec2, precision):
 
     # Decryption
     decrypted_result = first_vec.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Multiplication of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Multiplication of vectors is incorrect."
+    )
     assert _almost_equal(second_vec.decrypt(), vec2, precision), "Something went wrong in memory."
 
 
@@ -647,9 +645,9 @@ def test_mul_plain(context, vec1, vec2, precision):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Multiplication of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Multiplication of vectors is incorrect."
+    )
     assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
 
 
@@ -680,9 +678,9 @@ def test_rmul_plain(context, vec1, vec2, precision):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Multiplication of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Multiplication of vectors is incorrect."
+    )
     assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
 
 
@@ -714,9 +712,9 @@ def test_mul_plain_inplace(context, vec1, vec2, precision):
 
     # Decryption
     decrypted_result = first_vec.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Multiplication of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Multiplication of vectors is incorrect."
+    )
 
 
 @pytest.mark.parametrize(
@@ -749,9 +747,9 @@ def test_dot_product(context, vec1, vec2, precision):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Dot product of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Dot product of vectors is incorrect."
+    )
     assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
     assert _almost_equal(second_vec.decrypt(), vec2, precision), "Something went wrong in memory."
 
@@ -784,9 +782,9 @@ def test_dot_product_inplace(context, vec1, vec2, precision):
 
     # Decryption
     decrypted_result = first_vec.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Dot product of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Dot product of vectors is incorrect."
+    )
     assert _almost_equal(second_vec.decrypt(), vec2, precision), "Something went wrong in memory."
 
 
@@ -818,9 +816,9 @@ def test_dot_product_plain(context, vec1, vec2, precision):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Dot product of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Dot product of vectors is incorrect."
+    )
     assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
 
 
@@ -852,9 +850,9 @@ def test_dot_product_plain_inplace(context, vec1, vec2, precision):
 
     # Decryption
     decrypted_result = first_vec.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Dot product of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Dot product of vectors is incorrect."
+    )
 
 
 @pytest.mark.parametrize(
@@ -940,9 +938,9 @@ def test_mul_without_global_scale(vec1, vec2, precision):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Multiplication of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Multiplication of vectors is incorrect."
+    )
     assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
 
 
@@ -964,9 +962,9 @@ def test_vec_plain_matrix_mul(vec, matrix, n_threads, precision):
     ct = ts.ckks_vector(context, vec)
     result = ct.mm(matrix)
     expected = (np.array(vec) @ np.array(matrix)).tolist()
-    assert _almost_equal(
-        result.decrypt(), expected, precision
-    ), "Matrix multiplciation is incorrect."
+    assert _almost_equal(result.decrypt(), expected, precision), (
+        "Matrix multiplciation is incorrect."
+    )
     assert _almost_equal(ct.decrypt(), vec, precision), "Something went wrong in memory."
 
 
@@ -1017,9 +1015,9 @@ def test_vec_plain_matrix_mul_depth2(context, vec, matrix1, matrix2, precision):
     ct = ts.ckks_vector(context, vec)
     result = ct @ matrix1 @ matrix2
     expected = (np.array(vec) @ np.array(matrix1) @ np.array(matrix2)).tolist()
-    assert _almost_equal(
-        result.decrypt(), expected, precision
-    ), "Matrix multiplication is incorrect."
+    assert _almost_equal(result.decrypt(), expected, precision), (
+        "Matrix multiplication is incorrect."
+    )
 
 
 @pytest.mark.parametrize(
@@ -1040,9 +1038,9 @@ def test_enc_matmul_plain(context, matrix_shape, vector_size, precision):
     context.generate_galois_keys()
     ckks_vector = ts.enc_matmul_encoding(context, matrix.tolist())
     result = ckks_vector.enc_matmul_plain(vector.tolist(), matrix_shape[0])
-    assert _almost_equal(
-        result.decrypt(), expected, precision
-    ), "Matrix multiplication is incorrect."
+    assert _almost_equal(result.decrypt(), expected, precision), (
+        "Matrix multiplication is incorrect."
+    )
 
 
 @pytest.mark.parametrize(
@@ -1063,9 +1061,9 @@ def test_enc_matmul_plain_inplace(context, matrix_shape, vector_size, precision)
     context.generate_galois_keys()
     ckks_vector = ts.enc_matmul_encoding(context, matrix.tolist())
     ckks_vector.enc_matmul_plain_(vector.tolist(), matrix_shape[0])
-    assert _almost_equal(
-        ckks_vector.decrypt(), expected, precision
-    ), "Matrix multiplication is incorrect."
+    assert _almost_equal(ckks_vector.decrypt(), expected, precision), (
+        "Matrix multiplication is incorrect."
+    )
 
 
 @pytest.mark.parametrize(
@@ -1094,9 +1092,9 @@ def test_polynomial(context, data, polynom, precision):
     result = ct.polyval(polynom)
 
     decrypted_result = result.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Polynomial evaluation is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Polynomial evaluation is incorrect."
+    )
 
 
 @pytest.mark.parametrize(
@@ -1143,9 +1141,9 @@ def test_high_degree_polynomial(data, polynom, precision):
         error_tolerance = -1
     else:
         error_tolerance = 1
-    assert _almost_equal(
-        decrypted_result, expected, error_tolerance
-    ), "Polynomial evaluation is incorrect."
+    assert _almost_equal(decrypted_result, expected, error_tolerance), (
+        "Polynomial evaluation is incorrect."
+    )
 
 
 @pytest.mark.parametrize(

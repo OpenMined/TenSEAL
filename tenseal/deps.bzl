@@ -79,4 +79,3 @@ def tenseal_deps():
         name = "org_openmined_tenseal_python_deps",
         requirements_lock = "@org_openmined_tenseal//:requirements_dev.lock",
     )
-

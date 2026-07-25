@@ -6,6 +6,7 @@ and have different functionalities.
 - BFVVectpr: Vector of values encrypted using BFV.
 - PlainTensor: N-dimensonal tensor, serving as the main type to interact with encrypted tensors.
 """
+
 from tenseal.tensors.ckkstensor import CKKSTensor
 from tenseal.tensors.ckksvector import CKKSVector
 from tenseal.tensors.bfvvector import BFVVector

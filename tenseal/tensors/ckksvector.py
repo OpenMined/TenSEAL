@@ -1,5 +1,5 @@
-"""Vector of values encrypted using CKKS. Less flexible, but more efficient than CKKSTensor.
-"""
+"""Vector of values encrypted using CKKS. Less flexible, but more efficient than CKKSTensor."""
+
 from typing import List
 import tenseal as ts
 from tenseal.tensors.abstract_tensor import AbstractTensor

@@ -98,9 +98,9 @@ def test_power(plain_vec, power, precision, duplicate):
     new_vec = ckks_vec**power
     decrypted_result = new_vec.decrypt()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of vector is incorrect"
-    assert _almost_equal(
-        ckks_vec.decrypt(), plain_vec, precision
-    ), "Something went wrong in memory."
+    assert _almost_equal(ckks_vec.decrypt(), plain_vec, precision), (
+        "Something went wrong in memory."
+    )
 
 
 @pytest.mark.parametrize("plain_vec", [[0], [1, -4, 3, 5]])
@@ -114,9 +114,9 @@ def test_square(plain_vec, precision, duplicate):
     new_vec = ckks_vec.square()
     decrypted_result = new_vec.decrypt()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of vector is incorrect"
-    assert _almost_equal(
-        ckks_vec.decrypt(), plain_vec, precision
-    ), "Something went wrong in memory."
+    assert _almost_equal(ckks_vec.decrypt(), plain_vec, precision), (
+        "Something went wrong in memory."
+    )
 
 
 @pytest.mark.parametrize(
@@ -169,9 +169,9 @@ def test_sub(vec1, vec2, precision, duplicate):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Substraction of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Substraction of vectors is incorrect."
+    )
     assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
     assert _almost_equal(second_vec.decrypt(), vec2, precision), "Something went wrong in memory."
 
@@ -196,9 +196,9 @@ def test_mul(vec1, vec2, precision, duplicate):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Multiplication of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Multiplication of vectors is incorrect."
+    )
     assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
     assert _almost_equal(second_vec.decrypt(), vec2, precision), "Something went wrong in memory."
 
@@ -219,9 +219,9 @@ def test_dot_product(vec1, vec2, precision, duplicate):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Dot product of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Dot product of vectors is incorrect."
+    )
     assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
     assert _almost_equal(second_vec.decrypt(), vec2, precision), "Something went wrong in memory."
 
@@ -243,9 +243,9 @@ def test_mul_without_global_scale(vec1, vec2, precision, duplicate):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Multiplication of vectors is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Multiplication of vectors is incorrect."
+    )
     assert _almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
 
 
@@ -264,12 +264,12 @@ def test_ckksvector_lazy_load(precision):
     result = newvec + second_vec
     # Decryption
     decrypted_result = result.decrypt()
-    assert _almost_equal(
-        decrypted_result, [2, 4, 6, 8], precision
-    ), "Addition of vectors is incorrect."
-    assert _almost_equal(
-        newvec.decrypt(), [1, 2, 3, 4], precision
-    ), "Something went wrong in memory."
+    assert _almost_equal(decrypted_result, [2, 4, 6, 8], precision), (
+        "Addition of vectors is incorrect."
+    )
+    assert _almost_equal(newvec.decrypt(), [1, 2, 3, 4], precision), (
+        "Something went wrong in memory."
+    )
 
 
 @pytest.mark.parametrize("vec1, vec2", [([1], [1]), ([-1], [1]), ([1, 2, 3, 4], [4, 3, 2, 1])])
@@ -542,7 +542,7 @@ def test_ckks_tensor_lazy_load(precision):
     # Decryption
     decrypted_result = result.decrypt().tolist()
 
-    assert _almost_equal(
-        decrypted_result, [2, 4, 6, 8], precision
-    ), "Decryption of tensor is incorrect"
+    assert _almost_equal(decrypted_result, [2, 4, 6, 8], precision), (
+        "Decryption of tensor is incorrect"
+    )
     assert _almost_equal(newvec.decrypt().tolist(), [1, 2, 3, 4], precision), "invalid new tensor"

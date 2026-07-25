@@ -1,5 +1,5 @@
-"""Vector of values encrypted using BFV.
-"""
+"""Vector of values encrypted using BFV."""
+
 from typing import List
 import tenseal as ts
 from tenseal.tensors.abstract_tensor import AbstractTensor

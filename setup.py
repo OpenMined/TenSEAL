@@ -5,7 +5,7 @@ import subprocess
 import re
 import setuptools
 
-from setuptools import setup, Extension
+from setuptools import Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 

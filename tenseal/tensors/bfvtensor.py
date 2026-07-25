@@ -1,5 +1,4 @@
-"""N-dimensional tensor storing value in encrypted form using BFV.
-"""
+"""N-dimensional tensor storing value in encrypted form using BFV."""
 
 from typing import List
 import tenseal as ts

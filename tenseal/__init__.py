@@ -1,5 +1,4 @@
-"""TenSEAL is a library for doing homomorphic encryption operation on tensors.
-"""
+"""TenSEAL is a library for doing homomorphic encryption operation on tensors."""
 
 try:
     import _tenseal_cpp as _ts_cpp

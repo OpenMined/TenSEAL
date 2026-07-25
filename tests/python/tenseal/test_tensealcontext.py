@@ -1,6 +1,5 @@
 import pytest
 import tenseal as ts
-import numpy as np
 from tenseal.enc_context import GaloisKeys, RelinKeys
 
 

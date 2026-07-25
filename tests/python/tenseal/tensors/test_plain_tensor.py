@@ -1,4 +1,3 @@
-import math
 import pytest
 
 import numpy as np

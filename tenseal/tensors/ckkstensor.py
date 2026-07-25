@@ -1,5 +1,4 @@
-"""N-dimensional tensor storing value in encrypted form using CKKS.
-"""
+"""N-dimensional tensor storing value in encrypted form using CKKS."""
 
 from typing import List
 import tenseal as ts

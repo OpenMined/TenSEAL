@@ -1,4 +1,5 @@
-import sys, os
+import sys
+import os
 import pytest
 import tenseal.sealapi as sealapi
 

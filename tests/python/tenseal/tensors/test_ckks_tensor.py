@@ -1,10 +1,6 @@
-import copy
-import pickle
-import math
 import pytest
 
 import numpy as np
-from skimage.util.shape import view_as_windows
 
 import tenseal as ts
 
@@ -217,9 +213,9 @@ def test_sum(context, data, batch, reshape_first, axis, precision):
     decrypted_result = plain_ts.tolist()
 
     assert _almost_equal(decrypted_result, expected, precision), "Sum of tensor is incorrect."
-    assert _almost_equal(
-        tensor.decrypt().tolist(), orig, precision
-    ), "Something went wrong in memory."
+    assert _almost_equal(tensor.decrypt().tolist(), orig, precision), (
+        "Something went wrong in memory."
+    )
 
 
 @pytest.mark.parametrize(
@@ -255,9 +251,9 @@ def test_sum_batch(context, data, reshape_first, precision):
     decrypted_result = plain_ts.tolist()
 
     assert _almost_equal(decrypted_result, expected, precision), "Sum of tensor is incorrect."
-    assert _almost_equal(
-        tensor.decrypt().tolist(), orig, precision
-    ), "Something went wrong in memory."
+    assert _almost_equal(tensor.decrypt().tolist(), orig, precision), (
+        "Something went wrong in memory."
+    )
 
 
 @pytest.mark.parametrize("data", [(ts.plain_tensor([i for i in range(8)], shape=[2, 2, 2]))])
@@ -326,9 +322,9 @@ def test_square(context, plain, precision, reshape_first):
 
     decrypted_result = result.decrypt().tolist()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
-    assert _almost_equal(
-        tensor.decrypt().tolist(), plain.tolist(), precision
-    ), "Something went wrong in memory."
+    assert _almost_equal(tensor.decrypt().tolist(), plain.tolist(), precision), (
+        "Something went wrong in memory."
+    )
 
 
 @pytest.mark.parametrize(
@@ -555,9 +551,9 @@ def test_power(context, plain, power, precision):
     new_tensor = tensor**power
     decrypted_result = new_tensor.decrypt().tolist()
     assert _almost_equal(decrypted_result, expected, precision), "Decryption of tensor is incorrect"
-    assert _almost_equal(
-        tensor.decrypt().tolist(), plain.tolist(), precision
-    ), "Something went wrong in memory."
+    assert _almost_equal(tensor.decrypt().tolist(), plain.tolist(), precision), (
+        "Something went wrong in memory."
+    )
 
 
 @pytest.mark.parametrize(
@@ -611,9 +607,9 @@ def test_polynomial(context, data, polynom, reshape_first):
         precision = 1
 
     decrypted_result = result.decrypt().tolist()
-    assert _almost_equal(
-        decrypted_result, expected, precision
-    ), "Polynomial evaluation is incorrect."
+    assert _almost_equal(decrypted_result, expected, precision), (
+        "Polynomial evaluation is incorrect."
+    )
 
 
 @pytest.mark.parametrize(

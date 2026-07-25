@@ -267,7 +267,7 @@ class EncryptedTensor {
                 other, ct.parms_id());
         }
     }
-    virtual ~EncryptedTensor(){};
+    virtual ~EncryptedTensor() {};
 
    protected:
     optional<string> _lazy_buffer;

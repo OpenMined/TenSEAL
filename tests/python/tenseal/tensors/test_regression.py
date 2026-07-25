@@ -1,4 +1,3 @@
-import sys, os
 import pytest
 import tenseal as ts
 

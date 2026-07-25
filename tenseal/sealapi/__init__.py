@@ -1,5 +1,4 @@
-"""SEAL API bindings.
-"""
+"""SEAL API bindings."""
 
 try:
     import _sealapi_cpp

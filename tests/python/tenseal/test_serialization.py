@@ -232,9 +232,9 @@ def test_sanity_keys_regeneration(duplicate, vec1, vec2, encryption_type):
 
     # Decryption
     decrypted_result = result.decrypt()
-    assert almost_equal(
-        decrypted_result, expected, precision
-    ), "Dot product of vectors is incorrect."
+    assert almost_equal(decrypted_result, expected, precision), (
+        "Dot product of vectors is incorrect."
+    )
     assert almost_equal(first_vec.decrypt(), vec1, precision), "Something went wrong in memory."
     assert almost_equal(second_vec.decrypt(), vec2, precision), "Something went wrong in memory."
 

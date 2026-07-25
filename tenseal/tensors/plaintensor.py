@@ -1,5 +1,5 @@
-"""N-dimensonal tensor, serving as the main type to interact with encrypted tensors.
-"""
+"""N-dimensonal tensor, serving as the main type to interact with encrypted tensors."""
+
 from typing import List, Union
 import tenseal as ts
 import numpy as np
@@ -26,8 +26,8 @@ class PlainTensor:
 
         try:
             t = np.array(tensor, dtype=dtype)
-        except:
-            raise TypeError("input isn't a well structured tensor")
+        except Exception as e:
+            raise TypeError("input isn't a well structured tensor") from e
         shape = t.shape if shape is None else shape
         data = t.flatten().tolist()
         if dtype == "float":
@@ -46,7 +46,7 @@ class PlainTensor:
     def data(self, value: Union[ts._ts_cpp.PlainTensorDouble, ts._ts_cpp.PlainTensorInt64]):
         """Set the wrapped low level PlainTensor object"""
         if not isinstance(value, (ts._ts_cpp.PlainTensorDouble, ts._ts_cpp.PlainTensorInt64)):
-            raise TypeError(f"wrong data type")
+            raise TypeError("wrong data type")
         self._data = value
 
     @property

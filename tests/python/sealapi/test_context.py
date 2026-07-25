@@ -1,4 +1,5 @@
-import sys, os
+import sys
+import os
 import pytest
 import tenseal.sealapi as sealapi
 
@@ -165,7 +166,7 @@ def context_asserts(sealctx, sec_level, scheme):
         assert qualifiers.using_fast_plain_lift == (scheme == sealapi.SCHEME_TYPE.BFV)
         assert qualifiers.sec_level == sec_level
 
-    for (parms_id, ctx_data, index) in [
+    for parms_id, ctx_data, index in [
         (sealctx.first_parms_id(), sealctx.first_context_data(), coeff_mod_count - 2),
         (sealctx.last_parms_id(), sealctx.last_context_data(), 0),
         (sealctx.key_parms_id(), sealctx.key_context_data(), coeff_mod_count - 1),
