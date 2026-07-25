@@ -1,3 +1,41 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tenseal"
+description = "A Library for Homomorphic Encryption Operations on Tensors"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+authors = [{ name = "OpenMined", email = "info@openmined.org" }]
+keywords = ["homomorphic", "encryption", "tensor", "deep learning", "privacy", "secure"]
+classifiers = [
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: OS Independent",
+    "Topic :: Security :: Cryptography",
+]
+# Single source of truth stays tenseal/version.py; setuptools reads the literal
+# statically, so importing the package (and its C extension) is not required.
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/OpenMined/TenSEAL"
+Repository = "https://github.com/OpenMined/TenSEAL"
+Issues = "https://github.com/OpenMined/TenSEAL/issues"
+
+[tool.setuptools.dynamic]
+version = { attr = "tenseal.version.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["tenseal", "tenseal.*"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"

@@ -1,24 +1,16 @@
+"""Build hooks for the CMake-backed C++ extension.
+
+All packaging metadata lives in pyproject.toml; only the pieces that cannot be
+expressed declaratively (ext_modules and cmdclass) remain here.
+"""
+
 import os
-import sys
 import platform
 import subprocess
-import re
-import setuptools
+import sys
 
-from setuptools import Extension
+from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
-from distutils.version import LooseVersion
-
-
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
-
-
-def find_version():
-    version_file = read("tenseal/version.py")
-    version_re = r"__version__ = \"(?P<version>.+)\""
-    version = re.match(version_re, version_file).group("version")
-    return version
 
 
 class CMakeExtension(Extension):
@@ -30,17 +22,12 @@ class CMakeExtension(Extension):
 class CMakeBuild(build_ext):
     def run(self):
         try:
-            out = subprocess.check_output(["cmake", "--version"])
+            subprocess.check_output(["cmake", "--version"])
         except OSError:
             raise RuntimeError(
                 "CMake must be installed to build the following extensions: "
                 + ", ".join(e.name for e in self.extensions)
             )
-
-        if platform.system() == "Windows":
-            cmake_version = LooseVersion(re.search(r"version\s*([\d.]+)", out.decode()).group(1))
-            if cmake_version < "3.1.0":
-                raise RuntimeError("CMake >= 3.1.0 is required on Windows")
 
         for ext in self.extensions:
             self.build_extension(ext)
@@ -78,25 +65,8 @@ class CMakeBuild(build_ext):
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
 
 
-setuptools.setup(
-    name="tenseal",
-    version=find_version(),
-    author="OpenMined",
-    author_email="info@openmined.org",
-    description="A Library for Homomorphic Encryption Operations on Tensors",
-    license="Apache-2.0",
-    keywords="homomorphic encryption tensor deep learning privacy secure",
-    long_description=read("README.md"),
-    long_description_content_type="text/markdown",
-    url="https://github.com/OpenMined/TenSEAL",
-    packages=setuptools.find_packages(include=["tenseal", "tenseal.*"]),
-    classifiers=[
-        "Programming Language :: C++",
-        "Programming Language :: Python :: 3",
-        "Operating System :: OS Independent",
-        "Topic :: Security :: Cryptography",
-    ],
+setup(
     ext_modules=[CMakeExtension("_tenseal_cpp")],
-    cmdclass=dict(build_ext=CMakeBuild),
+    cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
 )
