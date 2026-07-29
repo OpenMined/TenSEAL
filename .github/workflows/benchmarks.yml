@@ -61,7 +61,14 @@ jobs:
       - name: Run benchmarks
         run: |
           pytest tests/python/benchmarks/ --cov-fail-under 0 --benchmark-json pytest_benchmarks_output.json
+      # Benchmark history is appended to the repository's gh-pages branch, which
+      # forks do not get - a fork only receives the default branch - so this step
+      # fails there with "couldn't find remote ref gh-pages" even when the build
+      # and the benchmarks themselves succeeded. Skip it on forks by default; a
+      # fork that wants to record its own history can create a gh-pages branch
+      # and set the BENCHMARK_STORE repository variable to "true".
       - name: Store benchmark result
+        if: ${{ !github.event.repository.fork || vars.BENCHMARK_STORE == 'true' }}
         uses: benchmark-action/github-action-benchmark@d48d326b4ca9ba73ca0cd0d59f108f9e02a381c7 # v1.20.4
         with:
           name: Python-Benchmarks
