@@ -19,7 +19,7 @@ The following is a set of guidelines for contributing to [TenSEAL](https://githu
   * [Pull Requests](#pull-requests)
 
 [Your Local Development Environment](#your-local-development-environment)
-  * [Fetching Third Party Libraries](#fetching-third-party-libraries)
+  * [Third Party Libraries](#third-party-libraries)
   * [Building TenSEAL](#building-tenseal)
   * [Testing Your Changes](#testing-your-changes)
 
@@ -30,6 +30,12 @@ The following is a set of guidelines for contributing to [TenSEAL](https://githu
 
 [Additional Notes](#additional-notes)
   * [Issue and Pull Request Labels](#issue-and-pull-request-labels)
+
+## Other documents
+
+- [SECURITY.md](SECURITY.md) — what to report here versus to Microsoft SEAL, and how
+- [RELEASING.md](RELEASING.md) — how a release is rehearsed and published
+- [CHANGELOG.md](CHANGELOG.md) — notable changes per release
 
 
 ## I have a question!
@@ -46,7 +52,12 @@ TenSEAL is a C++ library, all the core functionalities should be implemented in 
 
 ### Roadmap
 
-The roadmap of the project which can be found [here](https://github.com/OpenMined/Roadmap/blob/master/crypto_team/projects/TenSEAL.md) is mainly drawn by the homomorphic encryption group in the [crypto team](https://github.com/OpenMined/Roadmap/tree/master/crypto_team) at OpenMined.
+Planned work is tracked in [GitHub issues](https://github.com/OpenMined/TenSEAL/issues).
+Direction is set mainly by the homomorphic encryption group at OpenMined; the
+[Slack community](https://slack.openmined.org) is the place to discuss it.
+
+> **Note:** the `OpenMined/Roadmap` repository this section used to link to no
+> longer exists.
 
 
 ## How Can I Contribute?
@@ -135,81 +146,86 @@ While the prerequisites above must be satisfied prior to having your pull reques
 
 Before being able to make any code contribution, you need to be able to setup your local environment to make changes, build the new library, as well as running the tests to make sure previous functionalities are still working, and to tests new ones.
 
-> **Note:** You can always use our [Docker images](https://hub.docker.com/r/openmined/tenseal) for a ready to use environment. We provide images for different Python versions on every release or code change in the master branch, so it's also easy to try older non-released versions.
+TenSEAL requires **Python 3.11 or newer**, a C++17 toolchain, and CMake. See [Build from Source](README.md#build-from-source) in the README for the per-platform requirements and known toolchain limitations.
 
+> **TODO:** the [Docker images](https://hub.docker.com/r/openmined/tenseal) are unmaintained — the newest was published in 2021 — so they are not a usable development environment today. Refreshing or retiring them is tracked as future work.
 
-### Fetching Third Party Libraries
+### Third Party Libraries
 
-After cloning TenSEAL into your machine, or cloning one of your forks, you must make sure to fetch thrid party libraries that TenSEAL depends on, you can do that by running:
-
-```bash
-$ git submodule init
-$ git submodule update
-```
-
+There is nothing to fetch by hand. All third-party dependencies — Microsoft SEAL, Protocol Buffers, xtensor, pybind11 — are downloaded and built by CMake during the build. The repository has no git submodules.
 
 ### Building TenSEAL
 
-You can build and install the library (with Python bindings) locally by running:
+Development dependencies are declared as a [PEP 735](https://peps.python.org/pep-0735/) group in `pyproject.toml` and pinned in `uv.lock`.
+
+Using [uv](https://docs.astral.sh/uv/), which installs the locked set:
 
 ```bash
-$ pip install --group dev
-$ pip install .
+uv sync --group dev
 ```
 
-Development dependencies are declared as a [PEP 735](https://peps.python.org/pep-0735/) group in `pyproject.toml` and pinned in `uv.lock`. If you use [uv](https://docs.astral.sh/uv/), `uv sync --group dev` installs the locked set instead.
+Or with pip, which resolves the group fresh rather than from the lock file:
 
-This will trigger the build of the C++ library as well as the Python bindings. Please refer to [this section](https://github.com/OpenMined/TenSEAL#build-from-source) for more information about the dependencies required to build TenSEAL.
+```bash
+pip install --group dev
+pip install .
+```
 
-> **Note:** You can skip the building step if you are testing the library using Bazel, as it make sure the library is built before running the tests.
+Either path triggers the build of the C++ library as well as the Python bindings.
 
 
 ### Testing Your Changes
 
 #### C++
 
-If you use Bazel, you can do that pretty easily by running:
+Build and run the C++ test suite with CMake:
 
 ```bash
-$ bazel test --test_output=all --spawn_strategy=standalone //tests/cpp/...
-```
-
-Otherwise, you can always build the tests using CMake for the C++ test, and run them as follows:
-
-```bash
-$ cmake . -D BUILD_TEST=TRUE
-$ make && make test
+cmake . -D BUILD_TEST=TRUE
+make -j && CTEST_OUTPUT_ON_FAILURE=1 make test
 ```
 
 #### Python
 
-The Python tests can be ran using pytest:
+The Python tests run with pytest. The full suite is slow, so CI skips the tests marked `slow`:
 
 ```bash
-$ pytest -v tests/
+pytest -m "not slow" -v tests/python/tenseal
+pytest -v tests/python/sealapi
 ```
 
-You can also start the tests with Bazel:
+Drop `-m "not slow"` to run everything, including the long-running serialization tests.
 
-```bash
-$ bazel test --test_output=all --spawn_strategy=standalone //tests/python/...
-```
+> **TODO:** the Bazel test targets (`bazel test //tests/cpp/...` and `//tests/python/...`) are currently broken and cannot be used. See the Bazel note in the [README](README.md#using-bazel).
 
 
 ## Styleguides
 
+Formatting and linting are enforced by [pre-commit](https://pre-commit.com/), which runs the same hooks locally that CI runs on your pull request. Install the git hook once, and your changes are checked on every commit:
+
+```bash
+pre-commit install
+```
+
+To check everything at any time — this is exactly what the `Linter` CI job does:
+
+```bash
+pre-commit run --all-files
+```
+
 ### C++ Styleguide
 
-All C++ code must be formatted based on our [clang-format config file](https://github.com/OpenMined/TenSEAL/blob/master/.clang-format). You can easily setup that into your prefered IDE, so that formatting is applied as you code.
+C++ code is formatted with [clang-format](https://clang.llvm.org/docs/ClangFormat.html) using the [.clang-format](.clang-format) config in the repository root.
 
 ### Python Styleguide
 
-All Python code must be formatted using [black](https://github.com/psf/black). You can easily setup that into your prefered IDE, so that formatting is applied as you code.
-
+Python code is linted and formatted with [ruff](https://docs.astral.sh/ruff/), configured under `[tool.ruff]` in [pyproject.toml](pyproject.toml). Ruff replaces the black and flake8 setup used previously; most editors have a ruff integration that formats as you type.
 
 ### Documentation Styleguide
 
-TBD
+- Keep the README accurate about what currently works. If a feature is broken or unmaintained, say so rather than leaving stale instructions in place.
+- Python code is documented with docstrings on public classes and methods, using Google style (`Args:`, `Returns:`).
+- Prefer relative links between files in the repository so they keep working on forks and branches.
 
 
 ## Additional Notes
