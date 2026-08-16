@@ -13,14 +13,22 @@ FetchContent_MakeAvailable(protocolbuffers_protobuf)
 set(Protobuf_ROOT ${protocolbuffers_protobuf_SOURCE_DIR}/cmake)
 set(Protobuf_DIR ${Protobuf_ROOT}/${CMAKE_INSTALL_LIBDIR}/cmake/protobuf)
 
-message(STATUS "Setting up protobuf ...")
+message(STATUS "Configuring protobuf ...")
 execute_process(
   COMMAND
     ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -D protobuf_BUILD_TESTS=OFF -D protobuf_BUILD_PROTOC_BINARIES=ON -D CMAKE_POSITION_INDEPENDENT_CODE=ON -G "${CMAKE_GENERATOR}" .
   RESULT_VARIABLE result
   WORKING_DIRECTORY ${Protobuf_ROOT})
 if(result)
-  message(FATAL_ERROR "Failed to download protobuf (${result})!")
+  # Nothing is downloaded here - FetchContent already retrieved the sources
+  # above. This step configures them, so the cause is in the nested CMake
+  # output printed just before this message.
+  message(
+    FATAL_ERROR
+      "Failed to configure protobuf in ${Protobuf_ROOT} (exit ${result}). "
+      "See the CMake output above for the underlying error. If it reports "
+      "'Compatibility with CMake < 3.5 has been removed', re-run the build "
+      "with CMAKE_POLICY_VERSION_MINIMUM=3.5 set in your environment.")
 endif()
 
 message(STATUS "Building protobuf ...")
@@ -29,7 +37,7 @@ execute_process(
   RESULT_VARIABLE result
   WORKING_DIRECTORY ${Protobuf_ROOT})
 if(result)
-  message(FATAL_ERROR "Failed to build protobuf (${result})!")
+  message(FATAL_ERROR "Failed to build protobuf in ${Protobuf_ROOT} (exit ${result})")
 endif()
 
 message(STATUS "Installing protobuf ...")
@@ -39,7 +47,7 @@ if(WIN32)
     RESULT_VARIABLE result
     WORKING_DIRECTORY ${Protobuf_ROOT})
     if(result)
-        message(FATAL_ERROR "Failed to build protobuf (${result})!")
+        message(FATAL_ERROR "Failed to install protobuf in ${Protobuf_ROOT} (exit ${result})")
     endif()
 endif()
 
@@ -76,7 +84,10 @@ execute_process(
   RESULT_VARIABLE result
   WORKING_DIRECTORY ${Protobuf_ROOT})
 if(result)
-  message(FATAL_ERROR "Failed to install protobuf (${result})!")
+  message(
+    FATAL_ERROR
+      "Failed to generate C++ sources from the .proto files in ${PROTO_ROOT} "
+      "using ${Protobuf_PROTOC_EXECUTABLE} (exit ${result})")
 endif()
 
 include_directories(${PROTO_ROOT})
