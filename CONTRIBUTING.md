@@ -37,12 +37,13 @@ The following is a set of guidelines for contributing to [TenSEAL](https://githu
 - [RELEASING.md](RELEASING.md) — how a release is rehearsed and published
 - [CHANGELOG.md](CHANGELOG.md) — notable changes per release
 
+## I have a question
 
-## I have a question!
-
-If you have a question regarding release dates, how to use the library, and things like that, we suggest using the [OpenMined Slack](https://slack.openmined.org), you should get faster results in the slack channels than in a Github issue.
-
-Make sure to ask your questions in the **#lib_tenseal** channel.
+For how-to questions, the **#lib_tenseal** channel on the
+[OpenMined Slack](https://slack.openmined.org) is where TenSEAL users gather, and
+[past issues](https://github.com/OpenMined/TenSEAL/issues?q=is%3Aissue) are often the
+fastest answer. Nobody is on duty in either place, so treat a reply as a favour
+rather than an expectation.
 
 ## What should I know before I get started?
 
@@ -50,15 +51,15 @@ Make sure to ask your questions in the **#lib_tenseal** channel.
 
 TenSEAL is a C++ library, all the core functionalities should be implemented in C++. Bindings to other languages such as Python should only have language specific functionalities. This make sure that the same features are available through all languages.
 
-### Roadmap
+### Project Status
 
-Planned work is tracked in [GitHub issues](https://github.com/OpenMined/TenSEAL/issues).
-Direction is set mainly by the homomorphic encryption group at OpenMined; the
-[Slack community](https://slack.openmined.org) is the place to discuss it.
+TenSEAL is not actively maintained. No team is working on it, and there is no
+committed support: issues and pull requests may sit unanswered, and a release
+happens only when a contributor drives one.
 
-> **Note:** the `OpenMined/Roadmap` repository this section used to link to no
-> longer exists.
-
+Contributions are still welcome, and the open
+[GitHub issues](https://github.com/OpenMined/TenSEAL/issues) are the closest
+thing to a list of outstanding work.
 
 ## How Can I Contribute?
 
@@ -123,24 +124,18 @@ We also suggest starting with the [tutorials](https://github.com/OpenMined/TenSE
 
 TenSEAL can be developed locally. Check [this section](#your-local-development-environment) for instructions on how to setup your local development environment.
 
-
 ### Pull Requests
 
-The process described here has several goals:
+There is no review rota, so a pull request may sit for a long time. What you can do
+is make it easy to merge whenever someone does look:
 
-- Maintain TenSEAL's quality
-- Fix problems that are important to users
-- Engage the community in working toward the best possible TenSEAL
-- Enable a sustainable system for TenSEAL's maintainers to review contributions
-
-Please follow these steps to have your contribution considered by the maintainers:
-
-1. Follow all instructions in the pull request template
+1. Keep it to a single concern, with a title and description that explain the why
 2. Follow the [styleguides](#styleguides)
-3. After you submit your pull request, verify that all [status checks](https://help.github.com/articles/about-status-checks/) are passing <details><summary>What if the status checks are failing?</summary>If a status check is failing, and you believe that the failure is unrelated to your change, please leave a comment on the pull request explaining why you believe the failure is unrelated. A maintainer will re-run the status check for you. If we conclude that the failure was a false positive, then we will open an issue to track that problem with our status check suite.</details>
+3. Make sure the [status checks](https://help.github.com/articles/about-status-checks/) pass
 
-While the prerequisites above must be satisfied prior to having your pull request reviewed, the reviewer(s) may ask you to complete additional design work, tests, or other changes before your pull request can be ultimately accepted.
-
+If a check fails for a reason unrelated to your change, say so in a comment and
+explain why. CI has known flaky spots, and the next person to read the PR will need
+that context.
 
 ## Your Local Development Environment
 
