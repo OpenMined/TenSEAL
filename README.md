@@ -1,7 +1,7 @@
 
 <h1 align="center">
   <br>
-  <a href="http://duet.openmined.org/"><img src="https://github.com/OpenMined/design-assets/raw/master/logos/OM/mark-primary-trans.png" alt="TenSEAL" width="200"></a>
+  <a href="https://www.openmined.org/"><img src="https://github.com/OpenMined/design-assets/raw/master/logos/OM/mark-primary-trans.png" alt="TenSEAL" width="200"></a>
   <br>
   TenSEAL
   <br>
@@ -15,14 +15,12 @@
 
 <div align="center">
 
-[![Tests](https://github.com/OpenMined/TenSEAL/workflows/Tests/badge.svg)](https://github.com/OpenMined/TenSEAL/actions?query=branch%3Amaster++)
-[![Linux Package](https://github.com/OpenMined/TenSEAL/workflows/Linux%20Package/badge.svg)](https://github.com/OpenMined/TenSEAL/actions/workflows/pythonpublish-linux.yml)
-[![MacOS Package](https://github.com/OpenMined/TenSEAL/workflows/MacOS%20Package/badge.svg)](https://github.com/OpenMined/TenSEAL/actions/workflows/pythonpublish-macos.yml)
-[![Windows Package](https://github.com/OpenMined/TenSEAL/workflows/Windows%20Package/badge.svg)](https://github.com/OpenMined/TenSEAL/actions/workflows/pythonpublish-windows.yml)
-
+[![Tests](https://github.com/OpenMined/TenSEAL/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/OpenMined/TenSEAL/actions/workflows/tests.yml?query=branch%3Amain)
+[![Benchmarks](https://github.com/OpenMined/TenSEAL/actions/workflows/benchmarks.yml/badge.svg?branch=main)](https://github.com/OpenMined/TenSEAL/actions/workflows/benchmarks.yml?query=branch%3Amain)
 
 [![Downloads](https://img.shields.io/pypi/dd/tenseal)](https://pypi.org/project/tenseal/)
 [![Version](https://img.shields.io/pypi/v/tenseal)](https://pypi.org/project/tenseal/)
+[![Python versions](https://img.shields.io/pypi/pyversions/tenseal)](https://pypi.org/project/tenseal/)
 [![OpenCollective](https://img.shields.io/opencollective/all/openmined)](https://opencollective.com/openmined)
 [![Slack](https://img.shields.io/badge/chat-on%20slack-7A5979.svg)](https://openmined.slack.com/messages/support)
 
@@ -37,11 +35,15 @@ TenSEAL is a library for doing homomorphic encryption operations on tensors, bui
 - :old_key: Encryption/Decryption of vectors of real numbers using CKKS
 - :fire: Element-wise addition, subtraction and multiplication of encrypted-encrypted vectors and encrypted-plain vectors
 - :cyclone: Dot product and vector-matrix multiplication
+- :bar_chart: N-dimensional encrypted tensors (`CKKSTensor`, `BFVTensor`) with reshape, broadcast and transpose
+- :floppy_disk: Serialization of contexts, keys and encrypted tensors
 - :zap: Complete SEAL API under `tenseal.sealapi`
 
 ## Usage
 
 We show the basic operations over encrypted data, more advanced usage for machine learning applications can be found on our [tutorial section](#tutorials)
+
+TenSEAL is a binding over Microsoft SEAL plus a tensor layer on top, so the encryption parameters below (`poly_modulus_degree`, `coeff_mod_bit_sizes`, `global_scale`) carry exactly their SEAL meaning. Choosing them determines both the security level and how many operations you can chain before the noise budget is exhausted — see the [SEAL documentation](https://github.com/microsoft/SEAL#getting-started) and its [CKKS examples](https://github.com/microsoft/SEAL/blob/main/native/examples/5_ckks_basics.cpp) for what the values mean and how to pick them.
 
 ```python
 import tenseal as ts
@@ -81,91 +83,98 @@ result.decrypt() # ~ [157, -90, 153]
 
 ## Installation
 
+TenSEAL requires **Python 3.11 or newer** and depends on [NumPy](https://numpy.org/).
+
 #### Using pip
 
 ```bash
-$ pip install tenseal
+pip install tenseal
 ```
-This installs the last packaged version on [pypi](https://pypi.org/project/tenseal/). If your platform doesn't have a ready package, please open an [issue](https://github.com/OpenMined/TenSEAL/issues) to let us know.
+
+Prebuilt wheels are published for every supported Python version on:
+
+| Platform | Wheel |
+| --- | --- |
+| Linux (x86-64) | `manylinux_2_28_x86_64` |
+| macOS (Apple Silicon) | `macosx_14_0_arm64` |
+| Windows (x64) | `win_amd64` |
+
+A source distribution is published as well, so `pip install tenseal` also works on platforms without a prebuilt wheel — it will compile from source, which needs the build requirements listed below. If your platform is missing a wheel you would like us to publish, please open an [issue](https://github.com/OpenMined/TenSEAL/issues).
+
+To check that the installation worked:
+
+```python
+import tenseal as ts
+print(ts.__version__)
+```
+
+#### Using a specific Python version
+
+If your Python is older than 3.11, or you would rather leave your system Python alone, [uv](https://docs.astral.sh/uv/getting-started/installation/) can download a Python for you and keep TenSEAL in its own environment.
+
+Create an environment and install into it:
+
+```bash
+uv venv --python 3.13
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+uv pip install tenseal
+```
+
+Or start a one-off Python session without setting anything up — uv fetches Python 3.13 and TenSEAL, and discards the environment afterwards:
+
+```bash
+uv run --python 3.13 --with tenseal python
+```
+
+Replace `3.13` with any version from 3.11 to 3.14.
+
+#### Using conda
+
+TenSEAL is not published on conda-forge, so install it with pip inside the environment:
+
+```bash
+conda create -n tenseal python=3.13
+conda activate tenseal
+pip install tenseal
+```
 
 #### Build from Source
 
-Supported platforms and their requirements are listed below: (this are only required for building TenSEAL from source)
-- **Linux:** A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0).
-- **MacOS:** Xcode toolchain (>= 9.3)
-- **Windows:** Microsoft Visual Studio (>= 10.0.40219.1, Visual Studio 2010 SP1 or later).
+Building requires a C++17 toolchain and [CMake](https://cmake.org/install/) 3.14 or newer:
 
-If you want to install tenseal from the repository, you should first make sure to have the requirements for your platform (listed above) and [CMake (3.14 or higher)](https://cmake.org/install/) installed, then get the third party libraries (if you didn't already) by running the following command from the root directory of the project
+- **Linux:** GCC >= 7 or Clang >= 5
+- **macOS:** Xcode 15.x command line tools
+- **Windows:** Visual Studio 2017 or newer
 
-```bash
-$ git submodule init
-$ git submodule update
-```
-
-TenSEAL uses [Protocol Buffers](https://developers.google.com/protocol-buffers/docs/downloads) for serialization, and you will need the protocol buffer compiler too.
-
-
-If you are on Windows, you will first need to build SEAL library using Visual Studio, you should use the solution file `SEAL.sln` in `third_party/SEAL` to build the project `native\src\SEAL.vcxproj` with `Configuration=Release` and `Platform=x64`. For more details check the instructions in [Building Microsoft SEAL](https://github.com/microsoft/SEAL#windows)
-
-You can then trigger the build and the installation
+All third-party dependencies — including Microsoft SEAL and Protocol Buffers — are fetched and built automatically by CMake. There is nothing to install by hand and no submodules to initialise.
 
 ```bash
-$ pip install .
+pip install .
 ```
+
+> **Note:** with CMake 4.0 or newer the build fails with `Compatibility with CMake < 3.5 has been removed`, because some vendored dependencies still declare a pre-3.5 minimum. Until those are upgraded, set `CMAKE_POLICY_VERSION_MINIMUM=3.5` in your environment before building.
+
+> **Note:** on macOS, AppleClang 17 and newer (Xcode 16+) currently fail to compile the vendored xtensor. Use Xcode 15.x, or install the published wheel instead.
 
 #### Use Docker
 
-You can use our [Docker image](https://hub.docker.com/r/openmined/tenseal) for a ready to use environment with TenSEAL installed
-
-```bash
-$ docker container run --interactive --tty openmined/tenseal
-```
-
-**Note:** `openmined/tenseal` points to the image from the last release, use `openmined/tenseal:dev` for the image built from the master branch.
-
-
-You can also build your custom image, this might be handy for developers working on the project
-
-```bash
-$ docker build -t tenseal -f docker-images/Dockerfile-py38 .
-```
-
-To interactively run this docker image as a container after it has been built you can run
-
-```bash
-$ docker container run -it tenseal
-```
+> **TODO:** the images on [Docker Hub](https://hub.docker.com/r/openmined/tenseal) are unmaintained — the newest was published in 2021 for v0.3.4, and both `openmined/tenseal` and `openmined/tenseal:dev` are far behind the current release. The `docker-images/` directory targets Python 3.6–3.9, all of which are end-of-life and below the supported minimum. Do not rely on these images. Refreshing or retiring them is tracked as future work.
 
 #### Using Bazel
-To use this library in another Bazel project, add the following in your WORKSPACE file:
 
-```load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
-
-git_repository(
-   name = "org_openmined_tenseal",
-   remote = "https://github.com/OpenMined/TenSEAL",
-   branch = "master",
-   init_submodules = True,
-)
-
-load("@org_openmined_tenseal//tenseal:preload.bzl", "tenseal_preload")
-
-tenseal_preload()
-
-load("@org_openmined_tenseal//tenseal:deps.bzl", "tenseal_deps")
-
-tenseal_deps()
-```
+> **TODO:** the Bazel build is currently broken and its workflow runs on demand only. Its dependency pins have drifted from the CMake build, and it has not been migrated to bzlmod. Use the CMake build (`pip install .`) in the meantime. Restoring Bazel support is tracked as future work.
 
 ## Benchmarks
 
-You can benchmark the implementation at any point by running
+Benchmark results from every merge to `main` are published [on GitHub Pages](https://openmined.github.io/TenSEAL/benchmarks/), for Linux, macOS and Windows.
+
+The benchmark suite runs with pytest:
 
 ```bash
-$ bazel run -c opt --spawn_strategy=standalone //tests/cpp/benchmarks:benchmark
+pytest tests/python/benchmarks/
 ```
 
-The benchmarks from every PR merge are uploaded [here](https://openmined.github.io/TenSEAL/benchmarks/).
+> **TODO:** the C++ microbenchmarks under `tests/cpp/benchmarks/` are only wired up through Bazel, so they cannot currently be run. See the Bazel note above.
 
 ## Tutorials
 
@@ -195,10 +204,11 @@ A. Benaissa, B. Retiat, B. Cebere, A.E. Belfedhal, ["TenSEAL: A Library for Encr
 For support in using this library, please join the **#support** Slack channel. [Click here to join our Slack community!](https://slack.openmined.org)
 
 ## Contributing
+
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-Please make sure to update tests as appropriate.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to set up a development environment, build the library, and run the tests. Please make sure to update tests as appropriate.
 
 ## License
 
-[Apache License 2.0](https://github.com/OpenMined/TenSEAL/blob/master/LICENSE)
+[Apache License 2.0](LICENSE)
