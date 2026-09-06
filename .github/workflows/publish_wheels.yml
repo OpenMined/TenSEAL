@@ -76,10 +76,15 @@ jobs:
           package-dir: .
           output-dir: wheelhouse
 
+      # Name the artifact after the platform tag, not the runner label. Several
+      # rows share a runner (manylinux and musllinux both build on ubuntu-24.04),
+      # so keying on the label makes their artifacts collide. The upload still
+      # succeeds, but `download-artifact` with merge-multiple then extracts them
+      # over each other and the publish job silently ships one platform short.
       - name: Upload wheel artifact
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with:
-          name: dist-wheel-${{ matrix.python }}-${{ matrix.target[0] }}
+          name: dist-wheel-${{ matrix.python }}-${{ matrix.target[1] }}
           path: ./wheelhouse/*.whl
 
   build_sdist:
