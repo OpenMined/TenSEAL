@@ -95,9 +95,14 @@ Prebuilt wheels are published for every supported Python version on:
 
 | Platform | Wheel |
 | --- | --- |
-| Linux (x86-64) | `manylinux_2_28_x86_64` |
+| Linux, glibc (x86-64) | `manylinux_2_28_x86_64` |
+| Linux, musl (x86-64) | `musllinux_1_2_x86_64` |
 | macOS (Apple Silicon) | `macosx_14_0_arm64` |
 | Windows (x64) | `win_amd64` |
+
+Linux wheels come in two flavours: `manylinux` for glibc-based distributions and
+`musllinux` for musl-based ones such as Alpine, including the `-alpine` container
+images. pip picks the right one for your platform automatically.
 
 A source distribution is published as well, so `pip install tenseal` also works on platforms without a prebuilt wheel — it will compile from source, which needs the build requirements listed below. If your platform is missing a wheel you would like us to publish, please open an [issue](https://github.com/OpenMined/TenSEAL/issues).
 

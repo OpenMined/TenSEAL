@@ -20,6 +20,12 @@ if(${BUILD_TEST})
       ${TENSEAL_TESTS_BASEDIR}/tensors/bfvtensor_test.cpp)
   add_executable(tenseal_tests ${TESTING_SOURCES} ${SOURCES})
   target_link_libraries(tenseal_tests PRIVATE gtest gtest_main seal)
-  target_link_libraries(tenseal_tests PRIVATE tenseal tenseal_proto)
+  # Do not link libtenseal.so here. It is built from the same ${SOURCES} and
+  # embeds the static SEAL library, so linking it alongside `seal` above gives
+  # the test binary two copies of SEAL's global memory pool. Both are destroyed
+  # at exit, and the second destruction segfaults. glibc hides this by having
+  # the executable's symbols interpose over the shared library's; musl resolves
+  # them independently, so the crash is visible there.
+  target_link_libraries(tenseal_tests PRIVATE tenseal_proto)
   add_test(tenseal_tests tenseal_tests)
 endif()

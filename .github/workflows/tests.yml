@@ -30,6 +30,7 @@ jobs:
       matrix:
         target:
           - [ubuntu-24.04, manylinux_x86_64, ""]
+          - [ubuntu-24.04, musllinux_x86_64, ""]
           - [windows-2022, win_amd64, ""]
           - [macos-14, macosx_arm64, "14.0"]
         python:
@@ -63,6 +64,7 @@ jobs:
         uses: pypa/cibuildwheel@298ed2fb2c105540f5ed055e8a6ad78d82dd3a7e # v3.3.1
         env:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+          CIBW_MUSLLINUX_X86_64_IMAGE: musllinux_1_2
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.target[2] }}
           CIBW_BUILD: ${{ matrix.python }}-${{ matrix.target[1] }}
           CIBW_BUILD_VERBOSITY: 1
@@ -77,14 +79,18 @@ jobs:
           CIBW_TEST_COMMAND: >-
             pytest -m "not slow" -v {project}/tests/python/tenseal &&
             pytest -v {project}/tests/python/sealapi
+          # Bound the parallelism. An unbounded `make -j` starts one compiler per
+          # ready target, and the heaviest translation unit peaks above 1 GB, so
+          # the burst can exhaust a runner and kill the agent mid-build. The
+          # runners have 4 vCPUs (macOS has 3), so -j4 costs no wall time.
           CIBW_TEST_COMMAND_LINUX: >-
             pytest -m "not slow" -v {project}/tests/python/tenseal &&
             pytest -v {project}/tests/python/sealapi &&
-            sh -c "cd {project} && CMAKE_POLICY_VERSION_MINIMUM=3.5 cmake . -D BUILD_TEST=TRUE && make -j && CTEST_OUTPUT_ON_FAILURE=1 make test"
+            sh -c "cd {project} && CMAKE_POLICY_VERSION_MINIMUM=3.5 cmake . -D BUILD_TEST=TRUE && make -j4 && CTEST_OUTPUT_ON_FAILURE=1 make test"
           CIBW_TEST_COMMAND_MACOS: >-
             pytest -m "not slow" -v {project}/tests/python/tenseal &&
             pytest -v {project}/tests/python/sealapi &&
-            sh -c "cd {project} && CMAKE_POLICY_VERSION_MINIMUM=3.5 cmake . -D BUILD_TEST=TRUE && make -j && CTEST_OUTPUT_ON_FAILURE=1 make test"
+            sh -c "cd {project} && CMAKE_POLICY_VERSION_MINIMUM=3.5 cmake . -D BUILD_TEST=TRUE && make -j4 && CTEST_OUTPUT_ON_FAILURE=1 make test"
         with:
           package-dir: .
           output-dir: wheelhouse
