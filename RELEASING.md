@@ -2,8 +2,8 @@
 
 Releases are built and published by the **Build and Publish** workflow
 ([`.github/workflows/publish_wheels.yml`](.github/workflows/publish_wheels.yml)).
-It produces 16 wheels — Python 3.11–3.14 for Linux (glibc and musl), macOS (arm64)
-and Windows —
+It produces 20 wheels — Python 3.11–3.14 for Linux (glibc and musl, x86-64 and
+aarch64), macOS (arm64) and Windows —
 plus a source distribution, and uploads them in a single step so a partial
 failure cannot leave a half-published release on the index.
 
@@ -66,7 +66,7 @@ for approval; the build jobs run first regardless.
 pip index versions tenseal
 ```
 
-Or check [the project page](https://pypi.org/project/tenseal/) for 16 wheels and
+Or check [the project page](https://pypi.org/project/tenseal/) for 20 wheels and
 one `.tar.gz`. Update [`CHANGELOG.md`](CHANGELOG.md) if it was not part of the
 version bump.
 
