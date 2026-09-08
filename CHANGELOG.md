@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.18] - 2026-09-08
+
+Packaging only. No library API changes.
+
+### Added
+
+- Wheels for musl-based Linux (`musllinux_1_2_x86_64`), so `pip install tenseal`
+  works on Alpine without building from source ([#528]) — closes [#526]
+- Wheels for 64-bit ARM Linux (`manylinux_2_28_aarch64`), covering AWS Graviton
+  and 64-bit Raspberry Pi OS ([#529]) — closes [#507]
+
+### Fixed
+
+- Wheel artifacts were named after the runner label rather than the platform tag,
+  so the manylinux and musllinux wheels overwrote each other and a release
+  published one platform short without reporting an error ([#530])
+- The C++ test binary linked SEAL twice, which crashed the process at exit on
+  musl. glibc hid the fault through symbol interposition ([#528])
+- `cmake/protobuf.cmake` reported a configure failure as
+  `Failed to download protobuf`, which pointed users at the network instead of
+  the real cause ([#527])
+
 ## [0.3.17] - 2026-08-04
 
 Minimum supported Python is now **3.11**. No library API changes.
@@ -53,7 +75,8 @@ Minimum supported Python is now **3.11**. No library API changes.
 Release notes for v0.3.15 and earlier are on the
 [GitHub releases page](https://github.com/OpenMined/TenSEAL/releases).
 
-[Unreleased]: https://github.com/OpenMined/TenSEAL/compare/v0.3.17...HEAD
+[Unreleased]: https://github.com/OpenMined/TenSEAL/compare/v0.3.18...HEAD
+[0.3.18]: https://github.com/OpenMined/TenSEAL/compare/v0.3.17...v0.3.18
 [0.3.17]: https://github.com/OpenMined/TenSEAL/compare/v0.3.16...v0.3.17
 [0.3.16]: https://github.com/OpenMined/TenSEAL/compare/v0.3.15...v0.3.16
 [#509]: https://github.com/OpenMined/TenSEAL/pull/509
@@ -61,3 +84,9 @@ Release notes for v0.3.15 and earlier are on the
 [#520]: https://github.com/OpenMined/TenSEAL/pull/520
 [#521]: https://github.com/OpenMined/TenSEAL/pull/521
 [#522]: https://github.com/OpenMined/TenSEAL/pull/522
+[#507]: https://github.com/OpenMined/TenSEAL/issues/507
+[#526]: https://github.com/OpenMined/TenSEAL/issues/526
+[#527]: https://github.com/OpenMined/TenSEAL/pull/527
+[#528]: https://github.com/OpenMined/TenSEAL/pull/528
+[#529]: https://github.com/OpenMined/TenSEAL/pull/529
+[#530]: https://github.com/OpenMined/TenSEAL/pull/530
