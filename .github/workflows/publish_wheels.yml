@@ -26,6 +26,7 @@ jobs:
         target:
           - [ubuntu-24.04, manylinux_x86_64, ""]
           - [ubuntu-24.04, musllinux_x86_64, ""]
+          - [ubuntu-24.04-arm, manylinux_aarch64, ""]
           - [windows-2022, win_amd64, ""]
           - [macos-14, macosx_arm64, "14.0"]
         python:
@@ -65,6 +66,7 @@ jobs:
         env:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_MUSLLINUX_X86_64_IMAGE: musllinux_1_2
+          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.target[2] }}
           CIBW_BUILD: ${{ matrix.python }}-${{ matrix.target[1] }}
           CIBW_BUILD_VERBOSITY: 1

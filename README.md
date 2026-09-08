@@ -97,6 +97,7 @@ Prebuilt wheels are published for every supported Python version on:
 | --- | --- |
 | Linux, glibc (x86-64) | `manylinux_2_28_x86_64` |
 | Linux, musl (x86-64) | `musllinux_1_2_x86_64` |
+| Linux, glibc (aarch64) | `manylinux_2_28_aarch64` |
 | macOS (Apple Silicon) | `macosx_14_0_arm64` |
 | Windows (x64) | `win_amd64` |
 
