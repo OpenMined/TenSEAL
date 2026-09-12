@@ -17,9 +17,10 @@ CKKSTensor::CKKSTensor(const shared_ptr<TenSEALContext>& ctx,
 
     vector<Ciphertext> enc_data;
     vector<size_t> enc_shape = tensor.shape();
-    auto data = tensor.batch(0);
+    decltype(tensor.batch(0)) data;
     size_t size;
     if (batch) {
+        data = tensor.batch(0);
         _batch_size = enc_shape[0];
         enc_shape.erase(enc_shape.begin());
         size = tensor.batch(0).size();
