@@ -85,6 +85,13 @@ class PlainTensor {
         this->_data.transpose_inplace();
         return *this;
     }
+    PlainTensor<plain_t> transpose(const vector<size_t>& permutation) const {
+        return this->copy().transpose_inplace(permutation);
+    }
+    PlainTensor<plain_t>& transpose_inplace(const vector<size_t>& permutation) {
+        this->_data.transpose_inplace(permutation);
+        return *this;
+    }
     /**
      * Returns the element at position {idx1, idx2, ..., idxn} in the current
      * shape

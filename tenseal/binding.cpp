@@ -143,8 +143,12 @@ void bind_plain_tensor(py::module &m, const std::string &name) {
         .def("replicate", &type::replicate)
         .def("broadcast", &type::broadcast)
         .def("broadcast_", &type::broadcast_inplace)
-        .def("transpose", &type::transpose)
-        .def("transpose_", &type::transpose_inplace)
+        .def("transpose", py::overload_cast<>(&type::transpose, py::const_))
+        .def("transpose_", py::overload_cast<>(&type::transpose_inplace))
+        .def("transpose", py::overload_cast<const std::vector<size_t> &>(
+                                   &type::transpose, py::const_))
+        .def("transpose_", py::overload_cast<const std::vector<size_t> &>(
+                                   &type::transpose_inplace))
         .def("serialize", [](type &obj) { return py::bytes(obj.save()); });
 }
 
@@ -709,8 +713,12 @@ void bind_ckks_tensor(py::module &m) {
         .def("reshape_", &CKKSTensor::reshape_inplace)
         .def("broadcast", &CKKSTensor::broadcast)
         .def("broadcast_", &CKKSTensor::broadcast_inplace)
-        .def("transpose", &CKKSTensor::transpose)
-        .def("transpose_", &CKKSTensor::transpose_inplace)
+        .def("transpose", py::overload_cast<>(&CKKSTensor::transpose, py::const_))
+        .def("transpose_", py::overload_cast<>(&CKKSTensor::transpose_inplace))
+        .def("transpose", py::overload_cast<const std::vector<size_t> &>(
+                              &CKKSTensor::transpose, py::const_))
+        .def("transpose_", py::overload_cast<const std::vector<size_t> &>(
+                               &CKKSTensor::transpose_inplace))
         .def("scale", &CKKSTensor::scale);
 }
 
