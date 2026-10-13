@@ -261,6 +261,25 @@ TEST_F(PlainTensorTest, TestBatch3D) {
     ASSERT_THAT(out[1], ElementsAreArray({3.3, 4.4}));
 }
 
+TEST_F(PlainTensorTest, TestBatchTrailingUnitAxis) {
+    // xtensor gives a size-1 axis a stride of 0, so the batches must be built
+    // from the flat storage; otherwise every element reads as the first one.
+    vector<double> data = {1.1, 2.2, 3.3};
+    PlainTensor<double> tensor(data, {3, 1});
+
+    auto out = tensor.batch(0);
+
+    ASSERT_EQ(out.size(), 1);
+    ASSERT_THAT(out[0], ElementsAreArray({1.1, 2.2, 3.3}));
+
+    PlainTensor<double> tensor3d(vector<double>{1.1, 2.2, 3.3, 4.4}, {2, 2, 1});
+    out = tensor3d.batch(0);
+
+    ASSERT_EQ(out.size(), 2);
+    ASSERT_THAT(out[0], ElementsAreArray({1.1, 3.3}));
+    ASSERT_THAT(out[1], ElementsAreArray({2.2, 4.4}));
+}
+
 TEST_F(PlainTensorTest, TestUnbatch) {
     vector<double> data = {1.1, 2.2, 3.3, 4.4,   5.5,   6.6,
                            7.7, 8.8, 9.9, 10.10, 11.11, 12.12};

@@ -317,7 +317,7 @@ class TensorStorage {
             for (size_t pidx = 0; pidx < pos.size(); ++pidx)
                 new_idx += new_strides[pidx] * pos[pidx];
 
-            batches[new_idx].push_back(_data[idx]);
+            batches[new_idx].push_back(_data.data()[idx]);
         }
 
         for (const auto& it : batches)
