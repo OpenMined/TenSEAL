@@ -78,6 +78,10 @@ def test_reshape(data, shape, reshape):
         (ts.plain_tensor([i for i in range(210)], shape=[2, 3, 5, 7]), 1),
         (ts.plain_tensor([i for i in range(210)], shape=[2, 3, 5, 7]), 2),
         (ts.plain_tensor([i for i in range(210)], shape=[2, 3, 5, 7]), 3),
+        (ts.plain_tensor([i for i in range(3)], shape=[3, 1]), 0),
+        (ts.plain_tensor([i for i in range(6)], shape=[2, 3, 1]), 0),
+        (ts.plain_tensor([i for i in range(6)], shape=[2, 3, 1]), 1),
+        (ts.plain_tensor([i for i in range(4)], shape=[4, 1, 1]), 0),
     ],
 )
 def test_batch(data, axis):
@@ -86,8 +90,10 @@ def test_batch(data, axis):
     assert len(batch) == len(data.raw) / data.shape[axis]
     assert len(batch[0]) == data.shape[axis]
 
-    expected = np.array(data.raw).reshape(int(len(data.raw) / data.shape[axis]), data.shape[axis])
-    assert np.array(batch).any() == expected.any()
+    expected = np.moveaxis(np.array(data.raw).reshape(data.shape), axis, -1).reshape(
+        -1, data.shape[axis]
+    )
+    assert np.array(batch).tolist() == expected.tolist()
 
 
 @pytest.mark.parametrize(

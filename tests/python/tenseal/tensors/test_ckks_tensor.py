@@ -114,6 +114,17 @@ def test_reshape_batching(context, data, new_shape):
     assert tensor.shape == new_shape
 
 
+@pytest.mark.parametrize("shape", [[5, 1], [4, 1, 1], [3, 2, 1]])
+def test_batching_trailing_unit_axis(context, shape):
+    data = ts.plain_tensor([i + 1 for i in range(int(np.prod(shape)))], shape=shape)
+    tensor = ts.ckks_tensor(context, data, batch=True)
+
+    assert tensor.shape == shape[1:]
+    decrypted = tensor.decrypt()
+    assert decrypted.shape == shape
+    assert _almost_equal(decrypted.tolist(), data.tolist(), 1)
+
+
 @pytest.mark.parametrize(
     "data, slices, new_shape",
     [
